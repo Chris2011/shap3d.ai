@@ -1,0 +1,25 @@
+Shap3D.ai
+Copyright 2026 The Shap3D.ai Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Shap3D.ai is an independent project inspired by the modeling workflow of SketchUp.
+It is not affiliated with, endorsed by or sponsored by Trimble Inc.
+"SketchUp" and "Trimble" are trademarks of Trimble Inc.
+
+---------------------------------------------------------------------------
+Third-party content bundled with this product (under its own license):
+
+* Helvetiker and Optimer typefaces (src/assets/fonts)
+  Copyright 2004 MAGENTA Ltd. – MgOpen license, see src/assets/fonts/LICENSE
+
+* Reference people (src/assets/people), built from the "Humaaans"
+  illustrations by Pablo Stanley – CC0 1.0 (public domain),
+  see src/assets/people/LICENSE.md
+
+Third-party libraries used at runtime (installed via npm, not copied into
+this repository): three.js, three-bvh-csg, three-mesh-bvh, Vue, fzstd –
+all MIT licensed.
+
+Not bundled: the SketchUp SDK (downloaded by each user from Trimble under
+Trimble's terms) and any AI models (each under its own license).

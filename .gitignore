@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.bak
+*.log
+.DS_Store
+__pycache__/
+
+# Trimble's SketchUp SDK – licensed separately, every user downloads it themselves
+tools/sketchup-sdk/

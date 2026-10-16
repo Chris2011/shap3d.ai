@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" width="640" height="160" role="img" aria-label="Shap3D.ai">
+  <rect width="640" height="160" rx="18" fill="#0b0f14"/>
+  <g stroke="#e6ebf1" stroke-opacity=".035" stroke-width="1">
+    <path d="M32 0V160M64 0V160M96 0V160M128 0V160M160 0V160M192 0V160M224 0V160M256 0V160M288 0V160M320 0V160M352 0V160M384 0V160M416 0V160M448 0V160M480 0V160M512 0V160M544 0V160M576 0V160M608 0V160M0 32H640M0 64H640M0 96H640M0 128H640"/>
+  </g>
+  <g transform="translate(40 24) scale(1.75)">
+    <rect width="64" height="64" rx="14" fill="#0d1218" stroke="#1d2631"/>
+    <g fill="none" stroke="#e6ebf1" stroke-linejoin="round">
+      <path d="M32 12 L49 22 V42 L32 52 L15 42 V22 Z" stroke-width="2.2"/>
+      <path d="M15 22 L32 32 L49 22 M32 32 V52" stroke-width="1.4" stroke-opacity=".55"/>
+    </g>
+    <circle cx="32" cy="32" r="6.5" fill="none" stroke="#5fd4e6" stroke-width="1.2" stroke-opacity=".45"/>
+    <circle cx="32" cy="32" r="3.4" fill="#5fd4e6"/>
+  </g>
+  <text x="182" y="94" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="56" font-weight="600" letter-spacing="1" fill="#e6ebf1">Shap<tspan fill="#5fd4e6" font-weight="700">3D</tspan>.<tspan fill="#5fd4e6" font-weight="700">ai</tspan></text>
+  <text x="185" y="124" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="14" letter-spacing="2.2" fill="#7d8794">EASY 3D MODELING WITH A LOCAL AI COPILOT</text>
+</svg>

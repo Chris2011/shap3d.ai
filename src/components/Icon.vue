@@ -1,0 +1,113 @@
+<template>
+  <svg :width="size" :height="size" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" v-html="svg" aria-hidden="true"></svg>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 24 });
+
+const K = 'stroke="currentColor" stroke-width="1.6"';
+const R = 'stroke="#d0312d" stroke-width="1.6"';
+const B = 'stroke="#1f6fbf" stroke-width="1.6"';
+const G = 'stroke="#2e9b4b" stroke-width="1.6"';
+const FR = 'fill="#d0312d"';
+const FB = 'fill="#1f6fbf"';
+
+const ICONS: Record<string, string> = {
+  select: `<path d="M6 3.5 L6 19 L10 15.2 L12.8 21 L15 20 L12.3 14.3 L17.5 14 Z" style="fill:var(--s3d-icon-fill)" ${K}/>`,
+  lasso: `<path d="M5 9c0-3 3.5-5 7.5-5S20 6 20 9s-3.5 5-7.5 5c-1.5 0-3-.3-4-.8" ${K}/><path d="M8.5 13c-1 1-1 3 .5 3.5 1.5.5 1.5 2.5 0 3.5" ${K}/>`,
+  eraser: `<path d="M14.5 4.5 20 10l-8.5 8.5H7L4 15.5z" fill="#f4a3b5" ${K}/><path d="M9 10l5.5 5.5" ${K}/><path d="M11.5 18.5H20" ${K}/>`,
+  paint: `<path d="M5 11l6-6 7 7-6 6z" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M5 11c-1 2 0 3 2 3" ${K}/><path d="M18.5 14.5c1 1.6 1.5 2.6 1.5 3.2a1.5 1.5 0 0 1-3 0c0-.6.5-1.6 1.5-3.2z" ${FB} ${B}/><path d="M9 3l2 2" ${K}/>`,
+  sample: `<path d="M16 3.5a2.1 2.1 0 0 1 3 3L17 8.5l1 1-1.5 1.5-5-5L13 4.5l1 1z" ${K}/><path d="M11.5 7.5 5 14v3h3l6.5-6.5" ${K}/><circle cx="5.5" cy="19.5" r="1.5" ${FR}/>`,
+  line: `<path d="M4 20 L18 6" ${R}/><path d="M15.5 3.5l5 5-2 2-5-5z" fill="#ffd27a" ${K}/><circle cx="4" cy="20" r="1.4" ${FR}/>`,
+  freehand: `<path d="M3.5 17c2-6 4-1 6-5s3-7 5-4 2 7 6 3" ${R}/>`,
+  rectangle: `<rect x="3.5" y="6" width="17" height="12" ${K}/><path d="M3.5 18 20.5 6" ${R} stroke-dasharray="2 2"/><circle cx="3.5" cy="18" r="1.4" ${FR}/><circle cx="20.5" cy="6" r="1.4" ${FR}/>`,
+  rotrect: `<path d="M3 13 11 5l9 9-8 8z" ${K}/><circle cx="3" cy="13" r="1.4" ${FR}/><circle cx="11" cy="5" r="1.4" ${FR}/><circle cx="20" cy="14" r="1.4" ${FR}/>`,
+  circle: `<circle cx="12" cy="12" r="8" ${K}/><path d="M12 12h8" ${R}/><circle cx="12" cy="12" r="1.4" ${FR}/>`,
+  polygon: `<path d="M12 4l7 4v8l-7 4-7-4V8z" ${K}/><circle cx="12" cy="12" r="1.3" ${FR}/>`,
+  arc: `<path d="M5 17a8 8 0 0 1 14-6" ${K}/><path d="M12 17H5" ${R} stroke-dasharray="2 2"/><circle cx="12" cy="17" r="1.4" ${FR}/>`,
+  arc2: `<path d="M3.5 17c2-9 15-9 17 0" ${K}/><circle cx="3.5" cy="17" r="1.4" ${FR}/><circle cx="20.5" cy="17" r="1.4" ${FR}/><path d="M12 17v-6.5" ${R} stroke-dasharray="2 2"/>`,
+  arc3: `<path d="M3.5 17c2-9 15-9 17 0" ${K}/><circle cx="3.5" cy="17" r="1.4" ${FR}/><circle cx="12" cy="10.3" r="1.4" ${FR}/><circle cx="20.5" cy="17" r="1.4" ${FR}/>`,
+  pie: `<path d="M12 13 L20 13 A8 8 0 0 0 7 6.6 Z" fill="#fde2e2" ${K}/><circle cx="12" cy="13" r="1.4" ${FR}/>`,
+  pushpull: `<path d="M4 15l5-3 11 0-5 3z" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M4 15v4h11v-4M15 19l5-3v-4" ${K}/><path d="M12 12V3.5M9.5 6 12 3.5 14.5 6" ${R}/>`,
+  offset: `<path d="M4 4h16v16H4z" ${K}/><path d="M8 8h8v8H8z" ${R}/>`,
+  move: `<path d="M12 3v18M3 12h18" ${R}/><path d="M9.5 5.5 12 3l2.5 2.5M9.5 18.5 12 21l2.5-2.5M5.5 9.5 3 12l2.5 2.5M18.5 9.5 21 12l-2.5 2.5" ${R}/>`,
+  rotate: `<path d="M19 12a7 7 0 1 1-2.1-5" ${R}/><path d="M17.5 3.5v4h-4" ${R}/><circle cx="12" cy="12" r="1.4" ${FR}/>`,
+  scale: `<rect x="3.5" y="9.5" width="11" height="11" ${K}/><path d="M10 14 20 4M14.5 4H20v5.5" ${R}/><rect x="2.5" y="8.5" width="2" height="2" ${FR} stroke="none"/><rect x="13.5" y="19.5" width="2" height="2" ${FR} stroke="none"/>`,
+  followme: `<path d="M4 20c0-8 8-8 8-14" ${R}/><path d="M12 3l4 2-2 4-4-2z" fill="#fde2e2" ${K}/><path d="M3 18l3 3 3-2-2-3z" style="fill:var(--s3d-icon-fill)" ${K}/>`,
+  tape: `<rect x="3" y="7" width="11" height="11" rx="5.5" fill="#ffe58a" ${K}/><circle cx="8.5" cy="12.5" r="2" ${K}/><path d="M14 16h7v-3h-3" ${K}/><path d="M16 16v-1.5M18 16v-1.5" ${K}/>`,
+  protractor: `<path d="M3 17a9 9 0 0 1 18 0z" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M12 17 17 9" ${R}/><path d="M7 17v-1.5M12 8v1.5M17 17v-1.5" ${K}/>`,
+  dimension: `<path d="M4 6v12M20 6v12M4 12h16" ${K}/><path d="M7 9.5 4 12l3 2.5M17 9.5l3 2.5-3 2.5" ${K}/>`,
+  text: `<path d="M3 20 9 14" ${K}/><rect x="9" y="5" width="12" height="9" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M12 8h6M12 11h4" ${K}/>`,
+  text3d: `<path d="M5 6h12M11 6v13" stroke="#d0312d" stroke-width="2.4"/><path d="M8 4h12M14 4v13" ${K} opacity=".5"/>`,
+  section: `<path d="M4 7h14l2 3v8H6l-2-3z" fill="#fff3e0" stroke="#e07000" stroke-width="1.6"/><path d="M9 13l3-3 3 3M12 10v7" stroke="#e07000" stroke-width="1.6"/>`,
+  orbit: `<ellipse cx="12" cy="12" rx="8.5" ry="4" ${B}/><path d="M12 3.5v17" ${K} opacity=".55"/><path d="M17 6.7l2.6 1.5-.6 2.8" ${B}/>`,
+  pan: `<path d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11V4.5a1.5 1.5 0 0 1 3 0V11V5.5a1.5 1.5 0 0 1 3 0V12V8.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6.5 7S8 19.5 6 17l-2.5-3.5A1.5 1.5 0 0 1 6 11.6L8 14" style="fill:var(--s3d-icon-fill)" ${K}/>`,
+  zoom: `<circle cx="10" cy="10" r="6" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M14.5 14.5 20.5 20.5" stroke="currentColor" stroke-width="2.6"/><path d="M7 10h6M10 7v6" ${B}/>`,
+  zoomwindow: `<circle cx="11" cy="11" r="5.5" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M15 15l5.5 5.5" stroke="currentColor" stroke-width="2.4"/><rect x="2.5" y="2.5" width="9" height="7" ${B} stroke-dasharray="2 1.5"/>`,
+  zoomext: `<circle cx="11" cy="11" r="6" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.4"/><path d="M8 9V8h1M14 9V8h-1M8 13v1h1M14 13v1h-1" ${B}/><path d="M9.5 9.5h3v3h-3z" ${FB} stroke="none"/>`,
+  poscam: `<path d="M12 21v-8" ${K}/><circle cx="12" cy="8" r="3.2" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M8.5 21h7" ${K}/><path d="M17 5l3-2v6l-3-2" ${B}/>`,
+  lookaround: `<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" style="fill:var(--s3d-icon-fill)" ${K}/><circle cx="12" cy="12" r="3" ${FB} stroke="none"/>`,
+  walk: `<circle cx="13" cy="4.5" r="2" ${K}/><path d="M13 7.5 11 13l3 3 1 5M11 13l-3 3-2 0M12 9l3 2 3 0M12 9l-3 1-1 3" ${K}/>`,
+  search: `<circle cx="10.5" cy="10.5" r="6" ${K}/><path d="M15 15l5.5 5.5" stroke="currentColor" stroke-width="2"/>`,
+  menu: `<path d="M4 7h16M4 12h16M4 17h16" ${K}/>`,
+  undo: `<path d="M8 5 4 9l4 4" ${K}/><path d="M4 9h10a6 6 0 0 1 0 12h-3" ${K}/>`,
+  redo: `<path d="M16 5l4 4-4 4" ${K}/><path d="M20 9H10a6 6 0 0 0 0 12h3" ${K}/>`,
+  more: `<circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>`,
+  close: `<path d="M6 6l12 12M18 6 6 18" ${K}/>`,
+  chevron: `<path d="M9 6l6 6-6 6" ${K}/>`,
+  chevronDown: `<path d="M6 9l6 6 6-6" ${K}/>`,
+  mesh: `<path d="M12 3 21 8.5v7L12 21l-9-5.5v-7z" ${K}/><path d="M3 8.5 12 14l9-5.5M12 14v7M3 15.5 12 14l9 1.5M12 3v11" stroke="currentColor" stroke-width="1" stroke-opacity=".55"/><circle cx="12" cy="14" r="1.6" fill="#0e8ca0"/><circle cx="12" cy="3" r="1.3" fill="#0e8ca0"/><circle cx="21" cy="8.5" r="1.3" fill="#0e8ca0"/><circle cx="3" cy="8.5" r="1.3" fill="#0e8ca0"/>`,
+  monitor: `<rect x="3" y="4.5" width="18" height="12" rx="1.5" ${K}/><path d="M9 20h6M12 16.5V20" ${K}/>`,
+  dblchevron: `<path d="M6 6l6 6-6 6M12 6l6 6-6 6" ${K}/>`,
+  // panels
+  entityinfo: `<circle cx="12" cy="12" r="8.5" ${K}/><path d="M12 11v6" ${K}/><circle cx="12" cy="7.8" r="1.1" fill="currentColor"/>`,
+  outliner: `<path d="M4 5h6M7 9h7M7 13h7M10 17h8M4 5v0" ${K}/><path d="M5 5v12h4M5 9h1M5 13h1" ${K}/>`,
+  instructor: `<path d="M3 9l9-4 9 4-9 4z" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M7 11v4c3 2 7 2 10 0v-4" ${K}/><path d="M21 9v5" ${K}/>`,
+  materials: `<circle cx="12" cy="12" r="8.5" style="fill:var(--s3d-icon-fill)" ${K}/><circle cx="8.5" cy="10" r="1.6" ${FR} stroke="none"/><circle cx="12" cy="7.5" r="1.6" fill="#f2b705" stroke="none"/><circle cx="15.5" cy="10" r="1.6" ${FB} stroke="none"/><circle cx="14.5" cy="14.5" r="1.6" fill="#2e9b4b" stroke="none"/>`,
+  styles: `<rect x="4" y="4" width="16" height="16" rx="2" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M4 14l5-4 4 3 3-2 4 3" ${K}/><circle cx="15.5" cy="8" r="1.5" ${K}/>`,
+  tags: `<path d="M4 12V5a1 1 0 0 1 1-1h7l8 8-8 8z" style="fill:var(--s3d-icon-fill)" ${K}/><circle cx="8" cy="8" r="1.3" fill="currentColor"/>`,
+  shadows: `<circle cx="9" cy="9" r="3.5" fill="#ffd54a" ${K}/><path d="M9 2.5v1.5M2.5 9H4M4.4 4.4l1 1M13.6 4.4l-1 1" ${K}/><path d="M11 20h10l-4-6h-6z" fill="#9aa1ab" stroke="none"/>`,
+  scenes: `<rect x="3" y="6" width="18" height="12" rx="1.5" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/>`,
+  display: `<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" ${K}/><circle cx="12" cy="12" r="2.6" ${K}/>`,
+  soften: `<path d="M4 18c3-8 13-8 16 0" ${K}/><path d="M4 14c3-8 13-8 16 0" ${K} opacity=".45"/>`,
+  modelinfo: `<circle cx="12" cy="12" r="8.5" ${K}/><path d="M12 7v1M12 11v6" ${K}/>`,
+  script: `<rect x="3" y="4" width="18" height="16" rx="2" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M7 9l3 3-3 3M12 15h5" ${K}/>`,
+  component: `<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" style="fill:var(--s3d-icon-fill)" ${K}/><path d="M4 7.5l8 4.5 8-4.5M12 12v9" ${K}/>`,
+  group: `<rect x="4" y="4" width="16" height="16" ${K} stroke-dasharray="3 2"/><rect x="8" y="8" width="8" height="8" ${K}/>`,
+  flip: `<path d="M12 3v18" ${K} stroke-dasharray="2 2"/><path d="M10 6 4 18h6zM14 6l6 12h-6z" ${K}/>`,
+  terrain: `<path d="M2 19l6-9 4 5 3-4 7 8z" fill="#c8e6c9" ${K}/><path d="M6.5 12.2l1.5-2.2 1.6 2" stroke="#fff" stroke-width="1.4"/><path d="M2 19h20" ${G}/>`,
+  solid: `<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" fill="#c8e6c9" ${K}/>`,
+  union: `<circle cx="9" cy="12" r="5.5" fill="#bbdefb" ${K}/><circle cx="15" cy="12" r="5.5" fill="#bbdefb" ${K}/>`,
+  subtract: `<circle cx="9" cy="12" r="5.5" fill="#bbdefb" ${K}/><circle cx="15" cy="12" r="5.5" style="fill:var(--s3d-icon-fill)" ${K}/>`,
+  axes: `<path d="M5 19V5" ${B}/><path d="M5 19h14" ${R}/><path d="M5 19l10-8" ${G}/>`,
+  person: `<circle cx="12" cy="5" r="2.2" ${K}/><path d="M12 7.5v7M8 10.5h8M12 14.5l-3 6.5M12 14.5l3 6.5" ${K}/>`,
+  help: `<circle cx="12" cy="12" r="8.5" ${K}/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.7" ${K}/><circle cx="12" cy="17" r="1" fill="currentColor"/>`,
+  trackpad: `<rect x="3.5" y="5" width="17" height="13" rx="2" ${K}/><path d="M3.5 15h17M12 15v3" ${K}/><circle cx="9.5" cy="9.5" r="1.2" fill="currentColor"/><circle cx="14.5" cy="9.5" r="1.2" fill="currentColor"/>`,
+  sparkle: `<path d="M10 3 L11.6 8.4 L17 10 L11.6 11.6 L10 17 L8.4 11.6 L3 10 L8.4 8.4 Z" fill="#1e9bd7" stroke="#1e9bd7" stroke-width="1"/><path d="M18 13 L18.8 15.2 L21 16 L18.8 16.8 L18 19 L17.2 16.8 L15 16 L17.2 15.2 Z" fill="#0e416c"/><path d="M17.5 3 L18 4.5 L19.5 5 L18 5.5 L17.5 7 L17 5.5 L15.5 5 L17 4.5 Z" fill="#0e416c"/>`,
+  send: `<path d="M4 12 L20 4 L14 20 L11 13 Z" fill="currentColor"/>`,
+  stop: `<rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/>`,
+  mouse: `<rect x="7" y="3.5" width="10" height="17" rx="5" ${K}/><path d="M12 7v3" ${K}/>`,
+  eye: `<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" ${K}/><circle cx="12" cy="12" r="2.5" fill="currentColor"/>`,
+  eyeOff: `<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" ${K} opacity=".4"/><path d="M4 4l16 16" ${K}/>`,
+  plus: `<path d="M12 5v14M5 12h14" ${K}/>`,
+  minus: `<path d="M5 12h14" ${K}/>`,
+  trash: `<path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13" ${K}/>`,
+  sun: `<circle cx="12" cy="12" r="4" ${K}/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" ${K}/>`,
+  moon: `<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" ${K}/>`,
+  play: `<path d="M7 5v14l12-7z" fill="currentColor"/>`,
+  save: `<path d="M5 4h11l3 3v13H5z" ${K}/><path d="M8 4v5h7V4M8 20v-6h8v6" ${K}/>`,
+  download: `<path d="M12 4v11M7 10l5 5 5-5M5 20h14" ${K}/>`,
+  folder: `<path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" ${K}/>`,
+  home: `<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" ${K}/>`,
+  file: `<path d="M6 3h8l4 4v14H6z" ${K}/><path d="M14 3v4h4" ${K}/>`,
+  settings: `<circle cx="12" cy="12" r="3" ${K}/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" ${K}/>`,
+  print: `<path d="M7 9V4h10v5M7 17H4v-7h16v7h-3M7 14h10v6H7z" ${K}/>`,
+  import: `<path d="M12 14V3M7 9l5 5 5-5M4 15v5h16v-5" ${K}/>`,
+  export: `<path d="M12 3v11M7 8l5-5 5 5M4 15v5h16v-5" ${K}/>`,
+  camera: `<path d="M4 8h3l2-2.5h6L17 8h3v11H4z" ${K}/><circle cx="12" cy="13" r="3.5" ${K}/>`,
+  cube: `<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" ${K}/><path d="M4 7.5l8 4.5 8-4.5M12 12v9" ${K}/>`,
+};
+
+const svg = computed(() => ICONS[props.name] ?? ICONS.cube);
+</script>

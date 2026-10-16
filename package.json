@@ -1,0 +1,27 @@
+{
+  "name": "shap3d-ai",
+  "private": true,
+  "license": "Apache-2.0",
+  "version": "0.3.0",
+  "description": "Easy 3D modeling in the browser with a local AI copilot – sketch, push/pull, script and sculpt terrain, all on your own machine.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "fzstd": "^0.1.1",
+    "three": "^0.186.1",
+    "three-bvh-csg": "^0.0.18",
+    "three-mesh-bvh": "^0.9.16",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vue-tsc": "^3.3.13"
+  }
+}
