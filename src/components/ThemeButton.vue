@@ -1,9 +1,9 @@
 <template>
   <div class="group relative mx-0.5 flex h-9 items-center" @click.stop>
-    <button class="flex h-7.5 w-7 items-center justify-center rounded-l-[3px] bg-transparent p-0 text-ink-2 hover:text-navy group-hover:bg-hover" :class="open && 'bg-hover'" :title="theme.dark ? 'Dunkelmodus aus' : 'Dunkelmodus an'" :aria-pressed="theme.dark" @click="toggleTheme()">
+    <button class="flex h-7.5 w-7 items-center justify-center rounded-l-[3px] p-0 text-ink-2 hover:text-navy group-hover:bg-hover" :class="open && 'bg-hover'" :title="theme.dark ? 'Dunkelmodus aus' : 'Dunkelmodus an'" :aria-pressed="theme.dark" @click="toggleTheme()">
       <Icon :name="theme.dark ? 'moon' : 'sun'" :size="18" />
     </button>
-    <button class="flex h-7.5 w-4 items-center justify-center rounded-r-[3px] border-l bg-transparent p-0 text-ink-2 hover:text-navy group-hover:border-line-2 group-hover:bg-hover" :class="open ? 'border-line-2 bg-hover' : 'border-transparent'" title="Weitere Design-Optionen" :aria-expanded="open" @click="open = !open"><Icon name="chevronDown" :size="12" /></button>
+    <button class="flex h-7.5 w-4 items-center justify-center rounded-r-[3px] border-l p-0 text-ink-2 hover:text-navy group-hover:border-line-2 group-hover:bg-hover" :class="open ? 'border-line-2 bg-hover' : 'border-transparent'" title="Weitere Design-Optionen" :aria-expanded="open" @click="open = !open"><Icon name="chevronDown" :size="12" /></button>
 
     <div v-if="open" class="s3d-menu top-10 -left-2 w-67 cursor-default px-3 pt-2.5 pb-3">
       <label class="flex items-center justify-between gap-2.5">
@@ -12,11 +12,11 @@
       </label>
       <div class="-mx-3 my-2.5 h-px bg-line"></div>
       <div class="mt-2 mb-[5px] text-[11px] font-bold tracking-[.4px] text-muted uppercase">Oberfläche</div>
-      <div class="grid grid-cols-3 overflow-hidden rounded border border-line-2">
+      <div class="grid grid-cols-[repeat(3,1fr)] overflow-hidden rounded border border-line-2">
         <button v-for="o in UI" :key="o.v" :class="[SEG, theme.mode === o.v ? SEG_ON : SEG_OFF]" @click="setTheme(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
       </div>
       <div class="mt-2 mb-[5px] text-[11px] font-bold tracking-[.4px] text-muted uppercase">3D-Szene</div>
-      <div class="grid grid-cols-3 overflow-hidden rounded border border-line-2">
+      <div class="grid grid-cols-[repeat(3,1fr)] overflow-hidden rounded border border-line-2">
         <button v-for="o in SCENE" :key="o.v" :class="[SEG, theme.scene === o.v ? SEG_ON : SEG_OFF]" @click="setScene(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
       </div>
       <p class="mt-2.5 mb-0 text-[11.5px]/[1.4] text-ink-2">{{ hint }}</p>

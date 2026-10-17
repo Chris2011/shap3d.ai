@@ -10,7 +10,7 @@
       <!-- 1: provider -->
       <div v-if="step === 0" class="overflow-auto px-4 py-3.5 select-text">
         <p class="mb-3">Welcher lokale KI-Server läuft auf deinem Rechner? Alles bleibt auf deinem Gerät – nichts geht ins Internet. Am einfachsten ist <b>Ollama</b>.</p>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-[repeat(2,1fr)] gap-2">
           <button v-for="p in PROVIDERS" :key="p.id" class="flex flex-col gap-1 border bg-surface p-2.5 text-left" :class="draft.provider === p.id ? 'border-navy bg-sel shadow-[0_0_0_1px_var(--s3d-navy)]' : 'border-line-2'" @click="choose(p.id)">
             <div class="font-bold text-navy">{{ p.name }}</div>
             <div class="flex gap-1 [&>span]:rounded-lg [&>span]:px-1.5 [&>span]:text-[10px]"><span class="bg-ok-bg text-ok">lokal</span><span class="bg-surface-2 text-ink-2">kostenlos</span></div>

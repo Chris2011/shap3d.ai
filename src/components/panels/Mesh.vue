@@ -11,7 +11,7 @@
     </div>
 
     <div class="mt-3.5 mb-1.5 text-[11px] font-bold tracking-[.4px] text-navy uppercase">{{ scope }}</div>
-    <div class="grid grid-cols-2 gap-1.5 [&>div]:flex [&>div]:flex-col [&>div]:border [&>div]:border-line [&>div]:bg-surface-2 [&>div]:px-2 [&>div]:py-1.5 [&_b]:text-base [&_b]:tabular-nums [&_span]:text-[11px] [&_span]:text-muted">
+    <div class="grid grid-cols-[repeat(2,1fr)] gap-1.5 [&>div]:flex [&>div]:flex-col [&>div]:border [&>div]:border-line [&>div]:bg-surface-2 [&>div]:px-2 [&>div]:py-1.5 [&_b]:text-base [&_b]:tabular-nums [&_span]:text-[11px] [&_span]:text-muted">
       <div><b>{{ fmt(stats.vertices) }}</b><span>Eckpunkte</span></div>
       <div><b>{{ fmt(stats.edges) }}</b><span>Kanten<template v-if="stats.softEdges"> ({{ fmt(stats.softEdges) }} weich)</template></span></div>
       <div><b>{{ fmt(stats.faces) }}</b><span>Flächen</span></div>
@@ -37,7 +37,7 @@
     <!-- any group / component -->
     <template v-if="inst">
       <div class="mt-3.5 mb-1.5 text-[11px] font-bold tracking-[.4px] text-navy uppercase">Polygone ändern</div>
-      <div class="grid grid-cols-2 gap-1.5 [&_.s3d-btn]:px-1.5">
+      <div class="grid grid-cols-[repeat(2,1fr)] gap-1.5 [&_.s3d-btn]:px-1.5">
         <button class="s3d-btn" title="Jedes Dreieck wird zu vier – die Form bleibt exakt gleich" @click="more(false)">▲ Mehr (Form behalten)</button>
         <button class="s3d-btn" title="Jedes Dreieck wird zu vier, Ecken und Rundungen werden weicher" @click="more(true)">▲ Mehr (abrunden)</button>
       </div>

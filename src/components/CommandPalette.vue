@@ -89,9 +89,9 @@ const rows = computed<Row[]>(() => {
   const scored: { it: PaletteItem; score: number; hits: number[] }[] = [];
   for (const it of pool) {
     const m = fuzzy(q, it.label);
-    const extra = m ? null : fuzzy(q, `${it.group} ${it.keywords ?? ''}`);
+    const extra = !m && `${it.group} ${it.keywords ?? ''}`.toLowerCase().includes(q.toLowerCase());
     if (!m && !extra) continue;
-    let score = m ? m.score : extra!.score * 0.4 - 50;
+    let score = m ? m.score : 200 - (it.label.length * 0.5);
     if (recent.includes(it.id)) score += 40 - recent.indexOf(it.id) * 4;
     if (it.enabled && !it.enabled()) score -= 30;
     scored.push({ it, score, hits: m?.hits ?? [] });

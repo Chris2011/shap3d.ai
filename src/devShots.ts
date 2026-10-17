@@ -13,6 +13,10 @@ import { aiHistory } from './ai/history';
 import { openTerrain, generate } from './terrain/session';
 import { Entities } from './core/model';
 import { bakeTerrain, cellSize, heightAt } from './core/terrain';
+import { addScaleFigure } from './engine/defaults';
+import { measureView } from './engine/measureView';
+import { openPalette } from './components/paletteState';
+import { openTour } from './components/tour';
 
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 const cam = (ed: Editor, pos: number[], target: number[], fov = 35) => ed.viewer.rig.applyState({ pos, target, fov, ortho: false });
@@ -78,7 +82,7 @@ s3d.stairs([2, 2, 0], { steps: 6, width: 1.2, material: 'Eiche hell' });
 s3d.wedge([5.4, 2.1, 0], 1.6, 1, 0.8, { material: 'Beton' });`);
     openPanel.value = 'scripts';
     await wait(600);
-    (([...document.querySelectorAll('.se .lnk')] as HTMLElement[]).find(b => b.textContent?.includes('API-Info')))?.click();
+    (([...document.querySelectorAll('button')] as HTMLElement[]).find(b => b.textContent?.trim() === 'API-Info'))?.click();
     cam(ed, [-4, -9, 6], [4, 2, 0.6]);
   },
   async terrain(ed) {
@@ -98,6 +102,34 @@ s3d.torus([6.3, 0, 0.3], 0.6, 0.25, { segments: 18, material: 'Gold' });`);
     ed.select([{ kind: 'instance', id: [...ed.model.root.instances.values()][0].id }]);
     openPanel.value = 'mesh';
     cam(ed, [-1.5, -7, 4], [3.4, 0, 0.5]);
+  },
+  async palette(ed) {
+    setTheme('dark'); setScene('night'); ed.newModel(); run(ed, LANDSCAPE); settleLandscape(ed);
+    cam(ed, [-19, -23, 13], [3, 3, 1.2]);
+    openPalette('ansicht');
+    await wait(300);
+    const inp = document.querySelector<HTMLInputElement>('[role=dialog] input'); inp?.setSelectionRange(inp.value.length, inp.value.length);
+  },
+  async measure(ed) {
+    // origin close to the camera (cm labels on the axes), person and table further back (whole figure in view)
+    setTheme('light'); setScene('day'); empty(ed);
+    addScaleFigure(ed);
+    const person = [...ed.model.root.instances.values()].find(i => i.def.faceMe);
+    person?.matrix.setPosition(1.6, 2.6, 0);
+    run(ed, `s3d.group('Tisch', () => {
+  s3d.box([2.4, 2.2, 0.72], 1.2, 0.8, 0.04, { material: 'Eiche hell' });
+  for (const [x, y] of [[2.45, 2.25], [3.5, 2.25], [2.45, 2.9], [3.5, 2.9]]) s3d.box([x, y, 0], 0.05, 0.05, 0.72, { material: 'Eiche hell' });
+});`);
+    measureView.rulers = true; measureView.people = true;
+    cam(ed, [0.1, -1.4, 0.95], [2.4, 2.6, 0.55], 52);
+  },
+  async tour(ed) {
+    setTheme('light'); setScene('day'); ed.newModel(); run(ed, LANDSCAPE); settleLandscape(ed);
+    cam(ed, [-19, -23, 13], [3, 3, 1.2]);
+    openTour(1);
+    // headless Chrome does not advance CSS animations – freeze them at a moment where the box is pulled up
+    await wait(300);
+    for (const a of document.getAnimations()) { a.pause(); a.currentTime = 2250; }
   },
 };
 

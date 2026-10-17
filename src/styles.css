@@ -121,6 +121,7 @@
   html, body, #app { @apply h-full m-0 overflow-hidden; }
   body { @apply bg-surface text-ink font-sans text-[13px]/[1.4] antialiased select-none; }
   button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+  input[type="checkbox"], input[type="radio"] { margin: 3px 3px 3px 4px; }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb { background: var(--s3d-line-2); border-radius: 6px; border: 2px solid var(--s3d-bg); }
   ::-webkit-scrollbar-track { background: transparent; }

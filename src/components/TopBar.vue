@@ -37,7 +37,7 @@ import { openPanel } from './panelState';
 import ThemeButton from './ThemeButton.vue';
 
 const ed = useEditor();
-const TB_BASE = 'flex h-9 items-center justify-center border-0 bg-transparent p-0 hover:enabled:bg-hover disabled:cursor-default disabled:opacity-35';
+const TB_BASE = 'flex h-9 items-center justify-center border-0 p-0 hover:enabled:bg-hover disabled:cursor-default disabled:opacity-35';
 const TB = `${TB_BASE} w-9 text-navy`;
 const TB_SM = `${TB_BASE} w-6 text-[#6b6f7b] dark:text-ink-2`;
 const menuOpen = ref(false); const exportOpen = ref(false);

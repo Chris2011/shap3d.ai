@@ -7,7 +7,7 @@
     </div>
   </div>
   <input v-model="filter" class="s3d-input" placeholder="Materialien durchsuchen" />
-  <div class="my-2.5 grid grid-cols-6 gap-1.5">
+  <div class="my-2.5 grid grid-cols-[repeat(6,1fr)] gap-1.5">
     <div class="flex aspect-square cursor-pointer items-end justify-center rounded-[3px] border border-line-2 bg-[linear-gradient(135deg,var(--s3d-bg)_50%,#a4b2bf_50%)] text-[9px] text-[#333]" :class="{ [ON]: ed.ui.currentMaterial == null }" title="Standard" @click="choose(null)"><span>Std</span></div>
     <div v-for="m in list" :key="m.name" class="aspect-square cursor-pointer rounded-[3px] border border-line-2" :class="{ [ON]: ed.ui.currentMaterial === m.name }" :style="swStyle(m)" :title="m.name" @click="choose(m.name)"></div>
   </div>

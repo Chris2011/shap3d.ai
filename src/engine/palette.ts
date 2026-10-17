@@ -130,17 +130,21 @@ export function fuzzy(query: string, text: string): { score: number; hits: numbe
     const start = direct === 0 || /[\s\-_/:·(]/.test(t[direct - 1]);
     return { score: 1000 - direct + (start ? 300 : 0) - t.length * 0.5, hits: [...Array(q.length).keys()].map(k => direct + k) };
   }
-  const hits: number[] = []; let score = 0, ti = 0, prev = -2;
+  const hits: number[] = []; let score = 0, ti = 0, prev = -2, scattered = 0;
+  const wordStart = (k: number) => k === 0 || /[\s\-_/:·(]/.test(t[k - 1]);
   for (const ch of q) {
     if (ch === ' ') continue;
     let found = -1;
     // prefer the next word start, otherwise the next occurrence
-    for (let k = ti; k < t.length; k++) if (t[k] === ch && (k === 0 || /[\s\-_/:·(]/.test(t[k - 1]))) { found = k; break; }
+    for (let k = ti; k < t.length; k++) if (t[k] === ch && wordStart(k)) { found = k; break; }
     const next = t.indexOf(ch, ti);
     if (found < 0 || (next >= 0 && next === prev + 1)) found = next;
     if (found < 0) return null;
-    score += found === prev + 1 ? 12 : (found === 0 || /[\s\-_/:·(]/.test(t[found - 1])) ? 9 : 1;
+    const run = found === prev + 1, start = wordStart(found);
+    if (!run && !start) scattered++;
+    score += run ? 12 : start ? 9 : 1;
     hits.push(found); prev = found; ti = found + 1;
   }
+  if (scattered > 1) return null;
   return { score: score - t.length * 0.2, hits };
 }

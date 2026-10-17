@@ -39,8 +39,12 @@
   - [Script editor and the `s3d` API](#script-editor-and-the-s3d-api)
   - [Terrain editor](#terrain-editor)
   - [Polygon inspector](#polygon-inspector)
+  - [Command palette](#command-palette)
+  - [Measuring: rulers on the axes and people with their height](#measuring-rulers-on-the-axes-and-people-with-their-height)
+  - [Welcome tour](#welcome-tour)
   - [Dark mode and night scene](#dark-mode-and-night-scene)
 - [Getting started](#getting-started)
+- [Keyboard shortcuts](#keyboard-shortcuts)
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
 - [Connecting a local AI model](#connecting-a-local-ai-model)
 - [Scripting example](#scripting-example)
@@ -57,6 +61,9 @@
 - **Scriptable** – a small JavaScript API (`s3d.box(…)`, `s3d.terrain(…)`, …) with 44 documented commands, 52 ready-made materials and a searchable in-app reference.
 - **Terrain sculpting** – raise, lower, smooth and flatten landscapes with a brush. Grass, earth, rock and snow are painted automatically.
 - **Polygon inspector** – see every vertex and triangle, change the segment count of round shapes, subdivide or simplify any mesh.
+- **Command palette like in VS Code or IntelliJ** – <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, <kbd>F1</kbd> or <kbd>Shift</kbd> twice finds every tool, command, panel, switch, material, scene and object in one fuzzy search.
+- **Measuring aids** – rulers on the axes that switch from metres to centimetres to millimetres as you zoom in, and reference people that show their height.
+- **Welcome tour** – six short animated steps on the first start, available again any time from the menu.
 - **Dark mode with a real night scene**, a split button for every combination, and a German user interface.
 
 ## Features
@@ -72,7 +79,7 @@ The toolset follows the familiar push/pull workflow: draw a shape, pull it into 
 | Precision | Inference engine (endpoints, midpoints, edges, faces, axis and parallel locks), measurement box for typed values, tape measure, protractor, dimensions, guides |
 | Structure | Groups, reusable components with live instances, tags, outliner, entity info |
 | Solids | Union, subtract, intersect, outer shell, trim and split (CSG via `three-bvh-csg`) |
-| Presentation | Styles (shaded, textured, monochrome, hidden line, wireframe, X-ray), section planes, scenes, sun shadows, reference people |
+| Presentation | Styles (shaded, textured, monochrome, hidden line, wireframe, X-ray), section planes, scenes, sun shadows, reference people with a height dimension, zoom-dependent rulers on the axes |
 | Files | Native `.shap3d.json` files, import from SketchUp, Blender, 3ds Max and more – **SKP, BLEND, FBX, 3DS, DAE, KMZ, OBJ, STL, glTF/GLB, PLY, 3MF, AMF, VRML, USD/USDZ** – with materials, groups and unit detection (menu or drag & drop), export to GLB, glTF, STL, OBJ and PNG, autosave in the browser |
 
 ### Local AI copilot
@@ -117,6 +124,31 @@ Turn a rectangle into a landscape, or start a new terrain from scratch, then scu
 - **Exact resolution** for round shapes: rebuild a cylinder, sphere, cone, torus, tube or dome with more or fewer segments, including circles you have drawn before pushing them up.
 - **More polygons** for any object (keep the shape, or round it with Loop subdivision) and **fewer polygons** via edge-collapse simplification.
 
+### Command palette
+
+![Command palette](docs/screenshots/palette.png)
+
+Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, <kbd>F1</kbd>, <kbd>Ctrl</kbd>+<kbd>K</kbd> or <kbd>Shift</kbd> twice (as in IntelliJ) to reach everything in the app from the keyboard.
+
+- **One search for everything**: tools, menu commands, panels, display switches, AI settings, components and reference people, materials (in the model and the whole library), scenes, tags and the objects in your model.
+- **Fuzzy matching** with highlighted letters, word starts and German as well as English search words ("dark" finds *Dunkles Design*).
+- **Switches show their state**. <kbd>Enter</kbd> runs an entry and closes the palette, <kbd>Shift</kbd>+<kbd>Enter</kbd> runs or toggles it and keeps the palette open.
+- **Prefixes** narrow the search: `>` commands, `@` objects in the model (select and zoom to them), `#` materials (pick one and start painting). Recently used entries come first.
+
+### Measuring: rulers on the axes and people with their height
+
+![Rulers on the axes and the height of a reference person](docs/screenshots/measure.png)
+
+- **Rulers on the axes**: tick marks along the red, green and blue axes. Zoomed out you see whole metres; the closer you get, the finer the scale becomes – 10 cm, centimetres and finally millimetres, with labels wherever there is room.
+- **Height of reference people**: every person shows a dimension line with its height, in metres, or in centimetres and millimetres when you are close.
+- Both can be switched on and off in **Anzeige** (Display), in **Menu › Ansicht** or in the command palette.
+
+### Welcome tour
+
+![Welcome tour](docs/screenshots/tour.png)
+
+On the very first start a short tour with small animations explains the essentials: drawing and push/pull, navigating, the AI assistant, terrain, scripts and import, and the light/dark look. It can be closed at any step – including the first – with *Überspringen*, ✕ or <kbd>Esc</kbd>, and opened again any time via **Menu › Einführung** or the command palette.
+
 ### Dark mode and night scene
 
 The sun/moon split button switches dark mode on and off. Its menu lets you set the interface (light, dark, follow the system) and the 3D scene (day, night, same as the interface) separately. You can have dark menus with a bright model, or turn the whole viewport into a night scene with a night sky, moonlight and light edges.
@@ -130,12 +162,27 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:5173>. The interface is in German.
+Open <http://localhost:5173>. The interface is in German. On the first start the welcome tour opens.
+
+The 3D view needs WebGL. If the browser has turned it off (for example after a graphics driver crash), the app shows a short help page instead of the loading screen.
 
 ```bash
 npm run build     # production build in dist/
 npm run preview   # serve the build locally
 ```
+
+## Keyboard shortcuts
+
+| Keys | Action |
+| --- | --- |
+| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, <kbd>F1</kbd>, <kbd>Ctrl</kbd>+<kbd>K</kbd>, <kbd>Shift</kbd> twice | Command palette |
+| <kbd>Space</kbd> <kbd>L</kbd> <kbd>R</kbd> <kbd>C</kbd> <kbd>A</kbd> | Select, line, rectangle, circle, arc |
+| <kbd>P</kbd> <kbd>F</kbd> <kbd>M</kbd> <kbd>Q</kbd> <kbd>S</kbd> | Push/pull, offset, move, rotate, scale |
+| <kbd>E</kbd> <kbd>B</kbd> <kbd>T</kbd> <kbd>G</kbd> | Eraser, paint bucket, tape measure, make component |
+| Middle mouse button, <kbd>Shift</kbd> + middle mouse button, wheel | Orbit, pan, zoom |
+| <kbd>Shift</kbd>+<kbd>Z</kbd>, <kbd>Alt</kbd>+<kbd>K</kbd>, <kbd>K</kbd> | Zoom extents, X-ray, back edges |
+| <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd>, <kbd>Ctrl</kbd>+<kbd>S</kbd> | Undo / redo, save |
+| Type a number and <kbd>Enter</kbd> | Exact length, distance or angle while a tool is active |
 
 ## Importing from SketchUp, Blender, 3ds Max and others
 
@@ -220,14 +267,15 @@ src/
   scripting/   s3d API, API catalog, examples, OBJ import, resolution changes
   ai/          providers, prompts, agent, chat history, Hugging Face search
   terrain/     live terrain sculpting session
-  components/  Vue UI – toolbars, panels, dialogs, AI chat, terrain window
+  components/  Vue UI – toolbars, panels, dialogs, AI chat, terrain window, command palette, welcome tour
+  styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo and README screenshots
-scripts/       screenshot automation
+scripts/       screenshot automation (headless Chrome)
 ```
 
 ## Regenerating the screenshots
 
-The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`) with headless Chrome:
+The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
 
 ```bash
 npm run dev
@@ -249,7 +297,7 @@ Shap3D.ai is an independent, non-commercial hobby project. It was built from scr
 - It is **not affiliated with, endorsed by, sponsored by or otherwise connected to Trimble Inc.** or SketchUp.
 - "SketchUp" and "Trimble" are trademarks of Trimble Inc. and are used here only to describe the source of inspiration.
 - The project contains **no SketchUp source code, binaries, icons, assets or documentation**. All code, icons, cursors and graphics were created for this project or come from the open-source sources listed under [Credits](#credits).
-- It does **not** reverse-engineer any proprietary file format. `.skp` files are opened only through **Trimble's official SketchUp SDK**, which every user downloads themselves under Trimble's terms; it is not bundled with this project. `.blend` files are opened by the user's own Blender installation. All other formats are open and documented.
+- It does **not** reverse-engineer any proprietary file format. `.skp` files are opened only through **Trimble's official SketchUp SDK**, which every user downloads themselves under Trimble's terms; it is not bundled with this project. `.blend` files are read by the project's own reader of Blender's openly documented, self-describing file format. All other formats are open and documented.
 - Similarities in the general user interface (tool names, push/pull, panel layout) reflect common 3D-modeling conventions and the author's inspiration, not copied material.
 
 If you are a rights holder and see a problem, please open an issue and it will be addressed promptly.

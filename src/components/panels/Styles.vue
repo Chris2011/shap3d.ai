@@ -1,6 +1,6 @@
 <template>
   <div class="s3d-section-title">Vorlagen</div>
-  <div class="grid grid-cols-3 gap-2">
+  <div class="grid grid-cols-[repeat(3,1fr)] gap-2">
     <button v-for="p in PRESETS" :key="p.name" class="flex flex-col items-center gap-1 rounded border bg-surface p-1 text-[11px]" :class="p.name === active ? 'border-blue shadow-[0_0_0_1px_var(--s3d-blue)]' : 'border-edge'" @click="apply(p)">
       <div class="relative h-11 w-full rounded-[2px]" :style="{ background: `linear-gradient(${p.s.skyColor} 0 55%, ${p.s.groundColor} 55% 100%)` }"><div class="absolute top-[30%] left-[35%] h-1/2 w-[30%] border-[1.5px]" :style="{ background: p.s.frontColor, borderColor: p.s.edgeColor }"></div></div>
       <span>{{ p.name }}</span>

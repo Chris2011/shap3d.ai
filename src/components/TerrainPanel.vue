@@ -9,7 +9,7 @@
     <!-- chooser -->
     <div v-if="!terrainUi.active" class="overflow-auto px-3 pt-2 pb-3 text-xs">
       <p class="mt-1 mb-2 leading-[1.4] text-ink-2">Tipp: Zeichne ein <b>Rechteck</b>, wähle es aus und starte dann „Gelände“ – das Gelände übernimmt Größe und Lage. Oder lege hier eines an:</p>
-      <div class="mb-1.5 grid grid-cols-2 gap-2 [&>label]:flex [&>label]:flex-col [&>label]:gap-[3px]">
+      <div class="mb-1.5 grid grid-cols-[repeat(2,1fr)] gap-2 [&>label]:flex [&>label]:flex-col [&>label]:gap-[3px]">
         <label>Breite <span class="flex items-center gap-1"><input v-model.number="terrainUi.newW" class="s3d-input h-6.5 w-full" type="number" min="1" max="500" /> m</span></label>
         <label>Tiefe <span class="flex items-center gap-1"><input v-model.number="terrainUi.newD" class="s3d-input h-6.5 w-full" type="number" min="1" max="500" /> m</span></label>
       </div>
@@ -27,7 +27,7 @@
       <div v-if="st" class="mb-1 text-[11px] text-ink-2 tabular-nums">{{ fmtM(st.w) }} × {{ fmtM(st.d) }} · Raster {{ st.nx }}×{{ st.ny }} ({{ fmtM(st.cell) }}) · Höhe {{ fmtM(st.lo) }} … {{ fmtM(st.hi) }}</div>
 
       <div class="mt-2.5 mb-[5px] flex items-center gap-2 text-[11px] font-bold tracking-[.4px] text-navy uppercase">Pinsel</div>
-      <div class="grid grid-cols-5 gap-[3px]">
+      <div class="grid grid-cols-[repeat(5,1fr)] gap-[3px]">
         <button v-for="(m, i) in MODES" :key="m.id" class="flex flex-col items-center gap-px border py-1 text-[10.5px]" :class="terrainUi.brush.mode === m.id ? 'border-navy bg-sel font-bold text-navy' : 'border-line-2 bg-surface text-ink hover:border-navy'" :title="m.tip + ` (Taste ${i + 1})`" @click="setMode(m.id)">
           <span class="text-[15px]/4">{{ m.icon }}</span><span>{{ m.label }}</span>
         </button>
