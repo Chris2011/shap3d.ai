@@ -96,6 +96,22 @@ function sunDirection(hour: number, month: number): THREE.Vector3 {
   return new THREE.Vector3(-x, y, Math.max(z, 0.05)).normalize();
 }
 
+/** Full quality first, then cheaper settings – weak or software GPUs sometimes refuse antialias/preserveDrawingBuffer. */
+function createRenderer(canvas: HTMLCanvasElement): THREE.WebGLRenderer {
+  const tries: THREE.WebGLRendererParameters[] = [
+    { antialias: true, preserveDrawingBuffer: true },
+    { antialias: false, preserveDrawingBuffer: true },
+    { antialias: false, preserveDrawingBuffer: false, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false },
+  ];
+  let last: unknown;
+  for (const p of tries) {
+    try { return new THREE.WebGLRenderer({ canvas, ...p }); } catch (e) { last = e; }
+  }
+  throw new WebGLUnavailableError(String((last as Error)?.message ?? last));
+}
+
+export class WebGLUnavailableError extends Error { override name = 'WebGLUnavailableError'; }
+
 export class Viewer {
   renderer: THREE.WebGLRenderer;
   rig = new CameraRig();
@@ -121,7 +137,7 @@ export class Viewer {
   onFrame: (() => void) | null = null;
 
   constructor(public canvas: HTMLCanvasElement, overlayCanvas: HTMLCanvasElement) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    this.renderer = createRenderer(canvas);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.NoToneMapping;
@@ -158,8 +174,23 @@ export class Viewer {
     this.rig.onChange = () => { this.needsRender = true; };
     onThemeChange(() => { this.needsRender = true; });
     this.buildAxes();
-    const loop = () => { requestAnimationFrame(loop); if (this.rig.update()) this.needsRender = true; this.onFrame?.(); if (this.needsRender) this.render(); };
+    const loop = () => {
+      if (this.disposed) return;
+      this.raf = requestAnimationFrame(loop);
+      if (this.rig.update()) this.needsRender = true; this.onFrame?.(); if (this.needsRender) this.render();
+    };
     loop();
+  }
+
+  private raf = 0;
+  private disposed = false;
+  /** Stop the frame loop and hand the GL context back – otherwise every remount (e.g. HMR) leaks a live context. */
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    cancelAnimationFrame(this.raf);
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
   }
 
   axes = new THREE.Group();

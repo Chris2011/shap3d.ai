@@ -18,6 +18,7 @@ import { sceneToEntities } from './importMesh';
 import { readBlend } from '../core/blend/blendScene';
 import type { Editor } from './editor';
 import { theme, setTheme, setScene } from '../theme';
+import { openTour } from '../components/tour';
 import type { Entities, EntityRef } from '../core/model';
 import { Entities as EntitiesClass } from '../core/model';
 import type { FaceStyle } from '../core/document';
@@ -454,6 +455,7 @@ export const COMMANDS: Command[] = [
   { id: 'sceneNight', label: '3D-Szene: Nacht', group: 'Ansicht', run: () => setScene('night'), checked: () => theme.scene === 'night' },
   { id: 'sceneDay', label: '3D-Szene: Tag', group: 'Ansicht', run: () => setScene('day'), checked: () => theme.scene === 'day' },
   { id: 'sceneAuto', label: '3D-Szene wie Oberfläche', group: 'Ansicht', run: () => setScene('auto'), checked: () => theme.scene === 'auto' },
+  { id: 'tour', label: 'Einführung anzeigen', group: 'Ansicht', run: () => openTour() },
   { id: 'toggleAxes', label: 'Achsen', group: 'Ansicht', run: ed => { ed.model.settings.axes = !ed.model.settings.axes; ed.invalidate(); }, checked: ed => ed.model.settings.axes },
   { id: 'toggleGuides', label: 'Hilfslinien', group: 'Ansicht', run: ed => { ed.model.settings.guides = !ed.model.settings.guides; ed.invalidate(); }, checked: ed => ed.model.settings.guides },
   { id: 'toggleShadows', label: 'Schatten', group: 'Ansicht', run: ed => { ed.model.settings.shadows = !ed.model.settings.shadows; ed.invalidate(); }, checked: ed => ed.model.settings.shadows },

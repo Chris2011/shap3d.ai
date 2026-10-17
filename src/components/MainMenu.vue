@@ -48,6 +48,7 @@ const items: Item[] = [
   { label: 'Volumenkörper', icon: 'solid', sub: 'Volumenkörper' },
   { sep: true },
   { label: 'Drucken', icon: 'print', cmd: 'print' },
+  { label: 'Einführung', icon: 'help', cmd: 'tour' },
 ];
 function subItems(g: string) { return g === 'export' ? COMMANDS.filter(c => c.id.startsWith('export-')) : COMMANDS.filter(c => c.group === g); }
 function enabled(id: string) { const c = findCommand(id); return !c?.enabled || c.enabled(ed); }

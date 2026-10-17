@@ -20,6 +20,7 @@ const wrap = ref<HTMLDivElement | null>(null);
 const gl = ref<HTMLCanvasElement | null>(null);
 const ov = ref<HTMLCanvasElement | null>(null);
 let ro: ResizeObserver | null = null;
+let saveTimer: ReturnType<typeof setInterval> | undefined;
 let rightDown: { x: number; y: number } | null = null;
 
 // middle mouse navigation temporarily shows the orbit/pan cursor like SketchUp
@@ -63,9 +64,9 @@ onMounted(() => {
   let restored = false;
   try { const s = localStorage.getItem('s3d:autosave'); if (s) { const j = JSON.parse(s); if (j?._dirty) { ed.loadJSON(j); restored = true; ed.ui.saved = false; ed.toast('Letztes Modell wiederhergestellt'); } } } catch { /* ignore broken autosave */ }
   if (!restored) { addScaleFigure(ed); ed.resetHistory(); ed.ui.saved = true; }
-  setInterval(() => autosave(ed), 15000);
+  saveTimer = setInterval(() => autosave(ed), 15000);
 });
-onUnmounted(() => ro?.disconnect());
+onUnmounted(() => { ro?.disconnect(); clearInterval(saveTimer); ed.viewer?.dispose(); });
 </script>
 
 <style scoped>

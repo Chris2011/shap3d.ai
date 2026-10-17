@@ -10,6 +10,7 @@
     <SearchPalette v-if="searchOpen" @close="searchOpen = false" />
     <TerrainPanel />
     <Dialogs />
+    <WelcomeTour />
     <transition name="fade"><div v-if="ed.ui.toast" class="toast">{{ ed.ui.toast }}</div></transition>
     <div v-if="ed.ui.contextName" class="context-banner s3d-panel">
       <Icon name="group" :size="16" /> Bearbeiten: <b>{{ ed.ui.contextName }}</b>
@@ -30,6 +31,8 @@ import SearchPalette from './components/SearchPalette.vue';
 import Dialogs from './components/Dialogs.vue';
 import TerrainPanel from './components/TerrainPanel.vue';
 import Icon from './components/Icon.vue';
+import WelcomeTour from './components/WelcomeTour.vue';
+import { openTour, tourSeen } from './components/tour';
 import { createEditor, installKeyboard } from './engine/setup';
 import { EDITOR } from './components/keys';
 import { autosave } from './engine/defaults';
@@ -60,6 +63,8 @@ onMounted(() => {
   window.addEventListener('beforeunload', () => {
     autosave(ed);
   });
+  // first start: show the welcome tour once the splash is gone
+  if (!tourSeen() && !new URLSearchParams(location.search).has('shot')) setTimeout(() => openTour(), 2500);
 });
 </script>
 
