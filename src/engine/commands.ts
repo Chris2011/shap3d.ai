@@ -19,6 +19,7 @@ import { readBlend } from '../core/blend/blendScene';
 import type { Editor } from './editor';
 import { theme, setTheme, setScene } from '../theme';
 import { openTour } from '../components/tour';
+import { measureView } from './measureView';
 import type { Entities, EntityRef } from '../core/model';
 import { Entities as EntitiesClass } from '../core/model';
 import type { FaceStyle } from '../core/document';
@@ -457,6 +458,8 @@ export const COMMANDS: Command[] = [
   { id: 'sceneAuto', label: '3D-Szene wie Oberfläche', group: 'Ansicht', run: () => setScene('auto'), checked: () => theme.scene === 'auto' },
   { id: 'tour', label: 'Einführung anzeigen', group: 'Ansicht', run: () => openTour() },
   { id: 'toggleAxes', label: 'Achsen', group: 'Ansicht', run: ed => { ed.model.settings.axes = !ed.model.settings.axes; ed.invalidate(); }, checked: ed => ed.model.settings.axes },
+  { id: 'toggleRulers', label: 'Maßstab an den Achsen', group: 'Ansicht', run: ed => { measureView.rulers = !measureView.rulers; ed.invalidate(); }, checked: () => measureView.rulers },
+  { id: 'togglePeopleSize', label: 'Größe der Personen', group: 'Ansicht', run: ed => { measureView.people = !measureView.people; ed.invalidate(); }, checked: () => measureView.people },
   { id: 'toggleGuides', label: 'Hilfslinien', group: 'Ansicht', run: ed => { ed.model.settings.guides = !ed.model.settings.guides; ed.invalidate(); }, checked: ed => ed.model.settings.guides },
   { id: 'toggleShadows', label: 'Schatten', group: 'Ansicht', run: ed => { ed.model.settings.shadows = !ed.model.settings.shadows; ed.invalidate(); }, checked: ed => ed.model.settings.shadows },
   { id: 'toggleHidden', label: 'Ausgeblendete Geometrie', group: 'Ansicht', run: ed => { ed.model.settings.hiddenGeometry = !ed.model.settings.hiddenGeometry; ed.invalidate(); }, checked: ed => ed.model.settings.hiddenGeometry },

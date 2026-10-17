@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { drawMeasure } from './measureView';
 import { reactive, markRaw } from 'vue';
 import { Model } from '../core/document';
 import type { Entities, EntityRef, Instance } from '../core/model';
@@ -85,6 +86,7 @@ export class Editor {
     this.viewer = markRaw(new Viewer(canvas, overlay));
     this.viewer.model = this.model;
     this.infer = markRaw(new InferenceEngine(this.viewer, () => this.model.guides));
+    this.viewer.overlay.drawers.push(o => drawMeasure(o, this)); // below tool feedback
     this.viewer.overlay.drawers.push(o => this.drawOverlay(o));
     this.viewer.onFrame = () => this.frame();
     this.setTool('select');

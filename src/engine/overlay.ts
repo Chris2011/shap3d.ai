@@ -24,7 +24,7 @@ export class Overlay {
   }
 
   /** Project with near-plane clipping of the segment. */
-  private clipSegment(a: THREE.Vector3, b: THREE.Vector3): [THREE.Vector2, THREE.Vector2] | null {
+  projectSegment(a: THREE.Vector3, b: THREE.Vector3): [THREE.Vector2, THREE.Vector2] | null {
     const cam = this.viewer.rig.camera as THREE.PerspectiveCamera;
     const view = cam.matrixWorldInverse;
     const A = a.clone().applyMatrix4(view), B = b.clone().applyMatrix4(view);
@@ -41,7 +41,7 @@ export class Overlay {
   screen(p: THREE.Vector3): THREE.Vector2 | null { const r = this.viewer.project(p); return r.visible ? new THREE.Vector2(r.x, r.y) : null; }
 
   line(a: THREE.Vector3, b: THREE.Vector3, color = '#000', width = 1, dash?: number[]) {
-    const s = this.clipSegment(a, b); if (!s) return;
+    const s = this.projectSegment(a, b); if (!s) return;
     const c = this.ctx; c.beginPath(); c.strokeStyle = color; c.lineWidth = width; c.setLineDash(dash ?? []);
     c.moveTo(s[0].x, s[0].y); c.lineTo(s[1].x, s[1].y); c.stroke(); c.setLineDash([]);
   }

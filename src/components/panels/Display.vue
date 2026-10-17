@@ -20,7 +20,8 @@ import { runCommand, findCommand } from '../../engine/commands';
 
 const ed = useEditor();
 const OPTS = [
-  { id: 'toggleAxes', label: 'Achsen' }, { id: 'toggleGuides', label: 'Hilfslinien' }, { id: 'toggleSectionPlanes', label: 'Schnittebenen' }, { id: 'toggleSectionCuts', label: 'Schnitte' },
+  { id: 'toggleAxes', label: 'Achsen' }, { id: 'toggleRulers', label: 'Maßstab an den Achsen (m · cm · mm je nach Zoom)' }, { id: 'togglePeopleSize', label: 'Größe der Personen' },
+  { id: 'toggleGuides', label: 'Hilfslinien' }, { id: 'toggleSectionPlanes', label: 'Schnittebenen' }, { id: 'toggleSectionCuts', label: 'Schnitte' },
   { id: 'toggleHidden', label: 'Ausgeblendete Geometrie' }, { id: 'toggleShadows', label: 'Schatten' }, { id: 'xray', label: 'Röntgen' },
 ];
 const check = (id: string) => { void ed.ui.rev; return !!findCommand(id)?.checked?.(ed); };
