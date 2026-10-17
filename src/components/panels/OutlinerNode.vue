@@ -1,10 +1,10 @@
 <template>
   <div v-if="visible">
-    <div class="node" :class="{ sel: selected, ctx: inContext, hid: node.inst.hidden }" :style="{ paddingLeft: depth * 14 + 'px' }" @click="click" @dblclick="dbl">
-      <span class="tw" @click.stop="open = !open">{{ node.children.length ? (open ? '▾' : '▸') : '' }}</span>
+    <div class="flex cursor-pointer items-center gap-1 rounded-[3px] px-1.5 py-[3px]" :class="[selected ? 'bg-active' : 'hover:bg-hover', inContext && 'font-semibold text-blue']" :style="{ paddingLeft: depth * 14 + 'px' }" @click="click" @dblclick="dbl">
+      <span class="w-3 text-[11px] text-[#6b7680]" @click.stop="open = !open">{{ node.children.length ? (open ? '▾' : '▸') : '' }}</span>
       <Icon :name="node.inst.def.isComponent ? 'component' : 'group'" :size="16" />
-      <span class="lbl">{{ label }}</span>
-      <button class="eye" :title="node.inst.hidden ? 'Einblenden' : 'Ausblenden'" @click.stop="toggleHidden"><Icon :name="node.inst.hidden ? 'eyeOff' : 'eye'" :size="14" /></button>
+      <span class="flex-1 truncate" :class="node.inst.hidden && 'text-[#9aa3ab] italic'">{{ label }}</span>
+      <button class="flex bg-transparent px-0.5 opacity-55 hover:opacity-100" :title="node.inst.hidden ? 'Einblenden' : 'Ausblenden'" @click.stop="toggleHidden"><Icon :name="node.inst.hidden ? 'eyeOff' : 'eye'" :size="14" /></button>
     </div>
     <template v-if="open"><OutlinerNode v-for="c in node.children" :key="c.inst.id" :node="c" :depth="depth + 1" :filter="filter" /></template>
   </div>
@@ -31,15 +31,3 @@ function click() { if (!sameContext()) goTo(); ed.select([{ kind: 'instance', id
 function dbl() { goTo(); ed.enterInstance(props.node.inst); }
 function toggleHidden() { ed.commit('Ausblenden', () => { props.node.inst.hidden = !props.node.inst.hidden; }); }
 </script>
-
-<style scoped>
-.node { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 3px; cursor: pointer; }
-.node:hover { background: var(--s3d-hover); }
-.node.sel { background: var(--s3d-active); }
-.node.ctx { color: var(--s3d-blue); font-weight: 600; }
-.node.hid .lbl { color: #9aa3ab; font-style: italic; }
-.tw { width: 12px; color: #6b7680; font-size: 11px; }
-.lbl { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.eye { border: 0; background: transparent; cursor: pointer; opacity: .55; padding: 0 2px; display: flex; }
-.eye:hover { opacity: 1; }
-</style>

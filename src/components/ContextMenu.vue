@@ -1,5 +1,5 @@
 <template>
-  <div class="backdrop" @pointerdown="$emit('close')" @contextmenu.prevent="$emit('close')"></div>
+  <div class="fixed inset-0 z-59" @pointerdown="$emit('close')" @contextmenu.prevent="$emit('close')"></div>
   <div class="s3d-menu" :style="style" @pointerdown.stop>
     <template v-for="(it, i) in items" :key="i">
       <div v-if="it.sep" class="s3d-menu-sep"></div>
@@ -49,7 +49,3 @@ const items = computed<It[]>(() => {
 const style = computed(() => ({ left: Math.min(props.x, window.innerWidth - 240) + 'px', top: Math.min(props.y, window.innerHeight - 30 * items.value.length - 20) + 'px', position: 'fixed' as const }));
 function run(it: It) { emit('close'); if (it.fn) it.fn(); else if (it.cmd) runCommand(ed, it.cmd); }
 </script>
-
-<style scoped>
-.backdrop { position: fixed; inset: 0; z-index: 59; }
-</style>

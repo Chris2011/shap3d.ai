@@ -1,24 +1,24 @@
 <template>
   <div v-if="info.kind === 'none'">
-    <div class="big">Keine Auswahl</div>
+    <div class="mt-1 mb-2.5 font-semibold">Keine Auswahl</div>
     <div class="s3d-row"><span class="s3d-label">Modell</span><span>{{ ed.model.name }}</span></div>
     <div class="s3d-row"><span class="s3d-label">Flächen</span><span>{{ stats.faces }}</span></div>
     <div class="s3d-row"><span class="s3d-label">Kanten</span><span>{{ stats.edges }}</span></div>
     <div class="s3d-row"><span class="s3d-label">Komponenten</span><span>{{ ed.model.definitions.size }}</span></div>
   </div>
   <div v-else>
-    <div class="big">{{ info.title }}</div>
+    <div class="mt-1 mb-2.5 font-semibold">{{ info.title }}</div>
     <!-- material -->
     <div v-if="info.kind !== 'edge'" class="s3d-row">
       <span class="s3d-label">Material</span>
-      <div class="swatch" :style="{ background: info.matColor }" :title="info.material ?? 'Standard'"></div>
-      <span class="mname">{{ info.material ?? 'Standard' }}</span>
+      <div class="size-6.5 flex-none rounded-[3px] border border-line-2" :style="{ background: info.matColor }" :title="info.material ?? 'Standard'"></div>
+      <span class="flex-1 truncate text-xs">{{ info.material ?? 'Standard' }}</span>
       <button class="s3d-btn small" title="Aktuelles Material zuweisen" @click="assign('material', ed.ui.currentMaterial ?? undefined)">Zuweisen</button>
     </div>
     <div v-if="info.kind === 'face'" class="s3d-row">
       <span class="s3d-label">Rückseite</span>
-      <div class="swatch" :style="{ background: info.backColor }"></div>
-      <span class="mname">{{ info.back ?? 'Standard' }}</span>
+      <div class="size-6.5 flex-none rounded-[3px] border border-line-2" :style="{ background: info.backColor }"></div>
+      <span class="flex-1 truncate text-xs">{{ info.back ?? 'Standard' }}</span>
       <button class="s3d-btn small" @click="assign('backMaterial', ed.ui.currentMaterial ?? undefined)">Zuweisen</button>
     </div>
     <div class="s3d-row">
@@ -32,7 +32,7 @@
       <div class="s3d-row"><span class="s3d-label">Definition</span><input class="s3d-input" :value="info.defName" @change="setDefName(($event.target as HTMLInputElement).value)" /></div>
       <div class="s3d-row"><span class="s3d-label">Typ</span><span>{{ info.isComponent ? `Komponente (${info.count} Kopien)` : 'Gruppe' }}</span></div>
       <div class="s3d-row"><span class="s3d-label">Position</span>
-        <input v-for="(c, i) in info.pos" :key="i" class="s3d-input coord" :value="fmtNum(Number(c))" @change="setPos(Number(i), ($event.target as HTMLInputElement).value)" />
+        <input v-for="(c, i) in info.pos" :key="i" class="s3d-input w-1/3 px-1 text-xs" :value="fmtNum(Number(c))" @change="setPos(Number(i), ($event.target as HTMLInputElement).value)" />
       </div>
       <div class="s3d-row"><span class="s3d-label">Größe</span><span>{{ info.size }}</span></div>
       <div class="s3d-row" v-if="info.volume"><span class="s3d-label">Volumen</span><span>{{ info.volume }}</span></div>
@@ -111,10 +111,3 @@ function setPos(k: number, v: string) {
   each((r, E) => { const i = E.instances.get(r.id); if (!i) return; const e = i.matrix.elements; e[12 + k] = L; }, 'Position');
 }
 </script>
-
-<style scoped>
-.big { font-weight: 600; margin: 4px 0 10px; }
-.swatch { width: 26px; height: 26px; border-radius: 3px; border: 1px solid var(--s3d-line-2); flex: none; }
-.mname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.coord { width: 33%; padding: 0 4px; font-size: 12px; }
-</style>

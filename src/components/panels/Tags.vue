@@ -1,18 +1,18 @@
 <template>
-  <div class="bar">
+  <div class="mb-2 flex gap-1.5 [&_.s3d-btn]:flex [&_.s3d-btn]:items-center [&_.s3d-btn]:gap-1">
     <button class="s3d-btn small" @click="add"><Icon name="plus" :size="14" /> Tag hinzufügen</button>
     <button class="s3d-btn small" :disabled="!ed.selection.size" title="Auswahl dem markierten Tag zuweisen" @click="assign">Zuweisen</button>
   </div>
-  <div class="list">
-    <div v-for="t in tags" :key="t.name" class="tag" :class="{ on: active === t.name }" @click="active = t.name">
-      <button class="eye" @click.stop="toggle(t)"><Icon :name="t.visible ? 'eye' : 'eyeOff'" :size="16" /></button>
+  <div class="rounded-[3px] border border-line">
+    <div v-for="t in tags" :key="t.name" class="flex cursor-pointer items-center gap-1.5 border-b border-line px-1.5 py-1 last:border-b-0" :class="{ 'bg-active': active === t.name }" @click="active = t.name">
+      <button class="flex bg-transparent p-0.5 text-[#4a535b] dark:text-ink-2" @click.stop="toggle(t)"><Icon :name="t.visible ? 'eye' : 'eyeOff'" :size="16" /></button>
       <input v-if="editing === t.name" class="s3d-input" :value="t.name" @change="rename(t, ($event.target as HTMLInputElement).value)" @blur="editing = null" @keydown.enter="($event.target as HTMLInputElement).blur()" />
-      <span v-else class="nm" @dblclick="t.name !== 'Untagged' && (editing = t.name)">{{ t.name === 'Untagged' ? 'Ohne Tag' : t.name }}</span>
-      <input type="color" :value="t.color" @click.stop @change="setColor(t, ($event.target as HTMLInputElement).value)" />
-      <button v-if="t.name !== 'Untagged'" class="eye" title="Löschen" @click.stop="remove(t)"><Icon name="trash" :size="15" /></button>
+      <span v-else class="flex-1 truncate" @dblclick="t.name !== 'Untagged' && (editing = t.name)">{{ t.name === 'Untagged' ? 'Ohne Tag' : t.name }}</span>
+      <input class="h-[18px] w-5.5 rounded-[2px] border border-line-2 p-0" type="color" :value="t.color" @click.stop @change="setColor(t, ($event.target as HTMLInputElement).value)" />
+      <button v-if="t.name !== 'Untagged'" class="flex bg-transparent p-0.5 text-[#4a535b] dark:text-ink-2" title="Löschen" @click.stop="remove(t)"><Icon name="trash" :size="15" /></button>
     </div>
   </div>
-  <p class="s3d-label">Doppelklick benennt um. Ausgeblendete Tags verbergen alle Elemente mit diesem Tag.</p>
+  <p class="s3d-label my-3">Doppelklick benennt um. Ausgeblendete Tags verbergen alle Elemente mit diesem Tag.</p>
 </template>
 
 <script setup lang="ts">
@@ -32,15 +32,3 @@ function rename(t: Tag, n: string) { n = n.trim(); editing.value = null; if (!n 
 function remove(t: Tag) { ed.commit('Tag löschen', () => { ed.model.tags = ed.model.tags.filter(x => x !== t); walkAll(o => { if (o.tag === t.name) o.tag = undefined; }); }); }
 function assign() { const v = active.value === 'Untagged' ? undefined : active.value; ed.commit('Tag zuweisen', () => { const E = ed.entities; for (const r of ed.selected()) { const o: any = r.kind === 'face' ? E.faces.get(r.id) : r.kind === 'edge' ? E.edges.get(r.id) : E.instances.get(r.id); if (o) o.tag = v; } }); }
 </script>
-
-<style scoped>
-.bar { display: flex; gap: 6px; margin-bottom: 8px; }
-.bar .s3d-btn { display: flex; align-items: center; gap: 4px; }
-.list { border: 1px solid var(--s3d-line); border-radius: 3px; }
-.tag { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-bottom: 1px solid var(--s3d-line); cursor: pointer; }
-.tag:last-child { border-bottom: 0; }
-.tag.on { background: var(--s3d-active); }
-.nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.eye { border: 0; background: transparent; cursor: pointer; display: flex; padding: 2px; color: #4a535b; }
-input[type=color] { width: 22px; height: 18px; border: 1px solid var(--s3d-line-2); padding: 0; border-radius: 2px; }
-</style>

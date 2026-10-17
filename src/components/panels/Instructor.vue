@@ -1,11 +1,11 @@
 <template>
-  <div class="hd"><Icon :name="info.icon" :size="28" /><div><div class="name">{{ info.name }}</div><div class="key" v-if="info.key">Tastenkürzel: {{ info.key }}</div></div></div>
-  <p class="desc">{{ text.desc }}</p>
+  <div class="mt-1.5 mb-2.5 flex items-center gap-3"><Icon :name="info.icon" :size="28" /><div><div class="text-[15px] font-bold">{{ info.name }}</div><div v-if="info.key" class="text-xs text-ink-2">Tastenkürzel: {{ info.key }}</div></div></div>
+  <p class="mb-1.5">{{ text.desc }}</p>
   <div class="s3d-section-title">Bedienung</div>
-  <ol><li v-for="(s, i) in text.steps" :key="i">{{ s }}</li></ol>
+  <ol class="list-decimal pl-[18px]"><li v-for="(s, i) in text.steps" :key="i" class="my-1">{{ s }}</li></ol>
   <template v-if="text.mods?.length">
     <div class="s3d-section-title">Zusatztasten</div>
-    <ul><li v-for="(s, i) in text.mods" :key="i">{{ s }}</li></ul>
+    <ul class="list-disc pl-[18px]"><li v-for="(s, i) in text.mods" :key="i" class="my-1">{{ s }}</li></ul>
   </template>
 </template>
 
@@ -48,12 +48,3 @@ const T: Record<string, { desc: string; steps: string[]; mods?: string[] }> = {
 };
 const text = computed(() => T[ed.ui.tool] ?? { desc: ed.ui.status, steps: [ed.ui.status] });
 </script>
-
-<style scoped>
-.hd { display: flex; gap: 12px; align-items: center; margin: 6px 0 10px; }
-.name { font-weight: 700; font-size: 15px; }
-.key { color: var(--s3d-text-2); font-size: 12px; }
-.desc { margin: 0 0 6px; }
-ol, ul { margin: 0; padding-left: 18px; }
-li { margin: 4px 0; }
-</style>

@@ -16,6 +16,7 @@
   <img alt="three.js" src="https://img.shields.io/badge/three.js-r186-black">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-6-3178c6">
   <img alt="Vite" src="https://img.shields.io/badge/Vite-8-646cff">
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-4-38bdf8">
   <img alt="Local AI" src="https://img.shields.io/badge/AI-100%25%20local-5fd4e6">
   <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/License-Apache%202.0-blue"></a>
 </p>
@@ -236,7 +237,7 @@ powershell -File scripts/screenshots.ps1
 ## Credits
 
 - [fzstd](https://github.com/101arrowz/fzstd) (MIT) – zstd decompression for compressed Blender files
-- [three.js](https://threejs.org) (MIT), [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh) (MIT), [Vue](https://vuejs.org) (MIT), [Vite](https://vitejs.dev) (MIT)
+- [three.js](https://threejs.org) (MIT), [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh) (MIT), [Vue](https://vuejs.org) (MIT), [Vite](https://vitejs.dev) (MIT), [Tailwind CSS](https://tailwindcss.com) (MIT)
 - Reference people built from the [Humaaans](https://www.humaaans.com) illustrations by Pablo Stanley (CC0) – see `src/assets/people/LICENSE.md`
 - Helvetiker and Optimer typefaces from the three.js examples, © MAGENTA Ltd. – see `src/assets/fonts/LICENSE`
 - AI models are **not** bundled. Models you download (e.g. Qwen, Llama, LLaMA-Mesh) come with their own licenses.

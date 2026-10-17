@@ -1,43 +1,43 @@
 <template>
-  <div class="se">
-    <div class="tb">
-      <select class="s3d-input sel" :value="lang" @change="setLang(($event.target as HTMLSelectElement).value as any)">
+  <div class="flex h-full min-h-0 flex-col">
+    <div class="flex gap-1.5 px-2.5 pt-2 pb-1">
+      <select class="s3d-input w-[110px] flex-none" :value="lang" @change="setLang(($event.target as HTMLSelectElement).value as any)">
         <option value="js">JavaScript</option><option value="json">JSON</option><option value="obj">OBJ-Mesh</option>
       </select>
-      <select class="s3d-input ex" value="" @change="loadExample(($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''">
+      <select class="s3d-input flex-1" value="" @change="loadExample(($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''">
         <option value="" disabled>Beispiel laden…</option>
         <optgroup label="JavaScript"><option v-for="e in EXAMPLES.filter(x => x.lang === 'js')" :key="e.id" :value="e.id">{{ e.name }}</option></optgroup>
         <optgroup label="JSON"><option v-for="e in EXAMPLES.filter(x => x.lang === 'json')" :key="e.id" :value="e.id">{{ e.name }}</option></optgroup>
         <optgroup label="OBJ-Mesh"><option v-for="e in EXAMPLES.filter(x => x.lang === 'obj')" :key="e.id" :value="e.id">{{ e.name }}</option></optgroup>
         <optgroup v-if="saved.length" label="Meine Skripte"><option v-for="s in saved" :key="s.name" :value="'my:' + s.name">{{ s.name }}</option></optgroup>
       </select>
-      <button class="s3d-btn primary run" title="Ausführen (Strg+Enter)" @click="run"><Icon name="play" :size="14" /> Ausführen</button>
+      <button class="s3d-btn primary flex h-7 items-center gap-1.5" title="Ausführen (Strg+Enter)" @click="run"><Icon name="play" :size="14" /> Ausführen</button>
     </div>
-    <div class="tb2">
+    <div class="flex items-center gap-2.5 px-2.5 pb-1.5 text-xs">
       <label class="s3d-check"><input type="checkbox" v-model="clearFirst" /> Vorher Modell leeren</label>
-      <span style="flex:1"></span>
-      <button class="lnk" @click="save">Speichern</button>
-      <button class="lnk" v-if="currentSaved" @click="delSaved">Löschen</button>
-      <button class="lnk" @click="showHelp = !showHelp">{{ showHelp ? 'API-Info ausblenden' : 'API-Info' }}</button>
+      <span class="flex-1"></span>
+      <button class="bg-transparent p-0 text-xs text-blue hover:underline" @click="save">Speichern</button>
+      <button class="bg-transparent p-0 text-xs text-blue hover:underline" v-if="currentSaved" @click="delSaved">Löschen</button>
+      <button class="bg-transparent p-0 text-xs text-blue hover:underline" @click="showHelp = !showHelp">{{ showHelp ? 'API-Info ausblenden' : 'API-Info' }}</button>
     </div>
-    <div v-if="lang === 'obj'" class="tb2 objopts">
-      <label title="Größte Seite des Objekts">Größe <input class="s3d-input sz" v-model="objSize" @keydown.stop /></label>
+    <div v-if="lang === 'obj'" class="flex items-center gap-3.5 px-2.5 pb-1.5 text-xs [&_label]:flex [&_label]:items-center [&_label]:gap-[5px]">
+      <label title="Größte Seite des Objekts">Größe <input class="s3d-input h-6 w-16" v-model="objSize" @keydown.stop /></label>
       <label class="s3d-check" title="OBJ-Dateien und LLaMA-Mesh sind Y-oben – wird nach Z-oben gedreht"><input type="checkbox" v-model="objYUp" /> Y ist oben</label>
-      <label title="Kanten zwischen Flächen flacher als dieser Winkel werden geglättet (0 = alle Kanten sichtbar)">Glätten <input class="s3d-input ang" type="number" min="0" max="180" v-model.number="objSmooth" @keydown.stop />°</label>
+      <label title="Kanten zwischen Flächen flacher als dieser Winkel werden geglättet (0 = alle Kanten sichtbar)">Glätten <input class="s3d-input h-6 w-[52px]" type="number" min="0" max="180" v-model.number="objSmooth" @keydown.stop />°</label>
     </div>
-    <pre v-if="showHelp && lang === 'obj'" class="help">{{ OBJ_HELP }}</pre>
-    <ApiReference v-if="showHelp && lang !== 'obj'" class="apiref" @insert="insertText" @try="tryExample" />
-    <div class="editor" ref="edWrap">
-      <div class="gutter" ref="gutter"><div v-for="n in lines" :key="n">{{ n }}</div></div>
-      <div class="codewrap">
-        <pre class="hl" ref="hl" aria-hidden="true" v-html="highlighted"></pre>
-        <textarea ref="ta" v-model="code" class="code" spellcheck="false" wrap="off" @scroll="sync" @keydown="key" @keydown.stop @paste="onPaste"></textarea>
+    <pre v-if="showHelp && lang === 'obj'" class="mx-2.5 mt-0 mb-1.5 max-h-[220px] overflow-auto rounded-[3px] border border-line bg-surface-2 p-2 font-mono text-[11px]/[1.45] whitespace-pre-wrap select-text">{{ OBJ_HELP }}</pre>
+    <ApiReference v-if="showHelp && lang !== 'obj'" class="flex-[0_0_52%]" @insert="insertText" @try="tryExample" />
+    <div ref="edWrap" class="flex min-h-[120px] flex-1 border-y border-line bg-surface-2 font-mono text-[12.5px]/[18px]">
+      <div ref="gutter" class="w-[38px] flex-none overflow-hidden bg-surface-2 py-1.5 pr-1.5 text-right text-muted select-none"><div v-for="n in lines" :key="n">{{ n }}</div></div>
+      <div class="relative min-w-0 flex-1">
+        <pre ref="hl" class="s3d-syntax pointer-events-none absolute inset-0 m-0 overflow-hidden px-2 py-1.5 font-mono whitespace-pre text-ink [tab-size:2]" aria-hidden="true" v-html="highlighted"></pre>
+        <textarea ref="ta" v-model="code" class="absolute inset-0 m-0 resize-none overflow-auto border-0 bg-transparent px-2 py-1.5 whitespace-pre text-transparent caret-ink outline-none select-text [tab-size:2] selection:bg-[rgba(0,95,158,.25)] selection:text-transparent" spellcheck="false" wrap="off" @scroll="sync" @keydown="key" @keydown.stop @paste="onPaste"></textarea>
       </div>
     </div>
-    <div class="console" ref="cons">
-      <div class="ch">Konsole <span class="ms" v-if="lastMs != null">{{ lastMs.toFixed(0) }} ms</span><button class="lnk" @click="out = []">Leeren</button></div>
-      <div v-for="(l, i) in out" :key="i" class="ln" :class="l.kind">{{ l.text }}</div>
-      <div v-if="!out.length" class="ln muted">Ausgaben von s3d.log(…) und Fehler erscheinen hier. Jeder Lauf ist ein einziger Rückgängig-Schritt.</div>
+    <div ref="cons" class="h-[150px] flex-none overflow-auto px-2.5 pb-2 font-mono text-xs/normal select-text">
+      <div class="sticky top-0 flex items-center gap-2.5 bg-surface py-1.5 font-sans text-xs font-semibold">Konsole <span v-if="lastMs != null" class="ml-auto font-normal text-ink-2">{{ lastMs.toFixed(0) }} ms</span><button class="bg-transparent p-0 text-xs text-blue hover:underline" @click="out = []">Leeren</button></div>
+      <div v-for="(l, i) in out" :key="i" class="whitespace-pre-wrap break-words" :class="LN[l.kind]">{{ l.text }}</div>
+      <div v-if="!out.length" class="whitespace-pre-wrap break-words text-ink-2">Ausgaben von s3d.log(…) und Fehler erscheinen hier. Jeder Lauf ist ein einziger Rückgängig-Schritt.</div>
     </div>
   </div>
 </template>
@@ -61,6 +61,7 @@ auf den Boden gestellt und als Komponente neben das Modell gesetzt.
 Im JS-Skript: s3d.mesh(objText, { at: [x, y, z], size: '80cm', yUp: true, material: 'Holz' })`;
 
 const ed = useEditor();
+const LN: Record<string, string> = { warn: 'text-[#9a6700] dark:text-warn', error: 'text-danger', result: 'text-[#005f9e] dark:text-navy' };
 const LS = 's3d:scripts';
 const lang = ref<Lang>('js');
 const objSize = ref('1m'); const objYUp = ref(true); const objSmooth = ref(30);
@@ -152,41 +153,3 @@ async function save() {
 }
 function delSaved() { saved.value = saved.value.filter(s => s.name !== currentSaved.value); storeSaved(); currentSaved.value = null; }
 </script>
-
-<style scoped>
-.se { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.tb { display: flex; gap: 6px; padding: 8px 10px 4px; }
-.sel { width: 110px; flex: none; }
-.ex { flex: 1; }
-.run { display: flex; align-items: center; gap: 6px; height: 28px; }
-.tb2 { display: flex; gap: 10px; align-items: center; padding: 0 10px 6px; font-size: 12px; }
-.lnk { border: 0; background: transparent; color: var(--s3d-blue); cursor: pointer; font-size: 12px; padding: 0; }
-.lnk:hover { text-decoration: underline; }
-.apiref { flex: 0 0 52%; }
-.help { margin: 0 10px 6px; padding: 8px; background: var(--s3d-bg-2); border: 1px solid var(--s3d-line); border-radius: 3px; font: 11px/1.45 Consolas, "Cascadia Code", monospace; white-space: pre-wrap; max-height: 220px; overflow: auto; user-select: text; }
-.editor { flex: 1; min-height: 120px; display: flex; border-top: 1px solid var(--s3d-line); border-bottom: 1px solid var(--s3d-line); background: var(--s3d-bg-2); font: 12.5px/18px Consolas, "Cascadia Code", "Courier New", monospace; }
-.gutter { width: 38px; flex: none; text-align: right; padding: 6px 6px 6px 0; color: var(--s3d-muted); background: var(--s3d-bg-2); overflow: hidden; user-select: none; }
-.codewrap { position: relative; flex: 1; min-width: 0; }
-.hl, .code { position: absolute; inset: 0; margin: 0; padding: 6px 8px; font: inherit; white-space: pre; overflow: auto; tab-size: 2; }
-.hl { color: var(--s3d-text); pointer-events: none; overflow: hidden; }
-.code { color: transparent; caret-color: var(--s3d-text); background: transparent; border: 0; outline: none; resize: none; user-select: text; }
-.code::selection { background: rgba(0, 95, 158, .25); color: transparent; }
-.hl :deep(.c) { color: var(--syn-c); font-style: italic; }
-.hl :deep(.s) { color: var(--syn-s); }
-.hl :deep(.n) { color: var(--syn-n); }
-.hl :deep(.b) { color: var(--syn-b); font-weight: 600; }
-.hl :deep(.k) { color: var(--syn-k); }
-.hl :deep(.api) { color: var(--syn-api); font-weight: 600; }
-.console { height: 150px; flex: none; overflow: auto; font: 12px/1.5 Consolas, monospace; padding: 0 10px 8px; user-select: text; }
-.ch { position: sticky; top: 0; background: var(--s3d-bg); display: flex; gap: 10px; align-items: center; font: 600 12px "Open Sans", sans-serif; padding: 6px 0; }
-.ch .ms { color: var(--s3d-text-2); font-weight: 400; margin-left: auto; }
-.ln { white-space: pre-wrap; word-break: break-word; }
-.ln.warn { color: #9a6700; }
-.ln.error { color: var(--s3d-danger); }
-.ln.result { color: #005f9e; }
-.ln.muted { color: var(--s3d-text-2); }
-.objopts { gap: 14px; }
-.objopts label { display: flex; align-items: center; gap: 5px; }
-.objopts .sz { width: 64px; height: 24px; }
-.objopts .ang { width: 52px; height: 24px; }
-</style>

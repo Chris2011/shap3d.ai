@@ -1,91 +1,91 @@
 <template>
-  <div class="ai">
-    <div class="bar">
+  <div class="flex h-full min-h-0 flex-col">
+    <div class="flex items-center gap-2 border-b border-line px-3 py-2 text-xs">
       <template v-if="aiConfig.configured">
-        <span class="badge" :title="info.name + ' · ' + aiConfig.model">{{ info.name.replace(/ \(.*\)/, '') }} · <b>{{ aiConfig.model }}</b></span>
+        <span class="max-w-70 min-w-0 flex-[0_1_auto] truncate border border-line-2 bg-surface px-2 py-0.5" :title="info.name + ' · ' + aiConfig.model">{{ info.name.replace(/ \(.*\)/, '') }} · <b>{{ aiConfig.model }}</b></span>
       </template>
-      <span v-else class="badge muted">Nicht eingerichtet</span>
-      <button class="ico" title="Modelle auf Hugging Face suchen und herunterladen" @click="hfSearch = true"><Icon name="search" :size="16" /></button>
-      <span class="grow"></span>
-      <button class="lnk" :class="{ on: view === 'history' }" @click="view = view === 'history' ? 'chat' : 'history'">Verlauf ({{ aiHistory.sessions.filter(s => s.turns.length).length }})</button>
-      <button class="lnk" @click="newChat">Neuer Chat</button>
-      <button class="lnk" @click="wizard = true">{{ aiConfig.configured ? 'Einstellungen' : 'Einrichten' }}</button>
+      <span v-else class="max-w-70 min-w-0 flex-[0_1_auto] truncate border border-line-2 bg-surface px-2 py-0.5 text-muted">Nicht eingerichtet</span>
+      <button class="-ml-1 flex size-6 flex-none items-center justify-center bg-transparent p-0 text-navy hover:bg-hover" title="Modelle auf Hugging Face suchen und herunterladen" @click="hfSearch = true"><Icon name="search" :size="16" /></button>
+      <span class="min-w-0 flex-[1_1_0]"></span>
+      <button class="flex-none whitespace-nowrap bg-transparent p-0 text-xs text-blue hover:underline" :class="{ 'font-bold underline': view === 'history' }" @click="view = view === 'history' ? 'chat' : 'history'">Verlauf ({{ aiHistory.sessions.filter(s => s.turns.length).length }})</button>
+      <button class="flex-none whitespace-nowrap bg-transparent p-0 text-xs text-blue hover:underline" @click="newChat">Neuer Chat</button>
+      <button class="flex-none whitespace-nowrap bg-transparent p-0 text-xs text-blue hover:underline" @click="wizard = true">{{ aiConfig.configured ? 'Einstellungen' : 'Einrichten' }}</button>
     </div>
 
     <!-- history browser -->
-    <div v-if="view === 'history'" class="hist">
+    <div v-if="view === 'history'" class="flex-1 overflow-auto px-3 py-2.5 select-text">
       <input v-model="search" class="s3d-input" placeholder="Verlauf durchsuchen …" @keydown.stop />
       <template v-for="(g, gi) in historyGroups" :key="gi">
-        <div class="day">{{ g.day }}</div>
-        <div v-for="s in g.sessions" :key="s.id" class="sess" :class="{ cur: s.id === aiHistory.currentId }" @click="open(s.id)">
-          <div class="stitle">{{ s.title }}</div>
-          <div class="smeta">{{ clock(s.created) }}<template v-if="!sameDay(s.created, s.updated) || clock(s.created) !== clock(s.updated)"> – {{ clock(s.updated) }}</template> · {{ reqCount(s) }} {{ reqCount(s) === 1 ? 'Anfrage' : 'Anfragen' }} · {{ s.model || '—' }}</div>
-          <button class="sdel" title="Löschen" @click.stop="deleteSession(s.id)"><Icon name="trash" :size="14" /></button>
+        <div class="mt-3 mb-1 text-[11px] font-bold tracking-[.5px] text-navy uppercase">{{ g.day }}</div>
+        <div v-for="s in g.sessions" :key="s.id" class="relative mb-[5px] cursor-pointer border bg-surface py-[7px] pr-[30px] pl-2.5" :class="s.id === aiHistory.currentId ? 'border-navy shadow-[inset_3px_0_0_var(--s3d-navy)]' : 'border-line hover:border-line-2'" @click="open(s.id)">
+          <div class="truncate text-[13px]">{{ s.title }}</div>
+          <div class="mt-0.5 text-[11px] text-muted">{{ clock(s.created) }}<template v-if="!sameDay(s.created, s.updated) || clock(s.created) !== clock(s.updated)"> – {{ clock(s.updated) }}</template> · {{ reqCount(s) }} {{ reqCount(s) === 1 ? 'Anfrage' : 'Anfragen' }} · {{ s.model || '—' }}</div>
+          <button class="absolute top-2 right-1.5 bg-transparent opacity-50 hover:opacity-100" title="Löschen" @click.stop="deleteSession(s.id)"><Icon name="trash" :size="14" /></button>
         </div>
       </template>
-      <div v-if="!historyGroups.length" class="small" style="padding: 12px">Noch keine Gespräche{{ search ? ' mit diesem Suchbegriff' : '' }}.</div>
-      <button v-if="aiHistory.sessions.length" class="lnk danger" @click="clearAll">Gesamten Verlauf löschen</button>
+      <div v-if="!historyGroups.length" class="p-3 text-[11px] text-muted">Noch keine Gespräche{{ search ? ' mit diesem Suchbegriff' : '' }}.</div>
+      <button v-if="aiHistory.sessions.length" class="mt-2.5 mb-1 bg-transparent p-0 text-xs text-danger hover:underline" @click="clearAll">Gesamten Verlauf löschen</button>
     </div>
 
-    <div v-for="(d, name) in downloads" :key="name" class="dlrow">
-      <div class="dlhead"><b>{{ String(name).replace(/^hf\.co\/[^/]+\//, '') }}</b><span v-if="!d.error">{{ (d.frac * 100).toFixed(1).replace('.', ',') }} %</span><button v-if="!d.error" class="lnk" @click="cancelDownload(String(name))">Abbrechen</button></div>
-      <div v-if="d.error" class="st err">Fehler: {{ d.error }}</div>
+    <div v-for="(d, name) in downloads" :key="name" class="border-b border-line bg-surface-2 px-3 py-1.5 text-xs">
+      <div class="flex items-center gap-2"><b class="flex-1 truncate text-navy">{{ String(name).replace(/^hf\.co\/[^/]+\//, '') }}</b><span v-if="!d.error">{{ (d.frac * 100).toFixed(1).replace('.', ',') }} %</span><button v-if="!d.error" class="bg-transparent p-0 text-xs text-blue hover:underline" @click="cancelDownload(String(name))">Abbrechen</button></div>
+      <div v-if="d.error" class="mt-1 text-xs text-danger">Fehler: {{ d.error }}</div>
       <template v-else>
-        <div class="minibar"><span :style="{ width: (d.frac * 100) + '%' }"></span></div>
-        <div class="dlinfo">{{ d.status }}<template v-if="d.total"> · {{ fmtBytes(d.completed) }} von {{ fmtBytes(d.total) }}</template><template v-if="d.speed > 0 && d.phase === 'download'"> · {{ fmtBytes(d.speed) }}/s · {{ fmtDuration(d.eta) }}</template></div>
+        <div class="my-1 h-1.5 bg-line"><span class="block h-full bg-navy-bg transition-[width] duration-300" :style="{ width: (d.frac * 100) + '%' }"></span></div>
+        <div class="text-ink-2 tabular-nums">{{ d.status }}<template v-if="d.total"> · {{ fmtBytes(d.completed) }} von {{ fmtBytes(d.total) }}</template><template v-if="d.speed > 0 && d.phase === 'download'"> · {{ fmtBytes(d.speed) }}/s · {{ fmtDuration(d.eta) }}</template></div>
       </template>
     </div>
-    <div v-show="view === 'chat'" ref="list" class="list">
-      <div v-if="!aiConfig.configured" class="intro">
+    <div v-show="view === 'chat'" ref="list" class="flex flex-1 flex-col gap-2 overflow-auto px-3 py-2.5 select-text">
+      <div v-if="!aiConfig.configured" class="flex flex-col items-center gap-2 px-2.5 py-5 text-center text-ink">
         <Icon name="sparkle" :size="40" />
         <p>Beschreibe, was du bauen möchtest, und der Assistent modelliert es für dich: Würfel, Möbel, Häuser, Tiere – mit Farben und Texturen.</p>
         <button class="s3d-btn primary" @click="wizard = true">KI einrichten</button>
-        <p class="small">Läuft komplett lokal mit Ollama, LM Studio, LiteLLM oder einem anderen OpenAI-kompatiblen Server auf deinem Rechner.</p>
+        <p class="text-[11px] text-muted">Läuft komplett lokal mit Ollama, LM Studio, LiteLLM oder einem anderen OpenAI-kompatiblen Server auf deinem Rechner.</p>
       </div>
-      <div v-else-if="!aiState.turns.length" class="intro">
+      <div v-else-if="!aiState.turns.length" class="flex flex-col items-center gap-2 px-2.5 py-5 text-center text-ink">
         <Icon name="sparkle" :size="34" />
         <p>Was soll ich bauen?</p>
-        <p v-if="isMesh" class="small">LLaMA-Mesh erzeugt einzelne Objekte als Mesh. Für ganze Szenen mit Materialien eignet sich ein Code-Modell wie Qwen2.5-Coder besser.</p>
-        <div class="chips"><button v-for="q in QUICK" :key="q" class="chip" @click="ask(q)">{{ q }}</button></div>
+        <p v-if="isMesh" class="text-[11px] text-muted">LLaMA-Mesh erzeugt einzelne Objekte als Mesh. Für ganze Szenen mit Materialien eignet sich ein Code-Modell wie Qwen2.5-Coder besser.</p>
+        <div class="flex flex-wrap justify-center gap-1.5"><button v-for="q in QUICK" :key="q" class="rounded-[14px] border border-line-2 bg-surface px-2.5 py-1 text-xs hover:border-navy hover:text-navy" @click="ask(q)">{{ q }}</button></div>
       </div>
 
       <template v-for="(t, i) in aiState.turns" :key="t.id">
-        <div v-if="i === 0 || !sameDay(aiState.turns[i - 1].ts, t.ts)" class="daysep"><span>{{ dayLabel(t.ts) }}</span></div>
-        <div v-if="t.role === 'user'" class="msg user" :class="{ auto: t.auto }">{{ t.auto ? '↻ Fehler zurückgemeldet – Assistent korrigiert …' : t.text }}<span class="time">{{ clock(t.ts) }}</span></div>
-        <div v-else class="msg bot">
-          <div class="meta"><span>{{ clock(t.ts) }}</span><span v-if="t.model" class="mdl">{{ t.model.replace(/^hf\.co\/[^/]+\//, '') }}</span>
-            <span v-if="t.status === 'streaming' || t.status === 'running'" class="timer">⏱ {{ elapsed(now - t.ts) }}</span>
-            <span v-else-if="t.endTs" class="took" :title="'Start ' + clockSec(t.ts) + ' · Ende ' + clockSec(t.endTs)">⏱ {{ elapsed(t.endTs - t.ts) }}</span>
+        <div v-if="i === 0 || !sameDay(aiState.turns[i - 1].ts, t.ts)" class="my-1 flex items-center gap-2 text-[11px] text-muted before:h-px before:flex-1 before:bg-line before:content-[''] after:h-px after:flex-1 after:bg-line after:content-['']"><span>{{ dayLabel(t.ts) }}</span></div>
+        <div v-if="t.role === 'user'" class="max-w-[92%] self-end px-2.5 py-2 text-[13px]/[1.45] break-words whitespace-pre-wrap" :class="t.auto ? 'bg-warn-bg text-xs text-warn' : 'bg-navy-bg text-white'">{{ t.auto ? '↻ Fehler zurückgemeldet – Assistent korrigiert …' : t.text }}<span class="mt-[3px] block text-right text-[10px] opacity-70">{{ clock(t.ts) }}</span></div>
+        <div v-else class="max-w-[92%] self-start border border-line bg-surface px-2.5 py-2 text-[13px]/[1.45] break-words whitespace-pre-wrap">
+          <div class="mb-[3px] flex items-center gap-2 text-[10.5px] text-muted"><span>{{ clock(t.ts) }}</span><span v-if="t.model" class="bg-surface-2 px-[5px]">{{ t.model.replace(/^hf\.co\/[^/]+\//, '') }}</span>
+            <span v-if="t.status === 'streaming' || t.status === 'running'" class="font-bold text-blue tabular-nums">⏱ {{ elapsed(now - t.ts) }}</span>
+            <span v-else-if="t.endTs" class="tabular-nums" :title="'Start ' + clockSec(t.ts) + ' · Ende ' + clockSec(t.endTs)">⏱ {{ elapsed(t.endTs - t.ts) }}</span>
           </div>
           <template v-if="t.text">
             <template v-for="(p, pi) in splitFences(t.text)" :key="pi">
-              <div v-if="p.kind === 'text'" class="txt">{{ p.text.trim() }}</div>
+              <div v-if="p.kind === 'text'">{{ p.text.trim() }}</div>
               <CodeBlock v-else :code="p.code" :lang="p.lang" :streaming="p.open && t.status === 'streaming'" />
             </template>
           </template>
-          <div v-if="t.status === 'streaming'" class="st"><span class="dots"></span> {{ t.text ? 'schreibt …' : 'denkt nach …' }} <b class="live">{{ elapsed(now - t.ts) }}</b></div>
+          <div v-if="t.status === 'streaming'" class="mt-1 text-xs text-ink-2"><span class="after:animate-blink after:tracking-[2px] after:text-blue after:content-['●●●']"></span> {{ t.text ? 'schreibt …' : 'denkt nach …' }} <b class="text-blue tabular-nums">{{ elapsed(now - t.ts) }}</b></div>
           <CodeBlock v-if="t.code" :code="t.code" :lang="t.lang ?? 'js'" :start-collapsed="t.lang === 'obj'" />
-          <div v-if="t.status === 'done' && t.result" class="st ok">✓ {{ t.result }}</div>
-          <div v-if="t.status === 'error'" class="st err">✗ {{ t.error }}</div>
-          <div v-if="t.status === 'stopped'" class="st">Abgebrochen.</div>
-          <div class="acts">
+          <div v-if="t.status === 'done' && t.result" class="mt-1 text-xs text-ok">✓ {{ t.result }}</div>
+          <div v-if="t.status === 'error'" class="mt-1 text-xs text-danger">✗ {{ t.error }}</div>
+          <div v-if="t.status === 'stopped'" class="mt-1 text-xs text-ink-2">Abgebrochen.</div>
+          <div class="mt-1.5 flex flex-wrap gap-2.5">
             <button v-if="t.status === 'pending'" class="s3d-btn small primary" @click="run(t)">Ausführen</button>
-            <button v-if="t.code && (t.status === 'error' || t.status === 'done')" class="lnk" @click="run(t)">Erneut ausführen</button>
-            <button v-if="t.code" class="lnk" @click="toEditor(t)">Im Skript-Editor öffnen</button>
-            <button v-if="t.undoable && isLastDone(t) && ed.ui.undoLabel === 'KI-Assistent'" class="lnk" @click="undo(t)">Rückgängig</button>
+            <button v-if="t.code && (t.status === 'error' || t.status === 'done')" class="bg-transparent p-0 text-xs text-blue hover:underline" @click="run(t)">Erneut ausführen</button>
+            <button v-if="t.code" class="bg-transparent p-0 text-xs text-blue hover:underline" @click="toEditor(t)">Im Skript-Editor öffnen</button>
+            <button v-if="t.undoable && isLastDone(t) && ed.ui.undoLabel === 'KI-Assistent'" class="bg-transparent p-0 text-xs text-blue hover:underline" @click="undo(t)">Rückgängig</button>
           </div>
         </div>
       </template>
     </div>
 
-    <div class="input">
-      <textarea ref="ta" v-model="prompt" rows="2" :disabled="!aiConfig.configured" :placeholder="isMesh ? 'Ein einzelnes Objekt, am besten auf Englisch, z. B. „a wooden chair“ (Enter = senden)' : 'z. B. „Erstelle eine Spinne mit roten Augen“ (Enter = senden)'" @keydown.stop @keydown.enter.exact.prevent="submit"></textarea>
-      <button v-if="aiState.busy" class="send stop" title="Stopp" @click="stop"><Icon name="stop" :size="16" /></button>
-      <button v-else class="send" title="Senden" :disabled="!prompt.trim() || !aiConfig.configured" @click="submit"><Icon name="send" :size="16" /></button>
+    <div class="flex gap-1.5 border-t border-line px-3 pt-2 pb-1">
+      <textarea ref="ta" class="flex-1 resize-none border border-line-2 bg-surface px-2 py-1.5 font-sans text-[13px] outline-none focus:border-navy" v-model="prompt" rows="2" :disabled="!aiConfig.configured" :placeholder="isMesh ? 'Ein einzelnes Objekt, am besten auf Englisch, z. B. „a wooden chair“ (Enter = senden)' : 'z. B. „Erstelle eine Spinne mit roten Augen“ (Enter = senden)'" @keydown.stop @keydown.enter.exact.prevent="submit"></textarea>
+      <button v-if="aiState.busy" class="flex w-[38px] items-center justify-center bg-[#c62828] text-white" title="Stopp" @click="stop"><Icon name="stop" :size="16" /></button>
+      <button v-else class="flex w-[38px] items-center justify-center bg-navy-bg text-white disabled:cursor-default disabled:opacity-40" title="Senden" :disabled="!prompt.trim() || !aiConfig.configured" @click="submit"><Icon name="send" :size="16" /></button>
     </div>
-    <div class="opts">
+    <div class="flex items-center gap-3.5 px-3 pt-0.5 pb-2 text-[11px] text-ink-2 [&_label]:flex [&_label]:cursor-pointer [&_label]:items-center [&_label]:gap-1.5">
       <label><input v-model="aiConfig.autoRun" type="checkbox" /> Code automatisch ausführen</label>
-      <label v-if="!isMesh" class="fast" :class="{ on: aiConfig.fast }" title="Kurzer Systemprompt, kleiner Kontext, kurze Antworten – deutlich schneller auf Rechnern ohne Grafikkarte, dafür einfachere Objekte"><input v-model="aiConfig.fast" type="checkbox" /> ⚡ Schnellmodus</label>
+      <label v-if="!isMesh" :class="{ 'font-bold text-warn': aiConfig.fast }" title="Kurzer Systemprompt, kleiner Kontext, kurze Antworten – deutlich schneller auf Rechnern ohne Grafikkarte, dafür einfachere Objekte"><input v-model="aiConfig.fast" type="checkbox" /> ⚡ Schnellmodus</label>
     </div>
     <AiWizard v-if="wizard" @close="wizard = false" />
     <Teleport to="body"><ModelSearch v-if="hfSearch" @close="hfSearch = false" @use="m => ed.toast('Modell gewechselt: ' + m)" /></Teleport>
@@ -145,65 +145,3 @@ function toEditor(t: AiTurn) {
 }
 watch(() => aiState.turns.map(t => t.text.length + (t.status ?? '')).join(), () => nextTick(() => { if (list.value) list.value.scrollTop = list.value.scrollHeight; }));
 </script>
-
-<style scoped>
-.ai { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--s3d-line); font-size: 12px; }
-.badge { background: var(--s3d-bg); border: 1px solid var(--s3d-line-2); padding: 2px 8px; max-width: 280px; min-width: 0; flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar .grow { flex: 1 1 0; min-width: 0; }
-.bar .lnk { flex: none; white-space: nowrap; }
-.ico { flex: none; border: 0; background: transparent; cursor: pointer; width: 24px; height: 24px; margin-left: -4px; display: flex; align-items: center; justify-content: center; color: var(--s3d-navy); padding: 0; }
-.ico:hover { background: var(--s3d-hover); }
-.badge.muted { color: var(--s3d-muted); }
-.lnk { border: 0; background: transparent; color: var(--s3d-blue); cursor: pointer; font-size: 12px; padding: 0; }
-.lnk:hover { text-decoration: underline; }
-.dlrow { padding: 6px 12px; border-bottom: 1px solid var(--s3d-line); font-size: 12px; background: var(--s3d-bg-2); }
-.dlhead { display: flex; gap: 8px; align-items: center; }
-.dlhead b { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--s3d-navy); }
-.minibar { height: 6px; background: var(--s3d-line); margin: 4px 0; }
-.minibar span { display: block; height: 100%; background: var(--s3d-navy-bg); transition: width .3s; }
-.dlinfo { color: var(--s3d-text-2); font-variant-numeric: tabular-nums; }
-.lnk.on { font-weight: 700; text-decoration: underline; }
-.lnk.danger { color: var(--s3d-danger); margin: 10px 0 4px; }
-.hist { flex: 1; overflow: auto; padding: 10px 12px; user-select: text; }
-.day { font-size: 11px; font-weight: 700; color: var(--s3d-navy); letter-spacing: .5px; margin: 12px 0 4px; text-transform: uppercase; }
-.sess { position: relative; background: var(--s3d-bg); border: 1px solid var(--s3d-line); padding: 7px 30px 7px 10px; margin-bottom: 5px; cursor: pointer; }
-.sess:hover { border-color: var(--s3d-line-2); }
-.sess.cur { border-color: var(--s3d-navy); box-shadow: inset 3px 0 0 var(--s3d-navy); }
-.stitle { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.smeta { font-size: 11px; color: var(--s3d-muted); margin-top: 2px; }
-.sdel { position: absolute; right: 6px; top: 8px; border: 0; background: transparent; cursor: pointer; opacity: .5; }
-.sdel:hover { opacity: 1; }
-.daysep { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--s3d-muted); margin: 4px 0; }
-.daysep::before, .daysep::after { content: ''; flex: 1; height: 1px; background: var(--s3d-line); }
-.time { display: block; text-align: right; font-size: 10px; opacity: .7; margin-top: 3px; }
-.meta { display: flex; gap: 8px; font-size: 10.5px; color: var(--s3d-muted); margin-bottom: 3px; align-items: center; }
-.mdl { background: var(--s3d-bg-2); padding: 0 5px; }
-.timer { color: var(--s3d-blue); font-weight: 700; font-variant-numeric: tabular-nums; }
-.took { font-variant-numeric: tabular-nums; }
-.live { font-variant-numeric: tabular-nums; color: var(--s3d-blue); }
-.list { flex: 1; overflow: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; user-select: text; }
-.intro { text-align: center; color: var(--s3d-text); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.small { font-size: 11px; color: var(--s3d-muted); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-.chip { border: 1px solid var(--s3d-line-2); background: var(--s3d-bg); border-radius: 14px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
-.chip:hover { border-color: var(--s3d-navy); color: var(--s3d-navy); }
-.msg { max-width: 92%; padding: 8px 10px; font-size: 13px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
-.user { align-self: flex-end; background: var(--s3d-navy-bg); color: #fff; }
-.user.auto { background: var(--s3d-warn-bg); color: var(--s3d-warn); font-size: 12px; }
-.bot { align-self: flex-start; background: var(--s3d-bg); border: 1px solid var(--s3d-line); }
-.st { font-size: 12px; color: var(--s3d-text-2); margin-top: 4px; }
-.st.ok { color: var(--s3d-ok); } .st.err { color: var(--s3d-danger); }
-.dots::after { content: '●●●'; letter-spacing: 2px; animation: blink 1s infinite; color: var(--s3d-blue); }
-@keyframes blink { 50% { opacity: .3; } }
-.acts { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
-.input { display: flex; gap: 6px; padding: 8px 12px 4px; border-top: 1px solid var(--s3d-line); }
-.input textarea { flex: 1; resize: none; border: 1px solid var(--s3d-line-2); padding: 6px 8px; font: 13px "Open Sans", sans-serif; outline: none; background: var(--s3d-bg); }
-.input textarea:focus { border-color: var(--s3d-navy); }
-.send { width: 38px; border: 0; background: var(--s3d-navy-bg); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.send:disabled { opacity: .4; cursor: default; }
-.send.stop { background: #c62828; }
-.opts { display: flex; align-items: center; gap: 14px; font-size: 11px; color: var(--s3d-text-2); padding: 2px 12px 8px; }
-.opts label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
-.opts .fast.on { color: var(--s3d-warn); font-weight: 700; }
-</style>

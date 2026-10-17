@@ -1,7 +1,7 @@
 <template>
-  <div ref="wrap" class="vp" :style="{ cursor }" @pointerdown="down" @pointermove="move" @pointerup="up" @pointerleave="leave" @dblclick="dbl" @wheel.prevent="wheel">
-    <canvas ref="gl" class="layer"></canvas>
-    <canvas ref="ov" class="layer overlay"></canvas>
+  <div ref="wrap" class="absolute touch-none overflow-hidden bg-[#dfe8f0]" :style="{ cursor }" @pointerdown="down" @pointermove="move" @pointerup="up" @pointerleave="leave" @dblclick="dbl" @wheel.prevent="wheel">
+    <canvas ref="gl" class="absolute inset-0 block size-full"></canvas>
+    <canvas ref="ov" class="pointer-events-none absolute inset-0 block size-full"></canvas>
   </div>
 </template>
 
@@ -68,9 +68,3 @@ onMounted(() => {
 });
 onUnmounted(() => { ro?.disconnect(); clearInterval(saveTimer); ed.viewer?.dispose(); });
 </script>
-
-<style scoped>
-.vp { position: absolute; overflow: hidden; touch-action: none; background: #dfe8f0; }
-.layer { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.overlay { pointer-events: none; }
-</style>

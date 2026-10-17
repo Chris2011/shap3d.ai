@@ -18,7 +18,7 @@ Third-party content bundled with this product (under its own license):
   see src/assets/people/LICENSE.md
 
 Third-party libraries used at runtime (installed via npm, not copied into
-this repository): three.js, three-bvh-csg, three-mesh-bvh, Vue, fzstd –
+this repository): three.js, three-bvh-csg, three-mesh-bvh, Vue, Tailwind CSS, fzstd –
 all MIT licensed.
 
 Not bundled: the SketchUp SDK (downloaded by each user from Trimble under

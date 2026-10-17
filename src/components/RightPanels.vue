@@ -1,18 +1,18 @@
 <template>
-  <div class="tiles">
-    <div v-for="p in PANELS" :key="p.id" class="tile-row" @mouseenter="hot = p.id" @mouseleave="hot = null">
-      <span v-if="!openPanel || hot === p.id" class="pill" @click="toggle(p.id)">{{ p.label }}</span>
-      <button class="tile s3d-panel" :class="{ active: openPanel === p.id }" :title="p.label" @click="toggle(p.id)">
+  <div class="absolute top-1/2 right-1.5 z-27 flex -translate-y-1/2 flex-col gap-[9px]">
+    <div v-for="p in PANELS" :key="p.id" class="flex items-center justify-end gap-2.5" @mouseenter="hot = p.id" @mouseleave="hot = null">
+      <span v-if="!openPanel || hot === p.id" class="cursor-pointer whitespace-nowrap rounded-[2px] bg-panel px-[7px] py-0.5 text-[11px] font-bold tracking-[.75px] text-navy shadow-panel" @click="toggle(p.id)">{{ p.label }}</span>
+      <button class="s3d-panel flex size-10 items-center justify-center border-0 p-0 text-ink" :class="openPanel === p.id ? 'bg-active shadow-[inset_-3px_0_0_#1f6fbf,var(--s3d-shadow)]' : 'hover:bg-hover'" :title="p.label" @click="toggle(p.id)">
         <Icon :name="p.icon" :size="22" />
       </button>
     </div>
   </div>
-  <div v-if="current" class="panel s3d-panel" :style="{ width: current.width + 'px' }">
-    <div class="head">
-      <span class="t">{{ current.label }}</span>
-      <button class="x" title="Schließen" @click="openPanel = null"><Icon name="close" :size="16" /></button>
+  <div v-if="current" class="s3d-panel absolute top-13 right-14 bottom-[calc(var(--s3d-status-h)+8px)] z-28 flex flex-col" :style="{ width: current.width + 'px' }">
+    <div class="flex h-10 flex-none items-center gap-2 bg-panel-2 pr-1 pl-3.5">
+      <span class="flex-1 text-base font-semibold tracking-[.75px] text-navy">{{ current.label }}</span>
+      <button class="flex size-7.5 items-center justify-center border-0 bg-transparent text-navy hover:bg-hover" title="Schließen" @click="openPanel = null"><Icon name="close" :size="16" /></button>
     </div>
-    <div class="body" :class="{ flush: current.flush }"><component :is="current.comp" /></div>
+    <div class="flex-1 select-text" :class="current.flush ? 'flex flex-col overflow-hidden' : 'overflow-auto px-3.5 pt-2 pb-3'"><component :is="current.comp" /></div>
   </div>
 </template>
 
@@ -44,19 +44,3 @@ const COMPS: Record<string, Component> = {
 const PANELS = PANEL_INFO.map(p => ({ ...p, comp: markRaw(COMPS[p.id]) }));
 const current = computed(() => PANELS.find(p => p.id === openPanel.value));
 </script>
-
-<style scoped>
-.tiles { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); z-index: 27; display: flex; flex-direction: column; gap: 9px; }
-.tile-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
-.tile { width: 40px; height: 40px; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--s3d-text); padding: 0; }
-.tile:hover { background: var(--s3d-hover); }
-.tile.active { background: var(--s3d-active); box-shadow: inset -3px 0 0 #1f6fbf, var(--s3d-shadow); }
-.pill { background: var(--s3d-panel); color: var(--s3d-navy); font-size: 11px; font-weight: 700; letter-spacing: .75px; padding: 2px 7px; box-shadow: var(--s3d-shadow); white-space: nowrap; cursor: pointer; border-radius: 2px; }
-.panel { position: absolute; right: 56px; top: 52px; bottom: calc(var(--s3d-status-h) + 8px); z-index: 28; display: flex; flex-direction: column; }
-.head { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 4px 0 14px; background: var(--s3d-panel-2); flex: none; }
-.head .t { font-weight: 600; font-size: 16px; letter-spacing: .75px; color: var(--s3d-navy); flex: 1; }
-.x { width: 30px; height: 30px; border: 0; background: transparent; cursor: pointer; color: var(--s3d-navy); display: flex; align-items: center; justify-content: center; }
-.x:hover { background: var(--s3d-hover); }
-.body { flex: 1; overflow: auto; padding: 8px 14px 12px; user-select: text; }
-.body.flush { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
-</style>

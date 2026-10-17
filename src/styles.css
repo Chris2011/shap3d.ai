@@ -1,3 +1,8 @@
+@import "tailwindcss";
+
+/* dark mode follows <html data-theme="dark"> (set by theme.ts), not the OS setting */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --s3d-navy: #0e416c;          /* accent for text, icons, active states */
   --s3d-navy-bg: #0e416c;       /* accent as a background behind white text */
@@ -66,62 +71,104 @@
   color-scheme: dark;
 }
 
-* { box-sizing: border-box; }
-html, body, #app { height: 100%; margin: 0; overflow: hidden; }
-body {
-  background: var(--s3d-bg); color: var(--s3d-text);
-  font: 13px/1.4 "Open Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased; user-select: none;
+/* design tokens as Tailwind colours: bg-panel, text-ink-2, border-line … switch with the theme automatically */
+@theme inline {
+  --font-sans: "Open Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: Consolas, "Cascadia Code", monospace;
+  --color-ink: var(--s3d-text);
+  --color-ink-2: var(--s3d-text-2);
+  --color-muted: var(--s3d-muted);
+  --color-label: var(--s3d-gray-label);
+  --color-panel: var(--s3d-panel);
+  --color-panel-2: var(--s3d-panel-2);
+  --color-surface: var(--s3d-bg);
+  --color-surface-2: var(--s3d-bg-2);
+  --color-hover: var(--s3d-hover);
+  --color-active: var(--s3d-active);
+  --color-sel: var(--s3d-sel);
+  --color-line: var(--s3d-line);
+  --color-line-2: var(--s3d-line-2);
+  --color-edge: var(--s3d-border);
+  --color-navy: var(--s3d-navy);
+  --color-navy-bg: var(--s3d-navy-bg);
+  --color-blue: var(--s3d-blue);
+  --color-blue-hover: var(--s3d-blue-hover);
+  --color-blue-light: var(--s3d-blue-light);
+  --color-danger: var(--s3d-danger);
+  --color-ok: var(--s3d-ok);
+  --color-ok-bg: var(--s3d-ok-bg);
+  --color-warn: var(--s3d-warn);
+  --color-warn-bg: var(--s3d-warn-bg);
+  --color-syn-c: var(--syn-c); --color-syn-s: var(--syn-s); --color-syn-n: var(--syn-n); --color-syn-b: var(--syn-b); --color-syn-k: var(--syn-k); --color-syn-api: var(--syn-api);
+  /* brand (logo) – same in both themes */
+  --color-brand: #5fd4e6;
+  --color-brand-deep: #0e8ca0;
+  --color-brand-night: #0b0f14;
+  --color-brand-tile: #0d1218;
+  --color-brand-ice: #e6ebf1;
+  --shadow-panel: var(--s3d-shadow);
+  --shadow-menu: 0 2px 10px rgba(0, 0, 0, .25);
+  --spacing-status: var(--s3d-status-h);
+  --animate-blink: s3d-blink 1s infinite;
+  @keyframes s3d-blink { 50% { opacity: .3; } }
+  --animate-fade-in: s3d-fade-in .25s ease-out;
+  @keyframes s3d-fade-in { from { opacity: 0; } }
+  --animate-rise: s3d-rise .35s cubic-bezier(.2, .9, .3, 1.2);
+  @keyframes s3d-rise { from { opacity: 0; transform: translateY(14px) scale(.97); } }
 }
-button { font: inherit; color: inherit; }
-input, select, textarea { font: inherit; color: inherit; }
 
-.s3d-panel { background: var(--s3d-panel); box-shadow: var(--s3d-shadow); border-radius: var(--s3d-radius); }
-
-.s3d-iconbtn {
-  width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;
-  border: 0; background: transparent; border-radius: 3px; cursor: pointer; color: var(--s3d-text); padding: 0; position: relative;
+@layer base {
+  html, body, #app { @apply h-full m-0 overflow-hidden; }
+  body { @apply bg-surface text-ink font-sans text-[13px]/[1.4] antialiased select-none; }
+  button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--s3d-line-2); border-radius: 6px; border: 2px solid var(--s3d-bg); }
+  ::-webkit-scrollbar-track { background: transparent; }
 }
-.s3d-iconbtn:hover { background: var(--s3d-hover); }
-.s3d-iconbtn.active { background: var(--s3d-active); color: var(--s3d-navy); box-shadow: inset 3px 0 0 var(--s3d-blue); }
-.s3d-iconbtn:disabled { opacity: .35; cursor: default; background: transparent; }
 
-.s3d-btn {
-  height: 30px; padding: 0 14px; border-radius: 3px; border: 1px solid var(--s3d-border); background: var(--s3d-bg); cursor: pointer; white-space: nowrap;
+/* shared building blocks used all over the UI */
+@layer components {
+  .s3d-panel { @apply bg-panel shadow-panel; }
+
+  .s3d-iconbtn { @apply relative inline-flex size-10 items-center justify-center rounded-[3px] border-0 bg-transparent p-0 text-ink hover:bg-hover disabled:cursor-default disabled:bg-transparent disabled:opacity-35; }
+  .s3d-iconbtn.active { @apply bg-active text-navy shadow-[inset_3px_0_0_var(--s3d-blue)]; }
+
+  .s3d-btn { @apply h-[30px] whitespace-nowrap rounded-[3px] border border-edge bg-surface px-3.5 hover:bg-hover disabled:cursor-default disabled:opacity-50; }
+  .s3d-btn.primary { @apply border-blue bg-blue font-semibold text-white hover:bg-blue-hover; }
+  .s3d-btn.small { @apply h-[26px] px-2.5 text-xs; }
+
+  .s3d-input { @apply h-7 w-full rounded-[3px] border border-edge bg-surface px-2 outline-none focus:border-blue focus:ring-2 focus:ring-[rgba(47,143,214,.2)]; }
+  select.s3d-input { @apply pr-1; }
+
+  .s3d-label { @apply text-xs text-ink-2; }
+  .s3d-section-title { @apply mt-3 mb-1.5 text-xs font-semibold text-ink; }
+  .s3d-row { @apply my-1.5 flex items-center gap-2; }
+  .s3d-row > .s3d-label { @apply w-[92px] flex-none; }
+  .s3d-check { @apply my-[5px] flex cursor-pointer items-center gap-2; }
+  .s3d-check input { @apply accent-blue; }
+
+  .s3d-tooltip { @apply pointer-events-none absolute z-100 whitespace-nowrap rounded-[3px] bg-[#2b3035] px-2 py-1 text-xs text-white dark:bg-brand-ice dark:text-brand-night; }
+
+  .s3d-menu { @apply absolute z-60 min-w-[220px] rounded bg-surface py-1 shadow-menu dark:border dark:border-line dark:shadow-[0_4px_18px_rgba(0,0,0,.6)]; }
+  .s3d-menu-item { @apply flex h-[30px] cursor-pointer items-center gap-2.5 whitespace-nowrap px-3.5 hover:bg-hover; }
+  .s3d-menu-item.disabled { @apply pointer-events-none opacity-40; }
+  .s3d-menu-item .sc { @apply ml-auto pl-6 text-xs text-ink-2; }
+  .s3d-menu-sep { @apply my-1 h-px bg-line; }
+
+  /* token colours of the code highlighter (spans inside v-html) */
+  .s3d-syntax .c { @apply text-syn-c italic; }
+  .s3d-syntax .s { @apply text-syn-s; }
+  .s3d-syntax .n { @apply text-syn-n; }
+  .s3d-syntax .b { @apply font-semibold text-syn-b; }
+  .s3d-syntax .k { @apply text-syn-k; }
+  .s3d-syntax .api { @apply font-semibold text-syn-api; }
+
+  /* on/off switch (button.s3d-switch > span) */
+  .s3d-switch { @apply relative h-5.5 w-[38px] flex-none rounded-[11px] bg-line-2 p-0 transition-colors; }
+  .s3d-switch > span { @apply absolute top-[3px] left-[3px] size-4 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.3)] transition-transform; }
+  .s3d-switch.on { @apply bg-blue; }
+  .s3d-switch.on > span { @apply translate-x-4; }
+
+  /* keyboard keys in help texts */
+  .s3d-kbd { @apply whitespace-nowrap rounded-[3px] border border-b-2 border-line-2 bg-surface-2 px-1 font-mono text-[10.5px] text-ink-2; }
 }
-.s3d-btn:hover { background: var(--s3d-hover); }
-.s3d-btn:disabled { opacity: .5; cursor: default; }
-.s3d-btn.primary { background: var(--s3d-blue); color: #fff; border-color: var(--s3d-blue); font-weight: 600; }
-.s3d-btn.primary:hover { background: var(--s3d-blue-hover); }
-.s3d-btn.small { height: 26px; padding: 0 10px; font-size: 12px; }
-
-.s3d-input {
-  height: 28px; border: 1px solid var(--s3d-border); border-radius: 3px; padding: 0 8px; background: var(--s3d-bg); width: 100%; outline: none;
-}
-.s3d-input:focus { border-color: var(--s3d-blue); box-shadow: 0 0 0 2px rgba(47, 143, 214, .2); }
-select.s3d-input { padding-right: 4px; }
-
-.s3d-label { font-size: 12px; color: var(--s3d-text-2); }
-.s3d-section-title { font-size: 12px; font-weight: 600; text-transform: none; color: var(--s3d-text); margin: 12px 0 6px; }
-.s3d-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-.s3d-row > .s3d-label { width: 92px; flex: none; }
-.s3d-check { display: flex; align-items: center; gap: 8px; margin: 5px 0; cursor: pointer; }
-.s3d-check input { accent-color: var(--s3d-blue); }
-
-.s3d-tooltip {
-  position: absolute; white-space: nowrap; background: #2b3035; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 3px;
-  pointer-events: none; z-index: 100;
-}
-:root[data-theme="dark"] .s3d-tooltip { background: #e6ebf1; color: #0b0f14; }
-
-.s3d-menu { position: absolute; background: var(--s3d-bg); box-shadow: 0 2px 10px rgba(0, 0, 0, .25); border-radius: 4px; padding: 4px 0; min-width: 220px; z-index: 60; }
-:root[data-theme="dark"] .s3d-menu { box-shadow: 0 4px 18px rgba(0, 0, 0, .6); border: 1px solid var(--s3d-line); }
-.s3d-menu-item { display: flex; align-items: center; gap: 10px; height: 30px; padding: 0 14px; cursor: pointer; white-space: nowrap; }
-.s3d-menu-item:hover { background: var(--s3d-hover); }
-.s3d-menu-item.disabled { opacity: .4; pointer-events: none; }
-.s3d-menu-item .sc { margin-left: auto; color: var(--s3d-text-2); font-size: 12px; padding-left: 24px; }
-.s3d-menu-sep { height: 1px; background: var(--s3d-line); margin: 4px 0; }
-
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: var(--s3d-line-2); border-radius: 6px; border: 2px solid var(--s3d-bg); }
-::-webkit-scrollbar-track { background: transparent; }

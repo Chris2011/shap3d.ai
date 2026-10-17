@@ -1,7 +1,7 @@
 <template>
   <button class="s3d-iconbtn" :class="{ active: ed.ui.tool === tool }" @click="ed.setTool(tool)" @mouseenter="hover = true" @mouseleave="hover = false">
     <Icon :name="info.icon" />
-    <span v-if="hover" class="tip">{{ info.name }}<template v-if="info.key"> ({{ info.key }})</template></span>
+    <span v-if="hover" class="pointer-events-none absolute top-1/2 left-[46px] z-100 -translate-y-1/2 whitespace-nowrap bg-panel px-[9px] py-[3px] text-xs font-semibold tracking-[.5px] text-navy shadow-panel">{{ info.name }}<template v-if="info.key"> ({{ info.key }})</template></span>
   </button>
 </template>
 
@@ -16,7 +16,3 @@ const ed = useEditor();
 const hover = ref(false);
 const info = computed(() => TOOL_INFO[props.tool] ?? { id: props.tool, name: props.tool, icon: 'cube' });
 </script>
-
-<style scoped>
-.tip { position: absolute; left: 46px; top: 50%; transform: translateY(-50%); white-space: nowrap; background: var(--s3d-panel); color: var(--s3d-navy); font-weight: 600; font-size: 12px; letter-spacing: .5px; padding: 3px 9px; box-shadow: var(--s3d-shadow); pointer-events: none; z-index: 100; }
-</style>

@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
 import { Readable } from 'node:stream';
 import { convertBridge } from './tools/convertBridge';
 
@@ -37,5 +38,5 @@ function aiProxy(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [vue(), aiProxy(), convertBridge()],
+  plugins: [vue(), tailwindcss(), aiProxy(), convertBridge()],
 });

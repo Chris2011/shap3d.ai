@@ -1,17 +1,17 @@
 <template>
-  <div class="bar">
+  <div class="mb-2 flex flex-wrap gap-1.5 [&_.s3d-btn]:flex [&_.s3d-btn]:items-center [&_.s3d-btn]:gap-1">
     <button class="s3d-btn small" @click="add"><Icon name="plus" :size="14" /> Szene hinzufügen</button>
     <button class="s3d-btn small" :disabled="!sel" @click="update">Aktualisieren</button>
     <button class="s3d-btn small" :disabled="!scenes.length" @click="play">{{ playing ? 'Stopp' : 'Abspielen' }}</button>
   </div>
-  <div class="list">
-    <div v-for="sc in scenes" :key="sc.id" class="scene" :class="{ on: sel === sc.id }" @click="go(sc)">
+  <div>
+    <div v-for="sc in scenes" :key="sc.id" class="flex cursor-pointer items-center gap-2 rounded-[3px] p-1.5" :class="sel === sc.id ? 'bg-active' : 'hover:bg-hover'" @click="go(sc)">
       <Icon name="scenes" :size="18" />
       <input v-if="editing === sc.id" class="s3d-input" :value="sc.name" @change="rename(sc, ($event.target as HTMLInputElement).value)" @blur="editing = null" />
-      <span v-else class="nm" @dblclick="editing = sc.id">{{ sc.name }}</span>
-      <button class="del" title="Löschen" @click.stop="remove(sc)"><Icon name="trash" :size="15" /></button>
+      <span v-else class="flex-1" @dblclick="editing = sc.id">{{ sc.name }}</span>
+      <button class="flex bg-transparent opacity-60 hover:opacity-100" title="Löschen" @click.stop="remove(sc)"><Icon name="trash" :size="15" /></button>
     </div>
-    <div v-if="!scenes.length" class="empty">Noch keine Szenen. Szenen speichern Kamera, Stil und sichtbare Tags.</div>
+    <div v-if="!scenes.length" class="px-0.5 py-2 text-xs text-ink-2">Noch keine Szenen. Szenen speichern Kamera, Stil und sichtbare Tags.</div>
   </div>
 </template>
 
@@ -41,14 +41,3 @@ function play() {
 }
 onUnmounted(() => clearInterval(timer));
 </script>
-
-<style scoped>
-.bar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
-.bar .s3d-btn { display: flex; align-items: center; gap: 4px; }
-.scene { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 3px; cursor: pointer; }
-.scene:hover { background: var(--s3d-hover); }
-.scene.on { background: var(--s3d-active); }
-.nm { flex: 1; }
-.del { border: 0; background: transparent; cursor: pointer; opacity: .6; display: flex; }
-.empty { color: var(--s3d-text-2); font-size: 12px; padding: 8px 2px; }
-</style>

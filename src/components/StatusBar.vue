@@ -1,37 +1,37 @@
 <template>
-  <div class="status">
-    <button class="s3d-iconbtn sm" title="Hilfe / Tastenkürzel" @click="ed.ui.dialog = { kind: 'help' }"><Icon name="help" :size="18" /></button>
-    <span class="dot"></span>
-    <div class="devwrap">
-      <button class="s3d-iconbtn sm" :class="{ active: devOpen }" :title="'Eingabegerät: ' + (nav.device === 'mouse' ? 'Maus' : 'Trackpad')" @click.stop="devOpen = !devOpen"><Icon :name="nav.device === 'mouse' ? 'mouse' : 'trackpad'" :size="18" /></button>
-      <div v-if="devOpen" class="devpop s3d-panel" @click.stop @pointerdown.stop>
-        <div class="dt">Eingabegerät</div>
-        <div class="seg">
-          <button :class="{ on: nav.device === 'mouse' }" @click="nav.device = 'mouse'"><Icon name="mouse" :size="16" /> Maus</button>
-          <button :class="{ on: nav.device === 'trackpad' }" @click="nav.device = 'trackpad'"><Icon name="trackpad" :size="16" /> Trackpad</button>
+  <div class="absolute inset-x-0 bottom-0 z-30 flex h-status items-center gap-1 bg-panel px-1.5 text-xs">
+    <button class="s3d-iconbtn size-6.5" title="Hilfe / Tastenkürzel" @click="ed.ui.dialog = { kind: 'help' }"><Icon name="help" :size="18" /></button>
+    <span class="mx-0.5 h-4 w-px bg-edge"></span>
+    <div class="relative">
+      <button class="s3d-iconbtn size-6.5" :class="{ active: devOpen }" :title="'Eingabegerät: ' + (nav.device === 'mouse' ? 'Maus' : 'Trackpad')" @click.stop="devOpen = !devOpen"><Icon :name="nav.device === 'mouse' ? 'mouse' : 'trackpad'" :size="18" /></button>
+      <div v-if="devOpen" class="s3d-panel absolute bottom-8.5 left-0 z-50 w-75 px-3 py-2.5 text-xs" @click.stop @pointerdown.stop>
+        <div :class="DT" class="mt-0!">Eingabegerät</div>
+        <div class="flex border border-line-2 bg-surface">
+          <button :class="[SEG, nav.device === 'mouse' && SEG_ON]" @click="nav.device = 'mouse'"><Icon name="mouse" :size="16" /> Maus</button>
+          <button :class="[SEG, nav.device === 'trackpad' && SEG_ON]" @click="nav.device = 'trackpad'"><Icon name="trackpad" :size="16" /> Trackpad</button>
         </div>
         <template v-if="nav.device === 'trackpad'">
-          <div class="dt">Wischen mit zwei Fingern</div>
-          <div class="seg">
-            <button v-for="a in ACTIONS" :key="a" :class="{ on: nav.swipe === a }" @click="nav.swipe = a">{{ ACTION_LABEL[a] }}</button>
+          <div :class="DT">Wischen mit zwei Fingern</div>
+          <div class="flex border border-line-2 bg-surface">
+            <button v-for="a in ACTIONS" :key="a" :class="[SEG, nav.swipe === a && SEG_ON]" @click="nav.swipe = a">{{ ACTION_LABEL[a] }}</button>
           </div>
         </template>
-        <table class="map">
-          <tr v-for="r in mapping" :key="r[0]"><td><kbd>{{ r[0] }}</kbd></td><td>{{ r[1] }}</td></tr>
+        <table class="mt-2 w-full border-collapse">
+          <tr v-for="r in mapping" :key="r[0]"><td class="py-0.5"><kbd class="whitespace-nowrap border border-line-2 bg-surface px-[5px] font-mono text-[11px]">{{ r[0] }}</kbd></td><td class="py-0.5">{{ r[1] }}</td></tr>
         </table>
-        <div class="dt">Feineinstellung</div>
-        <div v-for="a in ACTIONS" :key="'s' + a" class="srow">
-          <span class="sl">{{ ACTION_LABEL[a] }}</span>
-          <input type="range" min="0.25" max="3" step="0.05" v-model.number="nav.sensitivity[a]" />
-          <label class="inv"><input type="checkbox" v-model="nav.invert[a]" /> umkehren</label>
+        <div :class="DT">Feineinstellung</div>
+        <div v-for="a in ACTIONS" :key="'s' + a" class="my-[3px] flex items-center gap-1.5">
+          <span class="w-16">{{ ACTION_LABEL[a] }}</span>
+          <input class="flex-1" type="range" min="0.25" max="3" step="0.05" v-model.number="nav.sensitivity[a]" />
+          <label class="flex items-center gap-[3px] whitespace-nowrap"><input type="checkbox" v-model="nav.invert[a]" /> umkehren</label>
         </div>
       </div>
     </div>
-    <div class="hint" :title="ed.ui.status">{{ ed.ui.status }}</div>
-    <div class="sel" v-if="selInfo">{{ selInfo }}</div>
-    <div class="vcb">
-      <label>{{ ed.ui.vcbLabel || 'Maßangaben' }}</label>
-      <input ref="input" v-model="value" class="vcb-input" spellcheck="false" @focus="onFocus" @blur="onBlur" @keydown.enter.prevent="submit" @keydown.esc.prevent="cancel" @keydown.stop />
+    <div class="min-w-0 flex-1 truncate pl-1.5 text-[13.3px] text-ink" :title="ed.ui.status">{{ ed.ui.status }}</div>
+    <div v-if="selInfo" class="whitespace-nowrap px-3 text-ink-2">{{ selInfo }}</div>
+    <div class="flex items-center gap-1 pl-2.5 text-[13.3px]">
+      <label class="whitespace-nowrap text-ink">{{ ed.ui.vcbLabel || 'Maßangaben' }}</label>
+      <input ref="input" v-model="value" class="h-5.5 w-40 rounded-none border border-[#8e919c] bg-surface px-1 text-left text-[13px] outline-none focus:border-blue" spellcheck="false" @focus="onFocus" @blur="onBlur" @keydown.enter.prevent="submit" @keydown.esc.prevent="cancel" @keydown.stop />
     </div>
   </div>
 </template>
@@ -44,6 +44,9 @@ import { onMounted, onUnmounted } from 'vue';
 import { useEditor } from './keys';
 
 const ed = useEditor();
+const DT = 'mt-2 mb-[5px] font-bold tracking-[.5px] text-navy';
+const SEG = 'flex flex-1 items-center justify-center gap-[5px] border-r border-line-2 bg-transparent px-1 py-[5px] text-xs last:border-r-0';
+const SEG_ON = 'bg-active font-bold text-navy';
 const devOpen = ref(false);
 const ACTIONS: NavAction[] = ['orbit', 'pan', 'zoom'];
 const mapping = computed(() => {
@@ -75,30 +78,3 @@ function focusVcb(initial: string) {
 }
 defineExpose({ focusVcb });
 </script>
-
-<style scoped>
-.status { position: absolute; left: 0; right: 0; bottom: 0; height: var(--s3d-status-h); background: var(--s3d-panel); display: flex; align-items: center; padding: 0 6px; gap: 4px; z-index: 30; font-size: 12px; }
-.s3d-iconbtn.sm { width: 26px; height: 26px; }
-.dot { width: 1px; height: 16px; background: var(--s3d-border); margin: 0 2px; }
-.hint { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--s3d-text); font-size: 13.3px; padding-left: 6px; }
-.sel { color: var(--s3d-text-2); white-space: nowrap; padding: 0 12px; }
-.vcb { display: flex; align-items: center; gap: 4px; padding-left: 10px; font-size: 13.3px; }
-.vcb label { color: var(--s3d-text); white-space: nowrap; }
-.vcb-input { width: 160px; height: 22px; border: 1px solid #8e919c; border-radius: 0; padding: 0 4px; outline: none; font-size: 13px; text-align: left; background: var(--s3d-bg); }
-.vcb-input:focus { border-color: var(--s3d-blue); }
-.devwrap { position: relative; }
-.devpop { position: absolute; bottom: 34px; left: 0; width: 300px; padding: 10px 12px; z-index: 50; font-size: 12px; }
-.dt { font-weight: 700; color: var(--s3d-navy); letter-spacing: .5px; margin: 8px 0 5px; }
-.dt:first-child { margin-top: 0; }
-.seg { display: flex; border: 1px solid var(--s3d-line-2); background: var(--s3d-bg); }
-.seg button { flex: 1; border: 0; background: transparent; padding: 5px 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; border-right: 1px solid var(--s3d-line-2); }
-.seg button:last-child { border-right: 0; }
-.seg button.on { background: var(--s3d-active); color: var(--s3d-navy); font-weight: 700; }
-.map { width: 100%; margin-top: 8px; border-collapse: collapse; }
-.map td { padding: 2px 0; }
-kbd { font: 11px Consolas, monospace; background: var(--s3d-bg); border: 1px solid var(--s3d-line-2); padding: 0 5px; white-space: nowrap; }
-.srow { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
-.sl { width: 64px; }
-.srow input[type=range] { flex: 1; }
-.inv { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
-</style>

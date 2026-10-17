@@ -1,22 +1,22 @@
 <template>
-  <div class="cur">
-    <div class="sw big" :style="swStyle(cur)"></div>
-    <div class="curinfo">
-      <div class="nm">{{ ed.ui.currentMaterial ?? 'Standard' }}</div>
+  <div class="mt-1 mb-2.5 flex items-center gap-2.5">
+    <div class="size-12 flex-none rounded-[3px] border border-line-2" :style="swStyle(cur)"></div>
+    <div>
+      <div class="font-semibold">{{ ed.ui.currentMaterial ?? 'Standard' }}</div>
       <div class="s3d-label">Klicken Sie ein Material an, dann auf Flächen (Farbeimer, B).</div>
     </div>
   </div>
   <input v-model="filter" class="s3d-input" placeholder="Materialien durchsuchen" />
-  <div class="grid">
-    <div class="sw def" :class="{ on: ed.ui.currentMaterial == null }" title="Standard" @click="choose(null)"><span>Std</span></div>
-    <div v-for="m in list" :key="m.name" class="sw" :class="{ on: ed.ui.currentMaterial === m.name }" :style="swStyle(m)" :title="m.name" @click="choose(m.name)"></div>
+  <div class="my-2.5 grid grid-cols-6 gap-1.5">
+    <div class="flex aspect-square cursor-pointer items-end justify-center rounded-[3px] border border-line-2 bg-[linear-gradient(135deg,var(--s3d-bg)_50%,#a4b2bf_50%)] text-[9px] text-[#333]" :class="{ [ON]: ed.ui.currentMaterial == null }" title="Standard" @click="choose(null)"><span>Std</span></div>
+    <div v-for="m in list" :key="m.name" class="aspect-square cursor-pointer rounded-[3px] border border-line-2" :class="{ [ON]: ed.ui.currentMaterial === m.name }" :style="swStyle(m)" :title="m.name" @click="choose(m.name)"></div>
   </div>
 
   <template v-if="cur">
     <div class="s3d-section-title">Bearbeiten</div>
     <div class="s3d-row"><span class="s3d-label">Name</span><input class="s3d-input" :value="cur.name" @change="rename(($event.target as HTMLInputElement).value)" /></div>
-    <div class="s3d-row"><span class="s3d-label">Farbe</span><input type="color" class="color" :value="cur.color" @input="setColor(($event.target as HTMLInputElement).value)" /><input class="s3d-input" :value="cur.color" @change="setColor(($event.target as HTMLInputElement).value)" /></div>
-    <div class="s3d-row"><span class="s3d-label">Deckkraft</span><input type="range" min="0.05" max="1" step="0.05" :value="cur.opacity" @input="setOpacity(+($event.target as HTMLInputElement).value)" /><span style="width:40px;text-align:right">{{ Math.round(cur.opacity * 100) }} %</span></div>
+    <div class="s3d-row"><span class="s3d-label">Farbe</span><input type="color" class="h-7 w-9 flex-none rounded-[3px] border border-edge bg-surface p-px" :value="cur.color" @input="setColor(($event.target as HTMLInputElement).value)" /><input class="s3d-input" :value="cur.color" @change="setColor(($event.target as HTMLInputElement).value)" /></div>
+    <div class="s3d-row"><span class="s3d-label">Deckkraft</span><input type="range" min="0.05" max="1" step="0.05" :value="cur.opacity" @input="setOpacity(+($event.target as HTMLInputElement).value)" /><span class="w-10 text-right">{{ Math.round(cur.opacity * 100) }} %</span></div>
     <div class="s3d-row"><span class="s3d-label">Textur</span>
       <select class="s3d-input" :value="cur.texture ?? ''" @change="setTexture(($event.target as HTMLSelectElement).value)">
         <option value="">Keine (nur Farbe)</option>
@@ -29,7 +29,7 @@
   </template>
 
   <div class="s3d-section-title">Neues Material</div>
-  <div class="s3d-row"><input v-model="newName" class="s3d-input" placeholder="Name" /><input v-model="newColor" type="color" class="color" /></div>
+  <div class="s3d-row"><input v-model="newName" class="s3d-input" placeholder="Name" /><input v-model="newColor" type="color" class="h-7 w-9 flex-none rounded-[3px] border border-edge bg-surface p-px" /></div>
   <button class="s3d-btn small" @click="create">Erstellen</button>
 </template>
 
@@ -42,6 +42,7 @@ import { TEXTURES, TEXTURE_SIZE, makeTexture, isTextureKind } from '../../core/t
 import { parseLength } from '../../core/units';
 
 const ed = useEditor();
+const ON = 'outline-2 outline-offset-1 outline-blue';
 const filter = ref(''); const newName = ref(''); const newColor = ref('#c08040');
 const mats = computed(() => { void ed.ui.rev; return ed.model.materials; });
 const list = computed(() => mats.value.filter(m => !filter.value || m.name.toLowerCase().includes(filter.value.toLowerCase())));
@@ -83,14 +84,3 @@ function create() {
   newName.value = ''; choose(n);
 }
 </script>
-
-<style scoped>
-.cur { display: flex; gap: 10px; align-items: center; margin: 4px 0 10px; }
-.curinfo .nm { font-weight: 600; }
-.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 10px 0; }
-.sw { aspect-ratio: 1; border-radius: 3px; border: 1px solid var(--s3d-line-2); cursor: pointer; }
-.sw.big { width: 48px; height: 48px; flex: none; }
-.sw.on { outline: 2px solid var(--s3d-blue); outline-offset: 1px; }
-.sw.def { display: flex; align-items: flex-end; justify-content: center; font-size: 9px; color: #333; background: linear-gradient(135deg, var(--s3d-bg) 50%, #a4b2bf 50%); }
-.color { width: 36px; height: 28px; border: 1px solid var(--s3d-border); border-radius: 3px; padding: 1px; background: var(--s3d-bg); flex: none; }
-</style>

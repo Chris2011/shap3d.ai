@@ -1,10 +1,10 @@
 <template>
-  <div class="backdrop" @pointerdown="$emit('close')"></div>
-  <div class="expanded s3d-panel" @pointerdown.stop>
-    <div v-for="(g, i) in groups" :key="i" class="grp">
-      <button v-for="it in g" :key="it.id" class="cell" :class="{ active: ed.ui.tool === it.id }" :title="it.title ?? it.label" @click="pick(it)">
+  <div class="fixed inset-0 z-24" @pointerdown="$emit('close')"></div>
+  <div class="s3d-panel absolute top-0 left-13 z-26 max-h-[calc(100vh-120px)] w-53 overflow-auto px-1" @pointerdown.stop>
+    <div v-for="(g, i) in groups" :key="i" class="grid grid-cols-[repeat(3,68px)] border-b border-[#d5d7df] py-1.5 last:border-b-0 dark:border-line">
+      <button v-for="it in g" :key="it.id" class="flex min-h-[62px] flex-col items-center gap-0.5 border-0 bg-transparent px-0.5 pt-2 pb-1 text-center text-[10px]/[1.1] break-words text-ink" :class="ed.ui.tool === it.id ? 'bg-active' : 'hover:bg-hover'" :title="it.title ?? it.label" @click="pick(it)">
         <Icon :name="it.icon" />
-        <span>{{ it.label }}</span>
+        <span :class="ed.ui.tool === it.id ? 'text-navy' : 'text-label'">{{ it.label }}</span>
       </button>
     </div>
   </div>
@@ -36,15 +36,3 @@ function pick(it: Cell) {
   else ed.setTool(it.id);
 }
 </script>
-
-<style scoped>
-.backdrop { position: fixed; inset: 0; z-index: 24; }
-.expanded { position: absolute; left: 52px; top: 0; width: 212px; padding: 0 4px; z-index: 26; max-height: calc(100vh - 120px); overflow: auto; }
-.grp { display: grid; grid-template-columns: repeat(3, 68px); padding: 6px 0; border-bottom: 1px solid #d5d7df; }
-.grp:last-child { border-bottom: 0; }
-.cell { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: transparent; padding: 8px 2px 4px; cursor: pointer; color: var(--s3d-text); font-size: 10px; line-height: 1.1; text-align: center; min-height: 62px; word-break: break-word; }
-.cell span { color: var(--s3d-gray-label); }
-.cell:hover { background: var(--s3d-hover); }
-.cell.active { background: var(--s3d-active); }
-.cell.active span { color: var(--s3d-navy); }
-</style>

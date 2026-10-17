@@ -1,8 +1,8 @@
 <template>
-  <p class="s3d-label">Mildert Kanten zwischen Flächen der Auswahl ab, deren Winkel kleiner als der eingestellte Wert ist.</p>
-  <div class="s3d-row"><span class="s3d-label">Winkel</span><input type="range" min="0" max="180" step="1" v-model.number="angle" style="flex:1" /><span style="width:42px;text-align:right">{{ angle }}°</span></div>
+  <p class="s3d-label my-3">Mildert Kanten zwischen Flächen der Auswahl ab, deren Winkel kleiner als der eingestellte Wert ist.</p>
+  <div class="s3d-row"><span class="s3d-label">Winkel</span><input type="range" min="0" max="180" step="1" v-model.number="angle" class="flex-1" /><span class="w-[42px] text-right">{{ angle }}°</span></div>
   <label class="s3d-check"><input type="checkbox" v-model="coplanar" /> Koplanare abmildern</label>
-  <div class="row"><button class="s3d-btn small" :disabled="!ed.selection.size" @click="apply">Auf Auswahl anwenden</button><button class="s3d-btn small" :disabled="!ed.selection.size" @click="clear">Zurücksetzen</button></div>
+  <div class="mt-2 flex gap-1.5"><button class="s3d-btn small" :disabled="!ed.selection.size" @click="apply">Auf Auswahl anwenden</button><button class="s3d-btn small" :disabled="!ed.selection.size" @click="clear">Zurücksetzen</button></div>
 </template>
 
 <script setup lang="ts">
@@ -21,7 +21,3 @@ function apply() {
 }
 function clear() { ed.commit('Abmildern zurücksetzen', () => { const E = ed.entities; for (const id of edges()) { const e = id > 0 ? E.edges.get(id) : undefined; if (e) e.soft = undefined; } for (const r of ed.selected()) if (r.kind === 'instance') { const i = E.instances.get(r.id); if (i) i.def.entities.edges.forEach(e => (e.soft = undefined)); } }); }
 </script>
-
-<style scoped>
-.row { display: flex; gap: 6px; margin-top: 8px; }
-</style>

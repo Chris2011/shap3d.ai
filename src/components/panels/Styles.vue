@@ -1,26 +1,26 @@
 <template>
   <div class="s3d-section-title">Vorlagen</div>
-  <div class="presets">
-    <button v-for="p in PRESETS" :key="p.name" class="preset" :class="{ on: p.name === active }" @click="apply(p)">
-      <div class="thumb" :style="{ background: `linear-gradient(${p.s.skyColor} 0 55%, ${p.s.groundColor} 55% 100%)` }"><div class="cube" :style="{ background: p.s.frontColor, borderColor: p.s.edgeColor }"></div></div>
+  <div class="grid grid-cols-3 gap-2">
+    <button v-for="p in PRESETS" :key="p.name" class="flex flex-col items-center gap-1 rounded border bg-surface p-1 text-[11px]" :class="p.name === active ? 'border-blue shadow-[0_0_0_1px_var(--s3d-blue)]' : 'border-edge'" @click="apply(p)">
+      <div class="relative h-11 w-full rounded-[2px]" :style="{ background: `linear-gradient(${p.s.skyColor} 0 55%, ${p.s.groundColor} 55% 100%)` }"><div class="absolute top-[30%] left-[35%] h-1/2 w-[30%] border-[1.5px]" :style="{ background: p.s.frontColor, borderColor: p.s.edgeColor }"></div></div>
       <span>{{ p.name }}</span>
     </button>
   </div>
   <div class="s3d-section-title">Flächen</div>
-  <div class="seg">
-    <button v-for="f in FACES" :key="f.id" :class="{ on: st.faceStyle === f.id }" :title="f.label" @click="set('faceStyle', f.id)">{{ f.label }}</button>
+  <div class="mb-1.5 flex overflow-hidden rounded-[3px] border border-edge">
+    <button v-for="f in FACES" :key="f.id" class="flex-1 border-r border-edge px-0.5 py-[5px] text-[11px] last:border-r-0" :class="st.faceStyle === f.id ? 'bg-active font-semibold text-blue' : 'bg-surface'" :title="f.label" @click="set('faceStyle', f.id)">{{ f.label }}</button>
   </div>
   <label class="s3d-check"><input type="checkbox" :checked="st.xray" @change="set('xray', !st.xray)" /> Röntgen (Alt+K)</label>
-  <div class="s3d-row"><span class="s3d-label">Vorderseite</span><input type="color" :value="st.frontColor" @input="set('frontColor', val($event))" /></div>
-  <div class="s3d-row"><span class="s3d-label">Rückseite</span><input type="color" :value="st.backColor" @input="set('backColor', val($event))" /></div>
+  <div class="s3d-row"><span class="s3d-label">Vorderseite</span><input class="h-6.5 w-11 rounded-[3px] border border-edge bg-surface p-px" type="color" :value="st.frontColor" @input="set('frontColor', val($event))" /></div>
+  <div class="s3d-row"><span class="s3d-label">Rückseite</span><input class="h-6.5 w-11 rounded-[3px] border border-edge bg-surface p-px" type="color" :value="st.backColor" @input="set('backColor', val($event))" /></div>
   <div class="s3d-section-title">Kanten</div>
   <label class="s3d-check"><input type="checkbox" :checked="st.edges" @change="set('edges', !st.edges)" /> Kanten anzeigen</label>
-  <div class="s3d-row"><span class="s3d-label">Kantenfarbe</span><input type="color" :value="st.edgeColor" @input="set('edgeColor', val($event))" /></div>
+  <div class="s3d-row"><span class="s3d-label">Kantenfarbe</span><input class="h-6.5 w-11 rounded-[3px] border border-edge bg-surface p-px" type="color" :value="st.edgeColor" @input="set('edgeColor', val($event))" /></div>
   <div class="s3d-section-title">Hintergrund</div>
   <label class="s3d-check"><input type="checkbox" :checked="st.sky" @change="set('sky', !st.sky)" /> Himmel</label>
-  <div class="s3d-row"><span class="s3d-label">Himmelfarbe</span><input type="color" :value="st.skyColor" @input="set('skyColor', val($event))" /></div>
+  <div class="s3d-row"><span class="s3d-label">Himmelfarbe</span><input class="h-6.5 w-11 rounded-[3px] border border-edge bg-surface p-px" type="color" :value="st.skyColor" @input="set('skyColor', val($event))" /></div>
   <label class="s3d-check"><input type="checkbox" :checked="st.ground" @change="set('ground', !st.ground)" /> Boden</label>
-  <div class="s3d-row"><span class="s3d-label">Bodenfarbe</span><input type="color" :value="st.groundColor" @input="set('groundColor', val($event))" /></div>
+  <div class="s3d-row"><span class="s3d-label">Bodenfarbe</span><input class="h-6.5 w-11 rounded-[3px] border border-edge bg-surface p-px" type="color" :value="st.groundColor" @input="set('groundColor', val($event))" /></div>
 </template>
 
 <script setup lang="ts">
@@ -46,16 +46,3 @@ const PRESETS: { name: string; s: StyleSettings }[] = [
 const active = computed(() => { void ed.ui.rev; const s = st.value; return PRESETS.find(p => Object.entries(p.s).every(([k, v]) => (s as any)[k] === v))?.name; });
 function apply(p: { s: StyleSettings }) { ed.commit('Stil', () => Object.assign(ed.model.settings.style, p.s)); }
 </script>
-
-<style scoped>
-.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.preset { border: 1px solid var(--s3d-border); background: var(--s3d-bg); border-radius: 4px; padding: 4px; cursor: pointer; font-size: 11px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
-.preset.on { border-color: var(--s3d-blue); box-shadow: 0 0 0 1px var(--s3d-blue); }
-.thumb { width: 100%; height: 44px; border-radius: 2px; position: relative; }
-.cube { position: absolute; left: 35%; top: 30%; width: 30%; height: 50%; border: 1.5px solid; }
-.seg { display: flex; border: 1px solid var(--s3d-border); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
-.seg button { flex: 1; border: 0; background: var(--s3d-bg); padding: 5px 2px; font-size: 11px; cursor: pointer; border-right: 1px solid var(--s3d-border); }
-.seg button:last-child { border-right: 0; }
-.seg button.on { background: var(--s3d-active); color: var(--s3d-blue); font-weight: 600; }
-input[type=color] { width: 44px; height: 26px; border: 1px solid var(--s3d-border); border-radius: 3px; padding: 1px; background: var(--s3d-bg); }
-</style>

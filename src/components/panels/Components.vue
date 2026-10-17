@@ -1,25 +1,25 @@
 <template>
   <div class="s3d-section-title">Im Modell</div>
   <div v-if="!defs.length" class="s3d-label">Keine Komponenten. Wählen Sie Geometrie aus und drücken Sie „G“.</div>
-  <div class="grid">
-    <div v-for="d in defs" :key="d.id" class="card" :title="'Klicken zum Platzieren: ' + d.name" @click="place(d)">
+  <div class="grid grid-cols-3 gap-1.5">
+    <div v-for="d in defs" :key="d.id" class="flex cursor-pointer flex-col items-center gap-1 rounded border border-[#e0e4e8] px-1 py-2 text-center text-ink hover:border-[#c5ccd3] hover:bg-hover dark:border-line dark:hover:border-line-2" :title="'Klicken zum Platzieren: ' + d.name" @click="place(d)">
       <Icon :name="d.isComponent ? 'component' : 'group'" :size="28" />
-      <div class="nm">{{ d.name }}</div>
-      <div class="cnt">{{ counts.get(d) ?? 0 }}×</div>
+      <div class="text-[11px]/[1.2] break-words">{{ d.name }}</div>
+      <div class="text-[10px] text-ink-2">{{ counts.get(d) ?? 0 }}×</div>
     </div>
   </div>
   <div class="s3d-section-title">Personen</div>
-  <div class="grid">
-    <div v-for="(p, k) in PEOPLE" :key="k" class="card person" :title="p.label + ' platzieren (dreht sich immer zur Kamera)'" @click="place(personDefinition(ed, k))">
-      <img :src="'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(p.svg)" alt="" />
-      <div class="nm">{{ p.label }}</div>
+  <div class="grid grid-cols-3 gap-1.5">
+    <div v-for="(p, k) in PEOPLE" :key="k" class="flex cursor-pointer flex-col items-center gap-1 rounded border border-[#e0e4e8] px-1 py-2 text-center text-ink hover:border-[#c5ccd3] hover:bg-hover dark:border-line dark:hover:border-line-2" :title="p.label + ' platzieren (dreht sich immer zur Kamera)'" @click="place(personDefinition(ed, k))">
+      <img class="h-16 w-full object-contain" :src="'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(p.svg)" alt="" />
+      <div class="text-[11px]/[1.2] break-words">{{ p.label }}</div>
     </div>
   </div>
   <div class="s3d-section-title">Bibliothek</div>
-  <div class="grid">
-    <div v-for="b in LIB" :key="b.name" class="card" @click="insertLib(b)"><Icon :name="b.icon" :size="28" /><div class="nm">{{ b.name }}</div></div>
+  <div class="grid grid-cols-3 gap-1.5">
+    <div v-for="b in LIB" :key="b.name" class="flex cursor-pointer flex-col items-center gap-1 rounded border border-[#e0e4e8] px-1 py-2 text-center text-ink hover:border-[#c5ccd3] hover:bg-hover dark:border-line dark:hover:border-line-2" @click="insertLib(b)"><Icon :name="b.icon" :size="28" /><div class="text-[11px]/[1.2] break-words">{{ b.name }}</div></div>
   </div>
-  <p class="s3d-label">Bibliotheksobjekte werden per Skript erzeugt und anschließend am Cursor platziert.</p>
+  <p class="s3d-label my-3">Bibliotheksobjekte werden per Skript erzeugt und anschließend am Cursor platziert.</p>
 </template>
 
 <script setup lang="ts">
@@ -39,12 +39,3 @@ function place(d: Definition) { (ed.tools.get('place') as PlaceTool).start(d); }
 
 const insertLib = (b: Lib) => insertLibrary(ed, b);
 </script>
-
-<style scoped>
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.card { border: 1px solid #e0e4e8; border-radius: 4px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-align: center; color: var(--s3d-text); }
-.card:hover { background: var(--s3d-hover); border-color: #c5ccd3; }
-.nm { font-size: 11px; line-height: 1.2; word-break: break-word; }
-.person img { width: 100%; height: 64px; object-fit: contain; }
-.cnt { font-size: 10px; color: var(--s3d-text-2); }
-</style>

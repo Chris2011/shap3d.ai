@@ -1,17 +1,17 @@
 <template>
-  <div class="mesh">
-    <label class="row sw">
-      <span>Polygonansicht</span>
-      <button class="switch" role="switch" :aria-checked="meshView.on" :class="{ on: meshView.on }" @click="meshView.on = !meshView.on; redraw()"><span></span></button>
+  <div class="text-[12.5px]">
+    <label class="flex items-center justify-between">
+      <span class="text-[13px] font-bold">Polygonansicht</span>
+      <button class="s3d-switch" role="switch" :aria-checked="meshView.on" :class="{ on: meshView.on }" @click="meshView.on = !meshView.on; redraw()"><span></span></button>
     </label>
-    <div class="opts" :class="{ dim: !meshView.on }">
-      <label class="s3d-check"><input v-model="meshView.points" type="checkbox" :disabled="!meshView.on" @change="redraw()" /> <i class="dot"></i> Eckpunkte</label>
-      <label class="s3d-check"><input v-model="meshView.triangles" type="checkbox" :disabled="!meshView.on" @change="redraw()" /> <i class="tri"></i> Dreiecke der Flächen</label>
-      <label class="s3d-check"><input v-model="meshView.soft" type="checkbox" :disabled="!meshView.on" @change="redraw()" /> <i class="soft"></i> Weiche Kanten</label>
+    <div class="mt-1.5 mb-0.5 ml-0.5" :class="{ 'opacity-50': !meshView.on }">
+      <label class="s3d-check"><input v-model="meshView.points" type="checkbox" :disabled="!meshView.on" @change="redraw()" /> <i class="inline-block h-2.5 w-3.5 bg-[radial-gradient(circle,#0e8ca0_3px,transparent_3.5px)]"></i> Eckpunkte</label>
+      <label class="s3d-check"><input v-model="meshView.triangles" type="checkbox" :disabled="!meshView.on" @change="redraw()" /> <i class="inline-block h-2.5 w-3.5 -skew-y-[25deg] border-b-[1.5px] border-brand-deep opacity-60"></i> Dreiecke der Flächen</label>
+      <label class="s3d-check"><input v-model="meshView.soft" type="checkbox" :disabled="!meshView.on" @change="redraw()" /> <i class="inline-block h-2.5 w-3.5 border-b-[1.5px] border-dashed border-ink-2"></i> Weiche Kanten</label>
     </div>
 
-    <div class="sect">{{ scope }}</div>
-    <div class="stats">
+    <div class="mt-3.5 mb-1.5 text-[11px] font-bold tracking-[.4px] text-navy uppercase">{{ scope }}</div>
+    <div class="grid grid-cols-2 gap-1.5 [&>div]:flex [&>div]:flex-col [&>div]:border [&>div]:border-line [&>div]:bg-surface-2 [&>div]:px-2 [&>div]:py-1.5 [&_b]:text-base [&_b]:tabular-nums [&_span]:text-[11px] [&_span]:text-muted">
       <div><b>{{ fmt(stats.vertices) }}</b><span>Eckpunkte</span></div>
       <div><b>{{ fmt(stats.edges) }}</b><span>Kanten<template v-if="stats.softEdges"> ({{ fmt(stats.softEdges) }} weich)</template></span></div>
       <div><b>{{ fmt(stats.faces) }}</b><span>Flächen</span></div>
@@ -20,35 +20,35 @@
 
     <!-- exact resolution: parametric shape or flat circle -->
     <template v-if="res">
-      <div class="sect">{{ res.label }} – Auflösung</div>
-      <div class="resrow">
+      <div class="mt-3.5 mb-1.5 text-[11px] font-bold tracking-[.4px] text-navy uppercase">{{ res.label }} – Auflösung</div>
+      <div class="flex items-center gap-1.5">
         <button class="s3d-btn small" title="Weniger" @click="applyRes(res.value - step(res.value))">−</button>
-        <input v-model.number="draft" class="s3d-input num" type="number" :min="res.min" max="256" @change="applyRes(draft)" @keydown.enter="applyRes(draft)" />
-        <span class="unit">{{ res.unit }}</span>
+        <input v-model.number="draft" class="s3d-input w-[70px] text-center" type="number" :min="res.min" max="256" @change="applyRes(draft)" @keydown.enter="applyRes(draft)" />
+        <span class="flex-1 text-ink-2">{{ res.unit }}</span>
         <button class="s3d-btn small" title="Mehr" @click="applyRes(res.value + step(res.value))">+</button>
       </div>
-      <input v-model.number="draft" class="range" type="range" :min="res.min" max="96" step="1" @change="applyRes(draft)" />
-      <div class="presets">
-        <button v-for="n in res.presets" :key="n" class="chip" :class="{ on: res.value === n }" @click="applyRes(n)">{{ n }}</button>
+      <input v-model.number="draft" class="mt-2 mb-1 w-full" type="range" :min="res.min" max="96" step="1" @change="applyRes(draft)" />
+      <div class="flex flex-wrap gap-1">
+        <button v-for="n in res.presets" :key="n" class="rounded-xl border px-[9px] py-px text-[11.5px] tabular-nums" :class="res.value === n ? 'border-navy bg-sel font-bold text-navy' : 'border-line-2 bg-surface text-ink hover:border-navy'" @click="applyRes(n)">{{ n }}</button>
       </div>
-      <p class="hint">{{ res.hint }}</p>
+      <p class="mt-2 mb-0 text-[11.5px]/[1.45] text-ink-2">{{ res.hint }}</p>
     </template>
 
     <!-- any group / component -->
     <template v-if="inst">
-      <div class="sect">Polygone ändern</div>
-      <div class="moreRow">
+      <div class="mt-3.5 mb-1.5 text-[11px] font-bold tracking-[.4px] text-navy uppercase">Polygone ändern</div>
+      <div class="grid grid-cols-2 gap-1.5 [&_.s3d-btn]:px-1.5">
         <button class="s3d-btn" title="Jedes Dreieck wird zu vier – die Form bleibt exakt gleich" @click="more(false)">▲ Mehr (Form behalten)</button>
         <button class="s3d-btn" title="Jedes Dreieck wird zu vier, Ecken und Rundungen werden weicher" @click="more(true)">▲ Mehr (abrunden)</button>
       </div>
-      <div class="less">
+      <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <button class="s3d-btn" @click="less()">▼ Weniger Polygone</button>
-        <label class="keep">auf <input v-model.number="keep" type="range" min="10" max="90" step="5" /> <b>{{ keep }} %</b></label>
+        <label class="flex flex-[1_1_100%] items-center gap-1.5 text-ink-2">auf <input class="min-w-0 flex-1" v-model.number="keep" type="range" min="10" max="90" step="5" /> <b>{{ keep }} %</b></label>
       </div>
-      <p class="hint">Wirkt auf die oberste Ebene der Gruppe/Komponente{{ inst.def.isComponent ? ' – und damit auf alle Kopien' : '' }}. Rückgängig mit Strg+Z.</p>
+      <p class="mt-2 mb-0 text-[11.5px]/[1.45] text-ink-2">Wirkt auf die oberste Ebene der Gruppe/Komponente{{ inst.def.isComponent ? ' – und damit auf alle Kopien' : '' }}. Rückgängig mit Strg+Z.</p>
     </template>
 
-    <p v-if="!res && !inst" class="hint">Wähle eine Gruppe, Komponente oder einen gezeichneten Kreis aus, um die Polygonzahl zu ändern. Lose Geometrie vorher mit „Gruppe erstellen“ zusammenfassen.</p>
+    <p v-if="!res && !inst" class="mt-2 mb-0 text-[11.5px]/[1.45] text-ink-2">Wähle eine Gruppe, Komponente oder einen gezeichneten Kreis aus, um die Polygonzahl zu ändern. Lose Geometrie vorher mit „Gruppe erstellen“ zusammenfassen.</p>
   </div>
 </template>
 
@@ -119,38 +119,3 @@ function applyRes(v: number) {
 function more(round: boolean) { if (!inst.value) return; const err = subdivideInstance(ed, inst.value, round); ed.toast(err ?? 'Mehr Polygone – Strg+Z macht es rückgängig'); }
 async function less() { if (!inst.value) return; const err = await simplifyInstance(ed, inst.value, keep.value / 100); ed.toast(err ?? 'Weniger Polygone – Strg+Z macht es rückgängig'); }
 </script>
-
-<style scoped>
-.mesh { font-size: 12.5px; }
-.row { display: flex; align-items: center; justify-content: space-between; }
-.sw span { font-weight: 700; font-size: 13px; }
-.switch { width: 38px; height: 22px; border-radius: 11px; border: 0; background: var(--s3d-line-2); position: relative; cursor: pointer; padding: 0; transition: background .15s; }
-.switch span { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .3); transition: transform .15s; }
-.switch.on { background: var(--s3d-blue); }
-.switch.on span { transform: translateX(16px); }
-.opts { margin: 6px 0 2px 2px; }
-.opts.dim { opacity: .5; }
-.opts i { display: inline-block; width: 14px; height: 10px; }
-.opts .dot { background: radial-gradient(circle, #0e8ca0 3px, transparent 3.5px); }
-.opts .tri { border-bottom: 1.5px solid #0e8ca0; transform: skewY(-25deg); opacity: .6; }
-.opts .soft { border-bottom: 1.5px dashed var(--s3d-text-2); }
-.sect { font-size: 11px; font-weight: 700; color: var(--s3d-navy); text-transform: uppercase; letter-spacing: .4px; margin: 14px 0 6px; }
-.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.stats div { background: var(--s3d-bg-2); border: 1px solid var(--s3d-line); padding: 6px 8px; display: flex; flex-direction: column; }
-.stats b { font-size: 16px; font-variant-numeric: tabular-nums; }
-.stats span { font-size: 11px; color: var(--s3d-muted); }
-.resrow { display: flex; align-items: center; gap: 6px; }
-.num { width: 70px; text-align: center; }
-.unit { flex: 1; color: var(--s3d-text-2); }
-.range { width: 100%; margin: 8px 0 4px; }
-.presets { display: flex; flex-wrap: wrap; gap: 4px; }
-.chip { border: 1px solid var(--s3d-line-2); background: var(--s3d-bg); color: var(--s3d-text); border-radius: 12px; padding: 1px 9px; cursor: pointer; font-size: 11.5px; font-variant-numeric: tabular-nums; }
-.chip:hover { border-color: var(--s3d-navy); }
-.chip.on { background: var(--s3d-sel); border-color: var(--s3d-navy); color: var(--s3d-navy); font-weight: 700; }
-.moreRow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.moreRow .s3d-btn { padding: 0 6px; }
-.less { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 6px; }
-.keep { flex: 1 1 100%; display: flex; align-items: center; gap: 6px; color: var(--s3d-text-2); }
-.keep input { flex: 1; min-width: 0; }
-.hint { color: var(--s3d-text-2); line-height: 1.45; margin: 8px 0 0; font-size: 11.5px; }
-</style>

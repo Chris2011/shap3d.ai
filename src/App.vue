@@ -1,7 +1,7 @@
 <template>
-  <div class="app" @contextmenu.prevent @dragenter.prevent="onDrag" @dragover.prevent="onDrag" @dragleave="onLeave" @drop.prevent="onDrop">
-    <div v-if="dragging" class="dropzone"><div class="dz s3d-panel"><Icon name="import" :size="28" /><b>Datei loslassen zum Importieren</b><span>SketchUp (SKP, DAE) · Blender (BLEND) · 3ds Max (FBX, 3DS) · OBJ · STL · glTF/GLB · PLY · 3MF · USDZ · Shap3D (.json)</span></div></div>
-    <Viewport class="viewport" @context="openContext" />
+  <div class="relative h-screen w-screen overflow-hidden" @contextmenu.prevent @dragenter.prevent="onDrag" @dragover.prevent="onDrag" @dragleave="onLeave" @drop.prevent="onDrop">
+    <div v-if="dragging" class="pointer-events-none absolute inset-0 z-90 flex items-center justify-center bg-brand-deep/12 outline-3 -outline-offset-12 outline-dashed outline-brand-deep"><div class="s3d-panel flex flex-col items-center gap-2 px-7.5 py-5.5 text-center text-ink"><Icon name="import" :size="28" /><b class="text-[15px]">Datei loslassen zum Importieren</b><span class="text-xs text-ink-2">SketchUp (SKP, DAE) · Blender (BLEND) · 3ds Max (FBX, 3DS) · OBJ · STL · glTF/GLB · PLY · 3MF · USDZ · Shap3D (.json)</span></div></div>
+    <Viewport class="inset-x-0 top-0 bottom-status" @context="openContext" />
     <TopBar />
     <MainToolbar @search="openPalette()" />
     <RightPanels />
@@ -11,8 +11,8 @@
     <TerrainPanel />
     <Dialogs />
     <WelcomeTour />
-    <transition name="fade"><div v-if="ed.ui.toast" class="toast">{{ ed.ui.toast }}</div></transition>
-    <div v-if="ed.ui.contextName" class="context-banner s3d-panel">
+    <transition enter-active-class="transition-opacity duration-200" leave-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-to-class="opacity-0"><div v-if="ed.ui.toast" class="pointer-events-none absolute bottom-12 left-1/2 z-80 -translate-x-1/2 rounded bg-[#2b3035] px-4 py-2 text-[13px] text-white shadow-[0_2px_8px_rgba(0,0,0,.3)]">{{ ed.ui.toast }}</div></transition>
+    <div v-if="ed.ui.contextName" class="s3d-panel absolute top-13 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 py-1 pr-1.5 pl-2.5 text-xs">
       <Icon name="group" :size="16" /> Bearbeiten: <b>{{ ed.ui.contextName }}</b>
       <button class="s3d-btn small" @click="ed.exitContext(true)">Schließen</button>
     </div>
@@ -89,19 +89,3 @@ onMounted(() => {
   if (!tourSeen() && !new URLSearchParams(location.search).has('shot')) setTimeout(() => openTour(), 2500);
 });
 </script>
-
-<style scoped>
-.app { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
-.viewport { position: absolute; inset: 0 0 var(--s3d-status-h) 0; }
-.toast {
-  position: absolute; left: 50%; bottom: 48px; transform: translateX(-50%); background: #2b3035; color: #fff; padding: 8px 16px; border-radius: 4px;
-  font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,.3); z-index: 80; pointer-events: none;
-}
-.context-banner { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 10px; font-size: 12px; z-index: 20; }
-.dropzone { position: absolute; inset: 0; z-index: 90; background: rgba(14, 140, 160, .12); outline: 3px dashed #0e8ca0; outline-offset: -12px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-.dz { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 30px; color: var(--s3d-text); text-align: center; }
-.dz b { font-size: 15px; }
-.dz span { font-size: 12px; color: var(--s3d-text-2); }
-.fade-enter-active, .fade-leave-active { transition: opacity .2s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-</style>

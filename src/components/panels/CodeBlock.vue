@@ -1,12 +1,12 @@
 <template>
-  <div class="cb" :class="{ collapsed }">
-    <div class="cbh">
-      <button class="tg" :title="collapsed ? 'Aufklappen' : 'Zuklappen'" @click="collapsed = !collapsed">{{ collapsed ? '▸' : '▾' }}</button>
-      <span class="lg">{{ LABEL[lang] }}</span>
-      <span class="ln">{{ lines }} Zeilen{{ streaming ? ' …' : '' }}</span>
-      <button class="cp" :class="{ ok: copied }" :title="'Code kopieren'" @click="copy">{{ copied ? '✓ Kopiert' : '⧉ Kopieren' }}</button>
+  <div class="my-1.5 border border-line bg-surface-2 whitespace-normal">
+    <div class="flex items-center gap-1.5 bg-surface-2 py-0.5 pr-1 pl-0.5 text-[11px] text-ink-2" :class="{ 'border-b border-line': !collapsed }">
+      <button class="w-[18px] bg-transparent p-0 text-navy" :title="collapsed ? 'Aufklappen' : 'Zuklappen'" @click="collapsed = !collapsed">{{ collapsed ? '▸' : '▾' }}</button>
+      <span class="font-bold text-navy">{{ LABEL[lang] }}</span>
+      <span class="flex-1">{{ lines }} Zeilen{{ streaming ? ' …' : '' }}</span>
+      <button class="border border-transparent bg-transparent px-1.5 py-px text-[11px] hover:border-line-2 hover:bg-surface" :class="copied ? 'text-ok' : 'text-blue'" :title="'Code kopieren'" @click="copy">{{ copied ? '✓ Kopiert' : '⧉ Kopieren' }}</button>
     </div>
-    <pre v-show="!collapsed" class="hl" v-html="html"></pre>
+    <pre v-show="!collapsed" class="s3d-syntax m-0 max-h-[260px] overflow-auto px-2 py-1.5 font-mono text-[11.5px]/[1.45] whitespace-pre text-ink select-text [tab-size:2]" v-html="html"></pre>
   </div>
 </template>
 
@@ -31,22 +31,3 @@ async function copy() {
   copied.value = true; setTimeout(() => { copied.value = false; }, 1500);
 }
 </script>
-
-<style scoped>
-.cb { margin: 6px 0; border: 1px solid var(--s3d-line); background: var(--s3d-bg-2); white-space: normal; }
-.cbh { display: flex; align-items: center; gap: 6px; padding: 2px 4px 2px 2px; border-bottom: 1px solid var(--s3d-line); background: var(--s3d-bg-2); font-size: 11px; color: var(--s3d-text-2); }
-.collapsed .cbh { border-bottom: 0; }
-.tg { border: 0; background: transparent; cursor: pointer; width: 18px; color: var(--s3d-navy); padding: 0; }
-.lg { font-weight: 700; color: var(--s3d-navy); }
-.ln { flex: 1; }
-.cp { border: 1px solid transparent; background: transparent; cursor: pointer; font-size: 11px; color: var(--s3d-blue); padding: 1px 6px; }
-.cp:hover { border-color: var(--s3d-line-2); background: var(--s3d-bg); }
-.cp.ok { color: var(--s3d-ok); }
-.hl { margin: 0; padding: 6px 8px; max-height: 260px; overflow: auto; font: 11.5px/1.45 Consolas, monospace; white-space: pre; color: var(--s3d-text); tab-size: 2; user-select: text; }
-.hl :deep(.c) { color: var(--syn-c); font-style: italic; }
-.hl :deep(.s) { color: var(--syn-s); }
-.hl :deep(.n) { color: var(--syn-n); }
-.hl :deep(.b) { color: var(--syn-b); font-weight: 600; }
-.hl :deep(.k) { color: var(--syn-k); }
-.hl :deep(.api) { color: var(--syn-api); font-weight: 600; }
-</style>

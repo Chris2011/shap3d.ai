@@ -1,11 +1,11 @@
 <template>
-  <div class="left">
-    <div class="search s3d-panel">
+  <div class="absolute top-1/2 left-1.5 z-25 flex -translate-y-1/2 flex-col gap-3.5">
+    <div class="s3d-panel w-10">
       <button class="s3d-iconbtn" title="Befehlspalette – alles suchen (Strg+Umschalt+P, F1 oder zweimal Umschalt)" @click="$emit('search')"><Icon name="search" /></button>
     </div>
-    <div class="toolbar s3d-panel">
+    <div class="s3d-panel flex w-10 flex-col [&_.s3d-iconbtn]:rounded-none">
       <ToolButton v-for="t in MAIN_TOOLS" :key="t" :tool="t" />
-      <div class="sep"></div>
+      <div class="mx-1.5 my-[5px] h-px bg-[#c9cbd4] dark:bg-line-2"></div>
       <ToolButton v-for="t in ed.ui.recentTools" :key="'r' + t" :tool="t" />
       <button class="s3d-iconbtn" :class="{ active: expanded }" title="Weitere Werkzeuge" @click.stop="expanded = !expanded"><Icon name="more" /></button>
     </div>
@@ -25,11 +25,3 @@ defineEmits<{ (e: 'search'): void }>();
 const ed = useEditor();
 const expanded = ref(false);
 </script>
-
-<style scoped>
-.left { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); z-index: 25; display: flex; flex-direction: column; gap: 14px; }
-.search { width: 40px; }
-.toolbar { width: 40px; display: flex; flex-direction: column; }
-.toolbar .s3d-iconbtn { border-radius: 0; }
-.sep { height: 1px; background: #c9cbd4; margin: 5px 6px; }
-</style>

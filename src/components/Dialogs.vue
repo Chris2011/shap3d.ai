@@ -1,36 +1,36 @@
 <template>
-  <div v-if="d" class="modal-bg" @pointerdown.self="cancel">
-    <div class="modal s3d-panel" @keydown.stop>
+  <div v-if="d" class="fixed inset-0 z-90 flex items-center justify-center bg-[rgba(20,25,30,.25)]" @pointerdown.self="cancel">
+    <div class="s3d-panel max-h-[86vh] w-95 overflow-auto px-4.5 py-4" @keydown.stop>
       <!-- prompt -->
       <template v-if="d.kind === 'prompt'">
-        <div class="title">{{ d.data.title }}</div>
-        <textarea v-if="d.data.multiline" ref="first" v-model="val" class="s3d-input ta" @keydown.enter.exact.prevent="ok" @keydown.esc="cancel"></textarea>
+        <div class="mb-3 text-[15px] font-semibold">{{ d.data.title }}</div>
+        <textarea v-if="d.data.multiline" ref="first" v-model="val" class="s3d-input h-[70px] resize-y px-2 py-1.5" @keydown.enter.exact.prevent="ok" @keydown.esc="cancel"></textarea>
         <input v-else ref="first" v-model="val" class="s3d-input" @keydown.enter="ok" @keydown.esc="cancel" />
-        <div class="btns"><button class="s3d-btn" @click="cancel">Abbrechen</button><button class="s3d-btn primary" @click="ok">OK</button></div>
+        <div class="mt-3.5 flex justify-end gap-2"><button class="s3d-btn" @click="cancel">Abbrechen</button><button class="s3d-btn primary" @click="ok">OK</button></div>
       </template>
       <!-- confirm -->
       <template v-else-if="d.kind === 'confirm'">
-        <div class="title">{{ d.data.title }}</div>
-        <div class="btns"><button class="s3d-btn" @click="answer(false)">Nein</button><button ref="first" class="s3d-btn primary" @click="answer(true)">Ja</button></div>
+        <div class="mb-3 text-[15px] font-semibold">{{ d.data.title }}</div>
+        <div class="mt-3.5 flex justify-end gap-2"><button class="s3d-btn" @click="answer(false)">Nein</button><button ref="first" class="s3d-btn primary" @click="answer(true)">Ja</button></div>
       </template>
       <!-- 3D text -->
       <template v-else-if="d.kind === 'text3d'">
-        <div class="title">3D-Text einfügen</div>
-        <textarea ref="first" v-model="t.text" class="s3d-input ta" placeholder="Text eingeben"></textarea>
+        <div class="mb-3 text-[15px] font-semibold">3D-Text einfügen</div>
+        <textarea ref="first" v-model="t.text" class="s3d-input h-[70px] resize-y px-2 py-1.5" placeholder="Text eingeben"></textarea>
         <div class="s3d-row"><span class="s3d-label">Schriftart</span><select v-model="t.font" class="s3d-input"><option v-for="(n, k) in FONT_NAMES" :key="k" :value="k">{{ n }}</option></select></div>
         <div class="s3d-row"><span class="s3d-label">Höhe</span><input v-model="t.size" class="s3d-input" /></div>
         <label class="s3d-check"><input type="checkbox" v-model="t.filled" /> Gefüllt</label>
         <div class="s3d-row"><span class="s3d-label">Extrudiert</span><input v-model="t.depth" class="s3d-input" :disabled="!t.filled" /></div>
         <label class="s3d-check"><input type="checkbox" v-model="t.upright" /> Aufrecht stehend</label>
-        <div class="btns"><button class="s3d-btn" @click="cancel">Abbrechen</button><button class="s3d-btn primary" @click="place3d">Platzieren</button></div>
+        <div class="mt-3.5 flex justify-end gap-2"><button class="s3d-btn" @click="cancel">Abbrechen</button><button class="s3d-btn primary" @click="place3d">Platzieren</button></div>
       </template>
       <!-- help -->
       <template v-else-if="d.kind === 'help'">
-        <div class="title">Tastenkürzel & Bedienung</div>
-        <div class="help">
-          <div v-for="r in HELP" :key="r[0]" class="hr"><kbd>{{ r[0] }}</kbd><span>{{ r[1] }}</span></div>
+        <div class="mb-3 text-[15px] font-semibold">Tastenkürzel & Bedienung</div>
+        <div class="grid gap-1">
+          <div v-for="r in HELP" :key="r[0]" class="flex items-baseline gap-2.5"><kbd class="min-w-32 rounded-[3px] border border-line-2 bg-surface-2 px-1.5 text-center font-mono text-[11px]/[1.6]">{{ r[0] }}</kbd><span>{{ r[1] }}</span></div>
         </div>
-        <div class="btns"><button ref="first" class="s3d-btn primary" @click="ed.ui.dialog = null">Schließen</button></div>
+        <div class="mt-3.5 flex justify-end gap-2"><button ref="first" class="s3d-btn primary" @click="ed.ui.dialog = null">Schließen</button></div>
       </template>
     </div>
   </div>
@@ -66,14 +66,3 @@ const HELP: [string, string][] = [
   ['Strg+Z / Strg+Y', 'Rückgängig / Wiederholen'], ['Entf', 'Auswahl löschen'], ['Alt+K', 'Röntgen'],
 ];
 </script>
-
-<style scoped>
-.modal-bg { position: fixed; inset: 0; background: rgba(20, 25, 30, .25); z-index: 90; display: flex; align-items: center; justify-content: center; }
-.modal { width: 380px; padding: 16px 18px; max-height: 86vh; overflow: auto; }
-.title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
-.ta { height: 70px; padding: 6px 8px; resize: vertical; }
-.btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
-.help { display: grid; gap: 4px; }
-.hr { display: flex; gap: 10px; align-items: baseline; }
-kbd { min-width: 128px; font: 11px/1.6 Consolas, monospace; background: var(--s3d-bg-2); border: 1px solid var(--s3d-line-2); border-radius: 3px; padding: 0 6px; text-align: center; }
-</style>

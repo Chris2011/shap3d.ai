@@ -1,10 +1,10 @@
 <template>
-  <div v-if="tour.open" class="bg" @pointerdown.self="closeTour()" @keydown.stop>
-    <div class="card s3d-panel" role="dialog" aria-modal="true" :aria-label="`Einführung, Schritt ${tour.step + 1} von ${STEPS.length}`">
-      <button class="x" title="Einführung schließen (Esc)" @click="closeTour()"><Icon name="close" :size="16" /></button>
+  <div v-if="tour.open" class="fixed inset-0 z-120 flex animate-fade-in items-center justify-center bg-[rgba(8,12,18,.45)] motion-reduce:animate-none" @pointerdown.self="closeTour()" @keydown.stop>
+    <div class="s3d-panel relative w-[min(520px,94vw)] animate-rise overflow-hidden rounded-[10px] motion-reduce:animate-none" role="dialog" aria-modal="true" :aria-label="`Einführung, Schritt ${tour.step + 1} von ${STEPS.length}`">
+      <button class="absolute top-2 right-2 z-2 flex size-7 items-center justify-center rounded bg-transparent text-ink-2 hover:bg-hover" title="Einführung schließen (Esc)" @click="closeTour()"><Icon name="close" :size="16" /></button>
 
       <!-- illustration – :key restarts the animation on every step -->
-      <div class="art" :key="tour.step">
+      <div :key="tour.step" class="art flex h-[190px] items-center justify-center bg-brand-night bg-[linear-gradient(rgba(230,235,241,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(230,235,241,.04)_1px,transparent_1px)] bg-size-[24px_24px]">
         <!-- 1 welcome: the logo draws itself -->
         <svg v-if="tour.step === 0" viewBox="0 0 300 170" class="ill">
           <g transform="translate(118 38) scale(1)">
@@ -65,20 +65,20 @@
         </div>
       </div>
 
-      <div class="text">
-        <div class="kicker">Schritt {{ tour.step + 1 }} von {{ STEPS.length }}</div>
-        <h2>{{ cur.title }}</h2>
-        <p>{{ cur.text }}</p>
-        <ul v-if="cur.tips" class="tips"><li v-for="t in cur.tips" :key="t" v-html="t"></li></ul>
-        <button v-if="cur.action" class="s3d-btn small act" @click="cur.action.run()">{{ cur.action.label }}</button>
+      <div class="px-5.5 pt-4 pb-1.5">
+        <div class="text-[11px] font-bold tracking-[.6px] text-muted uppercase">Schritt {{ tour.step + 1 }} von {{ STEPS.length }}</div>
+        <h2 class="mt-1 mb-1.5 text-[19px] font-bold text-ink">{{ cur.title }}</h2>
+        <p class="text-[13.5px]/normal text-ink-2">{{ cur.text }}</p>
+        <ul v-if="cur.tips" class="mt-2.5 list-disc pl-[18px] text-[12.5px]/[1.8] text-ink [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-line-2 [&_kbd]:bg-surface-2 [&_kbd]:px-[5px] [&_kbd]:font-mono [&_kbd]:text-[11px]"><li v-for="t in cur.tips" :key="t" v-html="t"></li></ul>
+        <button v-if="cur.action" class="s3d-btn small mt-3" @click="cur.action.run()">{{ cur.action.label }}</button>
       </div>
 
-      <div class="foot">
-        <div class="dots-nav">
-          <button v-for="(s, i) in STEPS" :key="s.title" class="dot" :class="{ on: i === tour.step, past: i < tour.step }" :title="s.title" :aria-label="`Schritt ${i + 1}: ${s.title}`" @click="tour.step = i"></button>
+      <div class="flex items-center gap-2 px-5.5 pt-3.5 pb-4.5">
+        <div class="flex gap-1.5">
+          <button v-for="(s, i) in STEPS" :key="s.title" class="h-2 rounded-full p-0 transition-[width,background-color] duration-200" :class="i === tour.step ? 'w-[22px] rounded bg-brand-deep' : i < tour.step ? 'w-2 bg-[#5fa9bf]' : 'w-2 bg-line-2'" :title="s.title" :aria-label="`Schritt ${i + 1}: ${s.title}`" @click="tour.step = i"></button>
         </div>
-        <span class="sp"></span>
-        <button v-if="tour.step === 0" class="lnk" @click="closeTour()">Überspringen</button>
+        <span class="flex-1"></span>
+        <button v-if="tour.step === 0" class="bg-transparent px-1.5 text-[13px] text-ink-2 hover:text-ink hover:underline" @click="closeTour()">Überspringen</button>
         <button v-else class="s3d-btn" @click="tour.step--">Zurück</button>
         <button class="s3d-btn primary" @click="next()">{{ tour.step === STEPS.length - 1 ? 'Loslegen' : tour.step === 0 ? 'Los geht’s' : 'Weiter' }}</button>
       </div>
@@ -120,29 +120,8 @@ onUnmounted(() => window.removeEventListener('keydown', key, true));
 </script>
 
 <style scoped>
-.bg { position: fixed; inset: 0; z-index: 120; background: rgba(8, 12, 18, .45); display: flex; align-items: center; justify-content: center; animation: fade .25s ease-out; }
-.card { position: relative; width: min(520px, 94vw); overflow: hidden; border-radius: 10px; animation: rise .35s cubic-bezier(.2, .9, .3, 1.2); }
-.x { position: absolute; top: 8px; right: 8px; z-index: 2; border: 0; background: transparent; cursor: pointer; width: 28px; height: 28px; border-radius: 4px; color: var(--s3d-text-2); display: flex; align-items: center; justify-content: center; }
-.x:hover { background: var(--s3d-hover); }
-.art { height: 190px; background: #0b0f14; background-image: linear-gradient(rgba(230, 235, 241, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(230, 235, 241, .04) 1px, transparent 1px); background-size: 24px 24px; display: flex; align-items: center; justify-content: center; }
+/* SVG/CSS illustrations of the tour steps – keyframe animations that Tailwind utilities cannot express */
 .ill { width: 100%; height: 100%; max-width: 360px; }
-.text { padding: 16px 22px 6px; }
-.kicker { font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--s3d-muted); font-weight: 700; }
-h2 { margin: 4px 0 6px; font-size: 19px; color: var(--s3d-text); }
-p { margin: 0; line-height: 1.5; color: var(--s3d-text-2); font-size: 13.5px; }
-.tips { margin: 10px 0 0; padding-left: 18px; color: var(--s3d-text); font-size: 12.5px; line-height: 1.8; }
-.tips :deep(kbd) { font: 11px Consolas, monospace; background: var(--s3d-bg-2); border: 1px solid var(--s3d-line-2); border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; }
-.act { margin-top: 12px; }
-.foot { display: flex; align-items: center; gap: 8px; padding: 14px 22px 18px; }
-.sp { flex: 1; }
-.dots-nav { display: flex; gap: 6px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: var(--s3d-line-2); transition: width .2s, background .2s; }
-.dot.past { background: #5fa9bf; }
-.dot.on { width: 22px; border-radius: 4px; background: #0e8ca0; }
-.lnk { border: 0; background: transparent; color: var(--s3d-text-2); cursor: pointer; font-size: 13px; padding: 0 6px; }
-.lnk:hover { color: var(--s3d-text); text-decoration: underline; }
-
-/* ---------- animations ---------- */
 .draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .8s cubic-bezier(.6, 0, .2, 1) forwards; }
 .d2 { animation-delay: .55s; }
 .pop { transform-box: fill-box; transform-origin: center; transform: scale(0); animation: pop .45s cubic-bezier(.3, 1.6, .5, 1) .95s forwards; }
@@ -196,8 +175,6 @@ p { margin: 0; line-height: 1.5; color: var(--s3d-text-2); font-size: 13.5px; }
 .toggle { width: 54px; height: 30px; border-radius: 15px; position: relative; animation: tgl 4s steps(1) infinite; }
 .knob { position: absolute; top: 4px; left: 4px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .4); animation: knob 4s cubic-bezier(.5, 0, .2, 1) infinite; }
 
-@keyframes fade { from { opacity: 0; } }
-@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.97); } }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 @keyframes pop { to { transform: scale(1); } }
 @keyframes ring { 0% { opacity: .6; transform: scale(.6); } 100% { opacity: 0; transform: scale(2.3); } }
@@ -218,6 +195,6 @@ p { margin: 0; line-height: 1.5; color: var(--s3d-text-2); font-size: 13.5px; }
 @keyframes knob { 0%, 40% { transform: none; } 50%, 90% { transform: translateX(24px); } 100% { transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .art *, .bg, .card { animation-duration: 1ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; }
+  .art * { animation-duration: 1ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; }
 }
 </style>

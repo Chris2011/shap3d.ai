@@ -1,25 +1,25 @@
 <template>
-  <div class="split" :class="{ open }" @click.stop>
-    <button class="main" :title="theme.dark ? 'Dunkelmodus aus' : 'Dunkelmodus an'" :aria-pressed="theme.dark" @click="toggleTheme()">
+  <div class="group relative mx-0.5 flex h-9 items-center" @click.stop>
+    <button class="flex h-7.5 w-7 items-center justify-center rounded-l-[3px] bg-transparent p-0 text-ink-2 hover:text-navy group-hover:bg-hover" :class="open && 'bg-hover'" :title="theme.dark ? 'Dunkelmodus aus' : 'Dunkelmodus an'" :aria-pressed="theme.dark" @click="toggleTheme()">
       <Icon :name="theme.dark ? 'moon' : 'sun'" :size="18" />
     </button>
-    <button class="more" title="Weitere Design-Optionen" :aria-expanded="open" @click="open = !open"><Icon name="chevronDown" :size="12" /></button>
+    <button class="flex h-7.5 w-4 items-center justify-center rounded-r-[3px] border-l bg-transparent p-0 text-ink-2 hover:text-navy group-hover:border-line-2 group-hover:bg-hover" :class="open ? 'border-line-2 bg-hover' : 'border-transparent'" title="Weitere Design-Optionen" :aria-expanded="open" @click="open = !open"><Icon name="chevronDown" :size="12" /></button>
 
-    <div v-if="open" class="pop s3d-menu">
-      <label class="row sw">
-        <span><Icon name="moon" :size="16" /> Dunkelmodus</span>
-        <button class="switch" role="switch" :aria-checked="theme.dark" :class="{ on: theme.dark }" @click="toggleTheme()"><span></span></button>
+    <div v-if="open" class="s3d-menu top-10 -left-2 w-67 cursor-default px-3 pt-2.5 pb-3">
+      <label class="flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2 font-semibold"><Icon name="moon" :size="16" /> Dunkelmodus</span>
+        <button class="relative h-5.5 w-[38px] rounded-[11px] p-0 transition-colors" role="switch" :aria-checked="theme.dark" :class="theme.dark ? 'bg-blue' : 'bg-line-2'" @click="toggleTheme()"><span class="absolute top-[3px] left-[3px] size-4 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.3)] transition-transform" :class="theme.dark && 'translate-x-4'"></span></button>
       </label>
-      <div class="sep"></div>
-      <div class="lbl">Oberfläche</div>
-      <div class="seg">
-        <button v-for="o in UI" :key="o.v" :class="{ on: theme.mode === o.v }" @click="setTheme(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
+      <div class="-mx-3 my-2.5 h-px bg-line"></div>
+      <div class="mt-2 mb-[5px] text-[11px] font-bold tracking-[.4px] text-muted uppercase">Oberfläche</div>
+      <div class="grid grid-cols-3 overflow-hidden rounded border border-line-2">
+        <button v-for="o in UI" :key="o.v" :class="[SEG, theme.mode === o.v ? SEG_ON : SEG_OFF]" @click="setTheme(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
       </div>
-      <div class="lbl">3D-Szene</div>
-      <div class="seg">
-        <button v-for="o in SCENE" :key="o.v" :class="{ on: theme.scene === o.v }" @click="setScene(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
+      <div class="mt-2 mb-[5px] text-[11px] font-bold tracking-[.4px] text-muted uppercase">3D-Szene</div>
+      <div class="grid grid-cols-3 overflow-hidden rounded border border-line-2">
+        <button v-for="o in SCENE" :key="o.v" :class="[SEG, theme.scene === o.v ? SEG_ON : SEG_OFF]" @click="setScene(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
       </div>
-      <p class="hint">{{ hint }}</p>
+      <p class="mt-2.5 mb-0 text-[11.5px]/[1.4] text-ink-2">{{ hint }}</p>
     </div>
   </div>
 </template>
@@ -30,6 +30,9 @@ import Icon from './Icon.vue';
 import { theme, toggleTheme, setTheme, setScene, type ThemeMode, type SceneMode } from '../theme';
 
 const open = ref(false);
+const SEG = 'flex items-center justify-center gap-1 whitespace-nowrap px-0.5 py-1.5 text-xs not-first:border-l not-first:border-line-2';
+const SEG_ON = 'bg-sel font-bold text-navy';
+const SEG_OFF = 'bg-surface text-ink hover:bg-hover';
 const UI: { v: ThemeMode; label: string; icon: string }[] = [
   { v: 'light', label: 'Hell', icon: 'sun' }, { v: 'dark', label: 'Dunkel', icon: 'moon' }, { v: 'system', label: 'System', icon: 'monitor' },
 ];
@@ -46,28 +49,3 @@ const close = () => { open.value = false; };
 onMounted(() => window.addEventListener('click', close));
 onUnmounted(() => window.removeEventListener('click', close));
 </script>
-
-<style scoped>
-.split { position: relative; display: flex; align-items: center; height: 36px; margin: 0 2px; }
-.main, .more { border: 0; background: transparent; cursor: pointer; color: var(--s3d-text-2); height: 30px; display: flex; align-items: center; justify-content: center; padding: 0; }
-.main { width: 28px; border-radius: 3px 0 0 3px; }
-.more { width: 16px; border-radius: 0 3px 3px 0; border-left: 1px solid transparent; }
-.split:hover .main, .split:hover .more, .split.open .main, .split.open .more { background: var(--s3d-hover); }
-.split:hover .more, .split.open .more { border-left-color: var(--s3d-line-2); }
-.main:hover, .more:hover { color: var(--s3d-navy); }
-.pop { top: 40px; left: -8px; width: 268px; padding: 10px 12px 12px; cursor: default; }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.row span { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-.switch { width: 38px; height: 22px; border-radius: 11px; border: 0; background: var(--s3d-line-2); position: relative; cursor: pointer; padding: 0; transition: background .15s; }
-.switch span { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .3); transition: transform .15s; }
-.switch.on { background: var(--s3d-blue); }
-.switch.on span { transform: translateX(16px); }
-.sep { height: 1px; background: var(--s3d-line); margin: 10px -12px; }
-.lbl { font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--s3d-muted); margin: 8px 0 5px; }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--s3d-line-2); border-radius: 4px; overflow: hidden; }
-.seg button { border: 0; background: var(--s3d-bg); color: var(--s3d-text); font-size: 12px; padding: 6px 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; }
-.seg button + button { border-left: 1px solid var(--s3d-line-2); }
-.seg button:hover { background: var(--s3d-hover); }
-.seg button.on { background: var(--s3d-sel); color: var(--s3d-navy); font-weight: 700; }
-.hint { font-size: 11.5px; color: var(--s3d-text-2); margin: 10px 0 0; line-height: 1.4; }
-</style>

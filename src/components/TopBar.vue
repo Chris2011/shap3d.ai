@@ -1,20 +1,20 @@
 <template>
-  <div class="topbar s3d-panel">
-    <button class="tb-btn menu" :class="{ on: menuOpen }" title="Modell/Voreinstellungen öffnen" @click.stop="menuOpen = !menuOpen"><Icon name="menu" :size="22" /></button>
-    <input v-if="editing" ref="nameInput" class="name-input" v-model="name" @keydown.enter="commitName" @blur="commitName" @keydown.esc="editing = false" />
-    <div v-else class="name" title="Modell umbenennen" @click="startEdit">{{ modelName }}</div>
-    <button class="tb-btn" :class="{ on: openPanel === 'ai' }" title="KI-Assistent" @click="openPanel = openPanel === 'ai' ? null : 'ai'"><Icon name="sparkle" :size="22" /></button>
-    <button class="tb-btn sm" :title="'Rückgängig ' + ed.ui.undoLabel" :disabled="!ed.ui.canUndo" @click="ed.undo()"><Icon name="undo" :size="18" /></button>
-    <button class="tb-btn sm" :title="'Wiederholen ' + ed.ui.redoLabel" :disabled="!ed.ui.canRedo" @click="ed.redo()"><Icon name="redo" :size="18" /></button>
-    <button class="tb-btn sm clear" title="Arbeitsfläche leeren (rückgängig mit Strg+Z)" @click="run('clearAll')"><Icon name="trash" :size="18" /></button>
+  <div class="s3d-panel absolute top-0 left-0 z-30 flex h-11 items-center gap-0.5 pr-3 pl-1">
+    <button :class="[TB, { 'bg-hover': menuOpen }]" title="Modell/Voreinstellungen öffnen" @click.stop="menuOpen = !menuOpen"><Icon name="menu" :size="22" /></button>
+    <input v-if="editing" ref="nameInput" class="mx-1 h-7 w-50 border border-navy bg-surface px-2 font-bold text-navy outline-none" v-model="name" @keydown.enter="commitName" @blur="commitName" @keydown.esc="editing = false" />
+    <div v-else class="max-w-65 cursor-text truncate pr-2 pl-1.5 text-sm/11 font-bold tracking-[.85px] text-navy" title="Modell umbenennen" @click="startEdit">{{ modelName }}</div>
+    <button :class="[TB, { 'bg-hover': openPanel === 'ai' }]" title="KI-Assistent" @click="openPanel = openPanel === 'ai' ? null : 'ai'"><Icon name="sparkle" :size="22" /></button>
+    <button :class="TB_SM" :title="'Rückgängig ' + ed.ui.undoLabel" :disabled="!ed.ui.canUndo" @click="ed.undo()"><Icon name="undo" :size="18" /></button>
+    <button :class="TB_SM" :title="'Wiederholen ' + ed.ui.redoLabel" :disabled="!ed.ui.canRedo" @click="ed.redo()"><Icon name="redo" :size="18" /></button>
+    <button :class="[TB_SM, 'hover:text-danger']" title="Arbeitsfläche leeren (rückgängig mit Strg+Z)" @click="run('clearAll')"><Icon name="trash" :size="18" /></button>
     <ThemeButton />
-    <span v-if="ed.ui.saved" class="saved">Gespeichert</span>
-    <button v-else class="save-link" title="Speichern (Strg+S)" @click="run('save')">Speichern</button>
+    <span v-if="ed.ui.saved" class="whitespace-nowrap pl-3.5 text-sm font-bold text-[#90939f]">Gespeichert</span>
+    <button v-else class="whitespace-nowrap border-0 bg-transparent pl-3.5 text-sm font-bold text-navy hover:underline" title="Speichern (Strg+S)" @click="run('save')">Speichern</button>
   </div>
 
-  <div class="topright s3d-panel">
-    <button class="share" @click.stop="exportOpen = !exportOpen">Exportieren</button>
-    <div v-if="exportOpen" class="s3d-menu" style="right: 0; top: 44px" @click="exportOpen = false">
+  <div class="s3d-panel absolute top-0 right-0 z-30 flex h-11 items-center gap-2 px-2">
+    <button class="h-7 rounded-[2px] border-0 bg-navy-bg px-2.5 text-[13px] font-bold tracking-[.3px] text-white hover:bg-[#0b3457]" @click.stop="exportOpen = !exportOpen">Exportieren</button>
+    <div v-if="exportOpen" class="s3d-menu top-11 right-0" @click="exportOpen = false">
       <div class="s3d-menu-item" @click="run('save')"><Icon name="save" :size="18" /> Modell (.shap3d.json)</div>
       <div class="s3d-menu-item" @click="run('export-glb')"><Icon name="cube" :size="18" /> GLB</div>
       <div class="s3d-menu-item" @click="run('export-gltf')"><Icon name="cube" :size="18" /> glTF</div>
@@ -37,6 +37,9 @@ import { openPanel } from './panelState';
 import ThemeButton from './ThemeButton.vue';
 
 const ed = useEditor();
+const TB_BASE = 'flex h-9 items-center justify-center border-0 bg-transparent p-0 hover:enabled:bg-hover disabled:cursor-default disabled:opacity-35';
+const TB = `${TB_BASE} w-9 text-navy`;
+const TB_SM = `${TB_BASE} w-6 text-[#6b6f7b] dark:text-ink-2`;
 const menuOpen = ref(false); const exportOpen = ref(false);
 const editing = ref(false); const name = ref(''); const nameInput = ref<HTMLInputElement | null>(null);
 const modelName = computed(() => { void ed.ui.rev; return ed.model.name; });
@@ -47,20 +50,3 @@ const close = () => { exportOpen.value = false; };
 onMounted(() => window.addEventListener('click', close));
 onUnmounted(() => window.removeEventListener('click', close));
 </script>
-
-<style scoped>
-.topbar { position: absolute; top: 0; left: 0; height: 44px; display: flex; align-items: center; padding: 0 12px 0 4px; gap: 2px; z-index: 30; }
-.tb-btn { border: 0; background: transparent; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--s3d-navy); padding: 0; }
-.tb-btn.sm { width: 24px; color: #6b6f7b; }
-.tb-btn:hover:not(:disabled), .tb-btn.on { background: var(--s3d-hover); }
-.tb-btn:disabled { opacity: .35; cursor: default; }
-.tb-btn.clear:hover { color: var(--s3d-danger); }
-.name { font-weight: 700; font-size: 14px; letter-spacing: .85px; color: var(--s3d-navy); padding: 0 8px 0 6px; cursor: text; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 44px; }
-.name-input { width: 200px; height: 28px; border: 1px solid var(--s3d-navy); padding: 0 8px; outline: none; font-weight: 700; color: var(--s3d-navy); margin: 0 4px; background: var(--s3d-bg); }
-.saved { color: #90939f; font-size: 14px; font-weight: 700; padding: 0 0 0 14px; white-space: nowrap; }
-.save-link { border: 0; background: transparent; color: var(--s3d-navy); font-size: 14px; font-weight: 700; padding: 0 0 0 14px; cursor: pointer; white-space: nowrap; }
-.save-link:hover { text-decoration: underline; }
-.topright { position: absolute; top: 0; right: 0; height: 44px; display: flex; gap: 8px; align-items: center; padding: 0 8px; z-index: 30; }
-.share { height: 28px; padding: 0 10px; border: 0; background: var(--s3d-navy-bg); color: #fff; font-weight: 700; font-size: 13px; letter-spacing: .3px; cursor: pointer; border-radius: 2px; }
-.share:hover { background: #0b3457; }
-</style>
