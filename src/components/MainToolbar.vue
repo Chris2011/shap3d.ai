@@ -1,7 +1,7 @@
 <template>
   <div class="left">
     <div class="search s3d-panel">
-      <button class="s3d-iconbtn" title="Suchen (Werkzeuge & Befehle)" @click="$emit('search')"><Icon name="search" /></button>
+      <button class="s3d-iconbtn" title="Befehlspalette – alles suchen (Strg+Umschalt+P, F1 oder zweimal Umschalt)" @click="$emit('search')"><Icon name="search" /></button>
     </div>
     <div class="toolbar s3d-panel">
       <ToolButton v-for="t in MAIN_TOOLS" :key="t" :tool="t" />

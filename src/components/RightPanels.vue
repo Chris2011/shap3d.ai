@@ -17,9 +17,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, markRaw, type Component } from 'vue';
 import Icon from './Icon.vue';
-import { openPanel } from './panelState';
+import { openPanel, PANEL_INFO, togglePanel as toggle } from './panelState';
 import EntityInfo from './panels/EntityInfo.vue';
 import Outliner from './panels/Outliner.vue';
 import Instructor from './panels/Instructor.vue';
@@ -37,25 +37,12 @@ import Components from './panels/Components.vue';
 import AiChat from './panels/AiChat.vue';
 
 const hot = ref<string | null>(null);
-const PANELS = [
-  { id: 'ai', label: 'KI-Assistent', icon: 'sparkle', comp: AiChat, width: 400, flush: true },
-  { id: 'entityinfo', label: 'Elementinformationen', icon: 'entityinfo', comp: EntityInfo, width: 300 },
-  { id: 'components', label: 'Komponenten', icon: 'component', comp: Components, width: 300 },
-  { id: 'instructor', label: 'Mentor', icon: 'instructor', comp: Instructor, width: 300 },
-  { id: 'materials', label: 'Materialien', icon: 'materials', comp: Materials, width: 300 },
-  { id: 'styles', label: 'Stile', icon: 'styles', comp: Styles, width: 300 },
-  { id: 'tags', label: 'Tags', icon: 'tags', comp: Tags, width: 300 },
-  { id: 'shadows', label: 'Schatten', icon: 'shadows', comp: Shadows, width: 300 },
-  { id: 'scenes', label: 'Szenen', icon: 'scenes', comp: Scenes, width: 300 },
-  { id: 'display', label: 'Anzeige', icon: 'display', comp: Display, width: 300 },
-  { id: 'soften', label: 'Abmildern / Glätten', icon: 'soften', comp: Soften, width: 300 },
-  { id: 'mesh', label: 'Polygone & Punkte', icon: 'mesh', comp: Mesh, width: 300 },
-  { id: 'modelinfo', label: 'Modellinformationen', icon: 'modelinfo', comp: ModelInfo, width: 300 },
-  { id: 'outliner', label: 'Gliederung', icon: 'outliner', comp: Outliner, width: 300 },
-  { id: 'scripts', label: 'Skript-Editor', icon: 'script', comp: ScriptEditor, width: 520, flush: true },
-];
+const COMPS: Record<string, Component> = {
+  ai: AiChat, entityinfo: EntityInfo, components: Components, instructor: Instructor, materials: Materials, styles: Styles, tags: Tags,
+  shadows: Shadows, scenes: Scenes, display: Display, soften: Soften, mesh: Mesh, modelinfo: ModelInfo, outliner: Outliner, scripts: ScriptEditor,
+};
+const PANELS = PANEL_INFO.map(p => ({ ...p, comp: markRaw(COMPS[p.id]) }));
 const current = computed(() => PANELS.find(p => p.id === openPanel.value));
-function toggle(id: string) { openPanel.value = openPanel.value === id ? null : id; }
 </script>
 
 <style scoped>

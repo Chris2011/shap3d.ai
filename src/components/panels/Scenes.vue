@@ -21,6 +21,7 @@ import Icon from '../Icon.vue';
 import { useEditor } from '../keys';
 import { newId } from '../../core/model';
 import type { Scene } from '../../core/document';
+import { applyScene } from '../../engine/scenes';
 
 const ed = useEditor(); const sel = ref<number | null>(null); const editing = ref<number | null>(null); const playing = ref(false); let timer = 0;
 const scenes = computed(() => { void ed.ui.rev; return ed.model.scenes; });
@@ -28,10 +29,7 @@ function capture(): Omit<Scene, 'id' | 'name'> { return { camera: ed.viewer.rig.
 function add() { const sc: Scene = { id: newId(), name: `Szene ${ed.model.scenes.length + 1}`, ...capture() }; ed.commit('Szene hinzufügen', () => ed.model.scenes.push(sc)); sel.value = sc.id; }
 function update() { const sc = ed.model.scenes.find(s => s.id === sel.value); if (sc) ed.commit('Szene aktualisieren', () => Object.assign(sc, capture())); }
 function go(sc: Scene) {
-  sel.value = sc.id; ed.viewer.rig.applyState(sc.camera, true); ed.ui.projection = sc.camera.ortho ? 'ortho' : 'persp';
-  if (sc.style) Object.assign(ed.model.settings.style, sc.style);
-  if (sc.hiddenTags) for (const t of ed.model.tags) t.visible = !sc.hiddenTags.includes(t.name);
-  ed.invalidate();
+  sel.value = sc.id; applyScene(ed, sc);
 }
 function rename(sc: Scene, n: string) { editing.value = null; if (n.trim()) ed.commit('Szene umbenennen', () => { sc.name = n.trim(); }); }
 function remove(sc: Scene) { ed.commit('Szene löschen', () => { ed.model.scenes = ed.model.scenes.filter(s => s !== sc); }); }

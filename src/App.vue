@@ -3,11 +3,11 @@
     <div v-if="dragging" class="dropzone"><div class="dz s3d-panel"><Icon name="import" :size="28" /><b>Datei loslassen zum Importieren</b><span>SketchUp (SKP, DAE) · Blender (BLEND) · 3ds Max (FBX, 3DS) · OBJ · STL · glTF/GLB · PLY · 3MF · USDZ · Shap3D (.json)</span></div></div>
     <Viewport class="viewport" @context="openContext" />
     <TopBar />
-    <MainToolbar @search="searchOpen = true" />
+    <MainToolbar @search="openPalette()" />
     <RightPanels />
     <StatusBar ref="statusBar" />
     <ContextMenu v-if="ctx" :x="ctx.x" :y="ctx.y" @close="ctx = null" />
-    <SearchPalette v-if="searchOpen" @close="searchOpen = false" />
+    <CommandPalette v-if="palette.open" />
     <TerrainPanel />
     <Dialogs />
     <WelcomeTour />
@@ -27,7 +27,8 @@ import MainToolbar from './components/MainToolbar.vue';
 import RightPanels from './components/RightPanels.vue';
 import StatusBar from './components/StatusBar.vue';
 import ContextMenu from './components/ContextMenu.vue';
-import SearchPalette from './components/SearchPalette.vue';
+import CommandPalette from './components/CommandPalette.vue';
+import { palette, openPalette, closePalette } from './components/paletteState';
 import Dialogs from './components/Dialogs.vue';
 import TerrainPanel from './components/TerrainPanel.vue';
 import Icon from './components/Icon.vue';
@@ -43,7 +44,6 @@ provide(EDITOR, ed);
 (window as any).editor = ed; // handy for debugging in the console
 
 const ctx = ref<{ x: number; y: number } | null>(null);
-const searchOpen = ref(false);
 const statusBar = ref<InstanceType<typeof StatusBar> | null>(null);
 function openContext(p: { x: number; y: number }) { ctx.value = p; }
 
@@ -63,6 +63,28 @@ onMounted(() => {
   window.addEventListener('beforeunload', () => {
     autosave(ed);
   });
+  // command palette like VS Code / IntelliJ: Strg+Umschalt+P, F1, Strg+K or Umschalt twice
+  let lastShift = 0, otherKey = false;
+  window.addEventListener('keydown', e => {
+    const ctrl = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+    if ((ctrl && e.shiftKey && k === 'p') || (ctrl && !e.shiftKey && !e.altKey && k === 'k') || (e.key === 'F1' && !ctrl)) {
+      e.preventDefault(); e.stopPropagation();
+      if (palette.open) closePalette(); else openPalette();
+      return;
+    }
+    otherKey = e.key !== 'Shift';
+  }, true);
+  // Umschalt + mouse (pan, Umschalt+wheel orbit) must not count as a tap
+  window.addEventListener('pointerdown', () => { otherKey = true; }, true);
+  window.addEventListener('wheel', () => { otherKey = true; }, { capture: true, passive: true });
+  window.addEventListener('keyup', e => {
+    if (e.key !== 'Shift') return;
+    if (otherKey || e.ctrlKey || e.altKey || e.metaKey) { otherKey = false; lastShift = 0; return; }
+    const t = e.target as HTMLElement | null;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) && !palette.open) return;
+    const now = performance.now();
+    if (now - lastShift < 350) { lastShift = 0; if (!palette.open) openPalette(); } else lastShift = now;
+  }, true);
   // first start: show the welcome tour once the splash is gone
   if (!tourSeen() && !new URLSearchParams(location.search).has('shot')) setTimeout(() => openTour(), 2500);
 });

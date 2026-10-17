@@ -19,6 +19,7 @@ import { readBlend } from '../core/blend/blendScene';
 import type { Editor } from './editor';
 import { theme, setTheme, setScene } from '../theme';
 import { openTour } from '../components/tour';
+import { openPalette } from '../components/paletteState';
 import { measureView } from './measureView';
 import type { Entities, EntityRef } from '../core/model';
 import { Entities as EntitiesClass } from '../core/model';
@@ -457,6 +458,7 @@ export const COMMANDS: Command[] = [
   { id: 'sceneDay', label: '3D-Szene: Tag', group: 'Ansicht', run: () => setScene('day'), checked: () => theme.scene === 'day' },
   { id: 'sceneAuto', label: '3D-Szene wie Oberfläche', group: 'Ansicht', run: () => setScene('auto'), checked: () => theme.scene === 'auto' },
   { id: 'tour', label: 'Einführung anzeigen', group: 'Ansicht', run: () => openTour() },
+  { id: 'commandPalette', label: 'Befehlspalette…', shortcut: 'Strg+Umschalt+P', group: 'Ansicht', run: () => openPalette() },
   { id: 'toggleAxes', label: 'Achsen', group: 'Ansicht', run: ed => { ed.model.settings.axes = !ed.model.settings.axes; ed.invalidate(); }, checked: ed => ed.model.settings.axes },
   { id: 'toggleRulers', label: 'Maßstab an den Achsen', group: 'Ansicht', run: ed => { measureView.rulers = !measureView.rulers; ed.invalidate(); }, checked: () => measureView.rulers },
   { id: 'togglePeopleSize', label: 'Größe der Personen', group: 'Ansicht', run: ed => { measureView.people = !measureView.people; ed.invalidate(); }, checked: () => measureView.people },
