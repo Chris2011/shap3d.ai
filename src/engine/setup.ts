@@ -1,3 +1,4 @@
+import { shallowReactive } from 'vue';
 import { Editor } from './editor';
 import { SelectTool, LassoTool, EraserTool, PaintTool, SampleTool } from '../tools/select';
 import { LineTool, FreehandTool, RectangleTool, RotatedRectangleTool, CircleTool, Arc2Tool, ArcCenterTool, Arc3Tool } from '../tools/draw';
@@ -10,6 +11,9 @@ import { installDefaults } from './defaults';
 import { onThemeChange } from '../theme';
 
 export interface ToolInfo { id: string; name: string; key?: string; icon: string }
+
+/** ids of tools contributed by plugins (shown as extra group in the expanded toolset) */
+export const PLUGIN_TOOLS = shallowReactive<string[]>([]);
 
 export const TOOL_INFO: Record<string, ToolInfo> = {
   select: { id: 'select', name: 'Auswählen', key: 'Leertaste', icon: 'select' },
@@ -67,7 +71,8 @@ export const createEditor = (): Editor => {
   return editor;
 };
 
-const KEYS: Record<string, string> = { ' ': 'select', e: 'eraser', b: 'paint', l: 'line', a: 'arc2', r: 'rectangle', c: 'circle', p: 'pushpull', f: 'offset', m: 'move', q: 'rotate', s: 'scale', t: 'tape', o: 'orbit', h: 'pan', z: 'zoom' };
+/** single-key tool shortcuts (plugins may add free keys) */
+export const TOOL_SHORTCUTS: Record<string, string> = { ' ': 'select', e: 'eraser', b: 'paint', l: 'line', a: 'arc2', r: 'rectangle', c: 'circle', p: 'pushpull', f: 'offset', m: 'move', q: 'rotate', s: 'scale', t: 'tape', o: 'orbit', h: 'pan', z: 'zoom' };
 
 /** Global keyboard handling: shortcuts, VCB typing, tool keys. */
 export const installKeyboard = (editor: Editor, focusVcb: (initial: string) => void) => {
@@ -96,7 +101,7 @@ export const installKeyboard = (editor: Editor, focusVcb: (initial: string) => v
     }
     if (key.toLowerCase() === 'g' && !keyEvent.shiftKey) { keyEvent.preventDefault(); runCommand(editor, 'makeComponent'); return; }
     if (key.toLowerCase() === 'k' && !keyEvent.shiftKey) { editor.model.settings.style.backEdges = !editor.model.settings.style.backEdges; editor.invalidate(); return; }
-    const tool = KEYS[key.toLowerCase()];
+    const tool = TOOL_SHORTCUTS[key.toLowerCase()];
     if (tool && !keyEvent.shiftKey) { keyEvent.preventDefault(); editor.setTool(tool); return; }
   });
   window.addEventListener('keyup', keyEvent => { if (isTyping(keyEvent) || editor.ui.dialog) return; if (editor.tool.onKey(keyEvent, false)) { editor.redraw(); } });

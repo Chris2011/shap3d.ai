@@ -1,9 +1,10 @@
+import { shallowReactive } from 'vue';
 /**
  * Reference of the `s3d` scripting API – one entry per call, with a runnable example.
  * Used by the API info in the script editor, the plain-text help and the AI system prompt,
  * so keep it in sync with src/scripting/api.ts.
  */
-export type ApiCategory = 'Körper' | 'Flächen & Linien' | 'Flächen bearbeiten' | 'Gruppen & Komponenten' | 'Materialien' | 'Ansicht & Szene' | 'Hilfen';
+export type ApiCategory = 'Körper' | 'Flächen & Linien' | 'Flächen bearbeiten' | 'Gruppen & Komponenten' | 'Materialien' | 'Ansicht & Szene' | 'Hilfen' | 'Plugins';
 
 export interface ApiEntry {
   id: string;
@@ -18,9 +19,10 @@ export interface ApiEntry {
   returns?: string;
 }
 
-export const API_CATEGORIES: ApiCategory[] = ['Körper', 'Flächen & Linien', 'Flächen bearbeiten', 'Gruppen & Komponenten', 'Materialien', 'Ansicht & Szene', 'Hilfen'];
+export const API_CATEGORIES: ApiCategory[] = ['Körper', 'Flächen & Linien', 'Flächen bearbeiten', 'Gruppen & Komponenten', 'Materialien', 'Ansicht & Szene', 'Hilfen', 'Plugins'];
 
-export const API_CATALOG: ApiEntry[] = [
+/** reactive: plugins add their s3d extensions here (category "Plugins") */
+export const API_CATALOG = shallowReactive<ApiEntry[]>([
   // ---------------------------------------------------------------- solids
   { id: 'box', category: 'Körper', title: 'Quader', signature: "s3d.box(ecke, breite, tiefe, höhe, { material, name })", returns: 'Gruppe',
     desc: 'Quader ab der linken vorderen unteren Ecke. Breite = X, Tiefe = Y, Höhe = Z.',
@@ -166,9 +168,9 @@ export const API_CATALOG: ApiEntry[] = [
   { id: 'log', category: 'Hilfen', title: 'Ausgabe', signature: "s3d.log(…)   console.log(…)   s3d.stats()",
     desc: 'Schreibt in die Konsole unter dem Editor. s3d.stats() liefert Anzahl Flächen/Kanten.',
     example: "s3d.box([0, 0, 0], 1, 1, 1);\nsu.log('Flächen:', s3d.stats().faces);" },
-];
+]);
 
 /** Plain-text version (one line per call) – for the AI prompt and as fallback help. */
 export const catalogText = (cats: ApiCategory[] = API_CATEGORIES): string => {
-  return cats.map(category => `## ${category}\n` + API_CATALOG.filter(entry => entry.category === category).map(entry => `- ${entry.signature}${entry.returns ? ` → ${entry.returns}` : ''} – ${entry.desc}`).join('\n')).join('\n\n');
+  return cats.filter(category => API_CATALOG.some(entry => entry.category === category)).map(category => `## ${category}\n` + API_CATALOG.filter(entry => entry.category === category).map(entry => `- ${entry.signature}${entry.returns ? ` → ${entry.returns}` : ''} – ${entry.desc}`).join('\n')).join('\n\n');
 };

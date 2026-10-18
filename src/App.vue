@@ -39,6 +39,7 @@ import { createEditor, installKeyboard } from './engine/setup';
 import { EDITOR } from './components/keys';
 import { autosave } from './engine/defaults';
 import { importFile } from './engine/commands';
+import { initPlugins } from './plugins/registry';
 
 const editor = createEditor();
 provide(EDITOR, editor);
@@ -85,6 +86,8 @@ useEventListener(window, 'keyup', (event: KeyboardEvent) => {
 
 onMounted(() => {
   installKeyboard(editor, (firstKey) => statusBar.value?.focusVcb(firstKey));
+  // plugins need the viewer, which the viewport creates while mounting
+  initPlugins(editor).catch(error => console.error('Plugins konnten nicht geladen werden', error));
   // first start: show the welcome tour once the splash is gone
   if (!tourSeen() && !new URLSearchParams(location.search).has('shot')) setTimeout(() => openTour(), 2500);
 });

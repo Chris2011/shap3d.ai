@@ -46,6 +46,7 @@ const items: Item[] = [
   { label: 'Ansicht', icon: 'display', sub: 'Ansicht' },
   { label: 'Kamera', icon: 'camera', sub: 'Kamera' },
   { label: 'Volumenkörper', icon: 'solid', sub: 'Volumenkörper' },
+  { label: 'Plugins', icon: 'plugin', sub: 'Plugins' },
   { sep: true },
   { label: 'Drucken', icon: 'print', cmd: 'print' },
   { label: 'Befehlspalette…', icon: 'search', cmd: 'commandPalette' },

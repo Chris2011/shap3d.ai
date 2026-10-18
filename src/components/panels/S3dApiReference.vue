@@ -70,7 +70,7 @@ type Tab = 'Alle' | 'Formen' | 'Flächen' | 'Gruppen' | 'Materialien' | 'Ansicht
 const TABS: Tab[] = ['Alle', 'Formen', 'Flächen', 'Gruppen', 'Materialien', 'Ansicht', 'Hilfen'];
 const TAB_CATS: Record<Tab, ApiCategory[]> = {
   Alle: API_CATEGORIES, Formen: ['Körper'], Flächen: ['Flächen & Linien', 'Flächen bearbeiten'], Gruppen: ['Gruppen & Komponenten'],
-  Materialien: ['Materialien'], Ansicht: ['Ansicht & Szene'], Hilfen: ['Hilfen'],
+  Materialien: ['Materialien'], Ansicht: ['Ansicht & Szene'], Hilfen: ['Hilfen', 'Plugins'],
 };
 
 const query = ref(''); const tab = ref<Tab>('Alle'); const copiedId = ref('');

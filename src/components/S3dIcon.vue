@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { extraIcons } from './iconRegistry';
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 24 });
 
 const STROKE = 'stroke="currentColor" stroke-width="1.6"';
@@ -106,8 +107,9 @@ const ICONS: Record<string, string> = {
   import: `<path d="M12 14V3M7 9l5 5 5-5M4 15v5h16v-5" ${STROKE}/>`,
   export: `<path d="M12 3v11M7 8l5-5 5 5M4 15v5h16v-5" ${STROKE}/>`,
   camera: `<path d="M4 8h3l2-2.5h6L17 8h3v11H4z" ${STROKE}/><circle cx="12" cy="13" r="3.5" ${STROKE}/>`,
+  plugin: `<path d="M9 3v4M15 3v4" ${STROKE}/><path d="M6 7h12v4a6 6 0 0 1-12 0z" style="fill:var(--s3d-icon-fill)" ${STROKE}/><path d="M12 17v4" ${STROKE_BLUE}/>`,
   cube: `<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" ${STROKE}/><path d="M4 7.5l8 4.5 8-4.5M12 12v9" ${STROKE}/>`,
 };
 
-const svg = computed(() => ICONS[props.name] ?? ICONS.cube);
+const svg = computed(() => ICONS[props.name] ?? extraIcons[props.name] ?? ICONS.cube);
 </script>

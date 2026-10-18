@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import S3dIcon from './S3dIcon.vue';
 import { useEditor } from './keys';
-import { TOOL_INFO } from '../engine/setup';
+import { TOOL_INFO, PLUGIN_TOOLS } from '../engine/setup';
 import { runCommand } from '../engine/commands';
 
 const emit = defineEmits<{ (event: 'close'): void }>();
@@ -28,6 +28,7 @@ const groups: Cell[][] = [
   [toolCell('offset'), toolCell('followme'), toolCell('terrain'), commandCell('flipx', 'Spiegeln', 'flip', 'flipX'), commandCell('outershell', 'Äußere Schale', 'solid', 'solid-outershell'), commandCell('sintersect', 'Verschneiden', 'union', 'solid-intersect'), commandCell('union', 'Vereinigen', 'union', 'solid-union'), commandCell('subtract', 'Entfernen', 'subtract', 'solid-subtract'), commandCell('trim', 'Abschneiden', 'subtract', 'solid-trim'), commandCell('split', 'Teilen', 'solid', 'solid-split')],
   [toolCell('dimension'), toolCell('protractor'), toolCell('text'), toolCell('section'), commandCell('makeGroup', 'Gruppe', 'group', 'makeGroup'), commandCell('makeComponent', 'Komponente', 'component', 'makeComponent')],
   [toolCell('zoom'), commandCell('zoomExtents', 'Alles zeigen', 'zoomext', 'zoomExtents'), toolCell('zoomwindow'), toolCell('poscam'), toolCell('lookaround'), toolCell('walk')],
+  ...(PLUGIN_TOOLS.length ? [PLUGIN_TOOLS.map(toolCell)] : []),
 ];
 const pick = (cell: Cell) => {
   emit('close');

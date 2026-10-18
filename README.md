@@ -48,6 +48,8 @@
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
 - [Connecting a local AI model](#connecting-a-local-ai-model)
 - [Scripting example](#scripting-example)
+- [Writing plugins](#writing-plugins)
+  - [The `context` API](#the-context-api)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
 - [Credits](#credits)
@@ -63,6 +65,7 @@
 - **Polygon inspector** – see every vertex and triangle, change the segment count of round shapes, subdivide or simplify any mesh.
 - **Command palette like in VS Code or IntelliJ** – <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, <kbd>F1</kbd> or <kbd>Shift</kbd> twice finds every tool, command, panel, switch, material, scene and object in one fuzzy search.
 - **Measuring aids** – rulers on the axes that switch from metres to centimetres to millimetres as you zoom in, and reference people that show their height.
+- **Plugin system** – extend the app with plain JavaScript modules: commands, tools, panels, script commands, file importers and exporters, overlay drawings. Switch them on and off in the plugin manager; three examples are included.
 - **Welcome tour** – six short animated steps on the first start, available again any time from the menu.
 - **Dark mode with a real night scene**, a split button for every combination, and a German user interface.
 
@@ -257,6 +260,63 @@ s3d.zoomExtents();
 
 Older scripts written with `su.` or `fw.` keep working – both are aliases of `s3d`.
 
+## Writing plugins
+
+A plugin is a plain JavaScript **ES module** whose default export describes the plugin and has an `activate(context)` function. No build step and no server are needed. You load the `.js` file in the **Plugins** panel (*Plugin-Datei laden…*); it is stored in your browser and started again with every app start. Everything a plugin registers through `context` is removed automatically when it is switched off or removed.
+
+> Plugins run with full access to the app (like a browser extension). Only install plugins whose source you trust – the plugin manager can download the source of every installed plugin.
+
+```js
+// hello-plugin.js
+export default {
+  id: 'hello',                 // unique: a–z, 0–9 and -
+  name: 'Hallo Welt',
+  version: '1.0.0',
+  description: 'Shows how a plugin works.',
+
+  activate(context) {
+    // a command – appears in the Plugins menu and in the command palette
+    context.commands.register({
+      id: 'greet',
+      label: 'Hallo sagen',
+      run: editor => context.ui.toast(`Das Modell hat ${editor.model.root.faces.size} Flächen`),
+    });
+
+    // a new script command: s3d.pillar(height) in the script editor
+    context.script.extend('pillar', (api, height = 2) => api.cylinder([0, 0, 0], 0.2, height), {
+      signature: 's3d.pillar(höhe)', description: 'Eine Säule am Ursprung.',
+    });
+  },
+};
+```
+
+### The `context` API
+
+| Area | Call | What it does |
+|---|---|---|
+| Commands | `commands.register({ id, label, run, group?, icon?, shortcut?, keywords?, checked?, enabled? })` | Adds a command to the main menu (*Plugins*, or another `group`) and to the command palette. With `checked` it becomes a switch; `shortcut` is only shown as a hint. |
+| Tools | `tools.register({ id, name, icon?, key?, create: editor => tool })` | Adds an interactive tool to the expanded toolset and the palette. Subclass `context.classes.PointTool` for snapping (`this.pick(pointer, from)`) or `context.classes.Tool` for anything else. `key` is a single-key shortcut, used only when no other tool has it. |
+| Panels | `panels.register({ id, label, icon?, width?, mount(element) })` or `{ …, component }` | A side panel. `mount` fills a plain DOM element (return a clean-up function if needed); `component` takes a Vue component – `context.vue` exposes `h`, `ref`, `computed`, `defineComponent` … to write one without a bundler. Plugin panels open from the Plugins menu, the palette and the plugin manager. |
+| Script API | `script.extend(name, (api, ...args) => …, { signature?, description?, example? })`, `script.run(code)` | Adds `s3d.<name>(…)` to the scripting API and lists it in the API reference (*Hilfen* tab). `script.run` runs a script as one undo step. |
+| Files | `files.registerImporter({ extensions, label, import(file, editor) })` | Opens new file types through *Importieren…* and drag & drop. |
+| | `files.registerExporter({ id, label, fileName(editor), mimeType?, export(editor) })` | Adds *Exportieren: …* to the export menu; `export` returns a string or a `Blob`. |
+| Drawing | `overlay.draw((overlay, editor) => …)` | Draws on the 2D overlay above the 3D view on every redraw (`overlay.line`, `overlay.text`, `overlay.context` for the raw canvas). |
+| Icons | `icons.register(name, svgContent)` | An icon for commands, tools and panels (inner SVG markup for a 24 × 24 view box). |
+| Events | `events.onToolChange(listener)`, `events.onNewModel(listener)` | React to tool changes and new models. |
+| Storage | `storage.get(key, fallback)`, `storage.set(key, value)` | JSON settings, kept per plugin in the browser. |
+| UI | `ui.toast(text)`, `ui.prompt(title, value?)`, `ui.confirm(title)` | Messages and simple dialogs. |
+| Model | `editor`, `THREE`, `newId()` | The full editor (model, selection, viewer; `editor.commit(label, change)` makes one undo step) and three.js. |
+
+Every `register…` call returns a function that removes the registration early. `onDispose(fn)` adds your own clean-up, and an optional `deactivate()` on the plugin runs when it is switched off. If `activate` throws, everything it registered so far is removed and the error is shown in the plugin manager.
+
+The three bundled examples in [`src/plugins/examples/`](src/plugins/examples) can be installed from the plugin manager and cover all extension points:
+
+- **Würfelraster** (`grid-generator.js`) – a command with an input dialog, a DOM panel and the script command `s3d.boxGrid()`.
+- **Koordinaten & Hilfspunkte** (`cursor-coordinates.js`) – an overlay with the coordinates of the snapped point, a toggle command and the tool *Hilfspunkt* (key <kbd>J</kbd>) built on `PointTool`.
+- **Stückliste & Punktimport** (`parts-list.js`) – a CSV parts-list exporter and an importer for `.xyz`/`.pts` point lists.
+
+Type definitions for the whole API are in [`src/plugins/types.ts`](src/plugins/types.ts); reference them with `/** @type {import('./types').S3dPlugin} */` for autocompletion in your editor.
+
 ## Project structure
 
 ```
@@ -265,6 +325,7 @@ src/
   engine/      editor state, undo, three.js viewer, camera, inference, commands
   tools/       interactive tools (draw, modify, select, construct, terrain)
   scripting/   s3d API, API catalog, examples, OBJ import, resolution changes
+  plugins/     plugin system – the plugin API (types), context, loader/registry, example plugins
   ai/          providers, prompts, agent, chat history, Hugging Face search
   terrain/     live terrain sculpting session
   components/  Vue UI – toolbars, panels, dialogs, AI chat, terrain window, command palette, welcome tour

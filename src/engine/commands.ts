@@ -25,8 +25,10 @@ import type { Entities, EntityRef } from '../core/model';
 import { Entities as EntitiesClass } from '../core/model';
 import type { FaceStyle } from '../core/document';
 import { solidOp, isSolid, type SolidOp } from '../core/solids';
+import { pluginImporters } from '../plugins/fileFormats';
+import { showPanel } from '../components/panelState';
 
-export interface Command { id: string; label: string; shortcut?: string; group: string; run: (editor: Editor) => void; enabled?: (editor: Editor) => boolean; checked?: (editor: Editor) => boolean }
+export interface Command { id: string; label: string; shortcut?: string; group: string; icon?: string; keywords?: string; run: (editor: Editor) => void; enabled?: (editor: Editor) => boolean; checked?: (editor: Editor) => boolean }
 
 // ------------------------------------------------------------ file helpers
 export const download = (name: string, data: Blob | string, type = 'application/octet-stream') => {
@@ -168,6 +170,8 @@ const loadForeign = async (ext: string, file: File): Promise<{ object: THREE.Obj
 
 export const importFile = async (editor: Editor, file: File) => {
   const ext = file.name.split('.').pop()!.toLowerCase();
+  const pluginImporter = pluginImporters.get(ext);
+  if (pluginImporter) { await pluginImporter.import(file, editor); editor.invalidate(); return; }
   if (ext === 'json') { const json = JSON.parse(await file.text()); if (typeof json.format === 'string' && json.format.startsWith('shap3d/')) { editor.loadJSON(json); editor.model.name = file.name.replace(/\.(shap3d|formwerk|suv)\.json$|\.json$/i, ''); return; } throw new Error('Unbekanntes JSON-Format'); }
   if (ext === 'max') throw new Error('3ds-Max-Dateien (.max) kann nur 3ds Max selbst lesen – dort über Datei › Exportieren als FBX (oder .3ds/.obj) speichern und diese Datei importieren.');
   const { object: obj, upY, scale: fixedScale } = await loadForeign(ext, file);
@@ -400,11 +404,11 @@ export const setFaceStyle = (editor: Editor, style: FaceStyle) => { editor.model
 export const COMMANDS: Command[] = [
   // file
   { id: 'new', label: 'Neu', shortcut: 'Strg+N', group: 'Datei', run: async editor => { if (editor.ui.saved || await editor.confirm('Ungespeicherte Änderungen verwerfen?')) editor.newModel(); } },
-  { id: 'open', label: 'Öffnen…', shortcut: 'Strg+O', group: 'Datei', run: async editor => { const file = await pickFile('.json,.shap3d.json,application/json'); if (file) await importFile(editor, file).catch(ext => editor.toast(String(ext.message ?? ext))); } },
+  { id: 'open', label: 'Öffnen…', shortcut: 'Strg+O', group: 'Datei', run: async editor => { const file = await pickFile('.json,.shap3d.json,application/json'); if (file) await importFile(editor, file).catch(error => editor.toast(String(error.message ?? error))); } },
   { id: 'save', label: 'Speichern (Download)', shortcut: 'Strg+S', group: 'Datei', run: editor => exportAs(editor, 'json') },
   { id: 'saveLocal', label: 'Im Browser speichern', group: 'Datei', run: editor => { try { localStorage.setItem('s3d:saved', JSON.stringify(editor.model.toJSON())); editor.ui.saved = true; editor.toast('Im Browser gespeichert'); } catch { editor.toast('Speichern fehlgeschlagen'); } } },
   { id: 'loadLocal', label: 'Aus Browser laden', group: 'Datei', run: editor => { try { const saved = localStorage.getItem('s3d:saved'); if (saved) editor.loadJSON(JSON.parse(saved)); else editor.toast('Kein gespeichertes Modell'); } catch { editor.toast('Laden fehlgeschlagen'); } } },
-  { id: 'import', label: 'Importieren (DAE, FBX, 3DS, OBJ, STL, glTF …)…', group: 'Datei', run: async editor => { const file = await pickFile(IMPORT_EXTS.map(ext => '.' + ext).join(',')); if (file) await importFile(editor, file).catch(error => editor.toast(String(error.message ?? error))); } },
+  { id: 'import', label: 'Importieren (DAE, FBX, 3DS, OBJ, STL, glTF …)…', group: 'Datei', run: async editor => { const file = await pickFile([...IMPORT_EXTS, ...pluginImporters.keys()].map(ext => '.' + ext).join(',')); if (file) await importFile(editor, file).catch(error => editor.toast(String(error.message ?? error))); } },
   { id: 'export-glb', label: 'Exportieren: GLB', group: 'Datei', run: editor => exportAs(editor, 'glb') },
   { id: 'export-gltf', label: 'Exportieren: glTF', group: 'Datei', run: editor => exportAs(editor, 'gltf') },
   { id: 'export-stl', label: 'Exportieren: STL', group: 'Datei', run: editor => exportAs(editor, 'stl') },
@@ -459,6 +463,7 @@ export const COMMANDS: Command[] = [
   { id: 'sceneAuto', label: '3D-Szene wie Oberfläche', group: 'Ansicht', run: () => setScene('auto'), checked: () => theme.scene === 'auto' },
   { id: 'tour', label: 'Einführung anzeigen', group: 'Ansicht', run: () => openTour() },
   { id: 'commandPalette', label: 'Befehlspalette…', shortcut: 'Strg+Umschalt+P', group: 'Ansicht', run: () => openPalette() },
+  { id: 'managePlugins', label: 'Plugins verwalten…', group: 'Plugins', run: () => showPanel('plugins') },
   { id: 'toggleAxes', label: 'Achsen', group: 'Ansicht', run: editor => { editor.model.settings.axes = !editor.model.settings.axes; editor.invalidate(); }, checked: editor => editor.model.settings.axes },
   { id: 'toggleRulers', label: 'Maßstab an den Achsen', group: 'Ansicht', run: editor => { measureView.rulers = !measureView.rulers; editor.invalidate(); }, checked: () => measureView.rulers },
   { id: 'togglePeopleSize', label: 'Größe der Personen', group: 'Ansicht', run: editor => { measureView.people = !measureView.people; editor.invalidate(); }, checked: () => measureView.people },

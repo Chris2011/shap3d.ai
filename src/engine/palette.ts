@@ -40,10 +40,10 @@ const SYNONYMS: Record<string, string> = {
   save: 'speichern save download', open: 'öffnen open laden', new: 'neu new leeres modell', import: 'import einlesen datei',
   toggleRulers: 'lineal ruler maße mm cm', togglePeopleSize: 'höhe figur person maß', toggleAxes: 'achsen axes', toggleShadows: 'schatten shadows sonne',
   xray: 'röntgen xray durchsichtig transparent', zoomExtents: 'alles zeigen fit zoom', terrain: 'gelände berge landschaft terrain',
-  tour: 'hilfe einführung tour wizard', commandPalette: 'palette befehle suchen',
+  tour: 'hilfe einführung tour wizard', managePlugins: 'plugin erweiterung addon extension', commandPalette: 'palette befehle suchen',
 };
 
-const GROUP_ICON: Record<string, string> ={ Datei: 'file', Bearbeiten: 'select', Ansicht: 'display', Kamera: 'camera', Volumenkörper: 'solid', Zeichnen: 'line', Werkzeuge: 'tape' };
+const GROUP_ICON: Record<string, string> ={ Datei: 'file', Bearbeiten: 'select', Ansicht: 'display', Kamera: 'camera', Volumenkörper: 'solid', Zeichnen: 'line', Werkzeuge: 'tape', Plugins: 'plugin' };
 
 export const paletteItems = (editor: Editor): PaletteItem[] => {
   const out: PaletteItem[] = [];
@@ -60,7 +60,7 @@ export const paletteItems = (editor: Editor): PaletteItem[] => {
   // commands (menus)
   for (const command of COMMANDS) {
     out.push({
-      id: 'c:' + command.id, label: command.label, group: command.group, icon: GROUP_ICON[command.group] ?? 'chevron', shortcut: command.shortcut, keywords: `${command.id} ${SYNONYMS[command.id] ?? ''}`,
+      id: 'c:' + command.id, label: command.label, group: command.group, icon: command.icon ?? GROUP_ICON[command.group] ?? 'chevron', shortcut: command.shortcut, keywords: `${command.id} ${SYNONYMS[command.id] ?? ''} ${command.keywords ?? ''}`,
       checked: command.checked ? () => !!command.checked!(editor) : undefined,
       enabled: command.enabled ? () => command.enabled!(editor) : undefined,
       run: () => runCommand(editor, command.id),
@@ -68,7 +68,7 @@ export const paletteItems = (editor: Editor): PaletteItem[] => {
   }
 
   // panels
-  for (const panel of PANEL_INFO) {
+  for (const panel of PANEL_INFO.filter(candidate => candidate.tile !== false)) { // tile-less (plugin) panels come with their own command
     out.push({ id: 'p:' + panel.id, label: panel.label, group: 'Panel', icon: panel.icon, keywords: 'panel fenster öffnen ' + panel.id, checked: () => openPanel.value === panel.id, run: () => togglePanel(panel.id) });
   }
 
