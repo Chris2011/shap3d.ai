@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { reactive, watch } from 'vue';
+import { reactive } from 'vue';
+import { useStorage } from '@vueuse/core';
 import type { Overlay } from './overlay';
 import type { Editor } from './editor';
 import { theme } from '../theme';
@@ -10,15 +11,11 @@ import { formatLength } from '../core/units';
  *  - rulers: tick marks along the axes that get finer while zooming in (m → 10 cm → cm → mm)
  *  - people: height dimension next to every reference person
  */
-const KEY = 's3d:measure';
+// README screenshots start without them and don't touch the stored setting
 const shotMode = new URLSearchParams(location.search).has('shot');
-function load() {
-  const d = { rulers: !shotMode, people: !shotMode };
-  if (shotMode) return d;
-  try { return { ...d, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }; } catch { return d; }
-}
-export const measureView = reactive<{ rulers: boolean; people: boolean }>(load());
-watch(measureView, v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* storage unavailable */ } });
+export const measureView: { rulers: boolean; people: boolean } = shotMode
+  ? reactive({ rulers: false, people: false })
+  : useStorage('s3d:measure', { rulers: true, people: true }, undefined, { mergeDefaults: true }).value;
 
 const STEPS = [100, 10, 1, 0.1, 0.01, 0.001];
 const MIN_TICK = 7;    // px between neighbouring ticks of one level

@@ -9,8 +9,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "lib": ["ES2021", "DOM"],
-    "types": ["vite/client", "three"]
+    "lib": ["ES2021", "DOM", "ESNext.Temporal"],
+    "types": ["vite/client", "three", "web-bluetooth"]
   },
   "include": ["src"]
 }

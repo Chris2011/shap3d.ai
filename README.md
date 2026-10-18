@@ -268,6 +268,10 @@ src/
   ai/          providers, prompts, agent, chat history, Hugging Face search
   terrain/     live terrain sculpting session
   components/  Vue UI – toolbars, panels, dialogs, AI chat, terrain window, command palette, welcome tour
+               (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components)
+  components/ui/  small reusable building blocks – S3dModalDialog, S3dToggleSwitch, S3dSegmentedControl, S3dProgressBar, S3dCloseButton
+  composables/ reusable stateful logic – useModel/useSelection, usePopover, useScripts (built on VueUse)
+  utils/       pure helper functions – e.g. material swatches
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo and README screenshots
 scripts/       screenshot automation (headless Chrome)
