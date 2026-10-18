@@ -72,7 +72,7 @@ const kindOk = (item: PaletteItem) => {
 };
 
 const rows = computed<Row[]>(() => {
-  void tick.value; void editor.ui.rev;
+  void tick.value; void editor.ui.revision;
   const query = text.value;
   const make = (item: PaletteItem, hits: number[] = [], header?: string): Row =>
     ({ item: item, segs: segments(item.label, hits), header, state: !!item.checked?.(), disabled: !!item.enabled && !item.enabled() });

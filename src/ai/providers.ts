@@ -39,14 +39,14 @@ export interface AiConfig { provider: ProviderId; baseUrl: string; apiKey: strin
   fast: boolean }
 
 const KEY = 's3d:ai';
-function load(): AiConfig {
-  try { const j = JSON.parse(localStorage.getItem(KEY) ?? 'null'); if (j && PROVIDERS.some(p => p.id === j.provider)) return { autoRun: true, fast: false, ...j }; } catch { /* storage unavailable */ }
+const load = (): AiConfig => {
+  try { const stored = JSON.parse(localStorage.getItem(KEY) ?? 'null'); if (stored && PROVIDERS.some(provider => provider.id === stored.provider)) return { autoRun: true, fast: false, ...stored }; } catch { /* storage unavailable */ }
   return { provider: 'ollama', baseUrl: PROVIDERS[0].baseUrl, apiKey: '', model: '', configured: false, autoRun: true, fast: false };
-}
+};
 export const aiConfig = reactive<AiConfig>(load());
-watch(aiConfig, v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* ignore */ } }, { deep: true });
+watch(aiConfig, config => { try { localStorage.setItem(KEY, JSON.stringify(config)); } catch { /* ignore */ } }, { deep: true });
 
-export const providerInfo = (id: ProviderId) => PROVIDERS.find(p => p.id === id)!;
+export const providerInfo = (id: ProviderId) => PROVIDERS.find(provider => provider.id === id)!;
 
 export interface ChatMsg { role: 'user' | 'assistant'; content: string }
 
@@ -54,61 +54,61 @@ export interface ChatMsg { role: 'user' | 'assistant'; content: string }
  * fetch that falls back to the Vite dev proxy (/__ai_proxy) when the browser blocks the request
  * (CORS). The proxy only exists while running `npm run dev`.
  */
-async function aiFetch(url: string, init: RequestInit): Promise<Response> {
+const aiFetch = async (url: string, init: RequestInit): Promise<Response> => {
   try { return await fetch(url, init); }
-  catch (e) {
-    if (!import.meta.env.DEV || init.signal?.aborted) throw e;
+  catch (error) {
+    if (!import.meta.env.DEV || init.signal?.aborted) throw error;
     const headers = new Headers(init.headers); headers.set('x-ai-target', url);
     return fetch('/__ai_proxy', { ...init, headers });
   }
-}
+};
 
-function openaiHeaders(cfg: AiConfig): Record<string, string> {
-  const h: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (cfg.apiKey) h.Authorization = `Bearer ${cfg.apiKey}`;
-  return h;
-}
+const openaiHeaders = (cfg: AiConfig): Record<string, string> => {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (cfg.apiKey) headers.Authorization = `Bearer ${cfg.apiKey}`;
+  return headers;
+};
 
 /** Available model ids for the configured provider. */
-export async function listModels(cfg: AiConfig): Promise<string[]> {
-  const r = await aiFetch(cfg.baseUrl.replace(/\/$/, '') + '/models', { headers: openaiHeaders(cfg) });
-  if (!r.ok) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
-  const j = await r.json();
-  return (j.data ?? j.models ?? []).map((m: any) => m.id ?? m.name).filter(Boolean).sort();
-}
+export const listModels = async (cfg: AiConfig): Promise<string[]> => {
+  const response = await aiFetch(cfg.baseUrl.replace(/\/$/, '') + '/models', { headers: openaiHeaders(cfg) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200)}`);
+  const data = await response.json();
+  return (data.data ?? data.models ?? []).map((model: any) => model.id ?? model.name).filter(Boolean).sort();
+};
 
 /** Stream a chat completion; calls onText for every text delta and resolves with the full answer. */
 export interface ChatOptions { numCtx?: number; numPredict?: number; temperature?: number }
 
 /** Ollama's native chat API – the only way to set a larger context window (default is just 2048 tokens). */
-async function chatOllama(cfg: AiConfig, system: string, messages: ChatMsg[], onText: (t: string) => void, signal: AbortSignal, o: ChatOptions): Promise<string> {
-  const options: Record<string, number> = { num_ctx: o.numCtx ?? 16384 };
-  if (o.temperature != null) options.temperature = o.temperature;
-  if (o.numPredict != null) options.num_predict = o.numPredict;
+const chatOllama = async (cfg: AiConfig, system: string, messages: ChatMsg[], onText: (text: string) => void, signal: AbortSignal, chatOptions: ChatOptions): Promise<string> => {
+  const options: Record<string, number> = { num_ctx: chatOptions.numCtx ?? 16384 };
+  if (chatOptions.temperature != null) options.temperature = chatOptions.temperature;
+  if (chatOptions.numPredict != null) options.num_predict = chatOptions.numPredict;
   const msgs = system ? [{ role: 'system', content: system }, ...messages] : messages;
-  const r = await aiFetch(ollamaRoot(cfg) + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal, body: JSON.stringify({ model: cfg.model, stream: true, messages: msgs, options }) });
-  if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 300)}`);
-  const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = '', full = '';
+  const response = await aiFetch(ollamaRoot(cfg) + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal, body: JSON.stringify({ model: cfg.model, stream: true, messages: msgs, options }) });
+  if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
+  const reader = response.body.getReader(); const dec = new TextDecoder(); let buf = '', full = '';
   for (;;) {
     const { done, value } = await reader.read(); if (done) break;
     buf += dec.decode(value, { stream: true }); let i: number;
     while ((i = buf.indexOf('\n')) >= 0) {
       const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (!line) continue;
-      const j = JSON.parse(line); if (j.error) throw new Error(j.error);
-      const t = j.message?.content; if (t) { full += t; onText(t); }
+      const data = JSON.parse(line); if (data.error) throw new Error(data.error);
+      const text = data.message?.content; if (text) { full += text; onText(text); }
     }
   }
   return full;
-}
+};
 
-export async function chat(cfg: AiConfig, system: string, messages: ChatMsg[], onText: (t: string) => void, signal: AbortSignal, opts: ChatOptions = {}): Promise<string> {
+export const chat = async (cfg: AiConfig, system: string, messages: ChatMsg[], onText: (text: string) => void, signal: AbortSignal, opts: ChatOptions = {}): Promise<string> => {
   if (cfg.provider === 'ollama') return chatOllama(cfg, system, messages, onText, signal, opts);
-  const r = await aiFetch(cfg.baseUrl.replace(/\/$/, '') + '/chat/completions', {
+  const response = await aiFetch(cfg.baseUrl.replace(/\/$/, '') + '/chat/completions', {
     method: 'POST', headers: openaiHeaders(cfg), signal,
     body: JSON.stringify({ model: cfg.model, stream: true, temperature: opts.temperature ?? 0.2, ...(opts.numPredict ? { max_tokens: opts.numPredict } : {}), messages: system ? [{ role: 'system', content: system }, ...messages] : messages }),
   });
-  if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 300)}`);
-  const reader = r.body.getReader(); const dec = new TextDecoder();
+  if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
+  const reader = response.body.getReader(); const dec = new TextDecoder();
   let buf = '', full = '';
   for (;;) {
     const { done, value } = await reader.read(); if (done) break;
@@ -118,19 +118,19 @@ export async function chat(cfg: AiConfig, system: string, messages: ChatMsg[], o
       const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
       if (!line.startsWith('data:')) continue;
       const data = line.slice(5).trim(); if (data === '[DONE]') continue;
-      try { const t = JSON.parse(data).choices?.[0]?.delta?.content; if (t) { full += t; onText(t); } } catch { /* partial line */ }
+      try { const text = JSON.parse(data).choices?.[0]?.delta?.content; if (text) { full += text; onText(text); } } catch { /* partial line */ }
     }
   }
   return full;
-}
+};
 
 /** Human-readable error message. */
-export function describeError(e: unknown): string {
-  const m = (e as Error)?.message ?? String(e);
-  if (/HTTP 404/.test(m)) return 'Modell nicht gefunden. Bei Ollama installieren mit: ollama pull <modell>';
-  if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'Server nicht erreichbar. Läuft er? Bei lokalen Servern ggf. CORS erlauben (Ollama: OLLAMA_ORIGINS="*").';
-  return m;
-}
+export const describeError = (error: unknown): string => {
+  const message = (error as Error)?.message ?? String(error);
+  if (/HTTP 404/.test(message)) return 'Modell nicht gefunden. Bei Ollama installieren mit: ollama pull <modell>';
+  if (/Failed to fetch|NetworkError|Load failed/i.test(message)) return 'Server nicht erreichbar. Läuft er? Bei lokalen Servern ggf. CORS erlauben (Ollama: OLLAMA_ORIGINS="*").';
+  return message;
+};
 
 /** How the assistant talks to a model: "code" writes s3d-API scripts, "mesh" returns OBJ meshes (LLaMA-Mesh). */
 export type ModelMode = 'code' | 'mesh';
@@ -148,17 +148,17 @@ export const MODEL_PRESETS: ModelPreset[] = [
 ];
 
 /** Small models (≤ 3B) are only worth it for speed – switching to one turns fast mode on. */
-export const isSmallModel = (model: string) => MODEL_PRESETS.some(p => p.fast && p.id === model) || /[:-](0\.5|1\.5|1\.7|1|2|3)b\b/i.test(model);
-watch(() => aiConfig.model, (m, old) => {
-  if (m && m !== old && isSmallModel(m)) aiConfig.fast = true;
-  if (old && m !== old) void unloadModel(aiConfig, old);
+export const isSmallModel = (model: string) => MODEL_PRESETS.some(preset => preset.fast && preset.id === model) || /[:-](0\.5|1\.5|1\.7|1|2|3)b\b/i.test(model);
+watch(() => aiConfig.model, (model, old) => {
+  if (model && model !== old && isSmallModel(model)) aiConfig.fast = true;
+  if (old && model !== old) void unloadModel(aiConfig, old);
 });
 
 /**
  * Ollama keeps every used model in RAM for 5 minutes (and several at once) – on a switch the old one
  * is released right away (keep_alive 0). It only frees memory; the model stays on disk.
  */
-export async function unloadModel(cfg: AiConfig, model: string) {
+export const unloadModel = async (cfg: AiConfig, model: string) => {
   if (cfg.provider !== 'ollama') return;
   // LLaMA-Mesh actually runs under its alias (see ensureMeshModel)
   const names = modeFor(model) === 'mesh' ? [model, MESH_ALIAS] : [model];
@@ -166,12 +166,12 @@ export async function unloadModel(cfg: AiConfig, model: string) {
     try { await aiFetch(ollamaRoot(cfg) + '/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: name, keep_alive: 0 }) }); }
     catch { /* server offline or model unknown – nothing to free */ }
   }
-}
+};
 
-export function modeFor(model: string): ModelMode { return /mesh/i.test(model) ? 'mesh' : 'code'; }
+export const modeFor = (model: string): ModelMode => { return /mesh/i.test(model) ? 'mesh' : 'code'; };
 
 /** Ollama's native API root (…/v1 stripped). */
-export function ollamaRoot(cfg: AiConfig) { return cfg.baseUrl.replace(/\/v1\/?$/, ''); }
+export const ollamaRoot = (cfg: AiConfig) => { return cfg.baseUrl.replace(/\/v1\/?$/, ''); };
 
 export interface PullProgress {
   status: string;      // German status text
@@ -192,59 +192,59 @@ const PULL_STATUS: [RegExp, string, PullProgress['phase']][] = [
 ];
 
 /** Download a model through Ollama (POST /api/pull) – sums all layers and estimates speed and remaining time. */
-export async function pullModel(cfg: AiConfig, name: string, onProgress: (p: PullProgress) => void, signal?: AbortSignal) {
-  const r = await aiFetch(ollamaRoot(cfg) + '/api/pull', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: name, stream: true }), signal });
-  if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
+export const pullModel = async (cfg: AiConfig, name: string, onProgress: (progress: PullProgress) => void, signal?: AbortSignal) => {
+  const response = await aiFetch(ollamaRoot(cfg) + '/api/pull', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: name, stream: true }), signal });
+  if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200)}`);
   const layers = new Map<string, { completed: number; total: number }>();
   let speed = 0, lastT = performance.now(), lastBytes = 0;
-  const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = '';
+  const reader = response.body.getReader(); const dec = new TextDecoder(); let buf = '';
   for (;;) {
     const { done, value } = await reader.read(); if (done) break;
     buf += dec.decode(value, { stream: true }); let i: number;
     while ((i = buf.indexOf('\n')) >= 0) {
       const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (!line) continue;
-      const j = JSON.parse(line); if (j.error) throw new Error(j.error);
-      if (j.digest && j.total) layers.set(j.digest, { completed: j.completed ?? 0, total: j.total });
-      let completed = 0, total = 0; for (const l of layers.values()) { completed += l.completed; total += l.total; }
-      const now = performance.now(), dt = (now - lastT) / 1000;
-      if (dt >= 0.5) { const inst = Math.max(0, completed - lastBytes) / dt; speed = speed ? speed * 0.7 + inst * 0.3 : inst; lastT = now; lastBytes = completed; }
-      const st = String(j.status ?? ''); const m = PULL_STATUS.find(([re]) => re.test(st));
+      const data = JSON.parse(line); if (data.error) throw new Error(data.error);
+      if (data.digest && data.total) layers.set(data.digest, { completed: data.completed ?? 0, total: data.total });
+      let completed = 0, total = 0; for (const layer of layers.values()) { completed += layer.completed; total += layer.total; }
+      const now = performance.now(), elapsed = (now - lastT) / 1000;
+      if (elapsed >= 0.5) { const inst = Math.max(0, completed - lastBytes) / elapsed; speed = speed ? speed * 0.7 + inst * 0.3 : inst; lastT = now; lastBytes = completed; }
+      const statusText = String(data.status ?? ''); const match = PULL_STATUS.find(([pattern]) => pattern.test(statusText));
       onProgress({
-        status: m?.[1] ?? st, phase: m?.[2] ?? 'download', completed, total,
-        frac: m?.[2] === 'done' ? 1 : total ? completed / total : 0,
+        status: match?.[1] ?? statusText, phase: match?.[2] ?? 'download', completed, total,
+        frac: match?.[2] === 'done' ? 1 : total ? completed / total : 0,
         speed, eta: speed > 0 && total ? (total - completed) / speed : null,
       });
     }
   }
-}
+};
 
 /** Running downloads (kept outside the wizard so they survive closing it). */
 export const downloads = reactive<Record<string, PullProgress & { error?: string; ctrl: AbortController }>>({});
 
-export async function startDownload(cfg: AiConfig, pullName: string, name = pullName): Promise<boolean> {
+export const startDownload = async (cfg: AiConfig, pullName: string, name = pullName): Promise<boolean> => {
   if (downloads[name] && !downloads[name].error) return false;
   const ctrl = new AbortController();
   downloads[name] = { status: 'Starte Download …', phase: 'start', completed: 0, total: 0, frac: 0, speed: 0, eta: null, ctrl };
-  try { await pullModel({ ...cfg }, pullName, p => Object.assign(downloads[name], p), ctrl.signal); delete downloads[name]; return true; }
-  catch (e) {
+  try { await pullModel({ ...cfg }, pullName, progress => Object.assign(downloads[name], progress), ctrl.signal); delete downloads[name]; return true; }
+  catch (error) {
     if (ctrl.signal.aborted) { delete downloads[name]; return false; }
-    downloads[name].error = describeError(e); return false;
+    downloads[name].error = describeError(error); return false;
   }
-}
-export function cancelDownload(name: string) { downloads[name]?.ctrl.abort(); }
+};
+export const cancelDownload = (name: string) => { downloads[name]?.ctrl.abort(); };
 
-export function fmtBytes(b: number): string {
-  if (b >= 1e9) return (b / 1e9).toFixed(2).replace('.', ',') + ' GB';
-  if (b >= 1e6) return (b / 1e6).toFixed(1).replace('.', ',') + ' MB';
-  return Math.round(b / 1e3) + ' kB';
-}
-export function fmtDuration(s: number | null): string {
-  if (s == null || !isFinite(s)) return 'Restzeit wird berechnet …';
-  if (s < 60) return `noch ca. ${Math.max(1, Math.round(s))} s`;
-  const m = Math.floor(s / 60), r = Math.round(s % 60);
-  if (m < 60) return `noch ca. ${m} Min. ${r} s`;
-  return `noch ca. ${Math.floor(m / 60)} Std. ${m % 60} Min.`;
-}
+export const fmtBytes = (bytes: number): string => {
+  if (bytes >= 1e9) return (bytes / 1e9).toFixed(2).replace('.', ',') + ' GB';
+  if (bytes >= 1e6) return (bytes / 1e6).toFixed(1).replace('.', ',') + ' MB';
+  return Math.round(bytes / 1e3) + ' kB';
+};
+export const fmtDuration = (seconds: number | null): string => {
+  if (seconds == null || !isFinite(seconds)) return 'Restzeit wird berechnet …';
+  if (seconds < 60) return `noch ca. ${Math.max(1, Math.round(seconds))} s`;
+  const minutes = Math.floor(seconds / 60), rest = Math.round(seconds % 60);
+  if (minutes < 60) return `noch ca. ${minutes} Min. ${rest} s`;
+  return `noch ca. ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min.`;
+};
 
 // ------------------------------------------------------------------ LLaMA-Mesh fix
 export const MESH_SOURCE = 'hf.co/bartowski/LLaMA-Mesh-GGUF:Q4_K_M';
@@ -258,17 +258,17 @@ const LLAMA3_TEMPLATE = `{{- range .Messages }}<|start_header_id|>{{ .Role }}<|e
 `;
 
 /** Make sure the "llama-mesh" alias with the correct template exists (no download – reuses the weights). */
-export async function ensureMeshModel(cfg: AiConfig): Promise<string> {
+export const ensureMeshModel = async (cfg: AiConfig): Promise<string> => {
   const tags = await (await aiFetch(ollamaRoot(cfg) + '/api/tags', {})).json();
-  const names: string[] = (tags.models ?? []).map((m: any) => m.name);
-  if (names.some(n => n === MESH_ALIAS || n === MESH_ALIAS + ':latest')) return MESH_ALIAS;
-  const src = names.find(n => /llama-mesh/i.test(n) && n !== MESH_ALIAS);
+  const names: string[] = (tags.models ?? []).map((model: any) => model.name);
+  if (names.some(candidate => candidate === MESH_ALIAS || candidate === MESH_ALIAS + ':latest')) return MESH_ALIAS;
+  const src = names.find(candidate => /llama-mesh/i.test(candidate) && candidate !== MESH_ALIAS);
   if (!src) throw new Error('LLaMA-Mesh ist nicht installiert. Bitte im Einrichtungs-Assistenten installieren.');
-  const r = await aiFetch(ollamaRoot(cfg) + '/api/create', {
+  const response = await aiFetch(ollamaRoot(cfg) + '/api/create', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: MESH_ALIAS, from: src, template: LLAMA3_TEMPLATE, stream: false,
       parameters: { num_ctx: 8192, num_predict: 7000, temperature: 0.9, top_p: 0.9, stop: ['<|eot_id|>', '<|start_header_id|>'] } }),
   });
-  if (!r.ok) throw new Error('Konnte llama-mesh nicht anlegen: ' + (await r.text()).slice(0, 200));
+  if (!response.ok) throw new Error('Konnte llama-mesh nicht anlegen: ' + (await response.text()).slice(0, 200));
   return MESH_ALIAS;
-}
+};

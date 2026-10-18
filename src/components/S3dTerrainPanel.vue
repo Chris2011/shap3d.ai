@@ -24,7 +24,7 @@
 
     <!-- sculpting -->
     <div v-else class="overflow-auto px-3 pt-2 pb-3 text-xs">
-      <div v-if="terrainStats" class="mb-1 text-[0.6875rem] text-ink-2 tabular-nums">{{ fmtM(terrainStats.w) }} × {{ fmtM(terrainStats.d) }} · Raster {{ terrainStats.nx }}×{{ terrainStats.ny }} ({{ fmtM(terrainStats.cell) }}) · Höhe {{ fmtM(terrainStats.lo) }} … {{ fmtM(terrainStats.hi) }}</div>
+      <div v-if="terrainStats" class="mb-1 text-[0.6875rem] text-ink-2 tabular-nums">{{ fmtM(terrainStats.width) }} × {{ fmtM(terrainStats.depth) }} · Raster {{ terrainStats.columns }}×{{ terrainStats.rows }} ({{ fmtM(terrainStats.cellSize) }}) · Höhe {{ fmtM(terrainStats.lowest) }} … {{ fmtM(terrainStats.highest) }}</div>
 
       <div class="mt-2.5 mb-1.25 flex items-center gap-2 s3d-caption text-navy">Pinsel</div>
       <div class="grid grid-cols-[repeat(5,1fr)] gap-0.75">
@@ -99,17 +99,17 @@ const LAYERS: { key: 'grass' | 'earth' | 'rock' | 'snow'; label: string }[] = [
   { key: 'grass', label: 'Ebene' }, { key: 'earth', label: 'Hang / Tal' }, { key: 'rock', label: 'Berg / Klippe' }, { key: 'snow', label: 'Gipfel' },
 ];
 
-const terrain = computed(() => { void terrainUi.rev; return terrainData(); });
+const terrain = computed(() => { void terrainUi.revision; return terrainData(); });
 const layers = computed<TerrainLayers | null>(() => terrain.value?.layers ?? null);
-const terrainStats = computed(() => { void terrainUi.rev; return stats(); });
-const maxR = computed(() => (terrain.value ? +(Math.max(terrain.value.w, terrain.value.d) / 2).toFixed(1) : 10));
-const maxH = computed(() => (terrain.value ? Math.max(5, Math.ceil(Math.max(terrain.value.w, terrain.value.d) * 0.5)) : 10));
+const terrainStats = computed(() => { void terrainUi.revision; return stats(); });
+const maxR = computed(() => (terrain.value ? +(Math.max(terrain.value.width, terrain.value.depth) / 2).toFixed(1) : 10));
+const maxH = computed(() => (terrain.value ? Math.max(5, Math.ceil(Math.max(terrain.value.width, terrain.value.depth) * 0.5)) : 10));
 const minH = computed(() => -maxH.value / 2);
 
 const snowH = computed({ get: () => layers.value?.snowHeight ?? maxH.value * 0.6, set: height => { if (layers.value && layers.value.snowHeight != null) layers.value.snowHeight = height; } });
 const waterH = computed({ get: () => terrain.value?.water ?? 0, set: height => { if (terrain.value && terrain.value.water != null) terrain.value.water = height; } });
 const toggleSnow = (event: Event) => { if (!layers.value) return; layers.value.snowHeight = (event.target as HTMLInputElement).checked ? +(maxH.value * 0.6).toFixed(1) : null; refreshLook(); };
-const toggleWater = (event: Event) => { if (!terrain.value) return; terrain.value.water = (event.target as HTMLInputElement).checked ? Math.min(0, (terrainStats.value?.lo ?? 0) + 0.3) : null; refreshLook(); };
+const toggleWater = (event: Event) => { if (!terrain.value) return; terrain.value.water = (event.target as HTMLInputElement).checked ? Math.min(0, (terrainStats.value?.lowest ?? 0) + 0.3) : null; refreshLook(); };
 const setMode = (mode: BrushMode) => { terrainUi.brush.mode = mode; editor.refreshStatus(); };
 
 // terrain works at landscape scale – always metres, whatever the model unit is

@@ -34,7 +34,7 @@ import { useModel } from '../../composables/useModel';
 
 const editor = useEditor();
 const defs = useModel(() => [...editor.model.definitions.values()].filter(definition => definition.isComponent));
-const counts = useModel(() => { const perDefinition = new Map<Definition, number>(); const walk = (entities: Entities) => { for (const instance of entities.instances.values()) { perDefinition.set(instance.def, (perDefinition.get(instance.def) ?? 0) + 1); walk(instance.def.entities); } }; walk(editor.model.root); return perDefinition; });
+const counts = useModel(() => { const perDefinition = new Map<Definition, number>(); const walk = (entities: Entities) => { for (const instance of entities.instances.values()) { perDefinition.set(instance.definition, (perDefinition.get(instance.definition) ?? 0) + 1); walk(instance.definition.entities); } }; walk(editor.model.root); return perDefinition; });
 const place = (definition: Definition) => { (editor.tools.get('place') as PlaceTool).start(definition); };
 
 const insertLib = (item: Lib) => insertLibrary(editor, item);

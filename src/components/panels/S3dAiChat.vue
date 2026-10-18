@@ -50,12 +50,12 @@
       </div>
 
       <template v-for="(turn, i) in aiState.turns" :key="turn.id">
-        <div v-if="i === 0 || !sameDay(aiState.turns[i - 1].ts, turn.ts)" class="my-1 flex items-center gap-2 text-[0.6875rem] text-muted before:h-px before:flex-1 before:bg-line before:content-[''] after:h-px after:flex-1 after:bg-line after:content-['']"><span>{{ dayLabel(turn.ts) }}</span></div>
-        <div v-if="turn.role === 'user'" class="max-w-[92%] self-end px-2.5 py-2 text-[0.8125rem]/[1.45] break-words whitespace-pre-wrap" :class="turn.auto ? 'bg-warn-bg text-xs text-warn' : 'bg-navy-bg text-white'">{{ turn.auto ? '↻ Fehler zurückgemeldet – Assistent korrigiert …' : turn.text }}<span class="mt-0.75 block text-right text-[0.625rem] opacity-70">{{ clock(turn.ts) }}</span></div>
+        <div v-if="i === 0 || !sameDay(aiState.turns[i - 1].createdAt, turn.createdAt)" class="my-1 flex items-center gap-2 text-[0.6875rem] text-muted before:h-px before:flex-1 before:bg-line before:content-[''] after:h-px after:flex-1 after:bg-line after:content-['']"><span>{{ dayLabel(turn.createdAt) }}</span></div>
+        <div v-if="turn.role === 'user'" class="max-w-[92%] self-end px-2.5 py-2 text-[0.8125rem]/[1.45] break-words whitespace-pre-wrap" :class="turn.auto ? 'bg-warn-bg text-xs text-warn' : 'bg-navy-bg text-white'">{{ turn.auto ? '↻ Fehler zurückgemeldet – Assistent korrigiert …' : turn.text }}<span class="mt-0.75 block text-right text-[0.625rem] opacity-70">{{ clock(turn.createdAt) }}</span></div>
         <div v-else class="max-w-[92%] self-start border border-line bg-surface px-2.5 py-2 text-[0.8125rem]/[1.45] break-words whitespace-pre-wrap">
-          <div class="mb-0.75 flex items-center gap-2 text-[0.65625rem] text-muted"><span>{{ clock(turn.ts) }}</span><span v-if="turn.model" class="bg-surface-2 px-1.25">{{ turn.model.replace(/^hf\.co\/[^/]+\//, '') }}</span>
-            <span v-if="turn.status === 'streaming' || turn.status === 'running'" class="font-bold text-blue tabular-nums">⏱ {{ elapsed(now - turn.ts) }}</span>
-            <span v-else-if="turn.endTs" class="tabular-nums" :title="'Start ' + clockSec(turn.ts) + ' · Ende ' + clockSec(turn.endTs)">⏱ {{ elapsed(turn.endTs - turn.ts) }}</span>
+          <div class="mb-0.75 flex items-center gap-2 text-[0.65625rem] text-muted"><span>{{ clock(turn.createdAt) }}</span><span v-if="turn.model" class="bg-surface-2 px-1.25">{{ turn.model.replace(/^hf\.co\/[^/]+\//, '') }}</span>
+            <span v-if="turn.status === 'streaming' || turn.status === 'running'" class="font-bold text-blue tabular-nums">⏱ {{ elapsed(now - turn.createdAt) }}</span>
+            <span v-else-if="turn.endedAt" class="tabular-nums" :title="'Start ' + clockSec(turn.createdAt) + ' · Ende ' + clockSec(turn.endedAt)">⏱ {{ elapsed(turn.endedAt - turn.createdAt) }}</span>
           </div>
           <template v-if="turn.text">
             <template v-for="(part, partIndex) in splitFences(turn.text)" :key="partIndex">
@@ -63,7 +63,7 @@
               <S3dCodeBlock v-else :code="part.code" :lang="part.lang" :streaming="part.open && turn.status === 'streaming'" />
             </template>
           </template>
-          <div v-if="turn.status === 'streaming'" class="mt-1 text-xs text-ink-2"><span class="after:animate-blink after:tracking-[0.125rem] after:text-blue after:content-['●●●']"></span> {{ turn.text ? 'schreibt …' : 'denkt nach …' }} <b class="text-blue tabular-nums">{{ elapsed(now - turn.ts) }}</b></div>
+          <div v-if="turn.status === 'streaming'" class="mt-1 text-xs text-ink-2"><span class="after:animate-blink after:tracking-[0.125rem] after:text-blue after:content-['●●●']"></span> {{ turn.text ? 'schreibt …' : 'denkt nach …' }} <b class="text-blue tabular-nums">{{ elapsed(now - turn.createdAt) }}</b></div>
           <S3dCodeBlock v-if="turn.code" :code="turn.code" :lang="turn.lang ?? 'js'" :start-collapsed="turn.lang === 'obj'" />
           <div v-if="turn.status === 'done' && turn.result" class="mt-1 text-xs text-ok">✓ {{ turn.result }}</div>
           <div v-if="turn.status === 'error'" class="mt-1 text-xs text-danger">✗ {{ turn.error }}</div>

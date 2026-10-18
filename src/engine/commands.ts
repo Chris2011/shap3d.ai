@@ -26,151 +26,151 @@ import { Entities as EntitiesClass } from '../core/model';
 import type { FaceStyle } from '../core/document';
 import { solidOp, isSolid, type SolidOp } from '../core/solids';
 
-export interface Command { id: string; label: string; shortcut?: string; group: string; run: (ed: Editor) => void; enabled?: (ed: Editor) => boolean; checked?: (ed: Editor) => boolean }
+export interface Command { id: string; label: string; shortcut?: string; group: string; run: (editor: Editor) => void; enabled?: (editor: Editor) => boolean; checked?: (editor: Editor) => boolean }
 
 // ------------------------------------------------------------ file helpers
-export function download(name: string, data: Blob | string, type = 'application/octet-stream') {
+export const download = (name: string, data: Blob | string, type = 'application/octet-stream') => {
   const blob = typeof data === 'string' ? new Blob([data], { type }) : data;
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-}
-export function pickFile(accept: string): Promise<File | null> {
-  return new Promise(res => { const i = document.createElement('input'); i.type = 'file'; i.accept = accept; i.onchange = () => res(i.files?.[0] ?? null); i.click(); });
-}
-const safeName = (ed: Editor) => (ed.model.name || 'Modell').replace(/[^\w\-äöüÄÖÜß ]+/g, '_');
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = name; link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+};
+export const pickFile = (accept: string): Promise<File | null> => {
+  return new Promise(res => { const input = document.createElement('input'); input.type = 'file'; input.accept = accept; input.onchange = () => res(input.files?.[0] ?? null); input.click(); });
+};
+const safeName = (editor: Editor) => (editor.model.name || 'Modell').replace(/[^\w\-äöüÄÖÜß ]+/g, '_');
 
 /** Build a plain three.js scene of the model (for exporters). */
-export function modelToThree(ed: Editor): THREE.Group {
-  const root = new THREE.Group(); root.name = ed.model.name;
+export const modelToThree = (editor: Editor): THREE.Group => {
+  const root = new THREE.Group(); root.name = editor.model.name;
   const mats = new Map<string, THREE.MeshStandardMaterial>();
   const getMat = (name: string | undefined, fallback: string) => {
-    const key = name ?? '__default'; let m = mats.get(key);
-    if (!m) { const md = ed.model.material(name); m = new THREE.MeshStandardMaterial({ color: md?.color ?? fallback, transparent: (md?.opacity ?? 1) < 1, opacity: md?.opacity ?? 1, side: THREE.DoubleSide, roughness: 0.8 }); m.name = name ?? 'Standard'; mats.set(key, m); }
-    return m;
+    const key = name ?? '__default'; let cached = mats.get(key);
+    if (!cached) { const material = editor.model.material(name); cached = new THREE.MeshStandardMaterial({ color: material?.color ?? fallback, transparent: (material?.opacity ?? 1) < 1, opacity: material?.opacity ?? 1, side: THREE.DoubleSide, roughness: 0.8 }); cached.name = name ?? 'Standard'; mats.set(key, cached); }
+    return cached;
   };
-  const hidden = ed.model.hiddenTags();
+  const hidden = editor.model.hiddenTags();
   const build = (ents: Entities, parent: THREE.Object3D, inherit?: string) => {
     const byMat = new Map<string, number[]>();
-    for (const f of ents.faces.values()) {
-      if (f.hidden || (f.tag && hidden.has(f.tag))) continue;
-      const key = f.material ?? inherit ?? '__default';
-      const tri = ents.faceTriangles(f); const pts = [...f.outer, ...f.holes.flat()].map(v => ents.pos(v));
+    for (const face of ents.faces.values()) {
+      if (face.hidden || (face.tag && hidden.has(face.tag))) continue;
+      const key = face.material ?? inherit ?? '__default';
+      const tri = ents.faceTriangles(face); const pts = [...face.outer, ...face.holes.flat()].map(vertex => ents.positionOf(vertex));
       const arr = byMat.get(key) ?? []; for (const i of tri) arr.push(pts[i].x, pts[i].y, pts[i].z); byMat.set(key, arr);
     }
-    for (const [k, arr] of byMat) {
-      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3)); g.computeVertexNormals();
-      parent.add(new THREE.Mesh(g, getMat(k === '__default' ? undefined : k, ed.model.settings.style.frontColor)));
+    for (const [materialKey, arr] of byMat) {
+      const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3)); geometry.computeVertexNormals();
+      parent.add(new THREE.Mesh(geometry, getMat(materialKey === '__default' ? undefined : materialKey, editor.model.settings.style.frontColor)));
     }
-    for (const i of ents.instances.values()) {
-      if (i.hidden || (i.tag && hidden.has(i.tag))) continue;
-      const o = new THREE.Group(); o.name = i.name || i.def.name; o.matrixAutoUpdate = false; o.matrix.copy(i.matrix); i.matrix.decompose(o.position, o.quaternion, o.scale); o.matrixAutoUpdate = true;
-      parent.add(o); build(i.def.entities, o, i.material ?? inherit);
+    for (const instance of ents.instances.values()) {
+      if (instance.hidden || (instance.tag && hidden.has(instance.tag))) continue;
+      const group = new THREE.Group(); group.name = instance.name || instance.definition.name; group.matrixAutoUpdate = false; group.matrix.copy(instance.matrix); instance.matrix.decompose(group.position, group.quaternion, group.scale); group.matrixAutoUpdate = true;
+      parent.add(group); build(instance.definition.entities, group, instance.material ?? inherit);
     }
   };
-  build(ed.model.root, root);
+  build(editor.model.root, root);
   // SketchUp is Z-up; most formats expect Y-up
   const yup = new THREE.Group(); yup.rotation.x = -Math.PI / 2; yup.add(root);
   const wrap = new THREE.Group(); wrap.add(yup); wrap.updateMatrixWorld(true);
   return wrap;
-}
+};
 
-export async function exportAs(ed: Editor, kind: 'glb' | 'gltf' | 'stl' | 'obj' | 'png' | 'json') {
-  const name = safeName(ed);
-  if (kind === 'json') { download(`${name}.shap3d.json`, JSON.stringify(ed.model.toJSON()), 'application/json'); ed.ui.saved = true; return; }
-  if (kind === 'png') { const url = ed.viewer.snapshot(); const a = document.createElement('a'); a.href = url; a.download = `${name}.png`; a.click(); return; }
-  const scene = modelToThree(ed);
+export const exportAs = async (editor: Editor, kind: 'glb' | 'gltf' | 'stl' | 'obj' | 'png' | 'json') => {
+  const name = safeName(editor);
+  if (kind === 'json') { download(`${name}.shap3d.json`, JSON.stringify(editor.model.toJSON()), 'application/json'); editor.ui.saved = true; return; }
+  if (kind === 'png') { const url = editor.viewer.snapshot(); const link = document.createElement('a'); link.href = url; link.download = `${name}.png`; link.click(); return; }
+  const scene = modelToThree(editor);
   if (kind === 'stl') { download(`${name}.stl`, new STLExporter().parse(scene, { binary: false }) as string, 'model/stl'); return; }
   if (kind === 'obj') { download(`${name}.obj`, new OBJExporter().parse(scene), 'text/plain'); return; }
   const res: any = await new GLTFExporter().parseAsync(scene, { binary: kind === 'glb' });
   if (kind === 'glb') download(`${name}.glb`, new Blob([res], { type: 'model/gltf-binary' }));
   else download(`${name}.gltf`, JSON.stringify(res), 'model/gltf+json');
-}
+};
 
 /** Import mesh files as a component made of faces (coplanar triangles merged). */
 /** File extensions the importer understands (menu filter, drop overlay, README). */
 export const IMPORT_EXTS = ['skp', 'blend', 'dae', 'kmz', 'fbx', '3ds', 'obj', 'stl', 'glb', 'gltf', 'ply', '3mf', 'amf', 'wrl', 'vrml', 'usdz', 'usda', 'usdc', 'usd'];
 
 /** Sends a .skp/.blend file to the local converter and returns the resulting .glb. */
-async function convertLocally(ext: 'skp' | 'blend', file: File): Promise<ArrayBuffer> {
-  let r: Response;
-  try { r = await fetch(`/__convert?from=${ext}`, { method: 'POST', body: file }); }
+const convertLocally = async (ext: 'skp' | 'blend', file: File): Promise<ArrayBuffer> => {
+  let response: Response;
+  try { response = await fetch(`/__convert?from=${ext}`, { method: 'POST', body: file }); }
   catch { throw new Error('Der lokale Konverter ist nicht erreichbar – die App über „npm run dev“ oder „npm run preview“ starten.'); }
-  if (r.status === 404) throw new Error('.skp- und .blend-Dateien gehen nur mit dem lokalen Server („npm run dev“ oder „npm run preview“).');
-  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error ?? `Konvertierung fehlgeschlagen (HTTP ${r.status})`); }
-  return r.arrayBuffer();
-}
+  if (response.status === 404) throw new Error('.skp- und .blend-Dateien gehen nur mit dem lokalen Server („npm run dev“ oder „npm run preview“).');
+  if (!response.ok) { const body = await response.json().catch(() => ({})); throw new Error(body.error ?? `Konvertierung fehlgeschlagen (HTTP ${response.status})`); }
+  return response.arrayBuffer();
+};
 
 /**
  * FBX stores its unit in GlobalSettings › UnitScaleFactor (centimetres per unit: cm = 1, m = 100, inch = 2.54).
  * Returns the factor to metres, or null if the file does not say.
  */
-function fbxUnitScale(data: ArrayBuffer): number | null {
+const fbxUnitScale = (data: ArrayBuffer): number | null => {
   const bytes = new Uint8Array(data);
   const head = new TextDecoder('latin1').decode(bytes.subarray(0, 23));
   if (!head.startsWith('Kaydara FBX Binary')) {
-    const m = new TextDecoder().decode(bytes).match(/"UnitScaleFactor"[^\n]*?,\s*([-\d.eE+]+)\s*$/m);
-    return m ? parseFloat(m[1]) / 100 : null;
+    const match = new TextDecoder().decode(bytes).match(/"UnitScaleFactor"[^\n]*?,\s*([-\d.eE+]+)\s*$/m);
+    return match ? parseFloat(match[1]) / 100 : null;
   }
   // binary: P: "UnitScaleFactor", "double", "Number", "", <double> – three 'S' string props, then a 'D'
   const key = new TextEncoder().encode('UnitScaleFactor');
   outer: for (let i = 0; i < bytes.length - key.length; i++) {
     for (let k = 0; k < key.length; k++) if (bytes[i + k] !== key[k]) continue outer;
-    const dv = new DataView(data); let p = i + key.length;
-    for (let s = 0; s < 3; s++) { if (bytes[p] !== 0x53) return null; p += 5 + dv.getUint32(p + 1, true); }
-    if (bytes[p] !== 0x44) return null;
-    const v = dv.getFloat64(p + 1, true);
-    return v > 0 ? v / 100 : null;
+    const view = new DataView(data); let cursor = i + key.length;
+    for (let skip = 0; skip < 3; skip++) { if (bytes[cursor] !== 0x53) return null; cursor += 5 + view.getUint32(cursor + 1, true); }
+    if (bytes[cursor] !== 0x44) return null;
+    const value = view.getFloat64(cursor + 1, true);
+    return value > 0 ? value / 100 : null;
   }
   return null;
-}
+};
 
 /**
  * Loads a foreign 3D file into a three.js scene.
  * upY: the scene comes Y-up and must be turned to our Z-up; scale: known unit factor to metres (null = guess).
  */
-async function loadForeign(ext: string, file: File): Promise<{ obj: THREE.Object3D; upY: boolean; scale: number | null }> {
+const loadForeign = async (ext: string, file: File): Promise<{ object: THREE.Object3D; upY: boolean; scale: number | null }> => {
   const buf = () => file.arrayBuffer(), txt = () => file.text();
   switch (ext) {
-    case 'obj': return { obj: new OBJLoader().parse(await txt()), upY: true, scale: null };
-    case 'stl': return { obj: new THREE.Mesh(new STLLoader().parse(await buf())), upY: false, scale: 1 };
-    case 'glb': return { obj: (await new GLTFLoader().parseAsync(await buf(), '')).scene, upY: true, scale: 1 };
-    case 'gltf': return { obj: (await new GLTFLoader().parseAsync(await txt(), '')).scene, upY: true, scale: 1 };
+    case 'obj': return { object: new OBJLoader().parse(await txt()), upY: true, scale: null };
+    case 'stl': return { object: new THREE.Mesh(new STLLoader().parse(await buf())), upY: false, scale: 1 };
+    case 'glb': return { object: (await new GLTFLoader().parseAsync(await buf(), '')).scene, upY: true, scale: 1 };
+    case 'gltf': return { object: (await new GLTFLoader().parseAsync(await txt(), '')).scene, upY: true, scale: 1 };
     // Collada handles its own unit (<unit meter>) and up axis (<up_axis>) and hands back a Y-up scene in metres
-    case 'dae': { const c = new ColladaLoader().parse(await txt(), ''); if (!c?.scene) throw new Error('Die Collada-Datei konnte nicht gelesen werden.'); return { obj: c.scene, upY: true, scale: 1 }; }
-    case 'kmz': return { obj: new KMZLoader().parse(await buf()).scene, upY: true, scale: 1 };
+    case 'dae': { const collada = new ColladaLoader().parse(await txt(), ''); if (!collada?.scene) throw new Error('Die Collada-Datei konnte nicht gelesen werden.'); return { object: collada.scene, upY: true, scale: 1 }; }
+    case 'kmz': return { object: new KMZLoader().parse(await buf()).scene, upY: true, scale: 1 };
     // FBX (3ds Max, Blender, Maya): the loader turns Z-up files to Y-up, units vary (often cm)
-    case 'fbx': { const data = await buf(); return { obj: new FBXLoader().parse(data, ''), upY: true, scale: fbxUnitScale(data) }; }
+    case 'fbx': { const data = await buf(); return { object: new FBXLoader().parse(data, ''), upY: true, scale: fbxUnitScale(data) }; }
     // 3DS (old 3ds Max format): stays in its own Z-up space, units vary
-    case '3ds': return { obj: new TDSLoader().parse(await buf(), ''), upY: false, scale: null };
-    case 'ply': { const g = new PLYLoader().parse(await buf()); g.computeVertexNormals(); return { obj: new THREE.Mesh(g, new THREE.MeshStandardMaterial({ vertexColors: g.hasAttribute('color') })), upY: true, scale: null }; }
+    case '3ds': return { object: new TDSLoader().parse(await buf(), ''), upY: false, scale: null };
+    case 'ply': { const geometry = new PLYLoader().parse(await buf()); geometry.computeVertexNormals(); return { object: new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ vertexColors: geometry.hasAttribute('color') })), upY: true, scale: null }; }
     // 3MF and AMF (3D printing) are Z-up in millimetres
-    case '3mf': return { obj: new ThreeMFLoader().parse(await buf()), upY: false, scale: 0.001 };
-    case 'amf': return { obj: new AMFLoader().parse(await buf()), upY: false, scale: 0.001 };
-    case 'wrl': case 'vrml': return { obj: new VRMLLoader().parse(await txt(), ''), upY: true, scale: 1 };
+    case '3mf': return { object: new ThreeMFLoader().parse(await buf()), upY: false, scale: 0.001 };
+    case 'amf': return { object: new AMFLoader().parse(await buf()), upY: false, scale: 0.001 };
+    case 'wrl': case 'vrml': return { object: new VRMLLoader().parse(await txt(), ''), upY: true, scale: 1 };
     // SketchUp and Blender files are converted to glTF by the local converter (tools/convertBridge.ts)
     // Blender files are read right here in the browser (Z-up, metres) – no Blender needed
     case 'blend': {
-      const r = readBlend(await buf());
-      if (!r.objects) throw new Error(`In der Blender-Datei (Version ${(r.version / 100).toFixed(2)}) wurden keine Mesh-Objekte gefunden.` + (r.skipped.length ? ` Übersprungen: ${r.skipped.slice(0, 3).join(', ')}` : ''));
-      return { obj: r.scene, upY: false, scale: 1 };
+      const result = readBlend(await buf());
+      if (!result.objects) throw new Error(`In der Blender-Datei (Version ${(result.version / 100).toFixed(2)}) wurden keine Mesh-Objekte gefunden.` + (result.skipped.length ? ` Übersprungen: ${result.skipped.slice(0, 3).join(', ')}` : ''));
+      return { object: result.scene, upY: false, scale: 1 };
     }
     // SketchUp files are converted to glTF by the local converter (tools/convertBridge.ts + SketchUp SDK)
     // (tools/skp/skp2glb.py writes Z-up in metres, like SketchUp itself)
-    case 'skp': return { obj: (await new GLTFLoader().parseAsync(await convertLocally('skp', file), '')).scene, upY: false, scale: 1 };
+    case 'skp': return { object: (await new GLTFLoader().parseAsync(await convertLocally('skp', file), '')).scene, upY: false, scale: 1 };
     case 'usdz': case 'usda': case 'usdc': case 'usd': {
       const data = await buf();
       const obj = await new Promise<THREE.Object3D>((res, rej) => new USDLoader().parse(data, '', res as any, rej as any));
-      return { obj, upY: true, scale: 1 };
+      return { object: obj, upY: true, scale: 1 };
     }
   }
   throw new Error('Nicht unterstütztes Format: ' + ext);
-}
+};
 
-export async function importFile(ed: Editor, file: File) {
+export const importFile = async (editor: Editor, file: File) => {
   const ext = file.name.split('.').pop()!.toLowerCase();
-  if (ext === 'json') { const j = JSON.parse(await file.text()); if (['shap3d/1', 'formwerk/1', 'sketchup-vue/1'].includes(j.format)) { ed.loadJSON(j); ed.model.name = file.name.replace(/\.(shap3d|formwerk|suv)\.json$|\.json$/i, ''); return; } throw new Error('Unbekanntes JSON-Format'); }
+  if (ext === 'json') { const json = JSON.parse(await file.text()); if (typeof json.format === 'string' && json.format.startsWith('shap3d/')) { editor.loadJSON(json); editor.model.name = file.name.replace(/\.(shap3d|formwerk|suv)\.json$|\.json$/i, ''); return; } throw new Error('Unbekanntes JSON-Format'); }
   if (ext === 'max') throw new Error('3ds-Max-Dateien (.max) kann nur 3ds Max selbst lesen – dort über Datei › Exportieren als FBX (oder .3ds/.obj) speichern und diese Datei importieren.');
-  const { obj, upY, scale: fixedScale } = await loadForeign(ext, file);
+  const { object: obj, upY, scale: fixedScale } = await loadForeign(ext, file);
   // unit guess for formats without reliable units (cm/mm are common in FBX and 3DS)
   let scale = fixedScale ?? 1, unitNote = '';
   if (fixedScale == null) {
@@ -183,273 +183,273 @@ export async function importFile(ed: Editor, file: File) {
   const conv = new THREE.Matrix4().makeScale(scale, scale, scale); if (upY) conv.premultiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
   const base = file.name.replace(/\.[^.]+$/, '');
   let info = { triangles: 0, groups: 0, materials: 0, skipped: 0 };
-  ed.commit('Importieren', () => {
-    const r = sceneToEntities(obj, ed.model, conv, base); info = r;
-    if (!r.root.faces.size && !r.root.instances.size) throw new Error('Die Datei enthält keine Flächen.');
+  editor.commit('Importieren', () => {
+    const result = sceneToEntities(obj, editor.model, conv, base); info = result;
+    if (!result.root.faces.size && !result.root.instances.size) throw new Error('Die Datei enthält keine Flächen.');
     // put it on the ground, centred on the origin
-    const bb = r.root.bounds();
-    const shift = new THREE.Matrix4().makeTranslation(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, -bb.min.z);
-    for (const v of r.root.vertices.values()) v.p.applyMatrix4(shift); r.root.invalidateHash();
-    for (const i of r.root.instances.values()) i.matrix.premultiply(shift);
-    const def = ed.model.newDefinition(ed.model.uniqueDefName(base), true, r.root);
-    const inst = ed.entities.addInstance(def, new THREE.Matrix4(), '');
-    ed.select([{ kind: 'instance', id: inst.id }]);
+    const box = result.root.bounds();
+    const shift = new THREE.Matrix4().makeTranslation(-(box.min.x + box.max.x) / 2, -(box.min.y + box.max.y) / 2, -box.min.z);
+    for (const vertex of result.root.vertices.values()) vertex.position.applyMatrix4(shift); result.root.invalidateHash();
+    for (const instance of result.root.instances.values()) instance.matrix.premultiply(shift);
+    const def = editor.model.newDefinition(editor.model.uniqueDefName(base), true, result.root);
+    const inst = editor.entities.addInstance(def, new THREE.Matrix4(), '');
+    editor.select([{ kind: 'instance', id: inst.id }]);
   });
-  const n = (k: number, one: string, many: string) => `${k.toLocaleString('de-DE')} ${k === 1 ? one : many}`;
-  ed.toast(`${file.name}${unitNote}: ${n(info.triangles, 'Dreieck', 'Dreiecke')}` + (info.groups ? `, ${n(info.groups, 'Gruppe', 'Gruppen')}` : '') + (info.materials ? `, ${n(info.materials, 'Material', 'Materialien')}` : '') + (info.skipped ? ` – ${n(info.skipped, 'Dreieck', 'Dreiecke')} über dem Limit ausgelassen` : ''));
-  ed.zoomExtents();
-}
+  const plural = (k: number, one: string, many: string) => `${k.toLocaleString('de-DE')} ${k === 1 ? one : many}`;
+  editor.toast(`${file.name}${unitNote}: ${plural(info.triangles, 'Dreieck', 'Dreiecke')}` + (info.groups ? `, ${plural(info.groups, 'Gruppe', 'Gruppen')}` : '') + (info.materials ? `, ${plural(info.materials, 'Material', 'Materialien')}` : '') + (info.skipped ? ` – ${plural(info.skipped, 'Dreieck', 'Dreiecke')} über dem Limit ausgelassen` : ''));
+  editor.zoomExtents();
+};
 
 // ------------------------------------------------------------ selection-based operations
-export function makeGroup(ed: Editor, component: boolean, name?: string) {
-  const refs = ed.selected(); if (!refs.length) { ed.toast('Nichts ausgewählt'); return; }
-  ed.commit(component ? 'Komponente erstellen' : 'Gruppe erstellen', () => {
-    const { entities } = ed.entities.extract(refs);
+export const makeGroup = (editor: Editor, component: boolean, name?: string) => {
+  const refs = editor.selected(); if (!refs.length) { editor.toast('Nichts ausgewählt'); return; }
+  editor.commit(component ? 'Komponente erstellen' : 'Gruppe erstellen', () => {
+    const { entities } = editor.entities.extract(refs);
     // component axes: put origin at the bbox min corner like SketchUp
-    const bb = entities.bounds(); const o = component && !bb.isEmpty() ? bb.min.clone() : new THREE.Vector3();
-    const m = new THREE.Matrix4().makeTranslation(o.x, o.y, o.z);
-    if (component) { for (const v of entities.vertices.values()) v.p.sub(o); for (const i of entities.instances.values()) i.matrix.premultiply(new THREE.Matrix4().makeTranslation(-o.x, -o.y, -o.z)); entities.invalidateHash(); }
-    const def = ed.model.newDefinition(name || ed.model.uniqueDefName(component ? 'Komponente' : 'Gruppe'), component, entities);
-    const inst = ed.entities.addInstance(def, component ? m : new THREE.Matrix4(), component ? '' : '');
-    ed.select([{ kind: 'instance', id: inst.id }]);
+    const box = entities.bounds(); const insertOrigin = component && !box.isEmpty() ? box.min.clone() : new THREE.Vector3();
+    const matrix = new THREE.Matrix4().makeTranslation(insertOrigin.x, insertOrigin.y, insertOrigin.z);
+    if (component) { for (const vertex of entities.vertices.values()) vertex.position.sub(insertOrigin); for (const instance of entities.instances.values()) instance.matrix.premultiply(new THREE.Matrix4().makeTranslation(-insertOrigin.x, -insertOrigin.y, -insertOrigin.z)); entities.invalidateHash(); }
+    const def = editor.model.newDefinition(name || editor.model.uniqueDefName(component ? 'Komponente' : 'Gruppe'), component, entities);
+    const inst = editor.entities.addInstance(def, component ? matrix : new THREE.Matrix4(), component ? '' : '');
+    editor.select([{ kind: 'instance', id: inst.id }]);
   });
-}
+};
 
-export function explode(ed: Editor) {
-  const refs = ed.selected().filter(r => r.kind === 'instance'); if (!refs.length) return;
-  ed.commit('Auflösen', () => {
+export const explode = (editor: Editor) => {
+  const refs = editor.selected().filter(entityRef => entityRef.kind === 'instance'); if (!refs.length) return;
+  editor.commit('Auflösen', () => {
     const out: EntityRef[] = [];
-    for (const r of refs) {
-      const i = ed.entities.instances.get(r.id); if (!i) continue;
-      out.push(...ed.entities.merge(i.def.entities, i.matrix, ed.model, i.material));
-      ed.entities.instances.delete(i.id);
+    for (const entityRef of refs) {
+      const instance = editor.entities.instances.get(entityRef.id); if (!instance) continue;
+      out.push(...editor.entities.merge(instance.definition.entities, instance.matrix, editor.model, instance.material));
+      editor.entities.instances.delete(instance.id);
     }
-    ed.model.purge();
-    ed.select(out);
+    editor.model.purge();
+    editor.select(out);
   });
-}
+};
 
-export function deleteSelection(ed: Editor) {
-  const refs = ed.selected(); if (!refs.length) return;
-  ed.commit('Löschen', () => { ed.entities.erase(refs); ed.clearSelection(); });
-}
+export const deleteSelection = (editor: Editor) => {
+  const refs = editor.selected(); if (!refs.length) return;
+  editor.commit('Löschen', () => { editor.entities.erase(refs); editor.clearSelection(); });
+};
 
-export function copySelection(ed: Editor, cut = false) {
-  const refs = ed.selected(); if (!refs.length) return;
+export const copySelection = (editor: Editor, cut = false) => {
+  const refs = editor.selected(); if (!refs.length) return;
   const tmp = new EntitiesClass();
-  const ents = ed.entities;
+  const ents = editor.entities;
   // copy geometry without removing it from the model
-  const faceIds = new Set(refs.filter(r => r.kind === 'face').map(r => r.id));
-  const edgeIds = new Set(refs.filter(r => r.kind === 'edge').map(r => r.id));
-  for (const id of faceIds) { const f = ents.faces.get(id); if (f) ents.faceEdges(f).forEach(e => edgeIds.add(e.id)); }
-  const vmap = new Map<number, number>(); const mv = (v: number) => { if (!vmap.has(v)) vmap.set(v, tmp.rawVertex(ed.toWorld(ents.pos(v)))); return vmap.get(v)!; };
-  for (const id of edgeIds) { const e = ents.edges.get(id); if (e) tmp.createEdgeRaw(mv(e.a), mv(e.b), { soft: e.soft, hidden: e.hidden }); }
-  for (const id of faceIds) { const f = ents.faces.get(id); if (f) tmp.createFaceRaw(f.outer.map(mv), f.holes.map(h => h.map(mv)), { material: f.material, backMaterial: f.backMaterial }); }
-  for (const r of refs) if (r.kind === 'instance') { const i = ents.instances.get(r.id); if (i) tmp.addInstance(i.def, ed.contextMatrix.multiply(i.matrix), i.name).material = i.material; }
-  ed.clipboard = tmp;
-  if (cut) deleteSelection(ed);
-  ed.toast(cut ? 'Ausgeschnitten' : 'Kopiert');
-}
+  const faceIds = new Set(refs.filter(entityRef => entityRef.kind === 'face').map(entityRef => entityRef.id));
+  const edgeIds = new Set(refs.filter(entityRef => entityRef.kind === 'edge').map(entityRef => entityRef.id));
+  for (const id of faceIds) { const face = ents.faces.get(id); if (face) ents.faceEdges(face).forEach(edge => edgeIds.add(edge.id)); }
+  const vmap = new Map<number, number>(); const mapVertex = (vertex: number) => { if (!vmap.has(vertex)) vmap.set(vertex, tmp.rawVertex(editor.toWorld(ents.positionOf(vertex)))); return vmap.get(vertex)!; };
+  for (const id of edgeIds) { const edge = ents.edges.get(id); if (edge) tmp.createEdgeRaw(mapVertex(edge.start), mapVertex(edge.end), { soft: edge.soft, hidden: edge.hidden }); }
+  for (const id of faceIds) { const face = ents.faces.get(id); if (face) tmp.createFaceRaw(face.outer.map(mapVertex), face.holes.map(hole => hole.map(mapVertex)), { material: face.material, backMaterial: face.backMaterial }); }
+  for (const entityRef of refs) if (entityRef.kind === 'instance') { const instance = ents.instances.get(entityRef.id); if (instance) tmp.addInstance(instance.definition, editor.contextMatrix.multiply(instance.matrix), instance.name).material = instance.material; }
+  editor.clipboard = tmp;
+  if (cut) deleteSelection(editor);
+  editor.toast(cut ? 'Ausgeschnitten' : 'Kopiert');
+};
 
-export function paste(ed: Editor, inPlace = false) {
-  const clip = ed.clipboard as Entities | null; if (!clip) return;
-  ed.commit(inPlace ? 'An Position einfügen' : 'Einfügen', () => {
-    const refs = ed.entities.merge(clip, ed.contextInverse, ed.model, undefined, true);
-    ed.select(refs);
+export const paste = (editor: Editor, inPlace = false) => {
+  const clip = editor.clipboard as Entities | null; if (!clip) return;
+  editor.commit(inPlace ? 'An Position einfügen' : 'Einfügen', () => {
+    const refs = editor.entities.merge(clip, editor.contextInverse, editor.model, undefined, true);
+    editor.select(refs);
   });
   if (!inPlace) {
     // attach to the cursor like SketchUp: start a move from the selection's bbox corner
-    const b = ed.entities.refBounds(ed.selected()); if (b.isEmpty()) return;
-    const mv: any = ed.tools.get('move'); ed.setTool('move');
-    const start = ed.toWorld(new THREE.Vector3(b.min.x, b.min.y, b.min.z));
-    mv.copy = false; mv.begin(start);
+    const box = editor.entities.refBounds(editor.selected()); if (box.isEmpty()) return;
+    const moveTool: any = editor.tools.get('move'); editor.setTool('move');
+    const start = editor.toWorld(new THREE.Vector3(box.min.x, box.min.y, box.min.z));
+    moveTool.copy = false; moveTool.begin(start);
     // the paste and the following move become separate steps; moving starts immediately
   }
-}
+};
 
-export function hideSelection(ed: Editor) {
-  const refs = ed.selected(); if (!refs.length) return;
-  ed.commit('Ausblenden', () => {
-    for (const r of refs) { if (r.kind === 'face') { const f = ed.entities.faces.get(r.id); if (f) f.hidden = true; } if (r.kind === 'edge') { const e = ed.entities.edges.get(r.id); if (e) e.hidden = true; } if (r.kind === 'instance') { const i = ed.entities.instances.get(r.id); if (i) i.hidden = true; } }
-    ed.clearSelection();
+export const hideSelection = (editor: Editor) => {
+  const refs = editor.selected(); if (!refs.length) return;
+  editor.commit('Ausblenden', () => {
+    for (const entityRef of refs) { if (entityRef.kind === 'face') { const face = editor.entities.faces.get(entityRef.id); if (face) face.hidden = true; } if (entityRef.kind === 'edge') { const edge = editor.entities.edges.get(entityRef.id); if (edge) edge.hidden = true; } if (entityRef.kind === 'instance') { const instance = editor.entities.instances.get(entityRef.id); if (instance) instance.hidden = true; } }
+    editor.clearSelection();
   });
-}
-export function unhideAll(ed: Editor) {
-  ed.commit('Alle einblenden', () => { const e = ed.entities; e.faces.forEach(f => (f.hidden = undefined)); e.edges.forEach(x => (x.hidden = undefined)); e.instances.forEach(i => (i.hidden = false)); });
-}
-export function reverseFaces(ed: Editor) {
-  const refs = ed.selected().filter(r => r.kind === 'face'); if (!refs.length) return;
-  ed.commit('Flächen umkehren', () => { for (const r of refs) { const f = ed.entities.faces.get(r.id); if (f) ed.entities.reverseFace(f); } });
-}
+};
+export const unhideAll = (editor: Editor) => {
+  editor.commit('Alle einblenden', () => { const entities = editor.entities; entities.faces.forEach(face => (face.hidden = undefined)); entities.edges.forEach(x => (x.hidden = undefined)); entities.instances.forEach(instance => (instance.hidden = false)); });
+};
+export const reverseFaces = (editor: Editor) => {
+  const refs = editor.selected().filter(entityRef => entityRef.kind === 'face'); if (!refs.length) return;
+  editor.commit('Flächen umkehren', () => { for (const entityRef of refs) { const face = editor.entities.faces.get(entityRef.id); if (face) editor.entities.reverseFace(face); } });
+};
 /** Orient all connected faces consistently with the selected one. */
-export function orientFaces(ed: Editor) {
-  const r = ed.selected().find(x => x.kind === 'face'); if (!r) return;
-  ed.commit('Flächen ausrichten', () => {
-    const E = ed.entities; const seen = new Set([r.id]); const queue = [r.id];
+export const orientFaces = (editor: Editor) => {
+  const entityRef = editor.selected().find(x => x.kind === 'face'); if (!entityRef) return;
+  editor.commit('Flächen ausrichten', () => {
+    const entities = editor.entities; const seen = new Set([entityRef.id]); const queue = [entityRef.id];
     while (queue.length) {
-      const f = E.faces.get(queue.shift()!)!;
-      for (const l of E.loops(f)) for (let i = 0; i < l.length; i++) {
-        const a = l[i], b = l[(i + 1) % l.length]; const e = E.edgeBetween(a, b); if (!e) continue;
-        const fs = E.facesOfEdge(e.id); if (fs.length !== 2) continue;
-        for (const g of fs) {
-          if (seen.has(g.id)) continue; seen.add(g.id);
+      const current = entities.faces.get(queue.shift()!)!;
+      for (const loop of entities.loops(current)) for (let i = 0; i < loop.length; i++) {
+        const vertexA = loop[i], vertexB = loop[(i + 1) % loop.length]; const edge = entities.edgeBetween(vertexA, vertexB); if (!edge) continue;
+        const faces = entities.facesOfEdge(edge.id); if (faces.length !== 2) continue;
+        for (const face of faces) {
+          if (seen.has(face.id)) continue; seen.add(face.id);
           // neighbour must traverse a→b in opposite direction
-          let same = false; for (const gl of E.loops(g)) for (let j = 0; j < gl.length; j++) if (gl[j] === a && gl[(j + 1) % gl.length] === b) same = true;
-          if (same) E.reverseFace(g);
-          queue.push(g.id);
+          let same = false; for (const gl of entities.loops(face)) for (let j = 0; j < gl.length; j++) if (gl[j] === vertexA && gl[(j + 1) % gl.length] === vertexB) same = true;
+          if (same) entities.reverseFace(face);
+          queue.push(face.id);
         }
       }
     }
   });
-}
-export function softenSelection(ed: Editor, soft: boolean) {
-  const refs = ed.selected(); ed.commit(soft ? 'Abmildern' : 'Abmildern aufheben', () => {
-    const E = ed.entities; const ids = new Set<number>();
-    for (const r of refs) { if (r.kind === 'edge') ids.add(r.id); if (r.kind === 'face') { const f = E.faces.get(r.id); if (f) E.faceEdges(f).forEach(e => ids.add(e.id)); } }
-    for (const id of ids) { const e = E.edges.get(id); if (e && (!soft || E.facesOfEdge(id).length === 2)) e.soft = soft || undefined; }
+};
+export const softenSelection = (editor: Editor, soft: boolean) => {
+  const refs = editor.selected(); editor.commit(soft ? 'Abmildern' : 'Abmildern aufheben', () => {
+    const entities = editor.entities; const ids = new Set<number>();
+    for (const entityRef of refs) { if (entityRef.kind === 'edge') ids.add(entityRef.id); if (entityRef.kind === 'face') { const face = entities.faces.get(entityRef.id); if (face) entities.faceEdges(face).forEach(edge => ids.add(edge.id)); } }
+    for (const id of ids) { const edge = entities.edges.get(id); if (edge && (!soft || entities.facesOfEdge(id).length === 2)) edge.soft = soft || undefined; }
   });
-}
-export function flipSelection(ed: Editor, axis: 'x' | 'y' | 'z') {
-  const refs = ed.selected(); if (!refs.length) return;
-  const b = ed.entities.refBounds(refs); const c = b.getCenter(new THREE.Vector3());
-  const s = new THREE.Vector3(axis === 'x' ? -1 : 1, axis === 'y' ? -1 : 1, axis === 'z' ? -1 : 1);
-  const M = new THREE.Matrix4().makeTranslation(c.x, c.y, c.z).multiply(new THREE.Matrix4().makeScale(s.x, s.y, s.z)).multiply(new THREE.Matrix4().makeTranslation(-c.x, -c.y, -c.z));
-  ed.commit('Spiegeln', () => {
-    const E = ed.entities; E.transform(refs, M);
+};
+export const flipSelection = (editor: Editor, axis: 'x' | 'y' | 'z') => {
+  const refs = editor.selected(); if (!refs.length) return;
+  const box = editor.entities.refBounds(refs); const center = box.getCenter(new THREE.Vector3());
+  const scale = new THREE.Vector3(axis === 'x' ? -1 : 1, axis === 'y' ? -1 : 1, axis === 'z' ? -1 : 1);
+  const matrix = new THREE.Matrix4().makeTranslation(center.x, center.y, center.z).multiply(new THREE.Matrix4().makeScale(scale.x, scale.y, scale.z)).multiply(new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z));
+  editor.commit('Spiegeln', () => {
+    const entities = editor.entities; entities.transform(refs, matrix);
     // mirrored faces must be reversed to keep their front side outside
-    for (const r of refs) if (r.kind === 'face') { const f = E.faces.get(r.id); if (f) E.reverseFace(f); }
+    for (const entityRef of refs) if (entityRef.kind === 'face') { const face = entities.faces.get(entityRef.id); if (face) entities.reverseFace(face); }
   });
-}
-export function zoomSelection(ed: Editor) {
-  const refs = ed.selected(); if (!refs.length) { ed.zoomExtents(); return; }
-  const b = ed.entities.refBounds(refs).applyMatrix4(ed.contextMatrix); ed.viewer.rig.zoomExtents(b);
-}
-export function intersectSelection(ed: Editor) {
+};
+export const zoomSelection = (editor: Editor) => {
+  const refs = editor.selected(); if (!refs.length) { editor.zoomExtents(); return; }
+  const box = editor.entities.refBounds(refs).applyMatrix4(editor.contextMatrix); editor.viewer.rig.zoomExtents(box);
+};
+export const intersectSelection = (editor: Editor) => {
   // intersect selected faces with each other: add lines where coplanar-crossing edges meet faces
-  const refs = ed.selected().filter(r => r.kind === 'face'); if (refs.length < 2) { ed.toast('Wählen Sie mindestens zwei Flächen aus.'); return; }
-  ed.commit('Verschneiden', () => {
-    const E = ed.entities; const faces = refs.map(r => E.faces.get(r.id)!).filter(Boolean);
+  const refs = editor.selected().filter(entityRef => entityRef.kind === 'face'); if (refs.length < 2) { editor.toast('Wählen Sie mindestens zwei Flächen aus.'); return; }
+  editor.commit('Verschneiden', () => {
+    const entities = editor.entities; const faces = refs.map(entityRef => entities.faces.get(entityRef.id)!).filter(Boolean);
     const segs: [THREE.Vector3, THREE.Vector3][] = [];
     for (let i = 0; i < faces.length; i++) for (let j = i + 1; j < faces.length; j++) {
-      const s = faceFaceIntersection(E, faces[i], faces[j]); if (s) segs.push(s);
+      const segment = faceFaceIntersection(entities, faces[i], faces[j]); if (segment) segs.push(segment);
     }
-    for (const [a, b] of segs) E.addLine(a, b);
+    for (const [start, end] of segs) entities.addLine(start, end);
   });
-}
-function faceFaceIntersection(E: Entities, f: any, g: any): [THREE.Vector3, THREE.Vector3] | null {
-  const n1 = E.faceNormal(f), n2 = E.faceNormal(g); const dir = n1.clone().cross(n2); if (dir.length() < 1e-6) return null;
+};
+const faceFaceIntersection = (entities: Entities, faceA: any, faceB: any): [THREE.Vector3, THREE.Vector3] | null => {
+  const normalA = entities.faceNormal(faceA), normalB = entities.faceNormal(faceB); const dir = normalA.clone().cross(normalB); if (dir.length() < 1e-6) return null;
   // clip the intersection line of both planes against both polygons
-  const p1 = E.pos(f.outer[0]), p2 = E.pos(g.outer[0]);
-  const ts: number[][] = [];
-  const pl2 = new THREE.Plane().setFromNormalAndCoplanarPoint(n2, p2), pl1 = new THREE.Plane().setFromNormalAndCoplanarPoint(n1, p1);
-  const ln = (face: any, plane: THREE.Plane) => { const pts: THREE.Vector3[] = []; const loop = face.outer.map((v: number) => E.pos(v)); for (let i = 0; i < loop.length; i++) { const a = loop[i], b = loop[(i + 1) % loop.length]; const da = plane.distanceToPoint(a), db = plane.distanceToPoint(b); if ((da <= 0 && db > 0) || (da > 0 && db <= 0)) pts.push(a.clone().lerp(b, da / (da - db))); } return pts; };
-  const A = ln(f, pl2), B = ln(g, pl1); if (A.length < 2 || B.length < 2) return null;
-  const d = dir.normalize(); const o = A[0];
-  const ta = A.map(p => p.clone().sub(o).dot(d)).sort((x, y) => x - y), tb = B.map(p => p.clone().sub(o).dot(d)).sort((x, y) => x - y);
-  ts.push(ta, tb);
-  const lo = Math.max(ta[0], tb[0]), hi = Math.min(ta[ta.length - 1], tb[tb.length - 1]); if (hi - lo < 1e-6) return null;
-  return [o.clone().addScaledVector(d, lo), o.clone().addScaledVector(d, hi)];
-}
+  const pointA = entities.positionOf(faceA.outer[0]), pointB = entities.positionOf(faceB.outer[0]);
+  const params: number[][] = [];
+  const pl2 = new THREE.Plane().setFromNormalAndCoplanarPoint(normalB, pointB), pl1 = new THREE.Plane().setFromNormalAndCoplanarPoint(normalA, pointA);
+  const crossings = (face: any, plane: THREE.Plane) => { const pts: THREE.Vector3[] = []; const loop = face.outer.map((vertex: number) => entities.positionOf(vertex)); for (let i = 0; i < loop.length; i++) { const current = loop[i], next = loop[(i + 1) % loop.length]; const distCurrent = plane.distanceToPoint(current), distNext = plane.distanceToPoint(next); if ((distCurrent <= 0 && distNext > 0) || (distCurrent > 0 && distNext <= 0)) pts.push(current.clone().lerp(next, distCurrent / (distCurrent - distNext))); } return pts; };
+  const crossingsA = crossings(faceA, pl2), crossingsB = crossings(faceB, pl1); if (crossingsA.length < 2 || crossingsB.length < 2) return null;
+  const direction = dir.normalize(); const base = crossingsA[0];
+  const paramsA = crossingsA.map(point => point.clone().sub(base).dot(direction)).sort((x, y) => x - y), paramsB = crossingsB.map(point => point.clone().sub(base).dot(direction)).sort((x, y) => x - y);
+  params.push(paramsA, paramsB);
+  const overlapStart = Math.max(paramsA[0], paramsB[0]), overlapEnd = Math.min(paramsA[paramsA.length - 1], paramsB[paramsB.length - 1]); if (overlapEnd - overlapStart < 1e-6) return null;
+  return [base.clone().addScaledVector(direction, overlapStart), base.clone().addScaledVector(direction, overlapEnd)];
+};
 
 /** SketchUp solid tools on selected groups/components (first selected = cutter). */
-export function runSolid(ed: Editor, op: SolidOp) {
-  const insts = ed.selected().filter(r => r.kind === 'instance').map(r => ed.entities.instances.get(r.id)!).filter(Boolean);
-  if (insts.length < 2) { ed.toast('Wählen Sie zwei Gruppen oder Komponenten (Volumenkörper) aus.'); return; }
-  const bad = insts.find(i => !isSolid(i.def.entities)); if (bad) { ed.toast(`„${bad.name || bad.def.name}“ ist kein Volumenkörper.`); return; }
+export const runSolid = (editor: Editor, operation: SolidOp) => {
+  const insts = editor.selected().filter(entityRef => entityRef.kind === 'instance').map(entityRef => editor.entities.instances.get(entityRef.id)!).filter(Boolean);
+  if (insts.length < 2) { editor.toast('Wählen Sie zwei Gruppen oder Komponenten (Volumenkörper) aus.'); return; }
+  const bad = insts.find(instance => !isSolid(instance.definition.entities)); if (bad) { editor.toast(`„${bad.name || bad.definition.name}“ ist kein Volumenkörper.`); return; }
   const names: Record<SolidOp, string> = { union: 'Vereinigen', subtract: 'Subtrahieren', intersect: 'Schnittmenge', outershell: 'Äußere Hülle', trim: 'Abziehen', split: 'Teilen' };
   try {
-    ed.commit(names[op], () => {
+    editor.commit(names[operation], () => {
       let pieces: Entities[];
-      if (op === 'outershell' || op === 'union') {
+      if (operation === 'outershell' || operation === 'union') {
         let acc = insts[0]; let res: Entities | null = null;
         for (let k = 1; k < insts.length; k++) {
           res = solidOp('union', acc, insts[k])[0];
-          const def = ed.model.newDefinition(ed.model.uniqueDefName('Volumenkörper'), false, res);
-          acc = { id: -1, def, matrix: new THREE.Matrix4(), name: '' } as any;
+          const def = editor.model.newDefinition(editor.model.uniqueDefName('Volumenkörper'), false, res);
+          acc = { id: -1, definition: def, matrix: new THREE.Matrix4(), name: '' } as any;
         }
         pieces = [res!];
-      } else pieces = solidOp(op, insts[0], insts[1]);
-      const keep = op === 'trim' ? [insts[0]] : [];
-      for (const i of insts) if (!keep.includes(i) && (op !== 'subtract' || true)) ed.entities.instances.delete(i.id);
+      } else pieces = solidOp(operation, insts[0], insts[1]);
+      const keep = operation === 'trim' ? [insts[0]] : [];
+      for (const instance of insts) if (!keep.includes(instance) && (operation !== 'subtract' || true)) editor.entities.instances.delete(instance.id);
       const refs: EntityRef[] = [];
-      for (const p of pieces) { if (!p.faces.size) continue; const def = ed.model.newDefinition(ed.model.uniqueDefName('Volumenkörper'), false, p); refs.push({ kind: 'instance', id: ed.entities.addInstance(def, new THREE.Matrix4(), '').id }); }
-      ed.model.purge();
-      ed.select(refs);
+      for (const entities of pieces) { if (!entities.faces.size) continue; const def = editor.model.newDefinition(editor.model.uniqueDefName('Volumenkörper'), false, entities); refs.push({ kind: 'instance', id: editor.entities.addInstance(def, new THREE.Matrix4(), '').id }); }
+      editor.model.purge();
+      editor.select(refs);
     });
-  } catch (e: any) { ed.toast('Volumenkörper-Operation fehlgeschlagen: ' + (e?.message ?? e)); }
-}
+  } catch (error: any) { editor.toast('Volumenkörper-Operation fehlgeschlagen: ' + (error?.message ?? error)); }
+};
 
 /** Empties the whole workspace (geometry, groups, guides, dimensions, labels, sections) as one undo step. */
-export function clearAll(ed: Editor) {
-  const m = ed.model;
-  if (!m.root.faces.size && !m.root.edges.size && !m.root.instances.size && !m.guides.length && !m.dimensions.length && !m.labels.length && !m.sections.length) { ed.toast('Die Arbeitsfläche ist bereits leer'); return; }
-  ed.setContext([]);
-  ed.commit('Alles löschen', () => {
-    const e = m.root;
-    for (const id of [...e.instances.keys()]) e.instances.delete(id);
-    for (const id of [...e.faces.keys()]) e.removeFace(id);
-    for (const edge of [...e.edges.values()]) e.eraseEdge(edge.id, false);
-    e.removeOrphanVertices();
-    m.guides = []; m.dimensions = []; m.labels = []; m.sections = [];
+export const clearAll = (editor: Editor) => {
+  const model = editor.model;
+  if (!model.root.faces.size && !model.root.edges.size && !model.root.instances.size && !model.guides.length && !model.dimensions.length && !model.labels.length && !model.sections.length) { editor.toast('Die Arbeitsfläche ist bereits leer'); return; }
+  editor.setContext([]);
+  editor.commit('Alles löschen', () => {
+    const entities = model.root;
+    for (const id of [...entities.instances.keys()]) entities.instances.delete(id);
+    for (const id of [...entities.faces.keys()]) entities.removeFace(id);
+    for (const edge of [...entities.edges.values()]) entities.eraseEdge(edge.id, false);
+    entities.removeOrphanVertices();
+    model.guides = []; model.dimensions = []; model.labels = []; model.sections = [];
   });
-  ed.toast('Arbeitsfläche geleert – Strg+Z holt alles zurück');
-}
+  editor.toast('Arbeitsfläche geleert – Strg+Z holt alles zurück');
+};
 
-export function setFaceStyle(ed: Editor, s: FaceStyle) { ed.model.settings.style.faceStyle = s; ed.invalidate(); }
+export const setFaceStyle = (editor: Editor, style: FaceStyle) => { editor.model.settings.style.faceStyle = style; editor.invalidate(); };
 
 export const COMMANDS: Command[] = [
   // file
-  { id: 'new', label: 'Neu', shortcut: 'Strg+N', group: 'Datei', run: async ed => { if (ed.ui.saved || await ed.confirm('Ungespeicherte Änderungen verwerfen?')) ed.newModel(); } },
-  { id: 'open', label: 'Öffnen…', shortcut: 'Strg+O', group: 'Datei', run: async ed => { const f = await pickFile('.json,.shap3d.json,application/json'); if (f) await importFile(ed, f).catch(e => ed.toast(String(e.message ?? e))); } },
-  { id: 'save', label: 'Speichern (Download)', shortcut: 'Strg+S', group: 'Datei', run: ed => exportAs(ed, 'json') },
-  { id: 'saveLocal', label: 'Im Browser speichern', group: 'Datei', run: ed => { try { localStorage.setItem('s3d:saved', JSON.stringify(ed.model.toJSON())); ed.ui.saved = true; ed.toast('Im Browser gespeichert'); } catch { ed.toast('Speichern fehlgeschlagen'); } } },
-  { id: 'loadLocal', label: 'Aus Browser laden', group: 'Datei', run: ed => { try { const s = localStorage.getItem('s3d:saved'); if (s) ed.loadJSON(JSON.parse(s)); else ed.toast('Kein gespeichertes Modell'); } catch { ed.toast('Laden fehlgeschlagen'); } } },
-  { id: 'import', label: 'Importieren (DAE, FBX, 3DS, OBJ, STL, glTF …)…', group: 'Datei', run: async ed => { const f = await pickFile(IMPORT_EXTS.map(e => '.' + e).join(',')); if (f) await importFile(ed, f).catch(e => ed.toast(String(e.message ?? e))); } },
-  { id: 'export-glb', label: 'Exportieren: GLB', group: 'Datei', run: ed => exportAs(ed, 'glb') },
-  { id: 'export-gltf', label: 'Exportieren: glTF', group: 'Datei', run: ed => exportAs(ed, 'gltf') },
-  { id: 'export-stl', label: 'Exportieren: STL', group: 'Datei', run: ed => exportAs(ed, 'stl') },
-  { id: 'export-obj', label: 'Exportieren: OBJ', group: 'Datei', run: ed => exportAs(ed, 'obj') },
-  { id: 'export-png', label: 'Exportieren: PNG-Bild', group: 'Datei', run: ed => exportAs(ed, 'png') },
-  { id: 'print', label: 'Drucken', group: 'Datei', run: ed => { const url = ed.viewer.snapshot(); const w = window.open(''); if (w) { w.document.write(`<img src="${url}" style="max-width:100%">`); w.document.close(); w.onload = () => w.print(); setTimeout(() => w.print(), 300); } } },
+  { id: 'new', label: 'Neu', shortcut: 'Strg+N', group: 'Datei', run: async editor => { if (editor.ui.saved || await editor.confirm('Ungespeicherte Änderungen verwerfen?')) editor.newModel(); } },
+  { id: 'open', label: 'Öffnen…', shortcut: 'Strg+O', group: 'Datei', run: async editor => { const file = await pickFile('.json,.shap3d.json,application/json'); if (file) await importFile(editor, file).catch(ext => editor.toast(String(ext.message ?? ext))); } },
+  { id: 'save', label: 'Speichern (Download)', shortcut: 'Strg+S', group: 'Datei', run: editor => exportAs(editor, 'json') },
+  { id: 'saveLocal', label: 'Im Browser speichern', group: 'Datei', run: editor => { try { localStorage.setItem('s3d:saved', JSON.stringify(editor.model.toJSON())); editor.ui.saved = true; editor.toast('Im Browser gespeichert'); } catch { editor.toast('Speichern fehlgeschlagen'); } } },
+  { id: 'loadLocal', label: 'Aus Browser laden', group: 'Datei', run: editor => { try { const saved = localStorage.getItem('s3d:saved'); if (saved) editor.loadJSON(JSON.parse(saved)); else editor.toast('Kein gespeichertes Modell'); } catch { editor.toast('Laden fehlgeschlagen'); } } },
+  { id: 'import', label: 'Importieren (DAE, FBX, 3DS, OBJ, STL, glTF …)…', group: 'Datei', run: async editor => { const file = await pickFile(IMPORT_EXTS.map(ext => '.' + ext).join(',')); if (file) await importFile(editor, file).catch(error => editor.toast(String(error.message ?? error))); } },
+  { id: 'export-glb', label: 'Exportieren: GLB', group: 'Datei', run: editor => exportAs(editor, 'glb') },
+  { id: 'export-gltf', label: 'Exportieren: glTF', group: 'Datei', run: editor => exportAs(editor, 'gltf') },
+  { id: 'export-stl', label: 'Exportieren: STL', group: 'Datei', run: editor => exportAs(editor, 'stl') },
+  { id: 'export-obj', label: 'Exportieren: OBJ', group: 'Datei', run: editor => exportAs(editor, 'obj') },
+  { id: 'export-png', label: 'Exportieren: PNG-Bild', group: 'Datei', run: editor => exportAs(editor, 'png') },
+  { id: 'print', label: 'Drucken', group: 'Datei', run: editor => { const url = editor.viewer.snapshot(); const printWindow = window.open(''); if (printWindow) { printWindow.document.write(`<img src="${url}" style="max-width:100%">`); printWindow.document.close(); printWindow.onload = () => printWindow.print(); setTimeout(() => printWindow.print(), 300); } } },
   // edit
-  { id: 'undo', label: 'Rückgängig', shortcut: 'Strg+Z', group: 'Bearbeiten', run: ed => ed.undo(), enabled: ed => ed.ui.canUndo },
-  { id: 'redo', label: 'Wiederholen', shortcut: 'Strg+Y', group: 'Bearbeiten', run: ed => ed.redo(), enabled: ed => ed.ui.canRedo },
-  { id: 'cut', label: 'Ausschneiden', shortcut: 'Strg+X', group: 'Bearbeiten', run: ed => copySelection(ed, true) },
-  { id: 'copy', label: 'Kopieren', shortcut: 'Strg+C', group: 'Bearbeiten', run: ed => copySelection(ed) },
-  { id: 'paste', label: 'Einfügen', shortcut: 'Strg+V', group: 'Bearbeiten', run: ed => paste(ed) },
-  { id: 'pasteInPlace', label: 'An Position einfügen', group: 'Bearbeiten', run: ed => paste(ed, true) },
+  { id: 'undo', label: 'Rückgängig', shortcut: 'Strg+Z', group: 'Bearbeiten', run: editor => editor.undo(), enabled: editor => editor.ui.canUndo },
+  { id: 'redo', label: 'Wiederholen', shortcut: 'Strg+Y', group: 'Bearbeiten', run: editor => editor.redo(), enabled: editor => editor.ui.canRedo },
+  { id: 'cut', label: 'Ausschneiden', shortcut: 'Strg+X', group: 'Bearbeiten', run: editor => copySelection(editor, true) },
+  { id: 'copy', label: 'Kopieren', shortcut: 'Strg+C', group: 'Bearbeiten', run: editor => copySelection(editor) },
+  { id: 'paste', label: 'Einfügen', shortcut: 'Strg+V', group: 'Bearbeiten', run: editor => paste(editor) },
+  { id: 'pasteInPlace', label: 'An Position einfügen', group: 'Bearbeiten', run: editor => paste(editor, true) },
   { id: 'delete', label: 'Löschen', shortcut: 'Entf', group: 'Bearbeiten', run: deleteSelection },
   { id: 'clearAll', label: 'Arbeitsfläche leeren', group: 'Bearbeiten', run: clearAll },
-  { id: 'deleteGuides', label: 'Hilfslinien löschen', group: 'Bearbeiten', run: ed => ed.commit('Hilfslinien löschen', () => { ed.model.guides = []; }) },
-  { id: 'selectAll', label: 'Alles auswählen', shortcut: 'Strg+A', group: 'Bearbeiten', run: ed => ed.selectAll() },
-  { id: 'selectNone', label: 'Auswahl aufheben', shortcut: 'Strg+T', group: 'Bearbeiten', run: ed => ed.clearSelection() },
-  { id: 'invertSel', label: 'Auswahl umkehren', shortcut: 'Strg+Umschalt+I', group: 'Bearbeiten', run: ed => { const cur = new Set(ed.selected().map(r => ed.key(r))); ed.selectAll(); ed.select(ed.selected().filter(r => !cur.has(ed.key(r)))); } },
+  { id: 'deleteGuides', label: 'Hilfslinien löschen', group: 'Bearbeiten', run: editor => editor.commit('Hilfslinien löschen', () => { editor.model.guides = []; }) },
+  { id: 'selectAll', label: 'Alles auswählen', shortcut: 'Strg+A', group: 'Bearbeiten', run: editor => editor.selectAll() },
+  { id: 'selectNone', label: 'Auswahl aufheben', shortcut: 'Strg+T', group: 'Bearbeiten', run: editor => editor.clearSelection() },
+  { id: 'invertSel', label: 'Auswahl umkehren', shortcut: 'Strg+Umschalt+I', group: 'Bearbeiten', run: editor => { const cur = new Set(editor.selected().map(entityRef => editor.key(entityRef))); editor.selectAll(); editor.select(editor.selected().filter(entityRef => !cur.has(editor.key(entityRef)))); } },
   { id: 'hide', label: 'Ausblenden', shortcut: 'H (Auswahl)', group: 'Bearbeiten', run: hideSelection },
   { id: 'unhideAll', label: 'Alle einblenden', group: 'Bearbeiten', run: unhideAll },
-  { id: 'terrain', label: 'Gelände (Sandkiste): Berge & Täler formen', group: 'Bearbeiten', run: ed => ed.setTool('terrain') },
-  { id: 'makeGroup', label: 'Gruppe erstellen', group: 'Bearbeiten', run: ed => makeGroup(ed, false) },
-  { id: 'makeComponent', label: 'Komponente erstellen…', shortcut: 'G', group: 'Bearbeiten', run: async ed => { if (!ed.selected().length) { ed.toast('Nichts ausgewählt'); return; } const n = await ed.prompt('Name der Komponente', ed.model.uniqueDefName('Komponente')); if (n != null) makeGroup(ed, true, n); } },
+  { id: 'terrain', label: 'Gelände (Sandkiste): Berge & Täler formen', group: 'Bearbeiten', run: editor => editor.setTool('terrain') },
+  { id: 'makeGroup', label: 'Gruppe erstellen', group: 'Bearbeiten', run: editor => makeGroup(editor, false) },
+  { id: 'makeComponent', label: 'Komponente erstellen…', shortcut: 'G', group: 'Bearbeiten', run: async editor => { if (!editor.selected().length) { editor.toast('Nichts ausgewählt'); return; } const componentName = await editor.prompt('Name der Komponente', editor.model.uniqueDefName('Komponente')); if (componentName != null) makeGroup(editor, true, componentName); } },
   { id: 'explode', label: 'Auflösen', group: 'Bearbeiten', run: explode },
-  { id: 'editGroup', label: 'Gruppe bearbeiten', group: 'Bearbeiten', run: ed => { const r = ed.selected().find(x => x.kind === 'instance'); const i = r && ed.entities.instances.get(r.id); if (i) ed.enterInstance(i); } },
-  { id: 'closeGroup', label: 'Gruppe/Komponente schließen', group: 'Bearbeiten', run: ed => ed.exitContext() },
-  { id: 'makeUnique', label: 'Eindeutig machen', group: 'Bearbeiten', run: ed => ed.commit('Eindeutig machen', () => { for (const r of ed.selected()) if (r.kind === 'instance') { const i = ed.entities.instances.get(r.id); if (i) i.def = ed.model.cloneDefinition(i.def); } }) },
-  { id: 'lock', label: 'Sperren', group: 'Bearbeiten', run: ed => ed.commit('Sperren', () => { for (const r of ed.selected()) if (r.kind === 'instance') { const i = ed.entities.instances.get(r.id); if (i) i.locked = true; } }) },
-  { id: 'unlock', label: 'Entsperren', group: 'Bearbeiten', run: ed => ed.commit('Entsperren', () => { for (const r of ed.selected()) if (r.kind === 'instance') { const i = ed.entities.instances.get(r.id); if (i) i.locked = false; } }) },
+  { id: 'editGroup', label: 'Gruppe bearbeiten', group: 'Bearbeiten', run: editor => { const entityRef = editor.selected().find(x => x.kind === 'instance'); const instance = entityRef && editor.entities.instances.get(entityRef.id); if (instance) editor.enterInstance(instance); } },
+  { id: 'closeGroup', label: 'Gruppe/Komponente schließen', group: 'Bearbeiten', run: editor => editor.exitContext() },
+  { id: 'makeUnique', label: 'Eindeutig machen', group: 'Bearbeiten', run: editor => editor.commit('Eindeutig machen', () => { for (const entityRef of editor.selected()) if (entityRef.kind === 'instance') { const instance = editor.entities.instances.get(entityRef.id); if (instance) instance.definition = editor.model.cloneDefinition(instance.definition); } }) },
+  { id: 'lock', label: 'Sperren', group: 'Bearbeiten', run: editor => editor.commit('Sperren', () => { for (const entityRef of editor.selected()) if (entityRef.kind === 'instance') { const instance = editor.entities.instances.get(entityRef.id); if (instance) instance.locked = true; } }) },
+  { id: 'unlock', label: 'Entsperren', group: 'Bearbeiten', run: editor => editor.commit('Entsperren', () => { for (const entityRef of editor.selected()) if (entityRef.kind === 'instance') { const instance = editor.entities.instances.get(entityRef.id); if (instance) instance.locked = false; } }) },
   { id: 'reverseFaces', label: 'Flächen umkehren', group: 'Bearbeiten', run: reverseFaces },
   { id: 'orientFaces', label: 'Flächen ausrichten', group: 'Bearbeiten', run: orientFaces },
-  { id: 'soften', label: 'Kanten abmildern', group: 'Bearbeiten', run: ed => softenSelection(ed, true) },
-  { id: 'unsoften', label: 'Abmilderung aufheben', group: 'Bearbeiten', run: ed => softenSelection(ed, false) },
+  { id: 'soften', label: 'Kanten abmildern', group: 'Bearbeiten', run: editor => softenSelection(editor, true) },
+  { id: 'unsoften', label: 'Abmilderung aufheben', group: 'Bearbeiten', run: editor => softenSelection(editor, false) },
   { id: 'intersect', label: 'Flächen verschneiden (Auswahl)', group: 'Bearbeiten', run: intersectSelection },
-  { id: 'flipX', label: 'Spiegeln: Rote Richtung', group: 'Bearbeiten', run: ed => flipSelection(ed, 'x') },
-  { id: 'flipY', label: 'Spiegeln: Grüne Richtung', group: 'Bearbeiten', run: ed => flipSelection(ed, 'y') },
-  { id: 'flipZ', label: 'Spiegeln: Blaue Richtung', group: 'Bearbeiten', run: ed => flipSelection(ed, 'z') },
+  { id: 'flipX', label: 'Spiegeln: Rote Richtung', group: 'Bearbeiten', run: editor => flipSelection(editor, 'x') },
+  { id: 'flipY', label: 'Spiegeln: Grüne Richtung', group: 'Bearbeiten', run: editor => flipSelection(editor, 'y') },
+  { id: 'flipZ', label: 'Spiegeln: Blaue Richtung', group: 'Bearbeiten', run: editor => flipSelection(editor, 'z') },
   // solid tools
-  { id: 'solid-union', label: 'Vereinigen', group: 'Volumenkörper', run: ed => runSolid(ed, 'union') },
-  { id: 'solid-subtract', label: 'Subtrahieren (erstes von zweitem)', group: 'Volumenkörper', run: ed => runSolid(ed, 'subtract') },
-  { id: 'solid-intersect', label: 'Schnittmenge', group: 'Volumenkörper', run: ed => runSolid(ed, 'intersect') },
-  { id: 'solid-outershell', label: 'Äußere Hülle', group: 'Volumenkörper', run: ed => runSolid(ed, 'outershell') },
-  { id: 'solid-trim', label: 'Abziehen', group: 'Volumenkörper', run: ed => runSolid(ed, 'trim') },
-  { id: 'solid-split', label: 'Teilen', group: 'Volumenkörper', run: ed => runSolid(ed, 'split') },
+  { id: 'solid-union', label: 'Vereinigen', group: 'Volumenkörper', run: editor => runSolid(editor, 'union') },
+  { id: 'solid-subtract', label: 'Subtrahieren (erstes von zweitem)', group: 'Volumenkörper', run: editor => runSolid(editor, 'subtract') },
+  { id: 'solid-intersect', label: 'Schnittmenge', group: 'Volumenkörper', run: editor => runSolid(editor, 'intersect') },
+  { id: 'solid-outershell', label: 'Äußere Hülle', group: 'Volumenkörper', run: editor => runSolid(editor, 'outershell') },
+  { id: 'solid-trim', label: 'Abziehen', group: 'Volumenkörper', run: editor => runSolid(editor, 'trim') },
+  { id: 'solid-split', label: 'Teilen', group: 'Volumenkörper', run: editor => runSolid(editor, 'split') },
   // view
   { id: 'themeDark', label: 'Dunkles Design', group: 'Ansicht', run: () => setTheme('dark'), checked: () => theme.mode === 'dark' },
   { id: 'themeLight', label: 'Helles Design', group: 'Ansicht', run: () => setTheme('light'), checked: () => theme.mode === 'light' },
@@ -459,30 +459,30 @@ export const COMMANDS: Command[] = [
   { id: 'sceneAuto', label: '3D-Szene wie Oberfläche', group: 'Ansicht', run: () => setScene('auto'), checked: () => theme.scene === 'auto' },
   { id: 'tour', label: 'Einführung anzeigen', group: 'Ansicht', run: () => openTour() },
   { id: 'commandPalette', label: 'Befehlspalette…', shortcut: 'Strg+Umschalt+P', group: 'Ansicht', run: () => openPalette() },
-  { id: 'toggleAxes', label: 'Achsen', group: 'Ansicht', run: ed => { ed.model.settings.axes = !ed.model.settings.axes; ed.invalidate(); }, checked: ed => ed.model.settings.axes },
-  { id: 'toggleRulers', label: 'Maßstab an den Achsen', group: 'Ansicht', run: ed => { measureView.rulers = !measureView.rulers; ed.invalidate(); }, checked: () => measureView.rulers },
-  { id: 'togglePeopleSize', label: 'Größe der Personen', group: 'Ansicht', run: ed => { measureView.people = !measureView.people; ed.invalidate(); }, checked: () => measureView.people },
-  { id: 'toggleGuides', label: 'Hilfslinien', group: 'Ansicht', run: ed => { ed.model.settings.guides = !ed.model.settings.guides; ed.invalidate(); }, checked: ed => ed.model.settings.guides },
-  { id: 'toggleShadows', label: 'Schatten', group: 'Ansicht', run: ed => { ed.model.settings.shadows = !ed.model.settings.shadows; ed.invalidate(); }, checked: ed => ed.model.settings.shadows },
-  { id: 'toggleHidden', label: 'Ausgeblendete Geometrie', group: 'Ansicht', run: ed => { ed.model.settings.hiddenGeometry = !ed.model.settings.hiddenGeometry; ed.invalidate(); }, checked: ed => ed.model.settings.hiddenGeometry },
-  { id: 'toggleSectionPlanes', label: 'Schnittebenen', group: 'Ansicht', run: ed => { ed.model.settings.sectionPlanes = !ed.model.settings.sectionPlanes; ed.invalidate(); }, checked: ed => ed.model.settings.sectionPlanes },
-  { id: 'toggleSectionCuts', label: 'Schnitte', group: 'Ansicht', run: ed => { ed.model.settings.sectionCuts = !ed.model.settings.sectionCuts; ed.invalidate(); }, checked: ed => ed.model.settings.sectionCuts },
-  { id: 'xray', label: 'Röntgen', shortcut: 'Alt+K', group: 'Ansicht', run: ed => { ed.model.settings.style.xray = !ed.model.settings.style.xray; ed.invalidate(); }, checked: ed => ed.model.settings.style.xray },
-  { id: 'style-wireframe', label: 'Drahtgitter', group: 'Ansicht', run: ed => setFaceStyle(ed, 'wireframe'), checked: ed => ed.model.settings.style.faceStyle === 'wireframe' },
-  { id: 'style-hiddenline', label: 'Verdeckte Linien', group: 'Ansicht', run: ed => setFaceStyle(ed, 'hiddenline'), checked: ed => ed.model.settings.style.faceStyle === 'hiddenline' },
-  { id: 'style-shaded', label: 'Schattiert', group: 'Ansicht', run: ed => setFaceStyle(ed, 'shaded'), checked: ed => ed.model.settings.style.faceStyle === 'shaded' },
-  { id: 'style-textured', label: 'Schattiert mit Texturen', group: 'Ansicht', run: ed => setFaceStyle(ed, 'textured'), checked: ed => ed.model.settings.style.faceStyle === 'textured' },
-  { id: 'style-monochrome', label: 'Monochrom', group: 'Ansicht', run: ed => setFaceStyle(ed, 'monochrome'), checked: ed => ed.model.settings.style.faceStyle === 'monochrome' },
+  { id: 'toggleAxes', label: 'Achsen', group: 'Ansicht', run: editor => { editor.model.settings.axes = !editor.model.settings.axes; editor.invalidate(); }, checked: editor => editor.model.settings.axes },
+  { id: 'toggleRulers', label: 'Maßstab an den Achsen', group: 'Ansicht', run: editor => { measureView.rulers = !measureView.rulers; editor.invalidate(); }, checked: () => measureView.rulers },
+  { id: 'togglePeopleSize', label: 'Größe der Personen', group: 'Ansicht', run: editor => { measureView.people = !measureView.people; editor.invalidate(); }, checked: () => measureView.people },
+  { id: 'toggleGuides', label: 'Hilfslinien', group: 'Ansicht', run: editor => { editor.model.settings.guides = !editor.model.settings.guides; editor.invalidate(); }, checked: editor => editor.model.settings.guides },
+  { id: 'toggleShadows', label: 'Schatten', group: 'Ansicht', run: editor => { editor.model.settings.shadows = !editor.model.settings.shadows; editor.invalidate(); }, checked: editor => editor.model.settings.shadows },
+  { id: 'toggleHidden', label: 'Ausgeblendete Geometrie', group: 'Ansicht', run: editor => { editor.model.settings.hiddenGeometry = !editor.model.settings.hiddenGeometry; editor.invalidate(); }, checked: editor => editor.model.settings.hiddenGeometry },
+  { id: 'toggleSectionPlanes', label: 'Schnittebenen', group: 'Ansicht', run: editor => { editor.model.settings.sectionPlanes = !editor.model.settings.sectionPlanes; editor.invalidate(); }, checked: editor => editor.model.settings.sectionPlanes },
+  { id: 'toggleSectionCuts', label: 'Schnitte', group: 'Ansicht', run: editor => { editor.model.settings.sectionCuts = !editor.model.settings.sectionCuts; editor.invalidate(); }, checked: editor => editor.model.settings.sectionCuts },
+  { id: 'xray', label: 'Röntgen', shortcut: 'Alt+K', group: 'Ansicht', run: editor => { editor.model.settings.style.xray = !editor.model.settings.style.xray; editor.invalidate(); }, checked: editor => editor.model.settings.style.xray },
+  { id: 'style-wireframe', label: 'Drahtgitter', group: 'Ansicht', run: editor => setFaceStyle(editor, 'wireframe'), checked: editor => editor.model.settings.style.faceStyle === 'wireframe' },
+  { id: 'style-hiddenline', label: 'Verdeckte Linien', group: 'Ansicht', run: editor => setFaceStyle(editor, 'hiddenline'), checked: editor => editor.model.settings.style.faceStyle === 'hiddenline' },
+  { id: 'style-shaded', label: 'Schattiert', group: 'Ansicht', run: editor => setFaceStyle(editor, 'shaded'), checked: editor => editor.model.settings.style.faceStyle === 'shaded' },
+  { id: 'style-textured', label: 'Schattiert mit Texturen', group: 'Ansicht', run: editor => setFaceStyle(editor, 'textured'), checked: editor => editor.model.settings.style.faceStyle === 'textured' },
+  { id: 'style-monochrome', label: 'Monochrom', group: 'Ansicht', run: editor => setFaceStyle(editor, 'monochrome'), checked: editor => editor.model.settings.style.faceStyle === 'monochrome' },
   // camera
-  { id: 'zoomExtents', label: 'Zoom Grenzen', shortcut: 'Umschalt+Z', group: 'Kamera', run: ed => ed.zoomExtents() },
+  { id: 'zoomExtents', label: 'Zoom Grenzen', shortcut: 'Umschalt+Z', group: 'Kamera', run: editor => editor.zoomExtents() },
   { id: 'zoomSelection', label: 'Auswahl zoomen', group: 'Kamera', run: zoomSelection },
-  { id: 'persp', label: 'Perspektive', group: 'Kamera', run: ed => { ed.viewer.rig.isOrtho = false; ed.ui.projection = 'persp'; ed.viewer.rig.syncOrtho(); ed.redraw(); }, checked: ed => !ed.viewer?.rig.isOrtho },
-  { id: 'ortho', label: 'Parallele Projektion', group: 'Kamera', run: ed => { ed.viewer.rig.isOrtho = true; ed.ui.projection = 'ortho'; ed.viewer.rig.syncOrtho(); ed.redraw(); }, checked: ed => !!ed.viewer?.rig.isOrtho },
-  ...(['iso', 'top', 'front', 'right', 'back', 'left', 'bottom'] as const).map(v => ({
-    id: 'view-' + v, label: { iso: 'Iso', top: 'Oben', front: 'Vorne', right: 'Rechts', back: 'Hinten', left: 'Links', bottom: 'Unten' }[v], group: 'Kamera',
-    run: (ed: Editor) => ed.viewer.rig.standardView(v, ed.model.bounds()),
+  { id: 'persp', label: 'Perspektive', group: 'Kamera', run: editor => { editor.viewer.rig.isOrtho = false; editor.ui.projection = 'persp'; editor.viewer.rig.syncOrtho(); editor.redraw(); }, checked: editor => !editor.viewer?.rig.isOrtho },
+  { id: 'ortho', label: 'Parallele Projektion', group: 'Kamera', run: editor => { editor.viewer.rig.isOrtho = true; editor.ui.projection = 'ortho'; editor.viewer.rig.syncOrtho(); editor.redraw(); }, checked: editor => !!editor.viewer?.rig.isOrtho },
+  ...(['iso', 'top', 'front', 'right', 'back', 'left', 'bottom'] as const).map(view => ({
+    id: 'view-' + view, label: { iso: 'Iso', top: 'Oben', front: 'Vorne', right: 'Rechts', back: 'Hinten', left: 'Links', bottom: 'Unten' }[view], group: 'Kamera',
+    run: (editor: Editor) => editor.viewer.rig.standardView(view, editor.model.bounds()),
   })),
 ];
 
-export function findCommand(id: string) { return COMMANDS.find(c => c.id === id); }
-export function runCommand(ed: Editor, id: string) { const c = findCommand(id); if (c && (!c.enabled || c.enabled(ed))) c.run(ed); }
+export const findCommand = (id: string) => { return COMMANDS.find(command => command.id === id); };
+export const runCommand = (editor: Editor, id: string) => { const command = findCommand(id); if (command && (!command.enabled || command.enabled(editor))) command.run(editor); };

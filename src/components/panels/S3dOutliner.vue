@@ -17,6 +17,6 @@ import { useSelection } from '../../composables/useModel';
 
 const editor = useEditor(); const filter = ref('');
 interface ONode { inst: Instance; path: Instance[]; children: ONode[] }
-const build = (entities: Entities, path: Instance[]): ONode[] => [...entities.instances.values()].map(instance => ({ inst: instance, path: [...path, instance], children: build(instance.def.entities, [...path, instance]) }));
+const build = (entities: Entities, path: Instance[]): ONode[] => [...entities.instances.values()].map(instance => ({ inst: instance, path: [...path, instance], children: build(instance.definition.entities, [...path, instance]) }));
 const nodes = useSelection(() => build(editor.model.root, []));
 </script>

@@ -27,7 +27,7 @@ const items = computed<It[]>(() => {
     out.push({ sep: true });
     out.push({ label: 'Löschen', cmd: 'delete', sc: 'Entf' }, { label: 'Ausblenden', cmd: 'hide' });
     out.push({ sep: true });
-    const terrainInst = selection.find(entityRef => entityRef.kind === 'instance' && editor.entities.instances.get(entityRef.id)?.def.terrain);
+    const terrainInst = selection.find(entityRef => entityRef.kind === 'instance' && editor.entities.instances.get(entityRef.id)?.definition.terrain);
     if (terrainInst) out.push({ label: '⛰ Gelände bearbeiten', cmd: 'terrain' }, { sep: true });
     else if (selection.length === 1 && has('face')) out.push({ label: '⛰ Gelände aus Fläche', cmd: 'terrain' }, { sep: true });
     if (has('instance')) {

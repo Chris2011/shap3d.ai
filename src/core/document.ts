@@ -4,11 +4,14 @@ import { terrainToJSON, terrainFromJSON, cloneTerrain } from './terrain';
 
 export interface MaterialDef { name: string; color: string; opacity: number; texture?: string; textureSize?: number }
 export interface Tag { name: string; visible: boolean; color: string }
-export interface Guide { id: number; kind: 'line' | 'point'; p: THREE.Vector3; d?: THREE.Vector3 }
-export interface Dimension { id: number; a: THREE.Vector3; b: THREE.Vector3; offset: THREE.Vector3 }
-export interface Label { id: number; p: THREE.Vector3; text: string; offset: THREE.Vector3 }
-export interface SectionPlane { id: number; p: THREE.Vector3; n: THREE.Vector3; active: boolean; name: string }
-export interface CameraState { pos: number[]; target: number[]; fov: number; ortho: boolean }
+export interface Guide { id: number; kind: 'line' | 'point'; point: THREE.Vector3; direction?: THREE.Vector3 }
+export interface Dimension { id: number; start: THREE.Vector3; end: THREE.Vector3; offset: THREE.Vector3 }
+export interface Label { id: number; point: THREE.Vector3; text: string; offset: THREE.Vector3 }
+export interface SectionPlane { id: number; point: THREE.Vector3; normal: THREE.Vector3; active: boolean; name: string }
+/** Version tag of the saved model files (.shap3d.json, autosave). */
+export const MODEL_FORMAT = 'shap3d/2';
+
+export interface CameraState { position: number[]; target: number[]; fov: number; ortho: boolean }
 export interface Scene { id: number; name: string; camera: CameraState; style?: Partial<StyleSettings>; hiddenTags?: string[] }
 
 export type Units = 'mm' | 'cm' | 'm' | 'in' | 'ft';
@@ -75,7 +78,7 @@ export const DEFAULT_MATERIALS: MaterialDef[] = [
 export class Model implements DefinitionRegistry {
   root = new Entities();
   definitions = new Map<number, Definition>();
-  materials: MaterialDef[] = DEFAULT_MATERIALS.map(m => ({ ...m }));
+  materials: MaterialDef[] = DEFAULT_MATERIALS.map(material => ({ ...material }));
   tags: Tag[] = [{ name: 'Untagged', visible: true, color: '#888888' }];
   guides: Guide[] = [];
   dimensions: Dimension[] = [];
@@ -90,25 +93,25 @@ export class Model implements DefinitionRegistry {
 
   material(name?: string): MaterialDef | undefined {
     if (!name) return undefined;
-    const m = this.materials.find(x => x.name === name); if (m) return m;
+    const material = this.materials.find(x => x.name === name); if (material) return material;
     // plain colours ("#rrggbb") work as anonymous materials, e.g. for imported illustrations
     return /^#[0-9a-f]{6}$/i.test(name) ? { name, color: name, opacity: 1 } : undefined;
   }
-  hiddenTags(): Set<string> { return new Set(this.tags.filter(t => !t.visible).map(t => t.name)); }
+  hiddenTags(): Set<string> { return new Set(this.tags.filter(tag => !tag.visible).map(tag => tag.name)); }
 
   newDefinition(name: string, isComponent: boolean, entities = new Entities()): Definition {
-    const d = new Definition(name, isComponent, entities); this.definitions.set(d.id, d); return d;
+    const definition = new Definition(name, isComponent, entities); this.definitions.set(definition.id, definition); return definition;
   }
-  cloneDefinition(d: Definition): Definition {
-    const nd = new Definition(d.name, d.isComponent, d.entities.clone(this)); nd.faceMe = d.faceMe; if (d.terrain) nd.terrain = cloneTerrain(d.terrain); if (d.shape) nd.shape = JSON.parse(JSON.stringify(d.shape));
-    this.definitions.set(nd.id, nd); return nd;
+  cloneDefinition(source: Definition): Definition {
+    const definition = new Definition(source.name, source.isComponent, source.entities.clone(this)); definition.faceMe = source.faceMe; if (source.terrain) definition.terrain = cloneTerrain(source.terrain); if (source.shape) definition.shape = JSON.parse(JSON.stringify(source.shape));
+    this.definitions.set(definition.id, definition); return definition;
   }
-  uniqueDefName(base: string) { let i = 1; const names = new Set([...this.definitions.values()].map(d => d.name)); while (names.has(`${base}#${i}`)) i++; return `${base}#${i}`; }
+  uniqueDefName(base: string) { let i = 1; const names = new Set([...this.definitions.values()].map(definition => definition.name)); while (names.has(`${base}#${i}`)) i++; return `${base}#${i}`; }
 
   /** Remove definitions that are not referenced anymore. */
   purge() {
     const used = new Set<number>();
-    const walk = (e: Entities) => { for (const i of e.instances.values()) { if (!used.has(i.def.id)) { used.add(i.def.id); walk(i.def.entities); } } };
+    const walk = (entities: Entities) => { for (const instance of entities.instances.values()) { if (!used.has(instance.definition.id)) { used.add(instance.definition.id); walk(instance.definition.entities); } } };
     walk(this.root);
     for (const id of [...this.definitions.keys()]) if (!used.has(id)) this.definitions.delete(id);
   }
@@ -121,55 +124,66 @@ export class Model implements DefinitionRegistry {
 
   // ---------------- serialization ----------------
   toJSON(): any {
-    const ents = (e: Entities) => ({
-      v: [...e.vertices.values()].map(v => [v.id, +v.p.x.toFixed(6), +v.p.y.toFixed(6), +v.p.z.toFixed(6)]),
-      e: [...e.edges.values()].map(x => { const o: any = [x.id, x.a, x.b]; const fl = (x.soft ? 1 : 0) | (x.hidden ? 2 : 0); if (fl || x.tag) o.push(fl); if (x.tag) o.push(x.tag); return o; }),
-      f: [...e.faces.values()].map(f => { const o: any = { id: f.id, o: f.outer }; if (f.holes.length) o.h = f.holes; if (f.material) o.m = f.material; if (f.backMaterial) o.bm = f.backMaterial; if (f.tag) o.t = f.tag; if (f.hidden) o.hd = 1; return o; }),
-      i: [...e.instances.values()].map(i => ({ id: i.id, d: i.def.id, m: i.matrix.toArray().map(x => +x.toFixed(6)), n: i.name, mat: i.material, t: i.tag, hd: i.hidden ? 1 : undefined, lk: i.locked ? 1 : undefined })),
+    const round = (value: number) => +value.toFixed(6);
+    const toArray = (vector: THREE.Vector3) => [vector.x, vector.y, vector.z];
+    const entitiesToJSON = (entities: Entities) => ({
+      vertices: [...entities.vertices.values()].map(vertex => ({ id: vertex.id, position: toArray(vertex.position).map(round) })),
+      edges: [...entities.edges.values()].map(edge => ({ id: edge.id, start: edge.start, end: edge.end, soft: edge.soft || undefined, hidden: edge.hidden || undefined, tag: edge.tag })),
+      faces: [...entities.faces.values()].map(face => ({ id: face.id, outer: face.outer, holes: face.holes.length ? face.holes : undefined, material: face.material, backMaterial: face.backMaterial, tag: face.tag, hidden: face.hidden || undefined })),
+      instances: [...entities.instances.values()].map(instance => ({ id: instance.id, definition: instance.definition.id, matrix: instance.matrix.toArray().map(round), name: instance.name, material: instance.material, tag: instance.tag, hidden: instance.hidden || undefined, locked: instance.locked || undefined })),
     });
-    const v3 = (p: THREE.Vector3) => [p.x, p.y, p.z];
     return {
-      format: 'shap3d/1', name: this.name,
+      format: MODEL_FORMAT, name: this.name,
       settings: this.settings, materials: this.materials, tags: this.tags,
-      definitions: [...this.definitions.values()].map(d => ({ id: d.id, name: d.name, c: d.isComponent, fm: d.faceMe ? 1 : undefined, tr: d.terrain ? terrainToJSON(d.terrain) : undefined, sh: d.shape, ents: ents(d.entities) })),
-      root: ents(this.root),
-      guides: this.guides.map(g => ({ id: g.id, k: g.kind, p: v3(g.p), d: g.d ? v3(g.d) : undefined })),
-      dimensions: this.dimensions.map(d => ({ id: d.id, a: v3(d.a), b: v3(d.b), o: v3(d.offset) })),
-      labels: this.labels.map(l => ({ id: l.id, p: v3(l.p), t: l.text, o: v3(l.offset) })),
-      sections: this.sections.map(s => ({ id: s.id, p: v3(s.p), n: v3(s.n), a: s.active, name: s.name })),
-      scenes: this.scenes,
+      definitions: [...this.definitions.values()].map(definition => ({ id: definition.id, name: definition.name, isComponent: definition.isComponent, faceMe: definition.faceMe || undefined, terrain: definition.terrain ? terrainToJSON(definition.terrain) : undefined, shape: definition.shape, entities: entitiesToJSON(definition.entities) })),
+      root: entitiesToJSON(this.root),
+      guides: this.guides.map(guide => ({ id: guide.id, kind: guide.kind, point: toArray(guide.point), direction: guide.direction ? toArray(guide.direction) : undefined })),
+      dimensions: this.dimensions.map(dimension => ({ id: dimension.id, start: toArray(dimension.start), end: toArray(dimension.end), offset: toArray(dimension.offset) })),
+      labels: this.labels.map(label => ({ id: label.id, point: toArray(label.point), text: label.text, offset: toArray(label.offset) })),
+      sections: this.sections.map(section => ({ id: section.id, point: toArray(section.point), normal: toArray(section.normal), active: section.active, name: section.name })),
+      scenes: this.scenes.map(scene => ({ ...scene, camera: { position: scene.camera.position, target: scene.camera.target, fov: scene.camera.fov, ortho: scene.camera.ortho } })),
     };
   }
 
-  static fromJSON(j: any): Model {
-    const m = new Model();
-    m.load(j); return m;
+  static fromJSON(json: any): Model {
+    const model = new Model();
+    model.load(json); return model;
   }
 
-  load(j: any) {
+  load(json: any) {
+    if (json?.format !== MODEL_FORMAT) throw new Error('Unbekanntes Dateiformat');
     this.clear();
-    if (!['shap3d/1', 'formwerk/1', 'sketchup-vue/1'].includes(j.format)) throw new Error('Unbekanntes Dateiformat');
     let maxId = 0; const seen = (id: number) => { if (id > maxId) maxId = id; return id; };
-    const V = (a: number[]) => new THREE.Vector3(a[0], a[1], a[2]);
-    this.name = j.name ?? 'Unbenannt';
-    this.settings = { ...this.settings, ...(j.settings ?? {}), style: { ...DEFAULT_STYLE, ...(j.settings?.style ?? {}) } };
-    if (j.materials) this.materials = j.materials;
-    if (j.tags) this.tags = j.tags;
-    const defs = new Map<number, Definition>();
-    for (const d of j.definitions ?? []) { const def = new Definition(d.name, !!d.c); def.faceMe = !!d.fm; if (d.tr) def.terrain = terrainFromJSON(d.tr); if (d.sh) def.shape = d.sh; (def as any).id = seen(d.id); defs.set(d.id, def); this.definitions.set(d.id, def); }
-    const fill = (e: Entities, s: any) => {
-      for (const [id, x, y, z] of s.v) e.rawVertex(new THREE.Vector3(x, y, z), seen(id));
-      for (const x of s.e) { const fl = x[3] ?? 0; e.createEdgeRaw(x[1], x[2], { soft: !!(fl & 1) || undefined, hidden: !!(fl & 2) || undefined, tag: x[4] }, seen(x[0])); }
-      for (const f of s.f) e.createFaceRaw(f.o, f.h ?? [], { material: f.m, backMaterial: f.bm, tag: f.t, hidden: f.hd ? true : undefined }, seen(f.id));
-      for (const i of s.i) { const def = defs.get(i.d); if (!def) continue; const inst: Instance = { id: seen(i.id), def, matrix: new THREE.Matrix4().fromArray(i.m), name: i.n ?? '', material: i.mat, tag: i.t, hidden: !!i.hd, locked: !!i.lk }; e.instances.set(inst.id, inst); }
+    const toVector = (values: number[]) => new THREE.Vector3(values[0], values[1], values[2]);
+    this.name = json.name ?? 'Unbenannt';
+    this.settings = { ...this.settings, ...(json.settings ?? {}), style: { ...DEFAULT_STYLE, ...(json.settings?.style ?? {}) } };
+    if (json.materials) this.materials = json.materials;
+    if (json.tags) this.tags = json.tags;
+    const definitions = new Map<number, Definition>();
+    for (const stored of json.definitions ?? []) {
+      const definition = new Definition(stored.name, !!stored.isComponent);
+      definition.faceMe = !!stored.faceMe;
+      if (stored.terrain) definition.terrain = terrainFromJSON(stored.terrain);
+      if (stored.shape) definition.shape = stored.shape;
+      (definition as any).id = seen(stored.id); definitions.set(stored.id, definition); this.definitions.set(stored.id, definition);
+    }
+    const fill = (entities: Entities, stored: any) => {
+      for (const vertex of stored.vertices) entities.rawVertex(toVector(vertex.position), seen(vertex.id));
+      for (const edge of stored.edges) entities.createEdgeRaw(edge.start, edge.end, { soft: edge.soft || undefined, hidden: edge.hidden || undefined, tag: edge.tag }, seen(edge.id));
+      for (const face of stored.faces) entities.createFaceRaw(face.outer, face.holes ?? [], { material: face.material, backMaterial: face.backMaterial, tag: face.tag, hidden: face.hidden || undefined }, seen(face.id));
+      for (const instance of stored.instances) {
+        const definition = definitions.get(instance.definition); if (!definition) continue;
+        const loaded: Instance = { id: seen(instance.id), definition: definition, matrix: new THREE.Matrix4().fromArray(instance.matrix), name: instance.name ?? '', material: instance.material, tag: instance.tag, hidden: !!instance.hidden, locked: !!instance.locked };
+        entities.instances.set(loaded.id, loaded);
+      }
     };
-    for (const d of j.definitions ?? []) fill(defs.get(d.id)!.entities, d.ents);
-    fill(this.root, j.root);
-    this.guides = (j.guides ?? []).map((g: any) => ({ id: seen(g.id), kind: g.k, p: V(g.p), d: g.d ? V(g.d) : undefined }));
-    this.dimensions = (j.dimensions ?? []).map((d: any) => ({ id: seen(d.id), a: V(d.a), b: V(d.b), offset: V(d.o) }));
-    this.labels = (j.labels ?? []).map((l: any) => ({ id: seen(l.id), p: V(l.p), text: l.t, offset: V(l.o) }));
-    this.sections = (j.sections ?? []).map((s: any) => ({ id: seen(s.id), p: V(s.p), n: V(s.n), active: !!s.a, name: s.name ?? 'Schnitt' }));
-    this.scenes = j.scenes ?? [];
+    for (const stored of json.definitions ?? []) fill(definitions.get(stored.id)!.entities, stored.entities);
+    fill(this.root, json.root);
+    this.guides = (json.guides ?? []).map((guide: any): Guide => ({ id: seen(guide.id), kind: guide.kind, point: toVector(guide.point), direction: guide.direction ? toVector(guide.direction) : undefined }));
+    this.dimensions = (json.dimensions ?? []).map((dimension: any): Dimension => ({ id: seen(dimension.id), start: toVector(dimension.start), end: toVector(dimension.end), offset: toVector(dimension.offset) }));
+    this.labels = (json.labels ?? []).map((label: any): Label => ({ id: seen(label.id), point: toVector(label.point), text: label.text, offset: toVector(label.offset) }));
+    this.sections = (json.sections ?? []).map((section: any): SectionPlane => ({ id: seen(section.id), point: toVector(section.point), normal: toVector(section.normal), active: !!section.active, name: section.name ?? 'Schnitt' }));
+    this.scenes = (json.scenes ?? []).map((scene: any): Scene => ({ ...scene, camera: { position: scene.camera.position, target: scene.camera.target, fov: scene.camera.fov, ortho: scene.camera.ortho } }));
     ensureIdAbove(maxId);
   }
 }

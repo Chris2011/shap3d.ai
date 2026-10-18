@@ -11,40 +11,40 @@ const fonts: Record<string, Font> = {};
 export const FONT_NAMES = { helvetiker: 'Helvetiker', helvetiker_bold: 'Helvetiker Fett', optimer: 'Optimer' } as const;
 export type FontName = keyof typeof FONT_NAMES;
 
-export function getFont(name: FontName = 'helvetiker'): Font {
+export const getFont = (name: FontName = 'helvetiker'): Font => {
   if (!fonts[name]) fonts[name] = loader.parse((name === 'helvetiker_bold' ? bold : name === 'optimer' ? optimer : regular) as any);
   return fonts[name];
-}
+};
 
 /** Builds faces (and optionally extrusions) for text in the XY plane (or XZ when upright). */
-export function buildText(ents: Entities, text: string, opts: { size: number; depth: number; font?: FontName; filled?: boolean; upright?: boolean }) {
+export const buildText = (ents: Entities, text: string, opts: { size: number; depth: number; font?: FontName; filled?: boolean; upright?: boolean }) => {
   const font = getFont(opts.font);
   const shapes = font.generateShapes(text, opts.size);
-  const map = (p: THREE.Vector2) => (opts.upright ? new THREE.Vector3(p.x, 0, p.y) : new THREE.Vector3(p.x, p.y, 0));
+  const map = (point: THREE.Vector2) => (opts.upright ? new THREE.Vector3(point.x, 0, point.y) : new THREE.Vector3(point.x, point.y, 0));
   const faces: number[] = [];
-  for (const s of shapes) {
-    const ex = s.extractPoints(6);
-    let outer = dedupe(ex.shape); let holes = ex.holes.map(dedupe).filter(h => h.length >= 3);
+  for (const shape of shapes) {
+    const extracted = shape.extractPoints(6);
+    let outer = dedupe(extracted.shape); let holes = extracted.holes.map(dedupe).filter(hole => hole.length >= 3);
     if (outer.length < 3) continue;
     if (THREE.ShapeUtils.isClockWise(outer)) outer = outer.reverse();
-    holes = holes.map(h => (THREE.ShapeUtils.isClockWise(h) ? h : h.reverse()));
-    const ov = outer.map(p => ents.rawVertex(map(p)));
-    const hv = holes.map(h => h.map(p => ents.rawVertex(map(p))));
+    holes = holes.map(hole => (THREE.ShapeUtils.isClockWise(hole) ? hole : hole.reverse()));
+    const outerIds = outer.map(point => ents.rawVertex(map(point)));
+    const holeIds = holes.map(hole => hole.map(point => ents.rawVertex(map(point))));
     if (opts.filled === false) {
-      for (const loop of [ov, ...hv]) for (let i = 0; i < loop.length; i++) ents.createEdgeRaw(loop[i], loop[(i + 1) % loop.length]);
+      for (const loop of [outerIds, ...holeIds]) for (let i = 0; i < loop.length; i++) ents.createEdgeRaw(loop[i], loop[(i + 1) % loop.length]);
       continue;
     }
-    const f = ents.createFaceRaw(ov, hv);
-    if (f) faces.push(f.id);
+    const face = ents.createFaceRaw(outerIds, holeIds);
+    if (face) faces.push(face.id);
   }
   // CCW outlines face +Z (flat) or -Y (upright, readable from the front view)
-  if (opts.depth > 0 && opts.filled !== false) for (const fid of faces) ents.pushPull(fid, opts.depth);
+  if (opts.depth > 0 && opts.filled !== false) for (const faceId of faces) ents.pushPull(faceId, opts.depth);
   return faces;
-}
+};
 
-function dedupe(pts: THREE.Vector2[]): THREE.Vector2[] {
+const dedupe = (pts: THREE.Vector2[]): THREE.Vector2[] => {
   const out: THREE.Vector2[] = [];
-  for (const p of pts) if (!out.length || out[out.length - 1].distanceTo(p) > 1e-6) out.push(p);
+  for (const point of pts) if (!out.length || out[out.length - 1].distanceTo(point) > 1e-6) out.push(point);
   while (out.length > 1 && out[0].distanceTo(out[out.length - 1]) < 1e-6) out.pop();
   return out;
-}
+};

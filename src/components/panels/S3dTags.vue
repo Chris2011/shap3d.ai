@@ -40,7 +40,7 @@ const add = () => {
   active.value = name;
 };
 const toggle = (tag: Tag) => { editor.commit('Tag-Sichtbarkeit', () => { tag.visible = !tag.visible; }); };
-const setColor = (tag: Tag, color: string) => { tag.color = color; editor.ui.saved = false; editor.ui.rev++; };
+const setColor = (tag: Tag, color: string) => { tag.color = color; editor.ui.saved = false; editor.ui.revision++; };
 
 /** Calls `visit` for every face, edge and instance of the model (each definition only once). */
 const walkAll = (visit: (item: { tag?: string }) => void) => {
@@ -50,7 +50,7 @@ const walkAll = (visit: (item: { tag?: string }) => void) => {
     seen.add(entities);
     entities.faces.forEach(face => visit(face));
     entities.edges.forEach(edge => visit(edge));
-    entities.instances.forEach(instance => { visit(instance); walk(instance.def.entities); });
+    entities.instances.forEach(instance => { visit(instance); walk(instance.definition.entities); });
   };
   walk(editor.model.root);
 };

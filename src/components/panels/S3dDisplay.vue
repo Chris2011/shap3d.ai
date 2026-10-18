@@ -24,11 +24,11 @@ const OPTS = [
   { id: 'toggleGuides', label: 'Hilfslinien' }, { id: 'toggleSectionPlanes', label: 'Schnittebenen' }, { id: 'toggleSectionCuts', label: 'Schnitte' },
   { id: 'toggleHidden', label: 'Ausgeblendete Geometrie' }, { id: 'toggleShadows', label: 'Schatten' }, { id: 'xray', label: 'Röntgen' },
 ];
-const check = (id: string) => { void editor.ui.rev; return !!findCommand(id)?.checked?.(editor); };
+const check = (id: string) => { void editor.ui.revision; return !!findCommand(id)?.checked?.(editor); };
 const toggle = (id: string) => { runCommand(editor, id); editor.ui.saved = false; };
 const sections = useModel(() => editor.model.sections);
 const activate = (id: number) => { editor.commit('Schnitt', () => editor.model.sections.forEach(section => (section.active = section.id === id))); };
-const flip = (id: number) => { editor.commit('Schnitt umdrehen', () => { const section = editor.model.sections.find(candidate => candidate.id === id); if (section) section.n.negate(); }); };
-const shift = (id: number, distance: number) => { editor.commit('Schnitt verschieben', () => { const section = editor.model.sections.find(candidate => candidate.id === id); if (section) section.p.addScaledVector(section.n, distance); }); };
+const flip = (id: number) => { editor.commit('Schnitt umdrehen', () => { const section = editor.model.sections.find(candidate => candidate.id === id); if (section) section.normal.negate(); }); };
+const shift = (id: number, distance: number) => { editor.commit('Schnitt verschieben', () => { const section = editor.model.sections.find(candidate => candidate.id === id); if (section) section.point.addScaledVector(section.normal, distance); }); };
 const del = (id: number) => { editor.commit('Schnitt löschen', () => { editor.model.sections = editor.model.sections.filter(section => section.id !== id); }); };
 </script>

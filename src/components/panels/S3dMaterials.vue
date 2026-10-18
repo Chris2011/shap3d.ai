@@ -51,7 +51,7 @@ const list = computed(() => mats.value.filter(material => !filter.value || mater
 const cur = useModel(() => editor.model.material(editor.ui.currentMaterial ?? undefined) ?? null);
 const usage = useModel(() => {
   const name = cur.value?.name; if (!name) return 0; let count = 0; const seen = new Set<Entities>();
-  const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === name) count++; if (face.backMaterial === name) count++; } for (const instance of entities.instances.values()) { if (instance.material === name) count++; walk(instance.def.entities); } };
+  const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === name) count++; if (face.backMaterial === name) count++; } for (const instance of entities.instances.values()) { if (instance.material === name) count++; walk(instance.definition.entities); } };
   walk(editor.model.root); return count;
 });
 const choose = (name: string | null) => { editor.ui.currentMaterial = name; if (editor.ui.tool !== 'paint') editor.setTool('paint'); else editor.refreshStatus(); };
@@ -65,7 +65,7 @@ const rename = (name: string) => {
   const material = cur.value; name = name.trim(); if (!material || !name || editor.model.materials.some(other => other.name === name)) return; const old = material.name;
   change('Material umbenennen', () => {
     material.name = name; const seen = new Set<Entities>();
-    const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === old) face.material = name; if (face.backMaterial === old) face.backMaterial = name; } for (const instance of entities.instances.values()) { if (instance.material === old) instance.material = name; walk(instance.def.entities); } };
+    const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === old) face.material = name; if (face.backMaterial === old) face.backMaterial = name; } for (const instance of entities.instances.values()) { if (instance.material === old) instance.material = name; walk(instance.definition.entities); } };
     walk(editor.model.root);
   });
   editor.ui.currentMaterial = name;
@@ -74,7 +74,7 @@ const remove = () => {
   const material = cur.value; if (!material) return; const old = material.name;
   change('Material löschen', () => {
     editor.model.materials = editor.model.materials.filter(other => other !== material); const seen = new Set<Entities>();
-    const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === old) face.material = undefined; if (face.backMaterial === old) face.backMaterial = undefined; } for (const instance of entities.instances.values()) { if (instance.material === old) instance.material = undefined; walk(instance.def.entities); } };
+    const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === old) face.material = undefined; if (face.backMaterial === old) face.backMaterial = undefined; } for (const instance of entities.instances.values()) { if (instance.material === old) instance.material = undefined; walk(instance.definition.entities); } };
     walk(editor.model.root);
   });
   editor.ui.currentMaterial = null;

@@ -1,20 +1,20 @@
 import * as THREE from 'three';
 import {
-  LEN_EPS, V3, v3, polygonNormal, planeBasis, to2D, signedArea2D, pointInPolygon2D, triangulate,
+  LEN_EPS, V3, vec3, polygonNormal, planeBasis, to2D, signedArea2D, pointInPolygon2D, triangulate,
   pointOnSegmentInterior, segmentSegmentClosest, polygonArea, isCollinear,
 } from './geometry';
 
 let NEXT_ID = 1;
 export const newId = () => NEXT_ID++;
-export function ensureIdAbove(n: number) { if (n >= NEXT_ID) NEXT_ID = n + 1; }
+export const ensureIdAbove = (usedId: number) => { if (usedId >= NEXT_ID) NEXT_ID = usedId + 1; };
 
-export interface Vertex { id: number; p: V3 }
-export interface Edge { id: number; a: number; b: number; soft?: boolean; hidden?: boolean; tag?: string }
+export interface Vertex { id: number; position: V3 }
+export interface Edge { id: number; start: number; end: number; soft?: boolean; hidden?: boolean; tag?: string }
 export interface ShapeParams { kind: string; args: unknown[]; opts: Record<string, unknown> }
 export interface Face { id: number; outer: number[]; holes: number[][]; material?: string; backMaterial?: string; tag?: string; hidden?: boolean }
 
 export interface Instance {
-  id: number; def: Definition; matrix: THREE.Matrix4; name: string;
+  id: number; definition: Definition; matrix: THREE.Matrix4; name: string;
   material?: string; tag?: string; hidden?: boolean; locked?: boolean;
 }
 
@@ -29,7 +29,7 @@ export class Definition {
   constructor(public name: string, public isComponent: boolean, public entities = new Entities()) {}
 }
 
-const ekey = (a: number, b: number) => (a < b ? `${a}_${b}` : `${b}_${a}`);
+const ekey = (vertexA: number, vertexB: number) => (vertexA < vertexB ? `${vertexA}_${vertexB}` : `${vertexB}_${vertexA}`);
 const PLANE_TOL = 1e-5;
 
 export type EntityRef = { kind: 'edge' | 'face' | 'instance'; id: number };
@@ -45,34 +45,34 @@ export class Entities {
   private eFaces = new Map<number, Set<number>>();
 
   // ---------- basic queries ----------
-  pos(vid: number): V3 { return this.vertices.get(vid)!.p; }
-  edgeBetween(a: number, b: number): Edge | undefined { const id = this.keyIndex.get(ekey(a, b)); return id != null ? this.edges.get(id) : undefined; }
-  edgesOfVertex(vid: number): Edge[] { return [...(this.vEdges.get(vid) ?? [])].map(id => this.edges.get(id)!).filter(Boolean); }
-  facesOfEdge(eid: number): Face[] { return [...(this.eFaces.get(eid) ?? [])].map(id => this.faces.get(id)!).filter(Boolean); }
-  facesOfVertex(vid: number): Face[] { const s = new Set<Face>(); for (const e of this.edgesOfVertex(vid)) for (const f of this.facesOfEdge(e.id)) s.add(f); return [...s]; }
-  loops(f: Face): number[][] { return [f.outer, ...f.holes]; }
-  loopEdges(loop: number[]): Edge[] { const r: Edge[] = []; for (let i = 0; i < loop.length; i++) { const e = this.edgeBetween(loop[i], loop[(i + 1) % loop.length]); if (e) r.push(e); } return r; }
-  faceEdges(f: Face): Edge[] { return this.loops(f).flatMap(l => this.loopEdges(l)); }
-  facePoints(f: Face): V3[] { return f.outer.map(v => this.pos(v)); }
-  faceNormal(f: Face): V3 { return polygonNormal(this.facePoints(f)); }
-  faceVertices(f: Face): number[] { return this.loops(f).flat(); }
-  faceArea(f: Face): number { return polygonArea(this.facePoints(f)) - f.holes.reduce((s, h) => s + polygonArea(h.map(v => this.pos(v))), 0); }
-  faceCenter(f: Face): V3 { const tri = this.faceTriangles(f); if (tri.length) { const c = v3(); const pts = [...f.outer, ...f.holes.flat()].map(v => this.pos(v)); let best = -1; for (let i = 0; i < tri.length; i += 3) { const a = pts[tri[i]], b = pts[tri[i + 1]], d = pts[tri[i + 2]]; const ar = b.clone().sub(a).cross(d.clone().sub(a)).length(); if (ar > best) { best = ar; c.copy(a).add(b).add(d).multiplyScalar(1 / 3); } } return c; } return this.facePoints(f)[0].clone(); }
-  faceTriangles(f: Face): number[] { return triangulate(f.outer.map(v => this.pos(v)), f.holes.map(h => h.map(v => this.pos(v))), this.faceNormal(f)); }
-  edgeLength(e: Edge) { return this.pos(e.a).distanceTo(this.pos(e.b)); }
+  positionOf(vertexId: number): V3 { return this.vertices.get(vertexId)!.position; }
+  edgeBetween(vertexA: number, vertexB: number): Edge | undefined { const id = this.keyIndex.get(ekey(vertexA, vertexB)); return id != null ? this.edges.get(id) : undefined; }
+  edgesOfVertex(vertexId: number): Edge[] { return [...(this.vEdges.get(vertexId) ?? [])].map(id => this.edges.get(id)!).filter(Boolean); }
+  facesOfEdge(edgeId: number): Face[] { return [...(this.eFaces.get(edgeId) ?? [])].map(id => this.faces.get(id)!).filter(Boolean); }
+  facesOfVertex(vertexId: number): Face[] { const found = new Set<Face>(); for (const edge of this.edgesOfVertex(vertexId)) for (const face of this.facesOfEdge(edge.id)) found.add(face); return [...found]; }
+  loops(face: Face): number[][] { return [face.outer, ...face.holes]; }
+  loopEdges(loop: number[]): Edge[] { const edges: Edge[] = []; for (let i = 0; i < loop.length; i++) { const edge = this.edgeBetween(loop[i], loop[(i + 1) % loop.length]); if (edge) edges.push(edge); } return edges; }
+  faceEdges(face: Face): Edge[] { return this.loops(face).flatMap(loop => this.loopEdges(loop)); }
+  facePoints(face: Face): V3[] { return face.outer.map(vertex => this.positionOf(vertex)); }
+  faceNormal(face: Face): V3 { return polygonNormal(this.facePoints(face)); }
+  faceVertices(face: Face): number[] { return this.loops(face).flat(); }
+  faceArea(face: Face): number { return polygonArea(this.facePoints(face)) - face.holes.reduce((sum, hole) => sum + polygonArea(hole.map(vertex => this.positionOf(vertex))), 0); }
+  faceCenter(face: Face): V3 { const tri = this.faceTriangles(face); if (tri.length) { const centroid = vec3(); const pts = [...face.outer, ...face.holes.flat()].map(vertex => this.positionOf(vertex)); let best = -1; for (let i = 0; i < tri.length; i += 3) { const cornerA = pts[tri[i]], cornerB = pts[tri[i + 1]], cornerC = pts[tri[i + 2]]; const triArea = cornerB.clone().sub(cornerA).cross(cornerC.clone().sub(cornerA)).length(); if (triArea > best) { best = triArea; centroid.copy(cornerA).add(cornerB).add(cornerC).multiplyScalar(1 / 3); } } return centroid; } return this.facePoints(face)[0].clone(); }
+  faceTriangles(face: Face): number[] { return triangulate(face.outer.map(vertex => this.positionOf(vertex)), face.holes.map(hole => hole.map(vertex => this.positionOf(vertex))), this.faceNormal(face)); }
+  edgeLength(edge: Edge) { return this.positionOf(edge.start).distanceTo(this.positionOf(edge.end)); }
   isEmpty() { return this.edges.size === 0 && this.instances.size === 0; }
 
-  pointInFace(f: Face, p: V3, strict = true): boolean {
-    const n = this.faceNormal(f); if (n.lengthSq() < 0.5) return false;
-    const o = this.pos(f.outer[0]);
-    if (Math.abs(p.clone().sub(o).dot(n)) > PLANE_TOL * 10) return false;
-    const { u, v } = planeBasis(n);
-    const P = to2D([p], o, u, v)[0];
-    if (!pointInPolygon2D(P, to2D(this.facePoints(f), o, u, v))) return false;
-    for (const h of f.holes) if (pointInPolygon2D(P, to2D(h.map(x => this.pos(x)), o, u, v))) return false;
+  pointInFace(face: Face, point: V3, strict = true): boolean {
+    const normal = this.faceNormal(face); if (normal.lengthSq() < 0.5) return false;
+    const anchor = this.positionOf(face.outer[0]);
+    if (Math.abs(point.clone().sub(anchor).dot(normal)) > PLANE_TOL * 10) return false;
+    const { basisU: basisU, basisV: basisV } = planeBasis(normal);
+    const point2D = to2D([point], anchor, basisU, basisV)[0];
+    if (!pointInPolygon2D(point2D, to2D(this.facePoints(face), anchor, basisU, basisV))) return false;
+    for (const hole of face.holes) if (pointInPolygon2D(point2D, to2D(hole.map(x => this.positionOf(x)), anchor, basisU, basisV))) return false;
     if (strict) {
       // reject points on the boundary
-      for (const e of this.faceEdges(f)) if (pointOnSegmentInterior(p, this.pos(e.a), this.pos(e.b), 1e-7) ) return false;
+      for (const edge of this.faceEdges(face)) if (pointOnSegmentInterior(point, this.positionOf(edge.start), this.positionOf(edge.end), 1e-7) ) return false;
     }
     return true;
   }
@@ -81,159 +81,159 @@ export class Entities {
   private vhash: Map<string, number[]> | null = null;
   private static CELL = 0.01;
   private cellKey(x: number, y: number, z: number) { return `${x},${y},${z}`; }
-  private hashInsert(id: number, p: V3) {
-    if (!this.vhash) return; const C = Entities.CELL;
-    const k = this.cellKey(Math.floor(p.x / C), Math.floor(p.y / C), Math.floor(p.z / C));
-    const l = this.vhash.get(k); if (l) l.push(id); else this.vhash.set(k, [id]);
+  private hashInsert(id: number, point: V3) {
+    if (!this.vhash) return; const cell = Entities.CELL;
+    const key = this.cellKey(Math.floor(point.x / cell), Math.floor(point.y / cell), Math.floor(point.z / cell));
+    const bucket = this.vhash.get(key); if (bucket) bucket.push(id); else this.vhash.set(key, [id]);
   }
   /** Must be called after vertex positions were mutated directly. */
   invalidateHash() { this.vhash = null; }
-  findVertex(p: V3, tol = LEN_EPS): number | undefined {
-    if (!this.vhash) { this.vhash = new Map(); for (const v of this.vertices.values()) this.hashInsert(v.id, v.p); }
-    const C = Entities.CELL; const cx = Math.floor(p.x / C), cy = Math.floor(p.y / C), cz = Math.floor(p.z / C);
-    let best: number | undefined, bd = tol * tol;
-    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) {
-      const l = this.vhash.get(this.cellKey(cx + dx, cy + dy, cz + dz)); if (!l) continue;
-      for (const id of l) { const v = this.vertices.get(id); if (!v) continue; const d = v.p.distanceToSquared(p); if (d < bd) { bd = d; best = id; } }
+  findVertex(point: V3, tol = LEN_EPS): number | undefined {
+    if (!this.vhash) { this.vhash = new Map(); for (const vertex of this.vertices.values()) this.hashInsert(vertex.id, vertex.position); }
+    const cell = Entities.CELL; const cellX = Math.floor(point.x / cell), cellY = Math.floor(point.y / cell), cellZ = Math.floor(point.z / cell);
+    let best: number | undefined, bestDistSq = tol * tol;
+    for (let offsetX = -1; offsetX <= 1; offsetX++) for (let offsetY = -1; offsetY <= 1; offsetY++) for (let offsetZ = -1; offsetZ <= 1; offsetZ++) {
+      const bucket = this.vhash.get(this.cellKey(cellX + offsetX, cellY + offsetY, cellZ + offsetZ)); if (!bucket) continue;
+      for (const id of bucket) { const vertex = this.vertices.get(id); if (!vertex) continue; const distSq = vertex.position.distanceToSquared(point); if (distSq < bestDistSq) { bestDistSq = distSq; best = id; } }
     }
     return best;
   }
-  addVertex(p: V3): number {
-    const f = this.findVertex(p); if (f != null) return f;
-    const id = newId(); this.vertices.set(id, { id, p: p.clone() }); this.hashInsert(id, p); return id;
+  addVertex(point: V3): number {
+    const found = this.findVertex(point); if (found != null) return found;
+    const id = newId(); this.vertices.set(id, { id, position: point.clone() }); this.hashInsert(id, point); return id;
   }
-  rawVertex(p: V3, id = newId()): number { this.vertices.set(id, { id, p: p.clone() }); this.hashInsert(id, p); return id; }
+  rawVertex(point: V3, id = newId()): number { this.vertices.set(id, { id, position: point.clone() }); this.hashInsert(id, point); return id; }
 
-  createEdgeRaw(a: number, b: number, props: Partial<Edge> = {}, id = newId()): Edge {
-    const ex = this.edgeBetween(a, b); if (ex) return ex;
-    const e: Edge = { ...props, id, a, b };
-    this.edges.set(id, e); this.keyIndex.set(ekey(a, b), id);
-    if (!this.vEdges.has(a)) this.vEdges.set(a, new Set());
-    if (!this.vEdges.has(b)) this.vEdges.set(b, new Set());
-    this.vEdges.get(a)!.add(id); this.vEdges.get(b)!.add(id);
-    return e;
+  createEdgeRaw(vertexA: number, vertexB: number, props: Partial<Edge> = {}, id = newId()): Edge {
+    const existing = this.edgeBetween(vertexA, vertexB); if (existing) return existing;
+    const edge: Edge = { ...props, id, start: vertexA, end: vertexB };
+    this.edges.set(id, edge); this.keyIndex.set(ekey(vertexA, vertexB), id);
+    if (!this.vEdges.has(vertexA)) this.vEdges.set(vertexA, new Set());
+    if (!this.vEdges.has(vertexB)) this.vEdges.set(vertexB, new Set());
+    this.vEdges.get(vertexA)!.add(id); this.vEdges.get(vertexB)!.add(id);
+    return edge;
   }
 
   private cleanLoop(loop: number[]): number[] {
-    const r: number[] = [];
-    for (const v of loop) if (r[r.length - 1] !== v) r.push(v);
-    while (r.length > 1 && r[0] === r[r.length - 1]) r.pop();
-    return r;
+    const cleaned: number[] = [];
+    for (const vertex of loop) if (cleaned[cleaned.length - 1] !== vertex) cleaned.push(vertex);
+    while (cleaned.length > 1 && cleaned[0] === cleaned[cleaned.length - 1]) cleaned.pop();
+    return cleaned;
   }
-  faceKey(outer: number[]) { return [...outer].sort((a, b) => a - b).join(','); }
+  faceKey(outer: number[]) { return [...outer].sort((left, right) => left - right).join(','); }
   private fkIndex = new Map<string, number>();
   private faceKeys = new Map<number, string>();
-  private indexFace(f: Face) { const old = this.faceKeys.get(f.id); if (old && this.fkIndex.get(old) === f.id) this.fkIndex.delete(old); const k = this.faceKey(f.outer); this.faceKeys.set(f.id, k); this.fkIndex.set(k, f.id); }
+  private indexFace(face: Face) { const old = this.faceKeys.get(face.id); if (old && this.fkIndex.get(old) === face.id) this.fkIndex.delete(old); const key = this.faceKey(face.outer); this.faceKeys.set(face.id, key); this.fkIndex.set(key, face.id); }
   private unindexFace(id: number) { const old = this.faceKeys.get(id); if (old && this.fkIndex.get(old) === id) this.fkIndex.delete(old); this.faceKeys.delete(id); }
   findFaceByOuter(outer: number[]): Face | undefined {
     const id = this.fkIndex.get(this.faceKey(outer)); if (id == null) return undefined;
-    const f = this.faces.get(id); if (f && f.outer.length === outer.length && this.faceKey(f.outer) === this.faceKey(outer)) return f;
+    const face = this.faces.get(id); if (face && face.outer.length === outer.length && this.faceKey(face.outer) === this.faceKey(outer)) return face;
     return undefined;
   }
 
   createFaceRaw(outer: number[], holes: number[][] = [], props: Partial<Face> = {}, id = newId()): Face | null {
-    outer = this.cleanLoop(outer); holes = holes.map(h => this.cleanLoop(h)).filter(h => h.length >= 3);
+    outer = this.cleanLoop(outer); holes = holes.map(hole => this.cleanLoop(hole)).filter(hole => hole.length >= 3);
     if (outer.length < 3) return null;
-    if (polygonArea(outer.map(v => this.pos(v))) < 1e-10) return null;
-    const ex = this.findFaceByOuter(outer); if (ex) return ex;
-    const f: Face = { ...props, id, outer, holes };
-    this.faces.set(id, f); this.indexFace(f);
-    for (const l of this.loops(f)) for (let i = 0; i < l.length; i++) {
-      const e = this.createEdgeRaw(l[i], l[(i + 1) % l.length]);
-      if (!this.eFaces.has(e.id)) this.eFaces.set(e.id, new Set());
-      this.eFaces.get(e.id)!.add(id);
+    if (polygonArea(outer.map(vertex => this.positionOf(vertex))) < 1e-10) return null;
+    const existing = this.findFaceByOuter(outer); if (existing) return existing;
+    const face: Face = { ...props, id, outer, holes };
+    this.faces.set(id, face); this.indexFace(face);
+    for (const loop of this.loops(face)) for (let i = 0; i < loop.length; i++) {
+      const edge = this.createEdgeRaw(loop[i], loop[(i + 1) % loop.length]);
+      if (!this.eFaces.has(edge.id)) this.eFaces.set(edge.id, new Set());
+      this.eFaces.get(edge.id)!.add(id);
     }
-    return f;
+    return face;
   }
 
-  removeFace(fid: number) {
-    const f = this.faces.get(fid); if (!f) return;
-    for (const e of this.faceEdges(f)) this.eFaces.get(e.id)?.delete(fid);
-    this.faces.delete(fid); this.unindexFace(fid);
+  removeFace(faceId: number) {
+    const face = this.faces.get(faceId); if (!face) return;
+    for (const edge of this.faceEdges(face)) this.eFaces.get(edge.id)?.delete(faceId);
+    this.faces.delete(faceId); this.unindexFace(faceId);
   }
 
-  private removeEdgeRaw(eid: number) {
-    const e = this.edges.get(eid); if (!e) return;
-    for (const f of this.facesOfEdge(eid)) this.removeFace(f.id);
-    this.edges.delete(eid); this.keyIndex.delete(ekey(e.a, e.b)); this.eFaces.delete(eid);
-    this.vEdges.get(e.a)?.delete(eid); this.vEdges.get(e.b)?.delete(eid);
+  private removeEdgeRaw(edgeId: number) {
+    const edge = this.edges.get(edgeId); if (!edge) return;
+    for (const face of this.facesOfEdge(edgeId)) this.removeFace(face.id);
+    this.edges.delete(edgeId); this.keyIndex.delete(ekey(edge.start, edge.end)); this.eFaces.delete(edgeId);
+    this.vEdges.get(edge.start)?.delete(edgeId); this.vEdges.get(edge.end)?.delete(edgeId);
   }
-  removeOrphanVertices(vids?: Iterable<number>) {
-    const list = vids ? [...vids] : [...this.vertices.keys()];
-    for (const v of list) if (!(this.vEdges.get(v)?.size)) { this.vertices.delete(v); this.vEdges.delete(v); }
+  removeOrphanVertices(vertexIds?: Iterable<number>) {
+    const list = vertexIds ? [...vertexIds] : [...this.vertices.keys()];
+    for (const vertex of list) if (!(this.vEdges.get(vertex)?.size)) { this.vertices.delete(vertex); this.vEdges.delete(vertex); }
   }
 
-  reverseFace(f: Face) { f.outer.reverse(); f.holes.forEach(h => h.reverse()); }
+  reverseFace(face: Face) { face.outer.reverse(); face.holes.forEach(hole => hole.reverse()); }
 
   // ---------- topology edits ----------
-  splitEdge(eid: number, vid: number): [Edge, Edge] | null {
-    const e = this.edges.get(eid); if (!e || e.a === vid || e.b === vid) return null;
-    const faces = this.facesOfEdge(eid);
-    const props = { soft: e.soft, hidden: e.hidden, tag: e.tag };
-    for (const f of faces) {
-      for (const l of this.loops(f)) for (let i = 0; i < l.length; i++) {
-        const x = l[i], y = l[(i + 1) % l.length];
-        if ((x === e.a && y === e.b) || (x === e.b && y === e.a)) { l.splice(i + 1, 0, vid); break; }
+  splitEdge(edgeId: number, vertexId: number): [Edge, Edge] | null {
+    const targetEdge = this.edges.get(edgeId); if (!targetEdge || targetEdge.start === vertexId || targetEdge.end === vertexId) return null;
+    const faces = this.facesOfEdge(edgeId);
+    const props = { soft: targetEdge.soft, hidden: targetEdge.hidden, tag: targetEdge.tag };
+    for (const face of faces) {
+      for (const loop of this.loops(face)) for (let i = 0; i < loop.length; i++) {
+        const x = loop[i], y = loop[(i + 1) % loop.length];
+        if ((x === targetEdge.start && y === targetEdge.end) || (x === targetEdge.end && y === targetEdge.start)) { loop.splice(i + 1, 0, vertexId); break; }
       }
     }
     // detach faces from old edge before removing it
-    this.eFaces.set(eid, new Set());
-    this.removeEdgeRaw(eid);
-    const e1 = this.createEdgeRaw(e.a, vid, props), e2 = this.createEdgeRaw(vid, e.b, props);
-    for (const f of faces) for (const ne of [e1, e2]) { if (!this.eFaces.has(ne.id)) this.eFaces.set(ne.id, new Set()); this.eFaces.get(ne.id)!.add(f.id); }
-    for (const f of faces) this.indexFace(f);
-    return [e1, e2];
+    this.eFaces.set(edgeId, new Set());
+    this.removeEdgeRaw(edgeId);
+    const firstEdge = this.createEdgeRaw(targetEdge.start, vertexId, props), secondEdge = this.createEdgeRaw(vertexId, targetEdge.end, props);
+    for (const face of faces) for (const edge of [firstEdge, secondEdge]) { if (!this.eFaces.has(edge.id)) this.eFaces.set(edge.id, new Set()); this.eFaces.get(edge.id)!.add(face.id); }
+    for (const face of faces) this.indexFace(face);
+    return [firstEdge, secondEdge];
   }
 
   /** Inserts a vertex at p, splitting any edge it lies on. */
-  addPointOnEdges(p: V3): number {
-    const vid = this.addVertex(p);
-    const P = this.pos(vid);
-    for (const e of [...this.edges.values()]) {
-      if (e.a === vid || e.b === vid) continue;
-      if (pointOnSegmentInterior(P, this.pos(e.a), this.pos(e.b))) { this.splitEdge(e.id, vid); break; }
+  addPointOnEdges(position: V3): number {
+    const vertexId = this.addVertex(position);
+    const point = this.positionOf(vertexId);
+    for (const edge of [...this.edges.values()]) {
+      if (edge.start === vertexId || edge.end === vertexId) continue;
+      if (pointOnSegmentInterior(point, this.positionOf(edge.start), this.positionOf(edge.end))) { this.splitEdge(edge.id, vertexId); break; }
     }
-    return vid;
+    return vertexId;
   }
 
   /**
    * SketchUp-like line insertion: merges vertices, splits crossed edges, and
    * automatically creates or splits faces when closed planar loops appear.
    */
-  addLine(p: V3, q: V3, opts: { detectFaces?: boolean } = {}): Edge[] {
-    if (p.distanceTo(q) < LEN_EPS) return [];
-    const va = this.addPointOnEdges(p), vb = this.addPointOnEdges(q);
-    if (va === vb) return [];
-    const A = this.pos(va).clone(), B = this.pos(vb).clone();
-    const pts: { t: number; vid: number }[] = [{ t: 0, vid: va }, { t: 1, vid: vb }];
-    const dir = B.clone().sub(A); const len2 = dir.lengthSq();
+  addLine(start: V3, end: V3, opts: { detectFaces?: boolean } = {}): Edge[] {
+    if (start.distanceTo(end) < LEN_EPS) return [];
+    const startVertex = this.addPointOnEdges(start), endVertex = this.addPointOnEdges(end);
+    if (startVertex === endVertex) return [];
+    const startPos = this.positionOf(startVertex).clone(), endPos = this.positionOf(endVertex).clone();
+    const pts: { param: number; vertexId: number }[] = [{ param: 0, vertexId: startVertex }, { param: 1, vertexId: endVertex }];
+    const dir = endPos.clone().sub(startPos); const len2 = dir.lengthSq();
     // existing vertices on the segment
-    for (const v of this.vertices.values()) {
-      if (v.id === va || v.id === vb) continue;
-      if (pointOnSegmentInterior(v.p, A, B)) pts.push({ t: v.p.clone().sub(A).dot(dir) / len2, vid: v.id });
+    for (const vertex of this.vertices.values()) {
+      if (vertex.id === startVertex || vertex.id === endVertex) continue;
+      if (pointOnSegmentInterior(vertex.position, startPos, endPos)) pts.push({ param: vertex.position.clone().sub(startPos).dot(dir) / len2, vertexId: vertex.id });
     }
     // crossing edges
-    for (const e of [...this.edges.values()]) {
-      if (!this.edges.has(e.id)) continue;
-      const P1 = this.pos(e.a), Q1 = this.pos(e.b);
-      if (e.a === va || e.b === va || e.a === vb || e.b === vb) continue;
-      const r = segmentSegmentClosest(A, B, P1, Q1);
-      if (r.c1.distanceTo(r.c2) > LEN_EPS) continue;
-      if (r.s <= 1e-7 || r.s >= 1 - 1e-7 || r.t <= 1e-7 || r.t >= 1 - 1e-7) continue;
+    for (const edge of [...this.edges.values()]) {
+      if (!this.edges.has(edge.id)) continue;
+      const edgeStart = this.positionOf(edge.start), edgeEnd = this.positionOf(edge.end);
+      if (edge.start === startVertex || edge.end === startVertex || edge.start === endVertex || edge.end === endVertex) continue;
+      const closest = segmentSegmentClosest(startPos, endPos, edgeStart, edgeEnd);
+      if (closest.c1.distanceTo(closest.c2) > LEN_EPS) continue;
+      if (closest.s <= 1e-7 || closest.s >= 1 - 1e-7 || closest.t <= 1e-7 || closest.t >= 1 - 1e-7) continue;
       // parallel overlapping edges are handled by vertex insertion
-      if (dir.clone().normalize().cross(Q1.clone().sub(P1).normalize()).length() < 1e-6) continue;
-      const vid = this.addVertex(r.c1);
-      this.splitEdge(e.id, vid);
-      pts.push({ t: r.s, vid });
+      if (dir.clone().normalize().cross(edgeEnd.clone().sub(edgeStart).normalize()).length() < 1e-6) continue;
+      const vertexId = this.addVertex(closest.c1);
+      this.splitEdge(edge.id, vertexId);
+      pts.push({ param: closest.s, vertexId: vertexId });
     }
-    pts.sort((x, y) => x.t - y.t);
+    pts.sort((x, y) => x.param - y.param);
     const created: Edge[] = [];
     for (let i = 0; i < pts.length - 1; i++) {
-      const a = pts[i].vid, b = pts[i + 1].vid; if (a === b) continue;
-      if (this.edgeBetween(a, b)) continue;
-      created.push(this.createEdgeRaw(a, b));
+      const vertexA = pts[i].vertexId, vertexB = pts[i + 1].vertexId; if (vertexA === vertexB) continue;
+      if (this.edgeBetween(vertexA, vertexB)) continue;
+      created.push(this.createEdgeRaw(vertexA, vertexB));
     }
-    if (opts.detectFaces !== false) for (const e of created) if (this.edges.has(e.id)) this.detectFaces(e.id);
+    if (opts.detectFaces !== false) for (const edge of created) if (this.edges.has(edge.id)) this.detectFaces(edge.id);
     return created;
   }
 
@@ -244,314 +244,314 @@ export class Entities {
     return out;
   }
 
-  edgesInPlane(o: V3, n: V3): Edge[] {
-    return [...this.edges.values()].filter(e => Math.abs(this.pos(e.a).clone().sub(o).dot(n)) < PLANE_TOL && Math.abs(this.pos(e.b).clone().sub(o).dot(n)) < PLANE_TOL);
+  edgesInPlane(planePoint: V3, planeNormal: V3): Edge[] {
+    return [...this.edges.values()].filter(edge => Math.abs(this.positionOf(edge.start).clone().sub(planePoint).dot(planeNormal)) < PLANE_TOL && Math.abs(this.positionOf(edge.end).clone().sub(planePoint).dot(planeNormal)) < PLANE_TOL);
   }
-  facesInPlane(o: V3, n: V3): Face[] {
-    return [...this.faces.values()].filter(f => { const fn = this.faceNormal(f); return Math.abs(Math.abs(fn.dot(n)) - 1) < 1e-6 && Math.abs(this.pos(f.outer[0]).clone().sub(o).dot(n)) < PLANE_TOL; });
+  facesInPlane(planePoint: V3, planeNormal: V3): Face[] {
+    return [...this.faces.values()].filter(face => { const faceNormal = this.faceNormal(face); return Math.abs(Math.abs(faceNormal.dot(planeNormal)) - 1) < 1e-6 && Math.abs(this.positionOf(face.outer[0]).clone().sub(planePoint).dot(planeNormal)) < PLANE_TOL; });
   }
 
   /** Planar half-edge traversal → CCW cycles (faces) and CW cycles (component boundaries). */
-  extractCycles(edgeIds: Iterable<number>, n: V3, origin: V3) {
+  extractCycles(edgeIds: Iterable<number>, normal: V3, origin: V3) {
     const adj = new Map<number, Set<number>>();
-    for (const id of edgeIds) { const e = this.edges.get(id); if (!e) continue; if (!adj.has(e.a)) adj.set(e.a, new Set()); if (!adj.has(e.b)) adj.set(e.b, new Set()); adj.get(e.a)!.add(e.b); adj.get(e.b)!.add(e.a); }
+    for (const id of edgeIds) { const edge = this.edges.get(id); if (!edge) continue; if (!adj.has(edge.start)) adj.set(edge.start, new Set()); if (!adj.has(edge.end)) adj.set(edge.end, new Set()); adj.get(edge.start)!.add(edge.end); adj.get(edge.end)!.add(edge.start); }
     // prune dangling
     let changed = true;
-    while (changed) { changed = false; for (const [v, s] of adj) if (s.size < 2) { for (const w of s) adj.get(w)?.delete(v); adj.delete(v); changed = true; } }
-    const { u, v } = planeBasis(n);
-    const p2 = new Map<number, THREE.Vector2>();
-    for (const k of adj.keys()) { const d = this.pos(k).clone().sub(origin); p2.set(k, new THREE.Vector2(d.dot(u), d.dot(v))); }
+    while (changed) { changed = false; for (const [vertex, neighbours] of adj) if (neighbours.size < 2) { for (const neighbour of neighbours) adj.get(neighbour)?.delete(vertex); adj.delete(vertex); changed = true; } }
+    const { basisU: basisU, basisV: basisV } = planeBasis(normal);
+    const planar = new Map<number, THREE.Vector2>();
+    for (const k of adj.keys()) { const offset = this.positionOf(k).clone().sub(origin); planar.set(k, new THREE.Vector2(offset.dot(basisU), offset.dot(basisV))); }
     const sorted = new Map<number, number[]>();
-    for (const [k, s] of adj) { const c = p2.get(k)!; sorted.set(k, [...s].sort((x, y) => { const a = p2.get(x)!, b = p2.get(y)!; return Math.atan2(a.y - c.y, a.x - c.x) - Math.atan2(b.y - c.y, b.x - c.x); })); }
+    for (const [k, neighbours] of adj) { const centre = planar.get(k)!; sorted.set(k, [...neighbours].sort((x, y) => { const pointA = planar.get(x)!, pointB = planar.get(y)!; return Math.atan2(pointA.y - centre.y, pointA.x - centre.x) - Math.atan2(pointB.y - centre.y, pointB.x - centre.x); })); }
     const visited = new Set<string>();
     const pos: number[][] = [], neg: number[][] = [];
-    for (const [s, ns] of sorted) for (const t of ns) {
-      if (visited.has(s + '>' + t)) continue;
-      const cyc: number[] = []; let cur = s, nxt = t, guard = 0;
+    for (const [startVertex, neighbours] of sorted) for (const targetVertex of neighbours) {
+      if (visited.has(startVertex + '>' + targetVertex)) continue;
+      const cyc: number[] = []; let cur = startVertex, nxt = targetVertex, guard = 0;
       while (guard++ < 100000) {
         visited.add(cur + '>' + nxt); cyc.push(cur);
         const list = sorted.get(nxt)!; const i = list.indexOf(cur);
-        const nn = list[(i - 1 + list.length) % list.length];
-        cur = nxt; nxt = nn;
-        if (cur === s && nxt === t) break;
+        const nextVertex = list[(i - 1 + list.length) % list.length];
+        cur = nxt; nxt = nextVertex;
+        if (cur === startVertex && nxt === targetVertex) break;
       }
       if (new Set(cyc).size !== cyc.length) continue; // non-simple (bridges) – skip
-      const area = signedArea2D(cyc.map(k => p2.get(k)!));
+      const area = signedArea2D(cyc.map(k => planar.get(k)!));
       if (Math.abs(area) < 1e-12) continue;
       (area > 0 ? pos : neg).push(cyc);
     }
     // assign holes
     const holesOf = new Map<number, number[][]>();
-    const poly = (c: number[]) => c.map(k => p2.get(k)!);
-    for (const h of neg) {
-      const hs = new Set(h);
+    const poly = (cycle: number[]) => cycle.map(k => planar.get(k)!);
+    for (const hole of neg) {
+      const holeSet = new Set(hole);
       let best = -1, bestA = Infinity;
-      pos.forEach((c, i) => {
-        if (c.some(k => hs.has(k))) return;
-        if (!pointInPolygon2D(p2.get(h[0])!, poly(c))) return;
-        const a = signedArea2D(poly(c)); if (a < bestA) { bestA = a; best = i; }
+      pos.forEach((cycle, i) => {
+        if (cycle.some(k => holeSet.has(k))) return;
+        if (!pointInPolygon2D(planar.get(hole[0])!, poly(cycle))) return;
+        const area = signedArea2D(poly(cycle)); if (area < bestA) { bestA = area; best = i; }
       });
-      if (best >= 0) { if (!holesOf.has(best)) holesOf.set(best, []); holesOf.get(best)!.push(h); }
+      if (best >= 0) { if (!holesOf.has(best)) holesOf.set(best, []); holesOf.get(best)!.push(hole); }
     }
-    return pos.map((c, i) => ({ outer: c, holes: holesOf.get(i) ?? [] }));
+    return pos.map((cycle, i) => ({ outer: cycle, holes: holesOf.get(i) ?? [] }));
   }
 
   private samplePoint(outer: number[], holes: number[][]): V3 | null {
-    const pts = [...outer, ...holes.flat()].map(v => this.pos(v));
-    const tri = triangulate(outer.map(v => this.pos(v)), holes.map(h => h.map(v => this.pos(v))));
+    const pts = [...outer, ...holes.flat()].map(vertex => this.positionOf(vertex));
+    const tri = triangulate(outer.map(vertex => this.positionOf(vertex)), holes.map(hole => hole.map(vertex => this.positionOf(vertex))));
     let best: V3 | null = null, bestA = -1;
-    for (let i = 0; i < tri.length; i += 3) { const a = pts[tri[i]], b = pts[tri[i + 1]], c = pts[tri[i + 2]]; const ar = b.clone().sub(a).cross(c.clone().sub(a)).length(); if (ar > bestA) { bestA = ar; best = a.clone().add(b).add(c).multiplyScalar(1 / 3); } }
+    for (let i = 0; i < tri.length; i += 3) { const cornerA = pts[tri[i]], cornerB = pts[tri[i + 1]], cornerC = pts[tri[i + 2]]; const triArea = cornerB.clone().sub(cornerA).cross(cornerC.clone().sub(cornerA)).length(); if (triArea > bestA) { bestA = triArea; best = cornerA.clone().add(cornerB).add(cornerC).multiplyScalar(1 / 3); } }
     return best;
   }
 
   /** Called for every newly created edge. */
-  detectFaces(eid: number) {
-    const e = this.edges.get(eid); if (!e) return;
-    const A = this.pos(e.a), B = this.pos(e.b), M = A.clone().add(B).multiplyScalar(0.5);
+  detectFaces(edgeId: number) {
+    const splitEdge = this.edges.get(edgeId); if (!splitEdge) return;
+    const start = this.positionOf(splitEdge.start), end = this.positionOf(splitEdge.end), middle = start.clone().add(end).multiplyScalar(0.5);
     // Case A: the edge lies inside an existing face → split / punch that face
-    for (const f of [...this.faces.values()]) {
-      if (!this.faces.has(f.id)) continue;
-      const n = this.faceNormal(f), o = this.pos(f.outer[0]);
-      if (Math.abs(A.clone().sub(o).dot(n)) > PLANE_TOL || Math.abs(B.clone().sub(o).dot(n)) > PLANE_TOL) continue;
-      if (!this.pointInFace(f, M)) continue;
-      this.resplitFace(f);
+    for (const face of [...this.faces.values()]) {
+      if (!this.faces.has(face.id)) continue;
+      const normal = this.faceNormal(face), anchor = this.positionOf(face.outer[0]);
+      if (Math.abs(start.clone().sub(anchor).dot(normal)) > PLANE_TOL || Math.abs(end.clone().sub(anchor).dot(normal)) > PLANE_TOL) continue;
+      if (!this.pointInFace(face, middle)) continue;
+      this.resplitFace(face);
       return;
     }
     // Case B: new faces in planes spanned by this edge and its neighbours
-    const dir = B.clone().sub(A).normalize();
+    const dir = end.clone().sub(start).normalize();
     const planes: V3[] = [];
-    for (const vid of [e.a, e.b]) for (const o of this.edgesOfVertex(vid)) {
-      if (o.id === eid) continue;
-      const od = this.pos(o.b).clone().sub(this.pos(o.a)).normalize();
-      const n = dir.clone().cross(od); if (n.length() < 1e-6) continue; n.normalize();
-      const big = Math.abs(n.x) > Math.abs(n.y) ? (Math.abs(n.x) > Math.abs(n.z) ? n.x : n.z) : (Math.abs(n.y) > Math.abs(n.z) ? n.y : n.z);
-      if (big < 0) n.negate();
-      if (!planes.some(p => p.distanceTo(n) < 1e-6)) planes.push(n);
+    for (const vertexId of [splitEdge.start, splitEdge.end]) for (const edge of this.edgesOfVertex(vertexId)) {
+      if (edge.id === edgeId) continue;
+      const otherDir = this.positionOf(edge.end).clone().sub(this.positionOf(edge.start)).normalize();
+      const normal = dir.clone().cross(otherDir); if (normal.length() < 1e-6) continue; normal.normalize();
+      const big = Math.abs(normal.x) > Math.abs(normal.y) ? (Math.abs(normal.x) > Math.abs(normal.z) ? normal.x : normal.z) : (Math.abs(normal.y) > Math.abs(normal.z) ? normal.y : normal.z);
+      if (big < 0) normal.negate();
+      if (!planes.some(plane => plane.distanceTo(normal) < 1e-6)) planes.push(normal);
     }
-    for (const n of planes) {
-      if (!this.edges.has(eid)) return;
-      const edges = this.edgesInPlane(A, n);
+    for (const normal of planes) {
+      if (!this.edges.has(edgeId)) return;
+      const edges = this.edgesInPlane(start, normal);
       // only keep the connected component of e plus everything else (needed for holes)
-      const regions = this.extractCycles(edges.map(x => x.id), n, A);
-      const existing = this.facesInPlane(A, n);
-      for (const r of regions) {
-        const L = r.outer.length; let has = false;
-        for (let i = 0; i < L; i++) { const x = r.outer[i], y = r.outer[(i + 1) % L]; if ((x === e.a && y === e.b) || (x === e.b && y === e.a)) { has = true; break; } }
+      const regions = this.extractCycles(edges.map(x => x.id), normal, start);
+      const existing = this.facesInPlane(start, normal);
+      for (const region of regions) {
+        const count = region.outer.length; let has = false;
+        for (let i = 0; i < count; i++) { const x = region.outer[i], y = region.outer[(i + 1) % count]; if ((x === splitEdge.start && y === splitEdge.end) || (x === splitEdge.end && y === splitEdge.start)) { has = true; break; } }
         if (!has) continue;
-        if (this.findFaceByOuter(r.outer)) continue;
-        const sp = this.samplePoint(r.outer, r.holes); if (!sp) continue;
-        if (existing.some(f => this.faces.has(f.id) && this.pointInFace(f, sp, false))) continue;
-        const f = this.createFaceRaw(r.outer, r.holes);
-        if (f) this.orientNewFace(f);
+        if (this.findFaceByOuter(region.outer)) continue;
+        const sample = this.samplePoint(region.outer, region.holes); if (!sample) continue;
+        if (existing.some(existingFace => this.faces.has(existingFace.id) && this.pointInFace(existingFace, sample, false))) continue;
+        const face = this.createFaceRaw(region.outer, region.holes);
+        if (face) this.orientNewFace(face);
       }
     }
   }
 
   /** Make a new face consistent with its neighbours (or point down on the ground plane, like SketchUp). */
-  orientNewFace(f: Face) {
-    for (const l of [f.outer]) for (let i = 0; i < l.length; i++) {
-      const a = l[i], b = l[(i + 1) % l.length]; const e = this.edgeBetween(a, b); if (!e) continue;
-      for (const g of this.facesOfEdge(e.id)) {
-        if (g.id === f.id) continue;
-        for (const gl of this.loops(g)) for (let j = 0; j < gl.length; j++) {
-          if (gl[j] === a && gl[(j + 1) % gl.length] === b) { this.reverseFace(f); return; }
-          if (gl[j] === b && gl[(j + 1) % gl.length] === a) return;
+  orientNewFace(newFace: Face) {
+    for (const loop of [newFace.outer]) for (let i = 0; i < loop.length; i++) {
+      const vertexA = loop[i], vertexB = loop[(i + 1) % loop.length]; const edge = this.edgeBetween(vertexA, vertexB); if (!edge) continue;
+      for (const face of this.facesOfEdge(edge.id)) {
+        if (face.id === newFace.id) continue;
+        for (const gl of this.loops(face)) for (let j = 0; j < gl.length; j++) {
+          if (gl[j] === vertexA && gl[(j + 1) % gl.length] === vertexB) { this.reverseFace(newFace); return; }
+          if (gl[j] === vertexB && gl[(j + 1) % gl.length] === vertexA) return;
         }
       }
     }
-    const n = this.faceNormal(f);
-    const z0 = Math.abs(this.pos(f.outer[0]).z) < PLANE_TOL;
-    if (Math.abs(n.z) > 0.999) { if (z0 ? n.z > 0 : n.z < 0) this.reverseFace(f); }
+    const normal = this.faceNormal(newFace);
+    const onGround = Math.abs(this.positionOf(newFace.outer[0]).z) < PLANE_TOL;
+    if (Math.abs(normal.z) > 0.999) { if (onGround ? normal.z > 0 : normal.z < 0) this.reverseFace(newFace); }
   }
 
   /** Rebuild a face after edges were drawn inside it. */
-  resplitFace(f: Face) {
-    const n = this.faceNormal(f), o = this.pos(f.outer[0]).clone();
-    const own = new Set(this.faceEdges(f).map(e => e.id));
-    const inner = this.edgesInPlane(o, n).filter(e => !own.has(e.id) && this.pointInFace(f, this.pos(e.a).clone().add(this.pos(e.b)).multiplyScalar(0.5)));
-    const snapshot = { outer: [...f.outer], holes: f.holes.map(h => [...h]) };
-    const inside = (p: V3) => this.pointInLoops(snapshot.outer, snapshot.holes, n, p);
-    const regions = this.extractCycles([...own, ...inner.map(e => e.id)], n, o);
-    const props = { material: f.material, backMaterial: f.backMaterial, tag: f.tag };
-    const valid = regions.filter(r => { const sp = this.samplePoint(r.outer, r.holes); return sp && inside(sp); });
-    if (valid.length <= 1 && valid[0] && valid[0].outer.length === f.outer.length && valid[0].holes.length === f.holes.length) return;
-    this.removeFace(f.id);
-    for (const r of valid) this.createFaceRaw(r.outer, r.holes, props);
+  resplitFace(face: Face) {
+    const normal = this.faceNormal(face), anchor = this.positionOf(face.outer[0]).clone();
+    const own = new Set(this.faceEdges(face).map(edge => edge.id));
+    const inner = this.edgesInPlane(anchor, normal).filter(edge => !own.has(edge.id) && this.pointInFace(face, this.positionOf(edge.start).clone().add(this.positionOf(edge.end)).multiplyScalar(0.5)));
+    const snapshot = { outer: [...face.outer], holes: face.holes.map(hole => [...hole]) };
+    const inside = (point: V3) => this.pointInLoops(snapshot.outer, snapshot.holes, normal, point);
+    const regions = this.extractCycles([...own, ...inner.map(edge => edge.id)], normal, anchor);
+    const props = { material: face.material, backMaterial: face.backMaterial, tag: face.tag };
+    const valid = regions.filter(region => { const sample = this.samplePoint(region.outer, region.holes); return sample && inside(sample); });
+    if (valid.length <= 1 && valid[0] && valid[0].outer.length === face.outer.length && valid[0].holes.length === face.holes.length) return;
+    this.removeFace(face.id);
+    for (const region of valid) this.createFaceRaw(region.outer, region.holes, props);
   }
 
-  pointInLoops(outer: number[], holes: number[][], n: V3, p: V3): boolean {
-    const o = this.pos(outer[0]); const { u, v } = planeBasis(n);
-    const P = to2D([p], o, u, v)[0];
-    if (!pointInPolygon2D(P, to2D(outer.map(x => this.pos(x)), o, u, v))) return false;
-    for (const h of holes) if (pointInPolygon2D(P, to2D(h.map(x => this.pos(x)), o, u, v))) return false;
+  pointInLoops(outer: number[], holes: number[][], normal: V3, point: V3): boolean {
+    const anchor = this.positionOf(outer[0]); const { basisU: basisU, basisV: basisV } = planeBasis(normal);
+    const point2D = to2D([point], anchor, basisU, basisV)[0];
+    if (!pointInPolygon2D(point2D, to2D(outer.map(x => this.positionOf(x)), anchor, basisU, basisV))) return false;
+    for (const hole of holes) if (pointInPolygon2D(point2D, to2D(hole.map(x => this.positionOf(x)), anchor, basisU, basisV))) return false;
     return true;
   }
 
-  private coplanarSame(f: Face, g: Face) {
-    const n1 = this.faceNormal(f), n2 = this.faceNormal(g);
-    return n1.dot(n2) > 1 - 1e-6 && Math.abs(this.pos(g.outer[0]).clone().sub(this.pos(f.outer[0])).dot(n1)) < PLANE_TOL;
+  private coplanarSame(face: Face, other: Face) {
+    const normalA = this.faceNormal(face), normalB = this.faceNormal(other);
+    return normalA.dot(normalB) > 1 - 1e-6 && Math.abs(this.positionOf(other.outer[0]).clone().sub(this.positionOf(face.outer[0])).dot(normalA)) < PLANE_TOL;
   }
 
   /** Erase an edge. Two coplanar faces separated by it are merged (SketchUp "healing"). */
-  eraseEdge(eid: number, heal = true) {
-    const e = this.edges.get(eid); if (!e) return;
-    const fs = this.facesOfEdge(eid);
-    if (heal && fs.length === 2 && this.coplanarSame(fs[0], fs[1]) && fs[0].material === fs[1].material) {
-      const [f1, f2] = fs; const n = this.faceNormal(f1), o = this.pos(f1.outer[0]).clone();
-      const s1 = { outer: [...f1.outer], holes: f1.holes.map(h => [...h]) }, s2 = { outer: [...f2.outer], holes: f2.holes.map(h => [...h]) };
-      const edgeIds = new Set([...this.faceEdges(f1), ...this.faceEdges(f2)].map(x => x.id)); edgeIds.delete(eid);
-      const props = { material: f1.material, backMaterial: f1.backMaterial, tag: f1.tag };
-      const area = this.faceArea(f1) + this.faceArea(f2);
-      const keep1 = { ...f1, outer: [...f1.outer], holes: f1.holes.map(h => [...h]) }, keep2 = { ...f2, outer: [...f2.outer], holes: f2.holes.map(h => [...h]) };
-      const eprops = { soft: e.soft, hidden: e.hidden, tag: e.tag };
-      this.removeEdgeRaw(eid);
-      const regions = this.extractCycles(edgeIds, n, o);
+  eraseEdge(edgeId: number, heal = true) {
+    const edge = this.edges.get(edgeId); if (!edge) return;
+    const faces = this.facesOfEdge(edgeId);
+    if (heal && faces.length === 2 && this.coplanarSame(faces[0], faces[1]) && faces[0].material === faces[1].material) {
+      const [faceA, faceB] = faces; const normal = this.faceNormal(faceA), anchor = this.positionOf(faceA.outer[0]).clone();
+      const shapeA = { outer: [...faceA.outer], holes: faceA.holes.map(hole => [...hole]) }, shapeB = { outer: [...faceB.outer], holes: faceB.holes.map(hole => [...hole]) };
+      const edgeIds = new Set([...this.faceEdges(faceA), ...this.faceEdges(faceB)].map(x => x.id)); edgeIds.delete(edgeId);
+      const props = { material: faceA.material, backMaterial: faceA.backMaterial, tag: faceA.tag };
+      const area = this.faceArea(faceA) + this.faceArea(faceB);
+      const keep1 = { ...faceA, outer: [...faceA.outer], holes: faceA.holes.map(hole => [...hole]) }, keep2 = { ...faceB, outer: [...faceB.outer], holes: faceB.holes.map(hole => [...hole]) };
+      const eprops = { soft: edge.soft, hidden: edge.hidden, tag: edge.tag };
+      this.removeEdgeRaw(edgeId);
+      const regions = this.extractCycles(edgeIds, normal, anchor);
       const made: Face[] = [];
-      for (const r of regions) {
-        const sp = this.samplePoint(r.outer, r.holes); if (!sp) continue;
-        if (this.pointInLoops(s1.outer, s1.holes, n, sp) || this.pointInLoops(s2.outer, s2.holes, n, sp)) { const nf = this.createFaceRaw(r.outer, r.holes, props); if (nf) made.push(nf); }
+      for (const region of regions) {
+        const sample = this.samplePoint(region.outer, region.holes); if (!sample) continue;
+        if (this.pointInLoops(shapeA.outer, shapeA.holes, normal, sample) || this.pointInLoops(shapeB.outer, shapeB.holes, normal, sample)) { const face = this.createFaceRaw(region.outer, region.holes, props); if (face) made.push(face); }
       }
-      const got = made.reduce((a, f) => a + this.faceArea(f), 0);
+      const got = made.reduce((sum, face) => sum + this.faceArea(face), 0);
       if (Math.abs(got - area) > Math.max(1e-9, area * 1e-6)) {
         // merge would lose area (non-simple outline) – keep the two faces as they were
-        for (const f of made) this.removeFace(f.id);
-        this.createEdgeRaw(e.a, e.b, eprops, eid);
+        for (const face of made) this.removeFace(face.id);
+        this.createEdgeRaw(edge.start, edge.end, eprops, edgeId);
         this.createFaceRaw(keep1.outer, keep1.holes, { material: keep1.material, backMaterial: keep1.backMaterial, tag: keep1.tag, hidden: keep1.hidden }, keep1.id);
         this.createFaceRaw(keep2.outer, keep2.holes, { material: keep2.material, backMaterial: keep2.backMaterial, tag: keep2.tag, hidden: keep2.hidden }, keep2.id);
         return;
       }
-      this.healCollinear([e.a, e.b]);
+      this.healCollinear([edge.start, edge.end]);
     } else {
-      this.removeEdgeRaw(eid);
+      this.removeEdgeRaw(edgeId);
     }
-    this.removeOrphanVertices([e.a, e.b]);
+    this.removeOrphanVertices([edge.start, edge.end]);
   }
 
   /** Remove vertices that only join two collinear edges with identical faces. */
-  healCollinear(vids: Iterable<number>) {
-    for (const vid of vids) {
-      if (!this.vertices.has(vid)) continue;
-      const es = this.edgesOfVertex(vid); if (es.length !== 2) continue;
-      const a = es[0].a === vid ? es[0].b : es[0].a, b = es[1].a === vid ? es[1].b : es[1].a;
-      if (!isCollinear(this.pos(a), this.pos(vid), this.pos(b))) continue;
-      const f1 = new Set(this.facesOfEdge(es[0].id).map(f => f.id)), f2 = this.facesOfEdge(es[1].id).map(f => f.id);
-      if (f2.length === 0 || f1.size !== f2.length || !f2.every(x => f1.has(x))) continue;
-      if (this.edgeBetween(a, b)) continue;
-      const faces = this.facesOfEdge(es[0].id);
-      const props = { soft: es[0].soft, hidden: es[0].hidden, tag: es[0].tag };
-      for (const f of faces) for (const e of this.faceEdges(f)) this.eFaces.get(e.id)?.delete(f.id);
-      for (const f of faces) for (const l of this.loops(f)) { const i = l.indexOf(vid); if (i >= 0) l.splice(i, 1); }
-      this.eFaces.set(es[0].id, new Set()); this.eFaces.set(es[1].id, new Set());
-      this.removeEdgeRaw(es[0].id); this.removeEdgeRaw(es[1].id);
-      this.createEdgeRaw(a, b, props);
-      for (const f of faces) for (const e of this.faceEdges(f)) { if (!this.eFaces.has(e.id)) this.eFaces.set(e.id, new Set()); this.eFaces.get(e.id)!.add(f.id); }
-      for (const f of faces) this.indexFace(f);
-      this.vertices.delete(vid); this.vEdges.delete(vid);
+  healCollinear(vertexIds: Iterable<number>) {
+    for (const vertexId of vertexIds) {
+      if (!this.vertices.has(vertexId)) continue;
+      const edges = this.edgesOfVertex(vertexId); if (edges.length !== 2) continue;
+      const vertexA = edges[0].start === vertexId ? edges[0].end : edges[0].start, vertexB = edges[1].start === vertexId ? edges[1].end : edges[1].start;
+      if (!isCollinear(this.positionOf(vertexA), this.positionOf(vertexId), this.positionOf(vertexB))) continue;
+      const facesA = new Set(this.facesOfEdge(edges[0].id).map(face => face.id)), facesB = this.facesOfEdge(edges[1].id).map(face => face.id);
+      if (facesB.length === 0 || facesA.size !== facesB.length || !facesB.every(x => facesA.has(x))) continue;
+      if (this.edgeBetween(vertexA, vertexB)) continue;
+      const faces = this.facesOfEdge(edges[0].id);
+      const props = { soft: edges[0].soft, hidden: edges[0].hidden, tag: edges[0].tag };
+      for (const face of faces) for (const edge of this.faceEdges(face)) this.eFaces.get(edge.id)?.delete(face.id);
+      for (const face of faces) for (const loop of this.loops(face)) { const i = loop.indexOf(vertexId); if (i >= 0) loop.splice(i, 1); }
+      this.eFaces.set(edges[0].id, new Set()); this.eFaces.set(edges[1].id, new Set());
+      this.removeEdgeRaw(edges[0].id); this.removeEdgeRaw(edges[1].id);
+      this.createEdgeRaw(vertexA, vertexB, props);
+      for (const face of faces) for (const edge of this.faceEdges(face)) { if (!this.eFaces.has(edge.id)) this.eFaces.set(edge.id, new Set()); this.eFaces.get(edge.id)!.add(face.id); }
+      for (const face of faces) this.indexFace(face);
+      this.vertices.delete(vertexId); this.vEdges.delete(vertexId);
     }
   }
 
   /** Merge coplanar faces across the given edges. */
   mergeCoplanar(edgeIds: Iterable<number>) {
     for (const id of [...edgeIds]) {
-      const e = this.edges.get(id); if (!e) continue;
-      const fs = this.facesOfEdge(id);
-      if (fs.length === 2 && this.coplanarSame(fs[0], fs[1]) && fs[0].material === fs[1].material) this.eraseEdge(id, true);
+      const edge = this.edges.get(id); if (!edge) continue;
+      const faces = this.facesOfEdge(id);
+      if (faces.length === 2 && this.coplanarSame(faces[0], faces[1]) && faces[0].material === faces[1].material) this.eraseEdge(id, true);
     }
   }
 
   /** Merge vertex src into dst (topology repair after moves). */
   mergeVertexInto(src: number, dst: number) {
     if (src === dst || !this.vertices.has(src) || !this.vertices.has(dst)) return;
-    const faces = this.facesOfVertex(src).map(f => ({ ...f, outer: [...f.outer], holes: f.holes.map(h => [...h]) }));
-    const edges = this.edgesOfVertex(src).map(e => ({ ...e }));
-    for (const f of faces) this.removeFace(f.id);
-    for (const e of edges) this.removeEdgeRaw(e.id);
-    for (const e of edges) { const o = e.a === src ? e.b : e.a; if (o !== dst) this.createEdgeRaw(dst, o, { soft: e.soft, hidden: e.hidden, tag: e.tag }); }
+    const faces = this.facesOfVertex(src).map(face => ({ ...face, outer: [...face.outer], holes: face.holes.map(hole => [...hole]) }));
+    const edges = this.edgesOfVertex(src).map(edge => ({ ...edge }));
+    for (const face of faces) this.removeFace(face.id);
+    for (const edge of edges) this.removeEdgeRaw(edge.id);
+    for (const edge of edges) { const other = edge.start === src ? edge.end : edge.start; if (other !== dst) this.createEdgeRaw(dst, other, { soft: edge.soft, hidden: edge.hidden, tag: edge.tag }); }
     this.vertices.delete(src); this.vEdges.delete(src);
-    for (const f of faces) {
-      const rep = (l: number[]) => this.cleanLoop(l.map(v => (v === src ? dst : v)));
-      const outer = rep(f.outer); const holes = f.holes.map(rep).filter(h => h.length >= 3);
+    for (const face of faces) {
+      const rep = (loop: number[]) => this.cleanLoop(loop.map(vertex => (vertex === src ? dst : vertex)));
+      const outer = rep(face.outer); const holes = face.holes.map(rep).filter(hole => hole.length >= 3);
       if (new Set(outer).size !== outer.length) continue;
-      this.createFaceRaw(outer, holes, { material: f.material, backMaterial: f.backMaterial, tag: f.tag }, f.id);
+      this.createFaceRaw(outer, holes, { material: face.material, backMaterial: face.backMaterial, tag: face.tag }, face.id);
     }
   }
 
   /** After moving vertices: weld coincident vertices, drop degenerate faces, merge coplanar. */
-  weld(vids: Iterable<number>) {
+  weld(vertexIds: Iterable<number>) {
     const touched = new Set<number>();
     this.invalidateHash();
-    for (const v of [...vids]) {
-      if (!this.vertices.has(v)) continue;
-      const p = this.pos(v);
+    for (const vertexId of [...vertexIds]) {
+      if (!this.vertices.has(vertexId)) continue;
+      const point = this.positionOf(vertexId);
       let target: number | undefined;
-      { const C = Entities.CELL; if (!this.vhash) { this.vhash = new Map(); for (const x of this.vertices.values()) this.hashInsert(x.id, x.p); }
-        const cx = Math.floor(p.x / C), cy = Math.floor(p.y / C), cz = Math.floor(p.z / C);
-        for (let dx = -1; dx <= 1 && target == null; dx++) for (let dy = -1; dy <= 1 && target == null; dy++) for (let dz = -1; dz <= 1 && target == null; dz++) {
-          for (const id of this.vhash.get(this.cellKey(cx + dx, cy + dy, cz + dz)) ?? []) { if (id === v) continue; const w = this.vertices.get(id); if (w && w.p.distanceToSquared(p) < LEN_EPS * LEN_EPS) { target = id; break; } }
+      { const cell = Entities.CELL; if (!this.vhash) { this.vhash = new Map(); for (const x of this.vertices.values()) this.hashInsert(x.id, x.position); }
+        const cellX = Math.floor(point.x / cell), cellY = Math.floor(point.y / cell), cellZ = Math.floor(point.z / cell);
+        for (let offsetX = -1; offsetX <= 1 && target == null; offsetX++) for (let offsetY = -1; offsetY <= 1 && target == null; offsetY++) for (let offsetZ = -1; offsetZ <= 1 && target == null; offsetZ++) {
+          for (const id of this.vhash.get(this.cellKey(cellX + offsetX, cellY + offsetY, cellZ + offsetZ)) ?? []) { if (id === vertexId) continue; const vertex = this.vertices.get(id); if (vertex && vertex.position.distanceToSquared(point) < LEN_EPS * LEN_EPS) { target = id; break; } }
         } }
-      if (target != null) { this.mergeVertexInto(v, target); touched.add(target); }
+      if (target != null) { this.mergeVertexInto(vertexId, target); touched.add(target); }
     }
-    for (const f of [...this.faces.values()]) if (this.faceArea(f) < 1e-10) this.removeFace(f.id);
-    const es = new Set<number>(); for (const v of touched) for (const e of this.edgesOfVertex(v)) es.add(e.id);
-    this.mergeCoplanar(es);
-    this.removeLooseInnerEdges(es);
+    for (const face of [...this.faces.values()]) if (this.faceArea(face) < 1e-10) this.removeFace(face.id);
+    const edgeIds = new Set<number>(); for (const vertex of touched) for (const edge of this.edgesOfVertex(vertex)) edgeIds.add(edge.id);
+    this.mergeCoplanar(edgeIds);
+    this.removeLooseInnerEdges(edgeIds);
     this.healCollinear(touched);
   }
 
   /** Remove edges without faces that lie flat inside a face (left-overs of merges). */
   removeLooseInnerEdges(edgeIds: Iterable<number>) {
     for (const id of [...edgeIds]) {
-      const e = this.edges.get(id); if (!e || this.facesOfEdge(id).length) continue;
-      const m = this.pos(e.a).clone().add(this.pos(e.b)).multiplyScalar(0.5);
-      for (const f of this.faces.values()) if (this.pointInFace(f, m)) { this.eraseEdge(id, false); break; }
+      const edge = this.edges.get(id); if (!edge || this.facesOfEdge(id).length) continue;
+      const middle = this.positionOf(edge.start).clone().add(this.positionOf(edge.end)).multiplyScalar(0.5);
+      for (const face of this.faces.values()) if (this.pointInFace(face, middle)) { this.eraseEdge(id, false); break; }
     }
   }
 
-  moveVertices(vids: Iterable<number>, m: THREE.Matrix4) { for (const v of vids) this.vertices.get(v)?.p.applyMatrix4(m); this.invalidateHash(); }
+  moveVertices(vertexIds: Iterable<number>, matrix: THREE.Matrix4) { for (const vertex of vertexIds) this.vertices.get(vertex)?.position.applyMatrix4(matrix); this.invalidateHash(); }
 
   /** SketchUp Push/Pull. Returns the moved/created face id. */
-  pushPull(fid: number, d: number): number | null {
-    const f = this.faces.get(fid); if (!f || Math.abs(d) < 1e-9) return fid;
-    const n = this.faceNormal(f);
-    const loops = this.loops(f);
-    const edges = this.faceEdges(f);
-    const others = edges.map(e => this.facesOfEdge(e.id).filter(g => g.id !== fid));
+  pushPull(faceId: number, distance: number): number | null {
+    const sourceFace = this.faces.get(faceId); if (!sourceFace || Math.abs(distance) < 1e-9) return faceId;
+    const normal = this.faceNormal(sourceFace);
+    const loops = this.loops(sourceFace);
+    const edges = this.faceEdges(sourceFace);
+    const others = edges.map(edge => this.facesOfEdge(edge.id).filter(face => face.id !== faceId));
     // stretch: all adjacent faces are perpendicular → just translate the face
-    const stretch = others.every(o => o.length === 1 && Math.abs(this.faceNormal(o[0]).dot(n)) < 1e-6);
+    const stretch = others.every(faces => faces.length === 1 && Math.abs(this.faceNormal(faces[0]).dot(normal)) < 1e-6);
     if (stretch) {
-      const vids = new Set(this.faceVertices(f));
-      const m = new THREE.Matrix4().makeTranslation(n.x * d, n.y * d, n.z * d);
-      this.moveVertices(vids, m);
-      this.weld(vids);
-      return this.faces.has(fid) ? fid : null;
+      const vertexIds = new Set(this.faceVertices(sourceFace));
+      const matrix = new THREE.Matrix4().makeTranslation(normal.x * distance, normal.y * distance, normal.z * distance);
+      this.moveVertices(vertexIds, matrix);
+      this.weld(vertexIds);
+      return this.faces.has(faceId) ? faceId : null;
     }
     // the original face disappears when the solid lies behind it: every edge must touch a coplanar
     // neighbour (face drawn on a larger face) or a face behind the extrusion direction (part of a solid)
-    const ext = n.clone().multiplyScalar(Math.sign(d));
-    const o0 = this.pos(f.outer[0]);
-    const embedded = others.every(os => os.some(g => {
-      const gn = this.faceNormal(g);
-      const coplanar = Math.abs(Math.abs(gn.dot(n)) - 1) < 1e-6 && Math.abs(this.pos(g.outer[0]).clone().sub(o0).dot(n)) < PLANE_TOL;
-      return coplanar || this.faceCenter(g).sub(o0).dot(ext) < -1e-6;
+    const ext = normal.clone().multiplyScalar(Math.sign(distance));
+    const anchor = this.positionOf(sourceFace.outer[0]);
+    const embedded = others.every(faces => faces.some(face => {
+      const otherNormal = this.faceNormal(face);
+      const coplanar = Math.abs(Math.abs(otherNormal.dot(normal)) - 1) < 1e-6 && Math.abs(this.positionOf(face.outer[0]).clone().sub(anchor).dot(normal)) < PLANE_TOL;
+      return coplanar || this.faceCenter(face).sub(anchor).dot(ext) < -1e-6;
     }));
-    const props = { material: f.material, backMaterial: f.backMaterial, tag: f.tag };
+    const props = { material: sourceFace.material, backMaterial: sourceFace.backMaterial, tag: sourceFace.tag };
     const map = new Map<number, number>();
-    for (const v of new Set(loops.flat())) map.set(v, this.rawVertex(this.pos(v).clone().addScaledVector(n, d)));
-    const reverseSides = !embedded && d < 0;
-    for (const l of loops) for (let i = 0; i < l.length; i++) {
-      const a = l[i], b = l[(i + 1) % l.length];
-      const q = [a, b, map.get(b)!, map.get(a)!];
-      if (reverseSides) q.reverse();
-      this.createFaceRaw(q, [], { material: props.material });
+    for (const vertex of new Set(loops.flat())) map.set(vertex, this.rawVertex(this.positionOf(vertex).clone().addScaledVector(normal, distance)));
+    const reverseSides = !embedded && distance < 0;
+    for (const loop of loops) for (let i = 0; i < loop.length; i++) {
+      const vertexA = loop[i], vertexB = loop[(i + 1) % loop.length];
+      const quad = [vertexA, vertexB, map.get(vertexB)!, map.get(vertexA)!];
+      if (reverseSides) quad.reverse();
+      this.createFaceRaw(quad, [], { material: props.material });
     }
-    const top = this.createFaceRaw(f.outer.map(v => map.get(v)!), f.holes.map(h => h.map(v => map.get(v)!)), props);
-    if (embedded) this.removeFace(fid);
-    else { if (d > 0) this.reverseFace(f); else if (top) this.reverseFace(top); }
+    const top = this.createFaceRaw(sourceFace.outer.map(vertex => map.get(vertex)!), sourceFace.holes.map(hole => hole.map(vertex => map.get(vertex)!)), props);
+    if (embedded) this.removeFace(faceId);
+    else { if (distance > 0) this.reverseFace(sourceFace); else if (top) this.reverseFace(top); }
     // vertical edges of curved profiles (circles, arcs) become soft like in SketchUp
     const sideEdges: number[] = [];
-    for (const v of map.keys()) { const e = this.edgeBetween(v, map.get(v)!); if (e) sideEdges.push(e.id); }
+    for (const vertex of map.keys()) { const edge = this.edgeBetween(vertex, map.get(vertex)!); if (edge) sideEdges.push(edge.id); }
     this.autoSoften(sideEdges);
-    this.mergeCoplanar(edges.map(e => e.id).filter(id => this.edges.has(id)));
+    this.mergeCoplanar(edges.map(edge => edge.id).filter(id => this.edges.has(id)));
     // when an embedded face is fully removed its loop edges might become orphaned (e.g. on top of a box the hole edges stay)
     return top?.id ?? null;
   }
@@ -561,13 +561,13 @@ export class Entities {
     let changed = true, guard = 0;
     while (changed && guard++ < 20) {
       changed = false;
-      for (const e of [...this.edges.values()]) {
-        if (!this.edges.has(e.id)) continue;
-        const A = this.pos(e.a), B = this.pos(e.b);
-        const box = new THREE.Box3().setFromPoints([A, B]).expandByScalar(LEN_EPS);
-        for (const v of this.vertices.values()) {
-          if (v.id === e.a || v.id === e.b || !box.containsPoint(v.p)) continue;
-          if (pointOnSegmentInterior(v.p, A, B)) { this.splitEdge(e.id, v.id); changed = true; break; }
+      for (const edge of [...this.edges.values()]) {
+        if (!this.edges.has(edge.id)) continue;
+        const start = this.positionOf(edge.start), end = this.positionOf(edge.end);
+        const box = new THREE.Box3().setFromPoints([start, end]).expandByScalar(LEN_EPS);
+        for (const vertex of this.vertices.values()) {
+          if (vertex.id === edge.start || vertex.id === edge.end || !box.containsPoint(vertex.position)) continue;
+          if (pointOnSegmentInterior(vertex.position, start, end)) { this.splitEdge(edge.id, vertex.id); changed = true; break; }
         }
       }
     }
@@ -575,71 +575,71 @@ export class Entities {
 
   /** Soften edges between faces that meet at a shallow angle (default 20°). */
   autoSoften(edgeIds: Iterable<number>, maxDeg = 20) {
-    const c = Math.cos(maxDeg * Math.PI / 180);
+    const cosLimit = Math.cos(maxDeg * Math.PI / 180);
     for (const id of edgeIds) {
-      const e = this.edges.get(id); if (!e) continue;
-      const fs = this.facesOfEdge(id); if (fs.length !== 2) continue;
-      const d = this.faceNormal(fs[0]).dot(this.faceNormal(fs[1]));
-      if (d > c && d < 1 - 1e-6) e.soft = true;
+      const edge = this.edges.get(id); if (!edge) continue;
+      const faces = this.facesOfEdge(id); if (faces.length !== 2) continue;
+      const cosAngle = this.faceNormal(faces[0]).dot(this.faceNormal(faces[1]));
+      if (cosAngle > cosLimit && cosAngle < 1 - 1e-6) edge.soft = true;
     }
   }
 
   /** Follow Me: sweep a face along a path (polyline in local coordinates). */
-  followMe(fid: number, path: V3[], closed: boolean): boolean {
-    const f = this.faces.get(fid); if (!f || path.length < 2) return false;
-    const n = path.length;
-    const segs = closed ? n : n - 1;
-    const dirs: V3[] = []; for (let i = 0; i < segs; i++) dirs.push(path[(i + 1) % n].clone().sub(path[i]).normalize());
+  followMe(faceId: number, path: V3[], closed: boolean): boolean {
+    const profileFace = this.faces.get(faceId); if (!profileFace || path.length < 2) return false;
+    const pathLength = path.length;
+    const segs = closed ? pathLength : pathLength - 1;
+    const dirs: V3[] = []; for (let i = 0; i < segs; i++) dirs.push(path[(i + 1) % pathLength].clone().sub(path[i]).normalize());
     const miter = (j: number): V3 => {
       if (!closed && j === 0) return dirs[0].clone();
-      if (!closed && j === n - 1) return dirs[segs - 1].clone();
-      const a = dirs[(j - 1 + segs) % segs], b = dirs[j % segs];
-      const m = a.clone().add(b); return m.lengthSq() < 1e-10 ? b.clone() : m.normalize();
+      if (!closed && j === pathLength - 1) return dirs[segs - 1].clone();
+      const incoming = dirs[(j - 1 + segs) % segs], outgoing = dirs[j % segs];
+      const bisector = incoming.clone().add(outgoing); return bisector.lengthSq() < 1e-10 ? outgoing.clone() : bisector.normalize();
     };
-    const project = (x: V3, d: V3, P: V3, m: V3) => { const den = d.dot(m); if (Math.abs(den) < 1e-9) return x.clone(); return x.clone().addScaledVector(d, P.clone().sub(x).dot(m) / den); };
-    const loops = this.loops(f).map(l => l.map(v => this.pos(v).clone()));
+    const project = (x: V3, direction: V3, planePoint: V3, planeNormal: V3) => { const den = direction.dot(planeNormal); if (Math.abs(den) < 1e-9) return x.clone(); return x.clone().addScaledVector(direction, planePoint.clone().sub(x).dot(planeNormal) / den); };
+    const loops = this.loops(profileFace).map(loop => loop.map(vertex => this.positionOf(vertex).clone()));
     // orient profile so its normal points backwards along the path start
-    const profN = this.faceNormal(f);
+    const profN = this.faceNormal(profileFace);
     const rings: V3[][][] = [];
     let first = loops;
-    if (closed) first = loops.map(l => l.map(p => project(p, dirs[0], path[0], miter(0))));
+    if (closed) first = loops.map(loop => loop.map(point => project(point, dirs[0], path[0], miter(0))));
     rings.push(first);
-    const count = closed ? n : n - 1;
+    const count = closed ? pathLength : pathLength - 1;
     for (let j = 1; j <= count; j++) {
-      const idx = j % n; const d = dirs[j - 1];
-      if (closed && j === n) { rings.push(rings[0]); break; }
-      rings.push(rings[j - 1].map(l => l.map(p => project(p, d, path[idx], miter(idx)))));
+      const idx = j % pathLength; const direction = dirs[j - 1];
+      if (closed && j === pathLength) { rings.push(rings[0]); break; }
+      rings.push(rings[j - 1].map(loop => loop.map(point => project(point, direction, path[idx], miter(idx)))));
     }
-    const vid = rings.map(r => r.map(l => l.map(p => this.addVertex(p))));
-    if (closed) vid[vid.length - 1] = vid[0];
+    const vertexId = rings.map(ring => ring.map(loop => loop.map(point => this.addVertex(point))));
+    if (closed) vertexId[vertexId.length - 1] = vertexId[0];
     const newFaces: Face[] = [];
     const flip = profN.dot(dirs[0]) > 0; // profile normal should point against the sweep direction
-    for (let j = 0; j < vid.length - 1; j++) for (let li = 0; li < vid[j].length; li++) {
-      const A = vid[j][li], B = vid[j + 1][li]; const L = A.length;
-      for (let k = 0; k < L; k++) {
-        let q = [A[k], A[(k + 1) % L], B[(k + 1) % L], B[k]];
-        if (!flip) q = q.reverse();
-        const nf = this.createFaceRaw(q, [], { material: f.material }); if (nf) newFaces.push(nf);
+    for (let j = 0; j < vertexId.length - 1; j++) for (let loopIndex = 0; loopIndex < vertexId[j].length; loopIndex++) {
+      const loopA = vertexId[j][loopIndex], loopB = vertexId[j + 1][loopIndex]; const loopLength = loopA.length;
+      for (let k = 0; k < loopLength; k++) {
+        let quad = [loopA[k], loopA[(k + 1) % loopLength], loopB[(k + 1) % loopLength], loopB[k]];
+        if (!flip) quad = quad.reverse();
+        const face = this.createFaceRaw(quad, [], { material: profileFace.material }); if (face) newFaces.push(face);
       }
     }
-    if (closed) this.removeFace(fid);
+    if (closed) this.removeFace(faceId);
     else {
-      if (flip) this.reverseFace(f);
-      const last = vid[vid.length - 1];
-      const cap = this.createFaceRaw(last[0], last.slice(1), { material: f.material, backMaterial: f.backMaterial });
+      if (flip) this.reverseFace(profileFace);
+      const last = vertexId[vertexId.length - 1];
+      const cap = this.createFaceRaw(last[0], last.slice(1), { material: profileFace.material, backMaterial: profileFace.backMaterial });
       if (cap && this.faceNormal(cap).dot(dirs[segs - 1]) < 0) this.reverseFace(cap);
     }
-    const es = new Set<number>(); for (const nf of newFaces) for (const e of this.faceEdges(nf)) es.add(e.id);
-    this.autoSoften(es);
+    const edgeIds = new Set<number>(); for (const face of newFaces) for (const edge of this.faceEdges(face)) edgeIds.add(edge.id);
+    this.autoSoften(edgeIds);
     return true;
   }
 
   /** Offset the outer loop of a face (positive = inward). */
-  offsetFace(fid: number, d: number, polyOffset: (pts: V3[], n: V3, d: number) => V3[]) {
-    const f = this.faces.get(fid); if (!f) return;
-    const n = this.faceNormal(f);
-    const pts = this.facePoints(f);
-    const off = polyOffset(pts, n, d);
+  offsetFace(faceId: number, offsetDistance: number, polyOffset: (pts: V3[], planeNormal: V3, distance: number) => V3[]) {
+    const face = this.faces.get(faceId); if (!face) return;
+    const normal = this.faceNormal(face);
+    const pts = this.facePoints(face);
+    const off = polyOffset(pts, normal, offsetDistance);
     this.addLoop(off);
   }
 
@@ -647,73 +647,73 @@ export class Entities {
   instanceVertices(): number[] { return []; }
 
   collectVertices(refs: EntityRef[]): Set<number> {
-    const s = new Set<number>();
-    for (const r of refs) {
-      if (r.kind === 'edge') { const e = this.edges.get(r.id); if (e) { s.add(e.a); s.add(e.b); } }
-      if (r.kind === 'face') { const f = this.faces.get(r.id); if (f) this.faceVertices(f).forEach(v => s.add(v)); }
+    const vertexIds = new Set<number>();
+    for (const entityRef of refs) {
+      if (entityRef.kind === 'edge') { const edge = this.edges.get(entityRef.id); if (edge) { vertexIds.add(edge.start); vertexIds.add(edge.end); } }
+      if (entityRef.kind === 'face') { const face = this.faces.get(entityRef.id); if (face) this.faceVertices(face).forEach(vertex => vertexIds.add(vertex)); }
     }
-    return s;
+    return vertexIds;
   }
 
-  transform(refs: EntityRef[], m: THREE.Matrix4) {
-    const vids = this.collectVertices(refs);
-    this.moveVertices(vids, m);
-    for (const r of refs) if (r.kind === 'instance') { const i = this.instances.get(r.id); if (i) i.matrix.premultiply(m); }
-    this.weld(vids);
+  transform(refs: EntityRef[], matrix: THREE.Matrix4) {
+    const vertexIds = this.collectVertices(refs);
+    this.moveVertices(vertexIds, matrix);
+    for (const entityRef of refs) if (entityRef.kind === 'instance') { const instance = this.instances.get(entityRef.id); if (instance) instance.matrix.premultiply(matrix); }
+    this.weld(vertexIds);
   }
 
   /** Copy entities with a transform. Returns refs to the copies. */
-  copy(refs: EntityRef[], m: THREE.Matrix4, defs: DefinitionRegistry): EntityRef[] {
+  copy(refs: EntityRef[], matrix: THREE.Matrix4, defs: DefinitionRegistry): EntityRef[] {
     const out: EntityRef[] = [];
-    const faceIds = new Set(refs.filter(r => r.kind === 'face').map(r => r.id));
-    const edgeIds = new Set(refs.filter(r => r.kind === 'edge').map(r => r.id));
+    const faceIds = new Set(refs.filter(entityRef => entityRef.kind === 'face').map(entityRef => entityRef.id));
+    const edgeIds = new Set(refs.filter(entityRef => entityRef.kind === 'edge').map(entityRef => entityRef.id));
     const faces = [...faceIds].map(id => this.faces.get(id)!).filter(Boolean);
-    for (const f of faces) for (const e of this.faceEdges(f)) edgeIds.add(e.id);
+    for (const face of faces) for (const edge of this.faceEdges(face)) edgeIds.add(edge.id);
     const vmap = new Map<number, number>();
-    const mv = (v: number) => { if (!vmap.has(v)) vmap.set(v, this.rawVertex(this.pos(v).clone().applyMatrix4(m))); return vmap.get(v)!; };
-    const edgesData = [...edgeIds].map(id => this.edges.get(id)!).filter(Boolean).map(e => ({ ...e }));
-    const facesData = faces.map(f => ({ ...f, outer: [...f.outer], holes: f.holes.map(h => [...h]) }));
-    const flip = m.determinant() < 0;
-    for (const e of edgesData) { const ne = this.createEdgeRaw(mv(e.a), mv(e.b), { soft: e.soft, hidden: e.hidden, tag: e.tag }); out.push({ kind: 'edge', id: ne.id }); }
-    for (const f of facesData) {
-      const nf = this.createFaceRaw(f.outer.map(mv), f.holes.map(h => h.map(mv)), { material: f.material, backMaterial: f.backMaterial, tag: f.tag });
-      if (nf) { if (flip) this.reverseFace(nf); out.push({ kind: 'face', id: nf.id }); }
+    const mapVertex = (vertex: number) => { if (!vmap.has(vertex)) vmap.set(vertex, this.rawVertex(this.positionOf(vertex).clone().applyMatrix4(matrix))); return vmap.get(vertex)!; };
+    const edgesData = [...edgeIds].map(id => this.edges.get(id)!).filter(Boolean).map(edge => ({ ...edge }));
+    const facesData = faces.map(face => ({ ...face, outer: [...face.outer], holes: face.holes.map(hole => [...hole]) }));
+    const flip = matrix.determinant() < 0;
+    for (const edgeData of edgesData) { const edge = this.createEdgeRaw(mapVertex(edgeData.start), mapVertex(edgeData.end), { soft: edgeData.soft, hidden: edgeData.hidden, tag: edgeData.tag }); out.push({ kind: 'edge', id: edge.id }); }
+    for (const faceData of facesData) {
+      const face = this.createFaceRaw(faceData.outer.map(mapVertex), faceData.holes.map(hole => hole.map(mapVertex)), { material: faceData.material, backMaterial: faceData.backMaterial, tag: faceData.tag });
+      if (face) { if (flip) this.reverseFace(face); out.push({ kind: 'face', id: face.id }); }
     }
-    for (const r of refs) if (r.kind === 'instance') {
-      const i = this.instances.get(r.id); if (!i) continue;
-      const def = i.def.isComponent ? i.def : defs.cloneDefinition(i.def);
-      const ni = this.addInstance(def, i.matrix.clone().premultiply(m), i.name);
-      ni.material = i.material; ni.tag = i.tag;
-      out.push({ kind: 'instance', id: ni.id });
+    for (const entityRef of refs) if (entityRef.kind === 'instance') {
+      const sourceInstance = this.instances.get(entityRef.id); if (!sourceInstance) continue;
+      const def = sourceInstance.definition.isComponent ? sourceInstance.definition : defs.cloneDefinition(sourceInstance.definition);
+      const instance = this.addInstance(def, sourceInstance.matrix.clone().premultiply(matrix), sourceInstance.name);
+      instance.material = sourceInstance.material; instance.tag = sourceInstance.tag;
+      out.push({ kind: 'instance', id: instance.id });
     }
     return out;
   }
 
   addInstance(def: Definition, matrix = new THREE.Matrix4(), name = ''): Instance {
-    const inst: Instance = { id: newId(), def, matrix, name };
+    const inst: Instance = { id: newId(), definition: def, matrix, name };
     this.instances.set(inst.id, inst); return inst;
   }
 
   erase(refs: EntityRef[]) {
-    for (const r of refs) if (r.kind === 'instance') this.instances.delete(r.id);
-    for (const r of refs) if (r.kind === 'edge') this.eraseEdge(r.id, false);
-    for (const r of refs) if (r.kind === 'face') this.removeFace(r.id);
+    for (const entityRef of refs) if (entityRef.kind === 'instance') this.instances.delete(entityRef.id);
+    for (const entityRef of refs) if (entityRef.kind === 'edge') this.eraseEdge(entityRef.id, false);
+    for (const entityRef of refs) if (entityRef.kind === 'face') this.removeFace(entityRef.id);
     this.removeOrphanVertices();
   }
 
   /** Moves the referenced raw geometry into a fresh Entities container. */
   extract(refs: EntityRef[]): { entities: Entities; instances: Instance[] } {
     const ent = new Entities();
-    const faceIds = new Set(refs.filter(r => r.kind === 'face').map(r => r.id));
-    const edgeIds = new Set(refs.filter(r => r.kind === 'edge').map(r => r.id));
-    for (const id of faceIds) { const f = this.faces.get(id); if (f) this.faceEdges(f).forEach(e => edgeIds.add(e.id)); }
+    const faceIds = new Set(refs.filter(entityRef => entityRef.kind === 'face').map(entityRef => entityRef.id));
+    const edgeIds = new Set(refs.filter(entityRef => entityRef.kind === 'edge').map(entityRef => entityRef.id));
+    for (const id of faceIds) { const face = this.faces.get(id); if (face) this.faceEdges(face).forEach(edge => edgeIds.add(edge.id)); }
     const vmap = new Map<number, number>();
-    const mv = (v: number) => { if (!vmap.has(v)) vmap.set(v, ent.rawVertex(this.pos(v))); return vmap.get(v)!; };
-    for (const id of edgeIds) { const e = this.edges.get(id); if (e) ent.createEdgeRaw(mv(e.a), mv(e.b), { soft: e.soft, hidden: e.hidden, tag: e.tag }); }
-    for (const id of faceIds) { const f = this.faces.get(id); if (f) ent.createFaceRaw(f.outer.map(mv), f.holes.map(h => h.map(mv)), { material: f.material, backMaterial: f.backMaterial, tag: f.tag }); }
+    const mapVertex = (vertex: number) => { if (!vmap.has(vertex)) vmap.set(vertex, ent.rawVertex(this.positionOf(vertex))); return vmap.get(vertex)!; };
+    for (const id of edgeIds) { const edge = this.edges.get(id); if (edge) ent.createEdgeRaw(mapVertex(edge.start), mapVertex(edge.end), { soft: edge.soft, hidden: edge.hidden, tag: edge.tag }); }
+    for (const id of faceIds) { const face = this.faces.get(id); if (face) ent.createFaceRaw(face.outer.map(mapVertex), face.holes.map(hole => hole.map(mapVertex)), { material: face.material, backMaterial: face.backMaterial, tag: face.tag }); }
     const insts: Instance[] = [];
-    for (const r of refs) if (r.kind === 'instance') { const i = this.instances.get(r.id); if (i) { insts.push(i); this.instances.delete(r.id); } }
-    for (const i of insts) ent.instances.set(i.id, i);
+    for (const entityRef of refs) if (entityRef.kind === 'instance') { const instance = this.instances.get(entityRef.id); if (instance) { insts.push(instance); this.instances.delete(entityRef.id); } }
+    for (const instance of insts) ent.instances.set(instance.id, instance);
     // remove from source: faces, then edges no longer used by any remaining face
     for (const id of faceIds) this.removeFace(id);
     for (const id of edgeIds) { if (this.facesOfEdge(id).length === 0) this.eraseEdge(id, false); }
@@ -722,41 +722,41 @@ export class Entities {
   }
 
   /** Insert all geometry of another Entities container transformed by m. */
-  merge(src: Entities, m: THREE.Matrix4, defs: DefinitionRegistry, materialOverride?: string, raw = false): EntityRef[] {
+  merge(src: Entities, matrix: THREE.Matrix4, defs: DefinitionRegistry, materialOverride?: string, raw = false): EntityRef[] {
     const out: EntityRef[] = [];
     const vmap = new Map<number, number>();
-    const mv = (v: number) => { if (!vmap.has(v)) { const p = src.pos(v).clone().applyMatrix4(m); vmap.set(v, raw ? this.rawVertex(p) : this.addVertex(p)); } return vmap.get(v)!; };
-    for (const e of src.edges.values()) { const ne = this.createEdgeRaw(mv(e.a), mv(e.b), { soft: e.soft, hidden: e.hidden, tag: e.tag }); out.push({ kind: 'edge', id: ne.id }); }
-    const flip = m.determinant() < 0;
-    for (const f of src.faces.values()) {
-      const nf = this.createFaceRaw(f.outer.map(mv), f.holes.map(h => h.map(mv)), { material: f.material ?? materialOverride, backMaterial: f.backMaterial, tag: f.tag });
-      if (nf) { if (flip) this.reverseFace(nf); out.push({ kind: 'face', id: nf.id }); }
+    const mapVertex = (vertex: number) => { if (!vmap.has(vertex)) { const point = src.positionOf(vertex).clone().applyMatrix4(matrix); vmap.set(vertex, raw ? this.rawVertex(point) : this.addVertex(point)); } return vmap.get(vertex)!; };
+    for (const edge of src.edges.values()) { const newEdge = this.createEdgeRaw(mapVertex(edge.start), mapVertex(edge.end), { soft: edge.soft, hidden: edge.hidden, tag: edge.tag }); out.push({ kind: 'edge', id: newEdge.id }); }
+    const flip = matrix.determinant() < 0;
+    for (const sourceFace of src.faces.values()) {
+      const face = this.createFaceRaw(sourceFace.outer.map(mapVertex), sourceFace.holes.map(hole => hole.map(mapVertex)), { material: sourceFace.material ?? materialOverride, backMaterial: sourceFace.backMaterial, tag: sourceFace.tag });
+      if (face) { if (flip) this.reverseFace(face); out.push({ kind: 'face', id: face.id }); }
     }
-    for (const i of src.instances.values()) {
-      const def = i.def.isComponent ? i.def : defs.cloneDefinition(i.def);
-      const ni = this.addInstance(def, i.matrix.clone().premultiply(m), i.name); ni.material = i.material; ni.tag = i.tag;
-      out.push({ kind: 'instance', id: ni.id });
+    for (const childInstance of src.instances.values()) {
+      const def = childInstance.definition.isComponent ? childInstance.definition : defs.cloneDefinition(childInstance.definition);
+      const instance = this.addInstance(def, childInstance.matrix.clone().premultiply(matrix), childInstance.name); instance.material = childInstance.material; instance.tag = childInstance.tag;
+      out.push({ kind: 'instance', id: instance.id });
     }
     return out;
   }
 
-  clone(defs: DefinitionRegistry): Entities { const e = new Entities(); e.merge(this, new THREE.Matrix4(), defs, undefined, true); return e; }
+  clone(defs: DefinitionRegistry): Entities { const entities = new Entities(); entities.merge(this, new THREE.Matrix4(), defs, undefined, true); return entities; }
 
   /** Bounding box in local coordinates (including nested instances). */
-  bounds(box = new THREE.Box3(), m = new THREE.Matrix4(), hiddenTags?: Set<string>): THREE.Box3 {
-    for (const v of this.vertices.values()) box.expandByPoint(v.p.clone().applyMatrix4(m));
-    for (const i of this.instances.values()) { if (i.hidden || (i.tag && hiddenTags?.has(i.tag))) continue; i.def.entities.bounds(box, m.clone().multiply(i.matrix), hiddenTags); }
+  bounds(box = new THREE.Box3(), matrix = new THREE.Matrix4(), hiddenTags?: Set<string>): THREE.Box3 {
+    for (const vertex of this.vertices.values()) box.expandByPoint(vertex.position.clone().applyMatrix4(matrix));
+    for (const instance of this.instances.values()) { if (instance.hidden || (instance.tag && hiddenTags?.has(instance.tag))) continue; instance.definition.entities.bounds(box, matrix.clone().multiply(instance.matrix), hiddenTags); }
     return box;
   }
 
   refBounds(refs: EntityRef[]): THREE.Box3 {
-    const b = new THREE.Box3();
-    for (const v of this.collectVertices(refs)) b.expandByPoint(this.pos(v));
-    for (const r of refs) if (r.kind === 'instance') { const i = this.instances.get(r.id); if (i) i.def.entities.bounds(b, i.matrix.clone()); }
-    return b;
+    const box = new THREE.Box3();
+    for (const vertex of this.collectVertices(refs)) box.expandByPoint(this.positionOf(vertex));
+    for (const entityRef of refs) if (entityRef.kind === 'instance') { const instance = this.instances.get(entityRef.id); if (instance) instance.definition.entities.bounds(box, instance.matrix.clone()); }
+    return box;
   }
 
-  stats() { let faces = this.faces.size, edges = this.edges.size; for (const i of this.instances.values()) { const s = i.def.entities.stats(); faces += s.faces; edges += s.edges; } return { faces, edges }; }
+  stats() { let faces = this.faces.size, edges = this.edges.size; for (const instance of this.instances.values()) { const childStats = instance.definition.entities.stats(); faces += childStats.faces; edges += childStats.edges; } return { faces, edges }; }
 }
 
-export interface DefinitionRegistry { cloneDefinition(d: Definition): Definition }
+export interface DefinitionRegistry { cloneDefinition(definition: Definition): Definition }

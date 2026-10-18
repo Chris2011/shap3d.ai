@@ -71,5 +71,5 @@ export const MATERIAL_LIBRARY: LibraryMaterial[] = [
   { name: 'Braun', color: '#7a4e2a', category: 'Farben' },
 ];
 
-const byName = new Map(MATERIAL_LIBRARY.map(m => [m.name.toLowerCase(), m]));
+const byName = new Map(MATERIAL_LIBRARY.map(material => [material.name.toLowerCase(), material]));
 export const libraryMaterial = (name: string) => byName.get(name.trim().toLowerCase());

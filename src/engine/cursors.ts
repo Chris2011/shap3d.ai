@@ -16,7 +16,7 @@ const PENCIL = `
 const ARROW = `<path d="M4 3 L4 18.5 L7.8 15 L10.6 21 L13 19.9 L10.3 14 L15.3 13.8 Z" fill="${NAVY}" stroke="${WHITE}" stroke-width="1.1"/>`;
 
 /** Shape badges in the upper left (x/y 1–13) for drawing tools, light blue like SketchUp. */
-const TL = {
+const HOTSPOT_TOP_LEFT = {
   rect: `<rect x="2" y="2" width="10" height="8" fill="${WHITE}" stroke="${LBLUE}" stroke-width="1.5"/>`,
   rotrect: `<path d="M1.5 7 L6.5 2 L12 7.5 L7 12.5 Z" fill="${WHITE}" stroke="${LBLUE}" stroke-width="1.5"/>`,
   circle: `<circle cx="7" cy="7" r="5" fill="${WHITE}" stroke="${LBLUE}" stroke-width="1.5"/>`,
@@ -29,7 +29,7 @@ const TL = {
 };
 
 /** Tool badges in the upper right (x/y 16–31) next to the navy arrow. */
-const TR = {
+const HOTSPOT_TOP_RIGHT = {
   pushpull: `<path d="M16.5 15 L21 12 L30.5 12 L26 15 Z" fill="${WHITE}" stroke="${NAVY}" stroke-width="1.3"/><path d="M16.5 15 V18 H26 V15 M26 18 L30.5 15 V12" stroke="${NAVY}" stroke-width="1.3"/><path d="M23.5 11 V2.5 M20.7 5.3 L23.5 2.5 L26.3 5.3" stroke="${RED}" stroke-width="1.9"/>`,
   scale: `<rect x="17" y="8" width="9" height="9" fill="${WHITE}" stroke="${NAVY}" stroke-width="1.4"/><path d="M21.5 12.5 L30 4 M25.5 4 H30 V8.5" stroke="${RED}" stroke-width="1.7"/>`,
   offset: `<path d="M18 13 A7 7 0 0 1 30 9" stroke="${NAVY}" stroke-width="1.6"/><path d="M21.5 14.5 A4 4 0 0 1 27.8 11.6" stroke="${RED}" stroke-width="1.6"/>`,
@@ -52,24 +52,24 @@ const CURSORS: Record<string, Cur> = {
   paint: { x: 5, y: 26, svg: svg(`<path d="M11 9 C11 5 21 5 21 9 L22 22 C22 26 10 26 10 22 Z" fill="${WHITE}" stroke="${NAVY}" stroke-width="1.6"/><ellipse cx="16" cy="9" rx="5" ry="2" fill="${LBLUE}" stroke="${NAVY}" stroke-width="1.3"/><path d="M11.5 9 C7 10 4.5 15 5 26 C8 22 9 17 12 13 Z" fill="${LBLUE}" stroke="${LBLUE}" stroke-width="1"/><path d="M21 12 C26 10 27 6 24 3" stroke="${NAVY}" stroke-width="1.5"/>`) },
   sample: { x: 3, y: 29, svg: svg(`<path d="M3 29 L5 23 L17 11 L21 15 L9 27 Z" fill="${WHITE}" stroke="${NAVY}" stroke-width="1.6"/><path d="M15.5 9.5 L22.5 16.5 M18 7 C20 3 25 3 27.5 5.5 C30 8 30 12 25 14 Z" fill="${NAVY}" stroke="${NAVY}" stroke-width="1.6"/><circle cx="4" cy="28" r="1.4" fill="${LBLUE}"/>`) },
   line: { x: 3, y: 29, svg: pencil() },
-  freehand: { x: 3, y: 29, svg: pencil(TL.freehand) },
-  rectangle: { x: 3, y: 29, svg: pencil(TL.rect) },
-  rotrect: { x: 3, y: 29, svg: pencil(TL.rotrect) },
-  circle: { x: 3, y: 29, svg: pencil(TL.circle) },
-  polygon: { x: 3, y: 29, svg: pencil(TL.polygon) },
-  arc: { x: 3, y: 29, svg: pencil(TL.arc) },
-  arc2: { x: 3, y: 29, svg: pencil(TL.arc2) },
-  arc3: { x: 3, y: 29, svg: pencil(TL.arc3) },
-  pie: { x: 3, y: 29, svg: pencil(TL.pie) },
-  pushpull: { x: 4, y: 3, svg: arrow(TR.pushpull) },
-  offset: { x: 4, y: 3, svg: arrow(TR.offset) },
-  scale: { x: 4, y: 3, svg: arrow(TR.scale) },
-  followme: { x: 4, y: 3, svg: arrow(TR.followme) },
-  section: { x: 4, y: 3, svg: arrow(TR.section) },
-  dimension: { x: 4, y: 3, svg: arrow(TR.dimension) },
-  text: { x: 4, y: 3, svg: arrow(TR.text) },
-  place: { x: 4, y: 3, svg: arrow(TR.place) },
-  poscam: { x: 4, y: 3, svg: arrow(TR.poscam) },
+  freehand: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.freehand) },
+  rectangle: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.rect) },
+  rotrect: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.rotrect) },
+  circle: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.circle) },
+  polygon: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.polygon) },
+  arc: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.arc) },
+  arc2: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.arc2) },
+  arc3: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.arc3) },
+  pie: { x: 3, y: 29, svg: pencil(HOTSPOT_TOP_LEFT.pie) },
+  pushpull: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.pushpull) },
+  offset: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.offset) },
+  scale: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.scale) },
+  followme: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.followme) },
+  section: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.section) },
+  dimension: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.dimension) },
+  text: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.text) },
+  place: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.place) },
+  poscam: { x: 4, y: 3, svg: arrow(HOTSPOT_TOP_RIGHT.poscam) },
   move: { x: 16, y: 16, svg: svg(`<path d="M16 4 V28 M4 16 H28" stroke="${WHITE}" stroke-width="5"/><path d="M16 4 V28 M4 16 H28" stroke="${RED}" stroke-width="2.6"/><path d="M11.5 7.5 L16 2 L20.5 7.5 Z M11.5 24.5 L16 30 L20.5 24.5 Z M7.5 11.5 L2 16 L7.5 20.5 Z M24.5 11.5 L30 16 L24.5 20.5 Z" fill="${RED}" stroke="${WHITE}" stroke-width="1"/>`) },
   rotate: { x: 16, y: 16, svg: svg(`<path d="M26.5 12.5 A11 11 0 0 0 7.5 9" stroke="${WHITE}" stroke-width="5"/><path d="M5.5 19.5 A11 11 0 0 0 24.5 23" stroke="${WHITE}" stroke-width="5"/><path d="M26.5 12.5 A11 11 0 0 0 7.5 9" stroke="${RED}" stroke-width="2.8"/><path d="M5.5 19.5 A11 11 0 0 0 24.5 23" stroke="${RED}" stroke-width="2.8"/><path d="M3.5 6 L7.5 9.5 L11.5 5.2 Z M28.5 26 L24.5 22.5 L20.5 26.8 Z" fill="${RED}" stroke="${RED}" stroke-width="1.4"/><circle cx="16" cy="16" r="1.4" fill="${NAVY}"/>`) },
   protractor: { x: 16, y: 22, svg: svg(`<path d="M3 22 A13 13 0 0 1 29 22 Z" fill="${WHITE}" stroke="${NAVY}" stroke-width="1.7"/><path d="M8 22 A8 8 0 0 1 24 22" stroke="${NAVY}" stroke-width="1.3"/><path d="M16 22 L23.5 12.5" stroke="${RED}" stroke-width="1.7"/><path d="M6 15.5 L8 17 M11 11 L12 13.2 M21 11 L20 13.2 M26 15.5 L24 17" stroke="${NAVY}" stroke-width="1.2"/><circle cx="16" cy="22" r="1.5" fill="${NAVY}"/>`) },
@@ -85,12 +85,12 @@ const CURSORS: Record<string, Cur> = {
 const cache = new Map<string, string>();
 
 /** CSS cursor value for a tool (falls back to a crosshair). */
-export function toolCursor(tool: string): string {
+export const toolCursor = (tool: string): string => {
   const hit = cache.get(tool); if (hit) return hit;
-  const c = CURSORS[tool];
-  const v = c ? `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(c.svg.replace(/\s+/g, ' '))}") ${c.x} ${c.y}, crosshair` : 'crosshair';
-  cache.set(tool, v); return v;
-}
+  const cursor = CURSORS[tool];
+  const css = cursor ? `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(cursor.svg.replace(/\s+/g, ' '))}") ${cursor.x} ${cursor.y}, crosshair` : 'crosshair';
+  cache.set(tool, css); return css;
+};
 
 /** Raw SVG markup (used to preview cursors in the UI). */
-export function toolCursorSvg(tool: string): string | undefined { return CURSORS[tool]?.svg; }
+export const toolCursorSvg = (tool: string): string | undefined => { return CURSORS[tool]?.svg; };

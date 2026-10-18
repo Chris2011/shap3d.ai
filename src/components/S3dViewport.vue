@@ -53,7 +53,7 @@ const up = (event: PointerEvent) => {
 };
 const leave = () => { editor.mouse.inside = false; editor.setHover(null); editor.redraw(); };
 const dbl = (event: MouseEvent) => { editor.dblClick(evt(event)); };
-const wheel = (event: WheelEvent) => { const point = evt(event); editor.wheel(point.x, point.y, { dx: event.deltaX, dy: event.deltaY, shift: event.shiftKey, ctrl: event.ctrlKey || event.metaKey, mode: event.deltaMode }); };
+const wheel = (event: WheelEvent) => { const point = evt(event); editor.wheel(point.x, point.y, { deltaX: event.deltaX, deltaY: event.deltaY, shift: event.shiftKey, ctrl: event.ctrlKey || event.metaKey, mode: event.deltaMode }); };
 
 onMounted(() => {
   editor.attach(glCanvas.value!, overlayCanvas.value!);

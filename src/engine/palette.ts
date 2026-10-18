@@ -45,106 +45,106 @@ const SYNONYMS: Record<string, string> = {
 
 const GROUP_ICON: Record<string, string> ={ Datei: 'file', Bearbeiten: 'select', Ansicht: 'display', Kamera: 'camera', Volumenkörper: 'solid', Zeichnen: 'line', Werkzeuge: 'tape' };
 
-export function paletteItems(ed: Editor): PaletteItem[] {
+export const paletteItems = (editor: Editor): PaletteItem[] => {
   const out: PaletteItem[] = [];
-  const toggle = (id: string, label: string, group: string, get: () => boolean, set: (v: boolean) => void, icon = 'display', keywords = '') =>
-    out.push({ id, label, group, icon, keywords, checked: get, run: () => { set(!get()); ed.invalidate(); ed.redraw(); } });
+  const toggle = (id: string, label: string, group: string, get: () => boolean, set: (value: boolean) => void, icon = 'display', keywords = '') =>
+    out.push({ id, label, group, icon, keywords, checked: get, run: () => { set(!get()); editor.invalidate(); editor.redraw(); } });
 
   // tools
-  for (const t of Object.values(TOOL_INFO)) {
-    if (t.id === 'place') continue;
-    out.push({ id: 't:' + t.id, label: t.name, group: 'Werkzeug', icon: t.icon, shortcut: t.key, keywords: 'werkzeug tool ' + t.id, run: () => ed.setTool(t.id) });
+  for (const tool of Object.values(TOOL_INFO)) {
+    if (tool.id === 'place') continue;
+    out.push({ id: 't:' + tool.id, label: tool.name, group: 'Werkzeug', icon: tool.icon, shortcut: tool.key, keywords: 'werkzeug tool ' + tool.id, run: () => editor.setTool(tool.id) });
   }
-  out.push({ id: 't:text3d', label: '3D-Text', group: 'Werkzeug', icon: 'text3d', keywords: 'schrift text', run: () => { ed.ui.dialog = { kind: 'text3d' }; } });
+  out.push({ id: 't:text3d', label: '3D-Text', group: 'Werkzeug', icon: 'text3d', keywords: 'schrift text', run: () => { editor.ui.dialog = { kind: 'text3d' }; } });
 
   // commands (menus)
-  for (const c of COMMANDS) {
+  for (const command of COMMANDS) {
     out.push({
-      id: 'c:' + c.id, label: c.label, group: c.group, icon: GROUP_ICON[c.group] ?? 'chevron', shortcut: c.shortcut, keywords: `${c.id} ${SYNONYMS[c.id] ?? ''}`,
-      checked: c.checked ? () => !!c.checked!(ed) : undefined,
-      enabled: c.enabled ? () => c.enabled!(ed) : undefined,
-      run: () => runCommand(ed, c.id),
+      id: 'c:' + command.id, label: command.label, group: command.group, icon: GROUP_ICON[command.group] ?? 'chevron', shortcut: command.shortcut, keywords: `${command.id} ${SYNONYMS[command.id] ?? ''}`,
+      checked: command.checked ? () => !!command.checked!(editor) : undefined,
+      enabled: command.enabled ? () => command.enabled!(editor) : undefined,
+      run: () => runCommand(editor, command.id),
     });
   }
 
   // panels
-  for (const p of PANEL_INFO) {
-    out.push({ id: 'p:' + p.id, label: p.label, group: 'Panel', icon: p.icon, keywords: 'panel fenster öffnen ' + p.id, checked: () => openPanel.value === p.id, run: () => togglePanel(p.id) });
+  for (const panel of PANEL_INFO) {
+    out.push({ id: 'p:' + panel.id, label: panel.label, group: 'Panel', icon: panel.icon, keywords: 'panel fenster öffnen ' + panel.id, checked: () => openPanel.value === panel.id, run: () => togglePanel(panel.id) });
   }
 
   // switches that only live inside panels
-  toggle('v:mesh', 'Polygonansicht', 'Polygone & Punkte', () => meshView.on, v => (meshView.on = v), 'mesh', 'mesh wireframe dreiecke vertices');
-  toggle('v:mesh-points', 'Polygonansicht: Eckpunkte', 'Polygone & Punkte', () => meshView.points, v => (meshView.points = v), 'mesh', 'vertices punkte');
-  toggle('v:mesh-tris', 'Polygonansicht: Dreiecke der Flächen', 'Polygone & Punkte', () => meshView.triangles, v => (meshView.triangles = v), 'mesh', 'triangles');
-  toggle('v:mesh-soft', 'Polygonansicht: Weiche Kanten', 'Polygone & Punkte', () => meshView.soft, v => (meshView.soft = v), 'mesh', 'soft edges');
-  toggle('v:backedges', 'Rückseitige Kanten', 'Stile', () => ed.model.settings.style.backEdges, v => (ed.model.settings.style.backEdges = v), 'styles', 'back edges K');
-  toggle('ai:fast', 'KI: Schnellmodus', 'KI-Assistent', () => aiConfig.fast, v => (aiConfig.fast = v), 'sparkle', 'fast schnell');
-  toggle('ai:autorun', 'KI: Code automatisch ausführen', 'KI-Assistent', () => aiConfig.autoRun, v => (aiConfig.autoRun = v), 'sparkle', 'autorun');
+  toggle('v:mesh', 'Polygonansicht', 'Polygone & Punkte', () => meshView.on, value => (meshView.on = value), 'mesh', 'mesh wireframe dreiecke vertices');
+  toggle('v:mesh-points', 'Polygonansicht: Eckpunkte', 'Polygone & Punkte', () => meshView.points, value => (meshView.points = value), 'mesh', 'vertices punkte');
+  toggle('v:mesh-tris', 'Polygonansicht: Dreiecke der Flächen', 'Polygone & Punkte', () => meshView.triangles, value => (meshView.triangles = value), 'mesh', 'triangles');
+  toggle('v:mesh-soft', 'Polygonansicht: Weiche Kanten', 'Polygone & Punkte', () => meshView.soft, value => (meshView.soft = value), 'mesh', 'soft edges');
+  toggle('v:backedges', 'Rückseitige Kanten', 'Stile', () => editor.model.settings.style.backEdges, value => (editor.model.settings.style.backEdges = value), 'styles', 'back edges K');
+  toggle('ai:fast', 'KI: Schnellmodus', 'KI-Assistent', () => aiConfig.fast, value => (aiConfig.fast = value), 'sparkle', 'fast schnell');
+  toggle('ai:autorun', 'KI: Code automatisch ausführen', 'KI-Assistent', () => aiConfig.autoRun, value => (aiConfig.autoRun = value), 'sparkle', 'autorun');
 
   // components: people, built-in library, components of this model
-  for (const [k, p] of Object.entries(PEOPLE)) {
-    out.push({ id: 'person:' + k, label: `Person platzieren: ${p.label}`, group: 'Komponenten', icon: 'person', keywords: 'figur mensch maßstab',
-      run: () => (ed.tools.get('place') as PlaceTool).start(personDefinition(ed, k)) });
+  for (const [key, person] of Object.entries(PEOPLE)) {
+    out.push({ id: 'person:' + key, label: `Person platzieren: ${person.label}`, group: 'Komponenten', icon: 'person', keywords: 'figur mensch maßstab',
+      run: () => (editor.tools.get('place') as PlaceTool).start(personDefinition(editor, key)) });
   }
-  for (const b of LIB) out.push({ id: 'lib:' + b.name, label: `${b.name} einfügen`, group: 'Komponenten', icon: 'component', keywords: 'bibliothek komponente', run: () => insertLibrary(ed, b) });
-  for (const d of ed.model.definitions.values()) {
-    if (!d.isComponent || d.faceMe) continue;
-    out.push({ id: 'def:' + d.id, label: `Komponente platzieren: ${d.name}`, group: 'Komponenten', icon: 'component', run: () => (ed.tools.get('place') as PlaceTool).start(d) });
+  for (const item of LIB) out.push({ id: 'lib:' + item.name, label: `${item.name} einfügen`, group: 'Komponenten', icon: 'component', keywords: 'bibliothek komponente', run: () => insertLibrary(editor, item) });
+  for (const definition of editor.model.definitions.values()) {
+    if (!definition.isComponent || definition.faceMe) continue;
+    out.push({ id: 'def:' + definition.id, label: `Komponente platzieren: ${definition.name}`, group: 'Komponenten', icon: 'component', run: () => (editor.tools.get('place') as PlaceTool).start(definition) });
   }
 
   // materials: those in the model first, then the library (added to the model when picked)
-  const choose = (name: string) => { ed.ui.currentMaterial = name; if (ed.ui.tool !== 'paint') ed.setTool('paint'); else ed.refreshStatus(); };
-  const inModel = new Set(ed.model.materials.map(m => m.name));
-  for (const m of ed.model.materials) out.push({ id: 'm:' + m.name, label: m.name, group: 'Material im Modell', icon: 'materials', kind: 'material', keywords: 'farbe material', run: () => choose(m.name) });
-  for (const m of MATERIAL_LIBRARY) {
-    if (inModel.has(m.name)) continue;
-    out.push({ id: 'ml:' + m.name, label: m.name, group: `Material · ${m.category}`, icon: 'materials', kind: 'material', keywords: `farbe material ${m.texture ?? ''} ${m.note ?? ''}`,
-      run: () => { let n = m.name; ed.commit('Material hinzufügen', () => { n = new ScriptApi(ed, ed.model.root).ensureMaterial(m.name); }); choose(n); } });
+  const choose = (name: string) => { editor.ui.currentMaterial = name; if (editor.ui.tool !== 'paint') editor.setTool('paint'); else editor.refreshStatus(); };
+  const inModel = new Set(editor.model.materials.map(material => material.name));
+  for (const material of editor.model.materials) out.push({ id: 'm:' + material.name, label: material.name, group: 'Material im Modell', icon: 'materials', kind: 'material', keywords: 'farbe material', run: () => choose(material.name) });
+  for (const material of MATERIAL_LIBRARY) {
+    if (inModel.has(material.name)) continue;
+    out.push({ id: 'ml:' + material.name, label: material.name, group: `Material · ${material.category}`, icon: 'materials', kind: 'material', keywords: `farbe material ${material.texture ?? ''} ${material.note ?? ''}`,
+      run: () => { let materialName = material.name; editor.commit('Material hinzufügen', () => { materialName = new ScriptApi(editor, editor.model.root).ensureMaterial(material.name); }); choose(materialName); } });
   }
 
   // scenes and tags
-  for (const sc of ed.model.scenes) out.push({ id: 'sc:' + sc.id, label: `Szene: ${sc.name}`, group: 'Szenen', icon: 'scenes', run: () => applyScene(ed, sc) });
-  for (const t of ed.model.tags) {
-    out.push({ id: 'tag:' + t.name, label: `Tag sichtbar: ${t.name}`, group: 'Tags', icon: 'tags', checked: () => t.visible, run: () => ed.commit('Tag-Sichtbarkeit', () => { t.visible = !t.visible; }) });
+  for (const scene of editor.model.scenes) out.push({ id: 'sc:' + scene.id, label: `Szene: ${scene.name}`, group: 'Szenen', icon: 'scenes', run: () => applyScene(editor, scene) });
+  for (const tag of editor.model.tags) {
+    out.push({ id: 'tag:' + tag.name, label: `Tag sichtbar: ${tag.name}`, group: 'Tags', icon: 'tags', checked: () => tag.visible, run: () => editor.commit('Tag-Sichtbarkeit', () => { tag.visible = !tag.visible; }) });
   }
 
   // objects in the model (top level): select and zoom to them
-  let n = 0;
-  for (const i of ed.model.root.instances.values()) {
-    if (++n > 400) break;
-    const name = i.name || i.def.name;
-    out.push({ id: 'obj:' + i.id, label: name, group: i.def.isComponent ? 'Objekt · Komponente' : 'Objekt · Gruppe', icon: i.def.isComponent ? 'component' : 'group', kind: 'object',
-      keywords: i.def.name, run: () => { if (ed.activePath.length) ed.exitContext(); ed.select([{ kind: 'instance', id: i.id }]); zoomSelection(ed); ed.redraw(); } });
+  let count = 0;
+  for (const instance of editor.model.root.instances.values()) {
+    if (++count > 400) break;
+    const name = instance.name || instance.definition.name;
+    out.push({ id: 'obj:' + instance.id, label: name, group: instance.definition.isComponent ? 'Objekt · Komponente' : 'Objekt · Gruppe', icon: instance.definition.isComponent ? 'component' : 'group', kind: 'object',
+      keywords: instance.definition.name, run: () => { if (editor.activePath.length) editor.exitContext(); editor.select([{ kind: 'instance', id: instance.id }]); zoomSelection(editor); editor.redraw(); } });
   }
   return out;
-}
+};
 
 // ------------------------------------------------------------ fuzzy matching
 
 /** VS Code-like fuzzy match: all query characters in order; bonus for word starts and runs. null = no match. */
-export function fuzzy(query: string, text: string): { score: number; hits: number[] } | null {
-  const q = query.toLowerCase(), t = text.toLowerCase();
-  if (!q) return { score: 0, hits: [] };
-  const direct = t.indexOf(q);
+export const fuzzy = (query: string, text: string): { score: number; hits: number[] } | null => {
+  const needle = query.toLowerCase(), haystack = text.toLowerCase();
+  if (!needle) return { score: 0, hits: [] };
+  const direct = haystack.indexOf(needle);
   if (direct >= 0) {
-    const start = direct === 0 || /[\s\-_/:·(]/.test(t[direct - 1]);
-    return { score: 1000 - direct + (start ? 300 : 0) - t.length * 0.5, hits: [...Array(q.length).keys()].map(k => direct + k) };
+    const start = direct === 0 || /[\s\-_/:·(]/.test(haystack[direct - 1]);
+    return { score: 1000 - direct + (start ? 300 : 0) - haystack.length * 0.5, hits: [...Array(needle.length).keys()].map(k => direct + k) };
   }
-  const hits: number[] = []; let score = 0, ti = 0, prev = -2, scattered = 0;
-  const wordStart = (k: number) => k === 0 || /[\s\-_/:·(]/.test(t[k - 1]);
-  for (const ch of q) {
-    if (ch === ' ') continue;
+  const hits: number[] = []; let score = 0, textIndex = 0, prev = -2, scattered = 0;
+  const wordStart = (k: number) => k === 0 || /[\s\-_/:·(]/.test(haystack[k - 1]);
+  for (const char of needle) {
+    if (char === ' ') continue;
     let found = -1;
     // prefer the next word start, otherwise the next occurrence
-    for (let k = ti; k < t.length; k++) if (t[k] === ch && wordStart(k)) { found = k; break; }
-    const next = t.indexOf(ch, ti);
+    for (let k = textIndex; k < haystack.length; k++) if (haystack[k] === char && wordStart(k)) { found = k; break; }
+    const next = haystack.indexOf(char, textIndex);
     if (found < 0 || (next >= 0 && next === prev + 1)) found = next;
     if (found < 0) return null;
     const run = found === prev + 1, start = wordStart(found);
     if (!run && !start) scattered++;
     score += run ? 12 : start ? 9 : 1;
-    hits.push(found); prev = found; ti = found + 1;
+    hits.push(found); prev = found; textIndex = found + 1;
   }
   if (scattered > 1) return null;
-  return { score: score - t.length * 0.2, hits };
-}
+  return { score: score - haystack.length * 0.2, hits };
+};

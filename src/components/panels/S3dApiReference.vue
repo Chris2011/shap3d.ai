@@ -12,12 +12,12 @@
       <!-- commands -->
       <template v-for="category in shownCats" :key="category">
         <div class="mt-3 mb-1 s3d-caption text-navy">{{ category }}</div>
-        <div v-for="entry in entries.filter(candidate => candidate.cat === category)" :key="entry.id" class="mb-1.5 border border-line bg-surface px-2.25 py-1.75">
+        <div v-for="entry in entries.filter(candidate => candidate.category === category)" :key="entry.id" class="mb-1.5 border border-line bg-surface px-2.25 py-1.75">
           <div class="flex items-baseline gap-2">
             <span class="text-[0.8125rem] font-bold">{{ entry.title }}</span>
             <span v-if="entry.returns" class="text-[0.6875rem] text-muted" title="Rückgabewert">→ {{ entry.returns }}</span>
           </div>
-          <code class="s3d-syntax font-mono text-ink my-0.75 block text-xs/[1.45] break-words whitespace-pre-wrap" v-html="highlightJs(entry.sig)"></code>
+          <code class="s3d-syntax font-mono text-ink my-0.75 block text-xs/[1.45] break-words whitespace-pre-wrap" v-html="highlightJs(entry.signature)"></code>
           <div class="text-xs/[1.4] text-ink">{{ entry.desc }}</div>
           <pre class="s3d-syntax font-mono text-ink mt-1.25 overflow-x-auto border border-line bg-surface-2 px-1.75 py-1.25 text-[0.71875rem]/[1.45] whitespace-pre" v-html="highlightJs(entry.example)"></pre>
           <div class="mt-1 flex gap-3">
@@ -77,8 +77,8 @@ const query = ref(''); const tab = ref<Tab>('Alle'); const copiedId = ref('');
 const norm = (text: string) => text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const match = (...parts: string[]) => { const search = norm(query.value.trim()); return !search || search.split(/\s+/).every(word => parts.some(part => norm(part).includes(word))); };
 
-const entries = computed(() => API_CATALOG.filter(entry => TAB_CATS[tab.value].includes(entry.cat) && match(entry.title, entry.sig, entry.desc, entry.id)));
-const shownCats = computed(() => API_CATEGORIES.filter(category => entries.value.some(entry => entry.cat === category)));
+const entries = computed(() => API_CATALOG.filter(entry => TAB_CATS[tab.value].includes(entry.category) && match(entry.title, entry.signature, entry.desc, entry.id)));
+const shownCats = computed(() => API_CATEGORIES.filter(category => entries.value.some(entry => entry.category === category)));
 const showMaterials = computed(() => tab.value === 'Alle' || tab.value === 'Materialien');
 const mats = computed(() => (showMaterials.value ? MATERIAL_LIBRARY.filter(material => match(material.name, material.category, material.texture ?? '', material.note ?? '')) : []));
 const textures = computed(() => (Object.keys(TEXTURES) as TextureKind[]).filter(kind => match(kind, TEXTURES[kind], 'textur')).map(kind => ({ kind: kind, label: TEXTURES[kind], size: TEXTURE_SIZE[kind] })));

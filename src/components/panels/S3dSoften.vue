@@ -29,7 +29,7 @@ const selectedEdgeIds = (): number[] => {
   if (selection.some(item => item.kind === 'instance')) {
     for (const item of selection) {
       const instance = entities.instances.get(item.id);
-      if (instance) instance.def.entities.edges.forEach(edge => ids.add(-edge.id));
+      if (instance) instance.definition.entities.edges.forEach(edge => ids.add(-edge.id));
     }
   }
   return [...ids];
@@ -53,7 +53,7 @@ const apply = () => {
     for (const item of editor.selected()) {
       if (item.kind !== 'instance') continue;
       const instance = entities.instances.get(item.id);
-      if (instance) soften(instance.def.entities, [...instance.def.entities.edges.keys()]);
+      if (instance) soften(instance.definition.entities, [...instance.definition.entities.edges.keys()]);
     }
   });
 };
@@ -68,7 +68,7 @@ const clear = () => {
     for (const item of editor.selected()) {
       if (item.kind !== 'instance') continue;
       const instance = entities.instances.get(item.id);
-      if (instance) instance.def.entities.edges.forEach(edge => (edge.soft = undefined));
+      if (instance) instance.definition.entities.edges.forEach(edge => (edge.soft = undefined));
     }
   });
 };

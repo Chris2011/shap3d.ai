@@ -22,35 +22,35 @@ export const DEFAULT_PERSON = 'chris';
  * `height` meters tall and centred on the origin. Each colour becomes a face colour ("#rrggbb"),
  * later layers sit a fraction of a millimetre in front (−Y) so they never z-fight.
  */
-export function buildPerson(ents: Entities, svgText: string, height = 1.75) {
+export const buildPerson = (ents: Entities, svgText: string, height = 1.75) => {
   const data = new SVGLoader().parse(svgText);
   const layers: { shapes: THREE.Shape[]; color: string }[] = [];
   const box = new THREE.Box2();
-  for (const p of data.paths) {
-    const fill = String((p.userData as { style?: { fill?: string } } | undefined)?.style?.fill ?? '');
+  for (const path of data.paths) {
+    const fill = String((path.userData as { style?: { fill?: string } } | undefined)?.style?.fill ?? '');
     if (!fill || fill === 'none') continue;
-    const shapes = SVGLoader.createShapes(p);
-    for (const s of shapes) for (const pt of s.getPoints()) box.expandByPoint(pt);
+    const shapes = SVGLoader.createShapes(path);
+    for (const shape of shapes) for (const point of shape.getPoints()) box.expandByPoint(point);
     layers.push({ shapes, color: '#' + new THREE.Color().setStyle(fill, THREE.LinearSRGBColorSpace).getHexString(THREE.LinearSRGBColorSpace) });
   }
   if (box.isEmpty()) return;
   const k = height / (box.max.y - box.min.y);
-  const cx = (box.min.x + box.max.x) / 2;
-  const map = (v: THREE.Vector2, layer: number) => new THREE.Vector3((v.x - cx) * k, -layer * 0.0006, (box.max.y - v.y) * k);
-  layers.forEach((l, i) => {
-    for (const s of l.shapes) {
-      const ex = s.extractPoints(5);
-      const clean = (pts: THREE.Vector2[]) => { const o: THREE.Vector2[] = []; for (const q of pts) if (!o.length || o[o.length - 1].distanceTo(q) > 1e-3) o.push(q); while (o.length > 2 && o[0].distanceTo(o[o.length - 1]) < 1e-3) o.pop(); return o; };
-      let outer = clean(ex.shape); if (outer.length < 3) continue;
+  const centerX = (box.min.x + box.max.x) / 2;
+  const map = (point2d: THREE.Vector2, layer: number) => new THREE.Vector3((point2d.x - centerX) * k, -layer * 0.0006, (box.max.y - point2d.y) * k);
+  layers.forEach((layerData, i) => {
+    for (const shape of layerData.shapes) {
+      const extracted = shape.extractPoints(5);
+      const clean = (pts: THREE.Vector2[]) => { const cleaned: THREE.Vector2[] = []; for (const point of pts) if (!cleaned.length || cleaned[cleaned.length - 1].distanceTo(point) > 1e-3) cleaned.push(point); while (cleaned.length > 2 && cleaned[0].distanceTo(cleaned[cleaned.length - 1]) < 1e-3) cleaned.pop(); return cleaned; };
+      let outer = clean(extracted.shape); if (outer.length < 3) continue;
       // SVG y points down: counter-clockwise in SVG becomes clockwise in X/Z → face normal −Y (front)
       if (!THREE.ShapeUtils.isClockWise(outer)) outer = outer.reverse();
-      const holes = ex.holes.map(clean).filter(h => h.length >= 3).map(h => (THREE.ShapeUtils.isClockWise(h) ? h.reverse() : h));
-      const ov = outer.map(p => ents.rawVertex(map(p, i)));
-      const hv = holes.map(h => h.map(p => ents.rawVertex(map(p, i))));
-      const f = ents.createFaceRaw(ov, hv, { material: l.color, backMaterial: l.color });
-      if (f && ents.faceNormal(f).y > 0) ents.reverseFace(f);
+      const holes = extracted.holes.map(clean).filter(hole => hole.length >= 3).map(hole => (THREE.ShapeUtils.isClockWise(hole) ? hole.reverse() : hole));
+      const outerIds = outer.map(point => ents.rawVertex(map(point, i)));
+      const holeIds = holes.map(hole => hole.map(point => ents.rawVertex(map(point, i))));
+      const face = ents.createFaceRaw(outerIds, holeIds, { material: layerData.color, backMaterial: layerData.color });
+      if (face && ents.faceNormal(face).y > 0) ents.reverseFace(face);
     }
   });
   // flat illustration look: no visible edges
-  for (const e of ents.edges.values()) e.soft = true;
-}
+  for (const edge of ents.edges.values()) edge.soft = true;
+};

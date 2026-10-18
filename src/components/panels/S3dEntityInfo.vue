@@ -76,10 +76,10 @@ const info = useSelection<any>(() => {
     if (single.kind === 'edge') { const edge = entities.edges.get(single.id)!; return { kind: 'edge', title: 'Kante', tag: edge.tag, hidden: !!edge.hidden, soft: !!edge.soft, length: editor.fmt(entities.edgeLength(edge)) }; }
     const instance = entities.instances.get(single.id)!;
     const pos = new THREE.Vector3().setFromMatrixPosition(instance.matrix);
-    const bounds = instance.def.entities.bounds(new THREE.Box3(), instance.matrix.clone()); const size = bounds.getSize(new THREE.Vector3());
-    let count = 0; const walk = (container: typeof entities) => { for (const child of container.instances.values()) { if (child.def === instance.def) count++; walk(child.def.entities); } }; walk(editor.model.root);
-    const solid = isSolid(instance.def.entities); const vol = solid ? Math.abs(volume(instance.def.entities, instance.matrix)) : 0;
-    return { volume: solid ? fmtVol(vol) : '', kind: 'instance', title: (solid ? 'Volumenkörper-' : '') + (instance.def.isComponent ? 'Komponente' : 'Gruppe'), name: instance.name, defName: instance.def.name, isComponent: instance.def.isComponent, count, material: instance.material, matColor: col(instance.material, '#ffffff'), tag: instance.tag, hidden: !!instance.hidden, locked: !!instance.locked, pos: [pos.x, pos.y, pos.z], size: `${editor.fmt(size.x)} × ${editor.fmt(size.y)} × ${editor.fmt(size.z)}` };
+    const bounds = instance.definition.entities.bounds(new THREE.Box3(), instance.matrix.clone()); const size = bounds.getSize(new THREE.Vector3());
+    let count = 0; const walk = (container: typeof entities) => { for (const child of container.instances.values()) { if (child.definition === instance.definition) count++; walk(child.definition.entities); } }; walk(editor.model.root);
+    const solid = isSolid(instance.definition.entities); const vol = solid ? Math.abs(volume(instance.definition.entities, instance.matrix)) : 0;
+    return { volume: solid ? fmtVol(vol) : '', kind: 'instance', title: (solid ? 'Volumenkörper-' : '') + (instance.definition.isComponent ? 'Komponente' : 'Gruppe'), name: instance.name, defName: instance.definition.name, isComponent: instance.definition.isComponent, count, material: instance.material, matColor: col(instance.material, '#ffffff'), tag: instance.tag, hidden: !!instance.hidden, locked: !!instance.locked, pos: [pos.x, pos.y, pos.z], size: `${editor.fmt(size.x)} × ${editor.fmt(size.y)} × ${editor.fmt(size.z)}` };
   }
   let area = 0, len = 0; const counts = { face: 0, edge: 0, instance: 0 };
   for (const entityRef of selection) { counts[entityRef.kind]++; if (entityRef.kind === 'face') area += entities.faceArea(entities.faces.get(entityRef.id)!); if (entityRef.kind === 'edge') len += entities.edgeLength(entities.edges.get(entityRef.id)!); }
@@ -104,7 +104,7 @@ const toggle = (prop: 'hidden' | 'soft' | 'locked') => {
   }, prop === 'hidden' ? 'Ausblenden' : prop === 'soft' ? 'Abmildern' : 'Sperren');
 };
 const setName = (name: string) => { each((entityRef, entities) => { const instance = entities.instances.get(entityRef.id); if (instance) instance.name = name; }, 'Umbenennen'); };
-const setDefName = (name: string) => { each((entityRef, entities) => { const instance = entities.instances.get(entityRef.id); if (instance && name.trim()) instance.def.name = name.trim(); }, 'Definition umbenennen'); };
+const setDefName = (name: string) => { each((entityRef, entities) => { const instance = entities.instances.get(entityRef.id); if (instance && name.trim()) instance.definition.name = name.trim(); }, 'Definition umbenennen'); };
 const setPos = (axis: number, text: string) => {
   const length = parseLength(text, editor.model.settings.units); if (length == null) return;
   each((entityRef, entities) => { const instance = entities.instances.get(entityRef.id); if (!instance) return; const elements = instance.matrix.elements; elements[12 + axis] = length; }, 'Position');

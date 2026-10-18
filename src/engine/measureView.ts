@@ -27,89 +27,89 @@ const AXES = [
 ];
 
 /** Label for a tick at `t` metres whose finest level is `step`: whole metres, then cm, then mm. */
-function tickLabel(t: number, step: number): string {
-  const sign = t < 0 ? '−' : ''; const a = Math.abs(t);
-  if (step >= 1) return `${sign}${Math.round(a)} m`;
-  if (step >= 0.01) return `${sign}${Math.round(a * 100)} cm`;
-  return `${sign}${Math.round(a * 1000)} mm`;
-}
+const tickLabel = (value: number, step: number): string => {
+  const sign = value < 0 ? '−' : ''; const magnitude = Math.abs(value);
+  if (step >= 1) return `${sign}${Math.round(magnitude)} m`;
+  if (step >= 0.01) return `${sign}${Math.round(magnitude * 100)} cm`;
+  return `${sign}${Math.round(magnitude * 1000)} mm`;
+};
 
-function label(c: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, align: CanvasTextAlign = 'center') {
-  c.font = '600 11px "Open Sans", "Segoe UI", sans-serif'; c.textAlign = align; c.textBaseline = 'middle';
-  c.lineJoin = 'round'; c.lineWidth = 3; c.strokeStyle = theme.night ? 'rgba(10,14,20,.85)' : 'rgba(255,255,255,.9)';
-  c.strokeText(text, x, y); c.fillStyle = color; c.fillText(text, x, y);
-}
+const label = (context: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, align: CanvasTextAlign = 'center') => {
+  context.font = '600 11px "Open Sans", "Segoe UI", sans-serif'; context.textAlign = align; context.textBaseline = 'middle';
+  context.lineJoin = 'round'; context.lineWidth = 3; context.strokeStyle = theme.night ? 'rgba(10,14,20,.85)' : 'rgba(255,255,255,.9)';
+  context.strokeText(text, x, y); context.fillStyle = color; context.fillText(text, x, y);
+};
 
-function drawRulers(o: Overlay) {
-  const v = o.viewer, c = o.ctx, W = v.width, H = v.height, M = 30;
-  const cam = (v.rig.camera as THREE.Camera).position;
+const drawRulers = (overlay: Overlay) => {
+  const viewer = overlay.viewer, context = overlay.context, viewWidth = viewer.width, viewHeight = viewer.height, margin = 30;
+  const cam = (viewer.rig.camera as THREE.Camera).position;
   const reach = Math.max(200, cam.length() * 6);
   const textCol = theme.night ? '#dfe6ee' : '#2b3035';
 
-  for (const ax of AXES) {
-    const P = (t: number) => ax.dir.clone().multiplyScalar(t);
-    // one subdivision step: draw the tick at `a` (unless the parent already did) and recurse into tenths
-    const visit = (a: number, b: number, level: number, drawStart: boolean) => {
-      const seg = o.projectSegment(P(a), P(b)); if (!seg) return;
-      const [p, q] = seg;
-      if (Math.max(p.x, q.x) < -M || Math.min(p.x, q.x) > W + M || Math.max(p.y, q.y) < -M || Math.min(p.y, q.y) > H + M) return;
-      const len = p.distanceTo(q); if (len < MIN_TICK) return;
-      if (drawStart && a !== 0) {
-        const s = o.screen(P(a));
-        if (s) {
-          const d = q.clone().sub(p).normalize(); const n = new THREE.Vector2(-d.y, d.x);
-          if (n.y < 0 || (Math.abs(n.y) < 1e-3 && n.x < 0)) n.negate(); // ticks hang below / to the right
-          const tl = Math.min(14, 3 + len * 0.06);
-          c.globalAlpha = Math.min(1, 0.3 + (len - MIN_TICK) / (MIN_TICK * 3));
-          c.strokeStyle = ax.color; c.lineWidth = len >= MIN_LABEL ? 1.6 : 1; c.setLineDash([]);
-          c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x + n.x * tl, s.y + n.y * tl); c.stroke();
-          c.globalAlpha = 1;
-          if (len >= MIN_LABEL) label(c, tickLabel(a, STEPS[level]), s.x + n.x * (tl + 10), s.y + n.y * (tl + 10), textCol);
+  for (const axis of AXES) {
+    const pointAt = (distance: number) => axis.dir.clone().multiplyScalar(distance);
+    // one subdivision step: draw the tick at `start` (unless the parent already did) and recurse into tenths
+    const visit = (start: number, end: number, level: number, drawStart: boolean) => {
+      const seg = overlay.projectSegment(pointAt(start), pointAt(end)); if (!seg) return;
+      const [screenStart, screenEnd] = seg;
+      if (Math.max(screenStart.x, screenEnd.x) < -margin || Math.min(screenStart.x, screenEnd.x) > viewWidth + margin || Math.max(screenStart.y, screenEnd.y) < -margin || Math.min(screenStart.y, screenEnd.y) > viewHeight + margin) return;
+      const len = screenStart.distanceTo(screenEnd); if (len < MIN_TICK) return;
+      if (drawStart && start !== 0) {
+        const tickPos = overlay.screen(pointAt(start));
+        if (tickPos) {
+          const direction = screenEnd.clone().sub(screenStart).normalize(); const tickNormal = new THREE.Vector2(-direction.y, direction.x);
+          if (tickNormal.y < 0 || (Math.abs(tickNormal.y) < 1e-3 && tickNormal.x < 0)) tickNormal.negate(); // ticks hang below / to the right
+          const tickLength = Math.min(14, 3 + len * 0.06);
+          context.globalAlpha = Math.min(1, 0.3 + (len - MIN_TICK) / (MIN_TICK * 3));
+          context.strokeStyle = axis.color; context.lineWidth = len >= MIN_LABEL ? 1.6 : 1; context.setLineDash([]);
+          context.beginPath(); context.moveTo(tickPos.x, tickPos.y); context.lineTo(tickPos.x + tickNormal.x * tickLength, tickPos.y + tickNormal.y * tickLength); context.stroke();
+          context.globalAlpha = 1;
+          if (len >= MIN_LABEL) label(context, tickLabel(start, STEPS[level]), tickPos.x + tickNormal.x * (tickLength + 10), tickPos.y + tickNormal.y * (tickLength + 10), textCol);
         }
       }
       if (level + 1 >= STEPS.length || len / 10 < MIN_TICK) return;
-      const s = (b - a) / 10;
-      for (let i = 0; i < 10; i++) visit(a + i * s, a + (i + 1) * s, level + 1, i > 0);
+      const subStep = (end - start) / 10;
+      for (let i = 0; i < 10; i++) visit(start + i * subStep, start + (i + 1) * subStep, level + 1, i > 0);
     };
     for (const sign of [1, -1]) {
-      const n = Math.ceil(reach / STEPS[0]);
-      for (let k = 0; k < n; k++) visit(sign * k * STEPS[0], sign * (k + 1) * STEPS[0], 0, true);
+      const count = Math.ceil(reach / STEPS[0]);
+      for (let k = 0; k < count; k++) visit(sign * k * STEPS[0], sign * (k + 1) * STEPS[0], 0, true);
     }
   }
-}
+};
 
-function drawPeople(o: Overlay) {
-  const v = o.viewer, c = o.ctx;
+const drawPeople = (overlay: Overlay) => {
+  const viewer = overlay.viewer, context = overlay.context;
   const col = theme.night ? '#dfe6ee' : '#2b3035';
-  for (const f of v.faceMe) {
-    if (!f.group.visible) continue;
-    const box = new THREE.Box3().setFromObject(f.group); if (box.isEmpty()) continue;
-    const h = box.max.z - box.min.z;
+  for (const figure of viewer.faceMe) {
+    if (!figure.group.visible) continue;
+    const box = new THREE.Box3().setFromObject(figure.group); if (box.isEmpty()) continue;
+    const height = box.max.z - box.min.z;
     const ctr = box.getCenter(new THREE.Vector3());
-    const bot = o.screen(new THREE.Vector3(ctr.x, ctr.y, box.min.z)), top = o.screen(new THREE.Vector3(ctr.x, ctr.y, box.max.z));
+    const bot = overlay.screen(new THREE.Vector3(ctr.x, ctr.y, box.min.z)), top = overlay.screen(new THREE.Vector3(ctr.x, ctr.y, box.max.z));
     if (!bot || !top || Math.abs(bot.y - top.y) < 36) continue;
     // right edge of the figure on screen
     let maxX = -Infinity;
     for (let i = 0; i < 8; i++) {
-      const s = o.screen(new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z));
-      if (s) maxX = Math.max(maxX, s.x);
+      const corner = overlay.screen(new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z));
+      if (corner) maxX = Math.max(maxX, corner.x);
     }
     const x = Math.round(maxX + 14) + 0.5;
-    c.strokeStyle = col; c.lineWidth = 1; c.setLineDash([]); c.beginPath();
-    c.moveTo(x, bot.y); c.lineTo(x, top.y);
-    c.moveTo(x - 5, bot.y); c.lineTo(x + 5, bot.y); c.moveTo(x - 5, top.y); c.lineTo(x + 5, top.y);
+    context.strokeStyle = col; context.lineWidth = 1; context.setLineDash([]); context.beginPath();
+    context.moveTo(x, bot.y); context.lineTo(x, top.y);
+    context.moveTo(x - 5, bot.y); context.lineTo(x + 5, bot.y); context.moveTo(x - 5, top.y); context.lineTo(x + 5, top.y);
     // little arrow heads
     const dir = Math.sign(bot.y - top.y) || 1;
-    c.moveTo(x - 3, top.y + 5 * dir); c.lineTo(x, top.y); c.lineTo(x + 3, top.y + 5 * dir);
-    c.moveTo(x - 3, bot.y - 5 * dir); c.lineTo(x, bot.y); c.lineTo(x + 3, bot.y - 5 * dir);
-    c.stroke();
-    const px = Math.abs(bot.y - top.y) / h; // pixels per metre at the figure
-    const text = px > 2500 ? `${Math.round(h * 1000)} mm` : px > 500 ? `${(h * 100).toFixed(1).replace('.', ',')} cm` : formatLength(h, 'm', 2);
-    label(c, text, x + 8, (bot.y + top.y) / 2, col, 'left');
+    context.moveTo(x - 3, top.y + 5 * dir); context.lineTo(x, top.y); context.lineTo(x + 3, top.y + 5 * dir);
+    context.moveTo(x - 3, bot.y - 5 * dir); context.lineTo(x, bot.y); context.lineTo(x + 3, bot.y - 5 * dir);
+    context.stroke();
+    const pixelsPerMetre = Math.abs(bot.y - top.y) / height; // pixels per metre at the figure
+    const text = pixelsPerMetre > 2500 ? `${Math.round(height * 1000)} mm` : pixelsPerMetre > 500 ? `${(height * 100).toFixed(1).replace('.', ',')} cm` : formatLength(height, 'm', 2);
+    label(context, text, x + 8, (bot.y + top.y) / 2, col, 'left');
   }
-}
+};
 
-export function drawMeasure(o: Overlay, ed: Editor) {
-  if (measureView.rulers && ed.model.settings.axes) drawRulers(o);
-  if (measureView.people) drawPeople(o);
-}
+export const drawMeasure = (overlay: Overlay, editor: Editor) => {
+  if (measureView.rulers && editor.model.settings.axes) drawRulers(overlay);
+  if (measureView.people) drawPeople(overlay);
+};

@@ -22,13 +22,13 @@ export const terrainUi = reactive({
   brush: { mode: 'raise' as BrushMode, radius: 2, strength: 0.5 } as Brush,
   newW: 20, newD: 20, detail: 'mittel' as 'grob' | 'mittel' | 'fein', startHills: false,
   /** bumped whenever the grid or the settings change (panel re-reads info) */
-  rev: 0,
+  revision: 0,
   canUndo: false,
   title: '',
 });
 
 interface Session {
-  ed: Editor;
+  editor: Editor;
   data: TerrainData;
   origin: THREE.Vector3;          // world position of the grid corner (0, 0)
   mesh: THREE.Mesh;
@@ -39,20 +39,20 @@ interface Session {
   inst: Instance | null;
   undo: number[][];
 }
-let S: Session | null = null;
-export const session = () => S;
-export const terrainData = () => S?.data ?? null;
+let current: Session | null = null;
+export const session = () => current;
+export const terrainData = () => current?.data ?? null;
 
 // ------------------------------------------------------------------ preview material
 const LAYER_DEFAULT = { Gras: '#6fa347', Erde: '#8a6342', Fels: '#9a968e', Schnee: '#f3f6f9' };
-function layerTex(name: string, fallback: keyof typeof LAYER_DEFAULT) {
-  const m = S?.ed.model.materials.find(x => x.name === name);
+const layerTex = (name: string, fallback: keyof typeof LAYER_DEFAULT) => {
+  const material = current?.editor.model.materials.find(x => x.name === name);
   const lib = libraryMaterial(name);
-  const color = m?.color ?? lib?.color ?? LAYER_DEFAULT[fallback];
-  const kind = m?.texture ?? lib?.texture;
-  const size = m?.textureSize ?? lib?.size ?? (kind && isTextureKind(kind) ? TEXTURE_SIZE[kind] : 1);
+  const color = material?.color ?? lib?.color ?? LAYER_DEFAULT[fallback];
+  const kind = material?.texture ?? lib?.texture;
+  const size = material?.textureSize ?? lib?.size ?? (kind && isTextureKind(kind) ? TEXTURE_SIZE[kind] : 1);
   return { tex: kind && isTextureKind(kind) ? makeTexture(kind, color) : null, color: new THREE.Color(color), size };
-}
+};
 
 const VERT = `
 #include <common>
@@ -93,7 +93,7 @@ void main(){
   gl_FragColor = vec4(toSRGB(col) * f, 1.0);
 }`;
 
-function makeMaterial() {
+const makeMaterial = () => {
   const blank = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); blank.needsUpdate = true;
   return new THREE.ShaderMaterial({
     uniforms: {
@@ -107,196 +107,196 @@ function makeMaterial() {
     // draws over the flat source face it was made from
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4,
   });
-}
+};
 
 /** Push texture + layer settings into the preview shader. */
-export function refreshLook() {
-  if (!S) return;
-  const u = (S.mesh.material as THREE.ShaderMaterial).uniforms; const L = S.data.layers;
-  const layers = [layerTex(L.grass, 'Gras'), layerTex(L.earth, 'Erde'), layerTex(L.rock, 'Fels'), layerTex(L.snow, 'Schnee')];
-  (['tG', 'tE', 'tR', 'tS'] as const).forEach((k, i) => { if (layers[i].tex) u[k].value = layers[i].tex; });
-  (['cG', 'cE', 'cR', 'cS'] as const).forEach((k, i) => (u[k].value as THREE.Color).copy(layers[i].color).convertSRGBToLinear());
-  u.useTex.value.set(...layers.map(l => (l.tex ? 1 : 0)) as [number, number, number, number]);
-  u.tile.value.set(...layers.map(l => l.size) as [number, number, number, number]);
-  u.autoTex.value = L.auto ? 1 : 0; u.rockH.value = L.rockHeight; u.snowH.value = L.snowHeight ?? -1e9;
-  u.earthSlope.value = L.earthSlope; u.rockSlope.value = L.rockSlope; u.dig.value = L.digDepth;
-  const d = S.data; S.water.visible = d.water != null;
-  if (d.water != null) { S.water.scale.set(d.w, d.d, 1); S.water.position.set(S.origin.x + d.w / 2, S.origin.y + d.d / 2, S.origin.z + d.water); }
-  terrainUi.rev++;
-  S.ed.redraw();
-}
+export const refreshLook = () => {
+  if (!current) return;
+  const uniforms = (current.mesh.material as THREE.ShaderMaterial).uniforms; const layerData = current.data.layers;
+  const layers = [layerTex(layerData.grass, 'Gras'), layerTex(layerData.earth, 'Erde'), layerTex(layerData.rock, 'Fels'), layerTex(layerData.snow, 'Schnee')];
+  (['tG', 'tE', 'tR', 'tS'] as const).forEach((uniform, i) => { if (layers[i].tex) uniforms[uniform].value = layers[i].tex; });
+  (['cG', 'cE', 'cR', 'cS'] as const).forEach((uniform, i) => (uniforms[uniform].value as THREE.Color).copy(layers[i].color).convertSRGBToLinear());
+  uniforms.useTex.value.set(...layers.map(layer => (layer.tex ? 1 : 0)) as [number, number, number, number]);
+  uniforms.tile.value.set(...layers.map(layer => layer.size) as [number, number, number, number]);
+  uniforms.autoTex.value = layerData.auto ? 1 : 0; uniforms.rockH.value = layerData.rockHeight; uniforms.snowH.value = layerData.snowHeight ?? -1e9;
+  uniforms.earthSlope.value = layerData.earthSlope; uniforms.rockSlope.value = layerData.rockSlope; uniforms.dig.value = layerData.digDepth;
+  const terrain = current.data; current.water.visible = terrain.water != null;
+  if (terrain.water != null) { current.water.scale.set(terrain.width, terrain.depth, 1); current.water.position.set(current.origin.x + terrain.width / 2, current.origin.y + terrain.depth / 2, current.origin.z + terrain.water); }
+  terrainUi.revision++;
+  current.editor.redraw();
+};
 
-function buildGeometry(t: TerrainData) {
-  const { cx, cy } = cellSize(t);
-  const pos = new Float32Array((t.nx + 1) * (t.ny + 1) * 3);
-  for (let j = 0; j <= t.ny; j++) for (let i = 0; i <= t.nx; i++) { const k = idx(t, i, j); pos[k * 3] = i * cx; pos[k * 3 + 1] = j * cy; pos[k * 3 + 2] = t.h[k]; }
+const buildGeometry = (terrain: TerrainData) => {
+  const { cx: cellX, cy: cellY } = cellSize(terrain);
+  const pos = new Float32Array((terrain.columns + 1) * (terrain.rows + 1) * 3);
+  for (let j = 0; j <= terrain.rows; j++) for (let i = 0; i <= terrain.columns; i++) { const k = idx(terrain, i, j); pos[k * 3] = i * cellX; pos[k * 3 + 1] = j * cellY; pos[k * 3 + 2] = terrain.heights[k]; }
   const index: number[] = [];
-  for (let j = 0; j < t.ny; j++) for (let i = 0; i < t.nx; i++) {
-    const a = idx(t, i, j), b = idx(t, i + 1, j), c = idx(t, i + 1, j + 1), d = idx(t, i, j + 1);
-    if ((i + j) % 2 === 0) index.push(a, b, c, a, c, d); else index.push(a, b, d, b, c, d);
+  for (let j = 0; j < terrain.rows; j++) for (let i = 0; i < terrain.columns; i++) {
+    const indexA = idx(terrain, i, j), indexB = idx(terrain, i + 1, j), indexC = idx(terrain, i + 1, j + 1), indexD = idx(terrain, i, j + 1);
+    if ((i + j) % 2 === 0) index.push(indexA, indexB, indexC, indexA, indexC, indexD); else index.push(indexA, indexB, indexD, indexB, indexC, indexD);
   }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setIndex(index); g.computeVertexNormals(); g.computeBoundingSphere();
-  return g;
-}
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geometry.setIndex(index); geometry.computeVertexNormals(); geometry.computeBoundingSphere();
+  return geometry;
+};
 /** Copy heights into the preview mesh after a brush dab. */
-export function syncGeometry() {
-  if (!S) return;
-  const g = S.mesh.geometry; const p = g.getAttribute('position') as THREE.BufferAttribute;
-  for (let k = 0; k < S.data.h.length; k++) p.setZ(k, S.data.h[k]);
-  p.needsUpdate = true; g.computeVertexNormals(); g.computeBoundingSphere(); g.computeBoundingBox();
-  terrainUi.rev++;
-  S.ed.redraw();
-}
+export const syncGeometry = () => {
+  if (!current) return;
+  const geometry = current.mesh.geometry; const positions = geometry.getAttribute('position') as THREE.BufferAttribute;
+  for (let k = 0; k < current.data.heights.length; k++) positions.setZ(k, current.data.heights[k]);
+  positions.needsUpdate = true; geometry.computeVertexNormals(); geometry.computeBoundingSphere(); geometry.computeBoundingBox();
+  terrainUi.revision++;
+  current.editor.redraw();
+};
 
 // ------------------------------------------------------------------ lifecycle
-function begin(ed: Editor, data: TerrainData, origin: THREE.Vector3, extra: { srcFace?: Session['srcFace']; inst?: Instance | null; title: string }) {
-  if (S) end();
+const begin = (editor: Editor, data: TerrainData, origin: THREE.Vector3, extra: { srcFace?: Session['srcFace']; inst?: Instance | null; title: string }) => {
+  if (current) end();
   const mesh = new THREE.Mesh(buildGeometry(data), makeMaterial());
   mesh.position.copy(origin); mesh.renderOrder = 2;
   const water = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0x3f7fae, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }));
   water.renderOrder = 3;
-  ed.viewer.helpers.add(mesh, water);
-  S = { ed, data, origin: origin.clone(), mesh, water, srcFace: extra.srcFace ?? null, inst: extra.inst ?? null, undo: [] };
-  if (S.inst) { S.inst.hidden = true; ed.invalidate(); }
-  const longest = Math.max(data.w, data.d);
+  editor.viewer.helpers.add(mesh, water);
+  current = { editor, data, origin: origin.clone(), mesh, water, srcFace: extra.srcFace ?? null, inst: extra.inst ?? null, undo: [] };
+  if (current.inst) { current.inst.hidden = true; editor.invalidate(); }
+  const longest = Math.max(data.width, data.depth);
   terrainUi.brush.radius = +Math.max(0.5, longest / 8).toFixed(1);
   Object.assign(terrainUi, { active: true, chooser: false, canUndo: false, title: extra.title });
   refreshLook();
-  if (ed.ui.tool !== 'terrain') ed.setTool('terrain');
-  ed.clearSelection();
-}
-function end() {
-  if (!S) return;
-  const s = S; S = null;
-  s.ed.viewer.helpers.remove(s.mesh, s.water);
-  s.mesh.geometry.dispose(); (s.mesh.material as THREE.Material).dispose(); s.water.geometry.dispose(); (s.water.material as THREE.Material).dispose();
-  if (s.inst) s.inst.hidden = false;
+  if (editor.ui.tool !== 'terrain') editor.setTool('terrain');
+  editor.clearSelection();
+};
+const end = () => {
+  if (!current) return;
+  const closing = current; current = null;
+  closing.editor.viewer.helpers.remove(closing.mesh, closing.water);
+  closing.mesh.geometry.dispose(); (closing.mesh.material as THREE.Material).dispose(); closing.water.geometry.dispose(); (closing.water.material as THREE.Material).dispose();
+  if (closing.inst) closing.inst.hidden = false;
   terrainUi.active = false; terrainUi.canUndo = false;
-  s.ed.invalidate();
-}
+  closing.editor.invalidate();
+};
 
 const CELLS = { grob: 28, mittel: 48, fein: 80 };
 /** Grid resolution for a size and the chosen detail level. */
-const cellFor = (w: number, d: number) => Math.max(0.1, Math.max(w, d) / CELLS[terrainUi.detail]);
+const cellFor = (width: number, depth: number) => Math.max(0.1, Math.max(width, depth) / CELLS[terrainUi.detail]);
 
 /**
  * Entry point of the terrain tool: edits a selected terrain group, turns a selected horizontal face
  * into terrain, or opens the "new terrain" chooser.
  */
-export function openTerrain(ed: Editor) {
-  if (S) { if (ed.ui.tool !== 'terrain') ed.setTool('terrain'); return; }
-  const sel = ed.selected();
-  const inst = sel.find(r => r.kind === 'instance');
+export const openTerrain = (editor: Editor) => {
+  if (current) { if (editor.ui.tool !== 'terrain') editor.setTool('terrain'); return; }
+  const sel = editor.selected();
+  const inst = sel.find(entityRef => entityRef.kind === 'instance');
   if (inst) {
-    const i = ed.entities.instances.get(inst.id);
-    if (i?.def.terrain) {
-      const origin = new THREE.Vector3().setFromMatrixPosition(ed.contextMatrix.clone().multiply(i.matrix));
-      begin(ed, cloneTerrain(i.def.terrain), origin, { inst: i, title: i.name || i.def.name });
+    const instance = editor.entities.instances.get(inst.id);
+    if (instance?.definition.terrain) {
+      const origin = new THREE.Vector3().setFromMatrixPosition(editor.contextMatrix.clone().multiply(instance.matrix));
+      begin(editor, cloneTerrain(instance.definition.terrain), origin, { inst: instance, title: instance.name || instance.definition.name });
       return;
     }
   }
-  const face = sel.find(r => r.kind === 'face');
+  const face = sel.find(entityRef => entityRef.kind === 'face');
   if (face) {
-    const f = ed.entities.faces.get(face.id);
-    if (f && Math.abs(ed.entities.faceNormal(f).z) > 0.999) {
-      const pts = ed.entities.facePoints(f).map(p => p.clone().applyMatrix4(ed.contextMatrix));
-      const bb = new THREE.Box3().setFromPoints(pts); const size = bb.getSize(new THREE.Vector3());
+    const existing = editor.entities.faces.get(face.id);
+    if (existing && Math.abs(editor.entities.faceNormal(existing).z) > 0.999) {
+      const pts = editor.entities.facePoints(existing).map(point => point.clone().applyMatrix4(editor.contextMatrix));
+      const box = new THREE.Box3().setFromPoints(pts); const size = box.getSize(new THREE.Vector3());
       if (size.x > 0.05 && size.y > 0.05) {
         const data = newTerrain(size.x, size.y, cellFor(size.x, size.y));
-        begin(ed, data, new THREE.Vector3(bb.min.x, bb.min.y, bb.min.z), { srcFace: { ents: ed.entities, id: f.id }, title: 'Gelände aus Fläche' });
+        begin(editor, data, new THREE.Vector3(box.min.x, box.min.y, box.min.z), { srcFace: { ents: editor.entities, id: existing.id }, title: 'Gelände aus Fläche' });
         return;
       }
     }
-    ed.toast('Gelände geht nur aus einer waagerechten Fläche – z. B. einem Rechteck auf dem Boden.');
+    editor.toast('Gelände geht nur aus einer waagerechten Fläche – z. B. einem Rechteck auf dem Boden.');
   }
   terrainUi.chooser = true;
-  if (ed.ui.tool !== 'terrain') ed.setTool('terrain');
-}
+  if (editor.ui.tool !== 'terrain') editor.setTool('terrain');
+};
 
 /** Creates a new terrain from the chooser (next to the existing model, or centred on the origin). */
-export function createNew(ed: Editor) {
-  const w = Math.max(1, terrainUi.newW), d = Math.max(1, terrainUi.newD);
-  const data = newTerrain(w, d, cellFor(w, d));
-  if (terrainUi.startHills) generateHills(data, { height: Math.max(w, d) * 0.12 });
-  const b = ed.model.bounds();
-  const origin = b.isEmpty() ? new THREE.Vector3(-w / 2, -d / 2, 0) : new THREE.Vector3(b.max.x + 2, b.min.y, 0);
-  begin(ed, data, origin, { title: `Neues Gelände ${w} × ${d} m` });
-  ed.viewer.rig.zoomExtents(new THREE.Box3(origin, origin.clone().add(new THREE.Vector3(w, d, Math.max(w, d) * 0.2))), true);
-}
+export const createNew = (editor: Editor) => {
+  const width = Math.max(1, terrainUi.newW), depth = Math.max(1, terrainUi.newD);
+  const data = newTerrain(width, depth, cellFor(width, depth));
+  if (terrainUi.startHills) generateHills(data, { height: Math.max(width, depth) * 0.12 });
+  const box = editor.model.bounds();
+  const origin = box.isEmpty() ? new THREE.Vector3(-width / 2, -depth / 2, 0) : new THREE.Vector3(box.max.x + 2, box.min.y, 0);
+  begin(editor, data, origin, { title: `Neues Gelände ${width} × ${depth} m` });
+  editor.viewer.rig.zoomExtents(new THREE.Box3(origin, origin.clone().add(new THREE.Vector3(width, depth, Math.max(width, depth) * 0.2))), true);
+};
 
 /** Bakes the terrain into the model – one undo step. */
-export function applyTerrain(switchTool = true) {
-  if (!S) return;
-  const s = S; const ed = s.ed;
+export const applyTerrain = (switchTool = true) => {
+  if (!current) return;
+  const active = current; const editor = active.editor;
   // un-hide first so the undo snapshot taken by commit() has the old terrain visible
-  if (s.inst) s.inst.hidden = false;
-  const data = cloneTerrain(s.data);
+  if (active.inst) active.inst.hidden = false;
+  const data = cloneTerrain(active.data);
   let made: Instance | null = null;
   try {
-    ed.commit(s.inst ? 'Gelände bearbeiten' : 'Gelände', () => {
+    editor.commit(active.inst ? 'Gelände bearbeiten' : 'Gelände', () => {
       const ents = new Entities();
-      bakeTerrain(ents, data, ed.model);
-      if (s.inst) {
-        const def = s.inst.def;
-        def.entities = ents; def.terrain = data; made = s.inst;
+      bakeTerrain(ents, data, editor.model);
+      if (active.inst) {
+        const def = active.inst.definition;
+        def.entities = ents; def.terrain = data; made = active.inst;
       } else {
-        const def = ed.model.newDefinition(ed.model.uniqueDefName('Gelände'), false, ents); def.terrain = data;
-        const local = s.origin.clone().applyMatrix4(ed.contextInverse);
-        made = ed.entities.addInstance(def, new THREE.Matrix4().makeTranslation(local.x, local.y, local.z), 'Gelände');
-        if (s.srcFace) {
+        const def = editor.model.newDefinition(editor.model.uniqueDefName('Gelände'), false, ents); def.terrain = data;
+        const local = active.origin.clone().applyMatrix4(editor.contextInverse);
+        made = editor.entities.addInstance(def, new THREE.Matrix4().makeTranslation(local.x, local.y, local.z), 'Gelände');
+        if (active.srcFace) {
           // the flat face is replaced by the terrain (edges that only bounded it go too)
-          const { ents: E, id } = s.srcFace; const f = E.faces.get(id);
-          if (f) { const edges = E.faceEdges(f); E.removeFace(id); for (const e of edges) if (!E.facesOfEdge(e.id).length) E.eraseEdge(e.id, false); E.removeOrphanVertices(); }
+          const { ents: entities, id } = active.srcFace; const face = entities.faces.get(id);
+          if (face) { const edges = entities.faceEdges(face); entities.removeFace(id); for (const edge of edges) if (!entities.facesOfEdge(edge.id).length) entities.eraseEdge(edge.id, false); entities.removeOrphanVertices(); }
         }
       }
     });
-  } catch { if (s.inst) s.inst.hidden = true; return; }
-  s.inst = null; // already visible again
+  } catch { if (active.inst) active.inst.hidden = true; return; }
+  active.inst = null; // already visible again
   end();
-  if (made) ed.select([{ kind: 'instance', id: (made as Instance).id }]);
-  if (switchTool) ed.setTool('select');
-  ed.toast('Gelände übernommen – Strg+Z macht es rückgängig');
-}
+  if (made) editor.select([{ kind: 'instance', id: (made as Instance).id }]);
+  if (switchTool) editor.setTool('select');
+  editor.toast('Gelände übernommen – Strg+Z macht es rückgängig');
+};
 
 /** Throws the sculpting away. */
-export function discardTerrain() {
-  if (!S) { terrainUi.chooser = false; return; }
-  const ed = S.ed; end(); ed.setTool('select'); ed.toast('Gelände verworfen');
-}
-export function closeChooser(ed: Editor) { terrainUi.chooser = false; if (!S && ed.ui.tool === 'terrain') ed.setTool('select'); }
+export const discardTerrain = () => {
+  if (!current) { terrainUi.chooser = false; return; }
+  const editor = current.editor; end(); editor.setTool('select'); editor.toast('Gelände verworfen');
+};
+export const closeChooser = (editor: Editor) => { terrainUi.chooser = false; if (!current && editor.ui.tool === 'terrain') editor.setTool('select'); };
 
 // ------------------------------------------------------------------ editing helpers (used by tool + panel)
-export function pushUndo() { if (!S) return; S.undo.push(S.data.h.slice()); if (S.undo.length > 60) S.undo.shift(); terrainUi.canUndo = true; }
-export function undoStroke() {
-  if (!S || !S.undo.length) return false;
-  S.data.h = S.undo.pop()!; terrainUi.canUndo = S.undo.length > 0; syncGeometry(); return true;
-}
-export function generate(kind: 'hills' | 'mountains' | 'flat') {
-  if (!S) return; pushUndo(); const d = S.data; const L = Math.max(d.w, d.d);
-  if (kind === 'flat') d.h.fill(0);
-  else if (kind === 'hills') generateHills(d, { height: L * 0.06, scale: L / 4 });
-  else generateHills(d, { height: L * 0.25, scale: L / 2.5 });
+export const pushUndo = () => { if (!current) return; current.undo.push(current.data.heights.slice()); if (current.undo.length > 60) current.undo.shift(); terrainUi.canUndo = true; };
+export const undoStroke = () => {
+  if (!current || !current.undo.length) return false;
+  current.data.heights = current.undo.pop()!; terrainUi.canUndo = current.undo.length > 0; syncGeometry(); return true;
+};
+export const generate = (kind: 'hills' | 'mountains' | 'flat') => {
+  if (!current) return; pushUndo(); const terrain = current.data; const extent = Math.max(terrain.width, terrain.depth);
+  if (kind === 'flat') terrain.heights.fill(0);
+  else if (kind === 'hills') generateHills(terrain, { height: extent * 0.06, scale: extent / 4 });
+  else generateHills(terrain, { height: extent * 0.25, scale: extent / 2.5 });
   syncGeometry();
-}
+};
 
 /** World hit point on the terrain under the mouse (null when the cursor is off the terrain). */
-export function hitTerrain(x: number, y: number): THREE.Vector3 | null {
-  if (!S) return null;
-  const rc = new THREE.Raycaster(); rc.ray.copy(S.ed.viewer.ray(x, y));
-  S.mesh.updateMatrixWorld();
-  const h = rc.intersectObject(S.mesh, false)[0];
-  return h ? h.point.clone() : null;
-}
-export const toGrid = (p: THREE.Vector3) => (S ? { x: p.x - S.origin.x, y: p.y - S.origin.y } : { x: 0, y: 0 });
-export const gridHeight = (x: number, y: number) => (S ? heightAt(S.data, x, y) : 0);
-export const gridToWorld = (x: number, y: number, z: number) => (S ? new THREE.Vector3(S.origin.x + x, S.origin.y + y, S.origin.z + z) : new THREE.Vector3());
-export function dab(x: number, y: number, dt: number, invert: boolean, target: number) {
-  if (!S) return false;
-  return applyBrush(S.data, terrainUi.brush, x, y, dt, invert, target);
-}
-export function stats() {
-  if (!S) return null; const d = S.data; let lo = Infinity, hi = -Infinity; for (const v of d.h) { if (v < lo) lo = v; if (v > hi) hi = v; }
-  const { cx } = cellSize(d);
-  return { w: d.w, d: d.d, nx: d.nx, ny: d.ny, cell: cx, lo, hi };
-}
+export const hitTerrain = (x: number, y: number): THREE.Vector3 | null => {
+  if (!current) return null;
+  const raycaster = new THREE.Raycaster(); raycaster.ray.copy(current.editor.viewer.ray(x, y));
+  current.mesh.updateMatrixWorld();
+  const hit = raycaster.intersectObject(current.mesh, false)[0];
+  return hit ? hit.point.clone() : null;
+};
+export const toGrid = (point: THREE.Vector3) => (current ? { x: point.x - current.origin.x, y: point.y - current.origin.y } : { x: 0, y: 0 });
+export const gridHeight = (x: number, y: number) => (current ? heightAt(current.data, x, y) : 0);
+export const gridToWorld = (x: number, y: number, z: number) => (current ? new THREE.Vector3(current.origin.x + x, current.origin.y + y, current.origin.z + z) : new THREE.Vector3());
+export const dab = (x: number, y: number, elapsed: number, invert: boolean, target: number) => {
+  if (!current) return false;
+  return applyBrush(current.data, terrainUi.brush, x, y, elapsed, invert, target);
+};
+export const stats = () => {
+  if (!current) return null; const terrain = current.data; let lowest = Infinity, highest = -Infinity; for (const height of terrain.heights) { if (height < lowest) lowest = height; if (height > highest) highest = height; }
+  const { cx: cellX } = cellSize(terrain);
+  return { width: terrain.width, depth: terrain.depth, columns: terrain.columns, rows: terrain.rows, cellSize: cellX, lowest, highest };
+};

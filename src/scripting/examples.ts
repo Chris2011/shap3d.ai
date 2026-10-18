@@ -35,8 +35,8 @@ s3d.zoomExtents();
     id: 'stairs', name: 'Treppe (Schleife)', lang: 'js', description: 'Stufen per for-Schleife, Maße als Variablen.',
     code: `// Gerade Treppe: Profil per Schleife berechnen, dann seitlich extrudieren
 const stufen = 12;
-const steigung = s3d.cm(17.5);   // Höhe je Stufe
-const auftritt = s3d.cm(28);     // Tiefe je Stufe
+const steigung = s3d.centimeters(17.5);   // Höhe je Stufe
+const auftritt = s3d.centimeters(28);     // Tiefe je Stufe
 const breite = 1.1;
 
 s3d.material('Eiche', '#c19a6b');

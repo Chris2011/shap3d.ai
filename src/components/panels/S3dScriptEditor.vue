@@ -117,7 +117,7 @@ const run = () => {
     if (size == null || size <= 0) { out.value = [{ kind: 'error', text: `✗ Ungültige Größe: ${objSize.value}` }]; return; }
     result = importObj(editor, code.value, { size, yUp: objYUp.value, smooth: objSmooth.value || 0, name: currentSaved.value ?? 'Mesh' });
   } else result = lang.value === 'json' ? runJson(editor, code.value) : runScript(editor, code.value);
-  lastMs.value = result.ms;
+  lastMs.value = result.durationMs;
   out.value = [...result.logs];
   if (result.ok) out.value.push({ kind: 'log', text: `✓ Fertig – ${editor.model.root.stats().faces} Flächen im Modell.` });
   else out.value.push({ kind: 'error', text: '✗ ' + result.error });
@@ -141,7 +141,7 @@ const tryExample = (example: string) => {
 ${example}
 });${place}
 s3d.zoomExtents();`, 'API-Beispiel');
-  lastMs.value = result.ms;
+  lastMs.value = result.durationMs;
   out.value = [...result.logs, result.ok ? { kind: 'log', text: '✓ Beispiel gebaut – Strg+Z macht es rückgängig.' } : { kind: 'error', text: '✗ ' + result.error }];
 };
 const save = async () => {

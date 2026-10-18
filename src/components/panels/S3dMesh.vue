@@ -45,7 +45,7 @@
         <button class="s3d-btn" @click="less()">▼ Weniger Polygone</button>
         <label class="flex flex-[1_1_100%] items-center gap-1.5 text-ink-2">auf <input class="min-w-0 flex-1" v-model.number="keep" type="range" min="10" max="90" step="5" /> <b>{{ keep }} %</b></label>
       </div>
-      <p class="mt-2 mb-0 text-[0.71875rem]/[1.45] text-ink-2">Wirkt auf die oberste Ebene der Gruppe/Komponente{{ inst.def.isComponent ? ' – und damit auf alle Kopien' : '' }}. Rückgängig mit Strg+Z.</p>
+      <p class="mt-2 mb-0 text-[0.71875rem]/[1.45] text-ink-2">Wirkt auf die oberste Ebene der Gruppe/Komponente{{ inst.definition.isComponent ? ' – und damit auf alle Kopien' : '' }}. Rückgängig mit Strg+Z.</p>
     </template>
 
     <p v-if="!res && !inst" class="mt-2 mb-0 text-[0.71875rem]/[1.45] text-ink-2">Wähle eine Gruppe, Komponente oder einen gezeichneten Kreis aus, um die Polygonzahl zu ändern. Lose Geometrie vorher mit „Gruppe erstellen“ zusammenfassen.</p>
@@ -84,11 +84,11 @@ const stats = useModel<MeshStats>(() => {
   if (!selection.length) return meshStats(editor.model.root);
   const parts: MeshStats[] = [];
   const faces = selection.filter(entityRef => entityRef.kind === 'face'), edges = selection.filter(entityRef => entityRef.kind === 'edge');
-  for (const entityRef of selection.filter(entityRef => entityRef.kind === 'instance')) { const instance = editor.entities.instances.get(entityRef.id); if (instance) parts.push(meshStats(instance.def.entities)); }
+  for (const entityRef of selection.filter(entityRef => entityRef.kind === 'instance')) { const instance = editor.entities.instances.get(entityRef.id); if (instance) parts.push(meshStats(instance.definition.entities)); }
   if (faces.length || edges.length) {
     const verts = new Set<number>(); let tris = 0;
     for (const entityRef of faces) { const face = editor.entities.faces.get(entityRef.id); if (!face) continue; [...face.outer, ...face.holes.flat()].forEach(vertex => verts.add(vertex)); tris += editor.entities.faceTriangles(face).length / 3; }
-    for (const entityRef of edges) { const edge = editor.entities.edges.get(entityRef.id); if (edge) { verts.add(edge.a); verts.add(edge.b); } }
+    for (const entityRef of edges) { const edge = editor.entities.edges.get(entityRef.id); if (edge) { verts.add(edge.start); verts.add(edge.end); } }
     parts.push({ vertices: verts.size, edges: edges.length, faces: faces.length, triangles: tris, softEdges: edges.filter(entityRef => editor.entities.edges.get(entityRef.id)?.soft).length });
   }
   return sumStats(parts);
@@ -98,7 +98,7 @@ const res = useModel(() => {
   
   if (inst.value) {
     const resolution = resolutionOf(inst.value); if (!resolution) return null;
-    return { ...resolution, unit: resolution.res, presets: resolution.res === 'Seiten' ? [3, 4, 5, 6, 8, 12] : [8, 12, 16, 24, 32, 48, 64], hint: 'Das Objekt wird mit der neuen Auflösung exakt neu berechnet.' };
+    return { ...resolution, unit: resolution.option, presets: resolution.option === 'Seiten' ? [3, 4, 5, 6, 8, 12] : [8, 12, 16, 24, 32, 48, 64], hint: 'Das Objekt wird mit der neuen Auflösung exakt neu berechnet.' };
   }
   if (face.value) {
     const circle = detectCircle(editor.entities, face.value); if (!circle) return null;

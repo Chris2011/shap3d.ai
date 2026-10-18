@@ -18,28 +18,28 @@ const DEFAULTS: NavSettings = {
   sensitivity: { orbit: 1, pan: 1, zoom: 1 },
 };
 
-function load(): NavSettings {
+const load = (): NavSettings => {
   try {
-    const j = JSON.parse(localStorage.getItem(KEY) ?? 'null');
-    if (j) return { ...DEFAULTS, ...j, invert: { ...DEFAULTS.invert, ...j.invert }, sensitivity: { ...DEFAULTS.sensitivity, ...j.sensitivity } };
+    const stored = JSON.parse(localStorage.getItem(KEY) ?? 'null');
+    if (stored) return { ...DEFAULTS, ...stored, invert: { ...DEFAULTS.invert, ...stored.invert }, sensitivity: { ...DEFAULTS.sensitivity, ...stored.sensitivity } };
   } catch { /* storage unavailable */ }
   return structuredClone(DEFAULTS);
-}
+};
 
 export const nav = reactive<NavSettings>(load());
-watch(nav, v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* ignore */ } }, { deep: true });
+watch(nav, settings => { try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch { /* ignore */ } }, { deep: true });
 
 /**
  * Which action a wheel / two-finger gesture triggers.
  * Mouse: wheel = zoom, Shift = orbit, Ctrl = pan.
  * Trackpad: swipe = chosen action, Shift and Ctrl give the other two (pinch arrives as Ctrl).
  */
-export function wheelAction(shift: boolean, ctrl: boolean): NavAction {
+export const wheelAction = (shift: boolean, ctrl: boolean): NavAction => {
   if (nav.device === 'mouse') return shift ? 'orbit' : ctrl ? 'pan' : 'zoom';
   const others: Record<NavAction, [NavAction, NavAction]> = { pan: ['orbit', 'zoom'], orbit: ['pan', 'zoom'], zoom: ['orbit', 'pan'] };
   if (shift) return others[nav.swipe][0];
   if (ctrl) return others[nav.swipe][1];
   return nav.swipe;
-}
+};
 
 export const ACTION_LABEL: Record<NavAction, string> = { orbit: 'Orbit', pan: 'Schwenken', zoom: 'Zoomen' };

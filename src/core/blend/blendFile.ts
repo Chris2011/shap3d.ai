@@ -48,144 +48,144 @@ export class BlendFile {
     }
 
     // block headers
-    const p = this.ptrSize, le = this.little, v = this.view;
+    const pointerSize = this.ptrSize, littleEndian = this.little, view = this.view;
     for (;;) {
       if (offset + 16 > bytes.length) break;
       const code = String.fromCharCode(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]).replace(/\0+$/, '');
       let sdna: number, addr: string, size: number, count: number, hlen: number;
       if (large) {
-        sdna = v.getInt32(offset + 4, le); addr = v.getBigUint64(offset + 8, le).toString(16);
-        size = Number(v.getBigInt64(offset + 16, le)); count = Number(v.getBigInt64(offset + 24, le)); hlen = 32;
+        sdna = view.getInt32(offset + 4, littleEndian); addr = view.getBigUint64(offset + 8, littleEndian).toString(16);
+        size = Number(view.getBigInt64(offset + 16, littleEndian)); count = Number(view.getBigInt64(offset + 24, littleEndian)); hlen = 32;
       } else {
-        size = v.getInt32(offset + 4, le);
-        addr = p === 8 ? v.getBigUint64(offset + 8, le).toString(16) : v.getUint32(offset + 8, le).toString(16);
-        sdna = v.getInt32(offset + 8 + p, le); count = v.getInt32(offset + 12 + p, le); hlen = 16 + p;
+        size = view.getInt32(offset + 4, littleEndian);
+        addr = pointerSize === 8 ? view.getBigUint64(offset + 8, littleEndian).toString(16) : view.getUint32(offset + 8, littleEndian).toString(16);
+        sdna = view.getInt32(offset + 8 + pointerSize, littleEndian); count = view.getInt32(offset + 12 + pointerSize, littleEndian); hlen = 16 + pointerSize;
       }
-      const b: BlendBlock = { code, sdna, addr, offset: offset + hlen, size, count };
+      const block: BlendBlock = { code, sdna, addr, offset: offset + hlen, size, count };
       if (code === 'ENDB') break;
       // a broken or truncated file must not loop forever or read past the end
       if (!(size >= 0) || offset + hlen + size > bytes.length) break;
-      this.blocks.push(b); this.byAddr.set(addr, b);
+      this.blocks.push(block); this.byAddr.set(addr, block);
       offset += hlen + size;
     }
-    const dna = this.blocks.find(b => b.code === 'DNA1');
+    const dna = this.blocks.find(block => block.code === 'DNA1');
     if (!dna) throw new Error('Die Datei enthält keine Strukturbeschreibung (DNA1).');
     this.readDna(dna);
   }
 
   // ------------------------------------------------------------ SDNA catalogue
-  private readDna(b: BlendBlock) {
-    const v = this.view, le = this.little; let o = b.offset;
-    const tag = () => { const t = String.fromCharCode(...this.bytes.subarray(o, o + 4)); o += 4; return t; };
+  private readDna(block: BlendBlock) {
+    const view = this.view, littleEndian = this.little; let cursor = block.offset;
+    const tag = () => { const text = String.fromCharCode(...this.bytes.subarray(cursor, cursor + 4)); cursor += 4; return text; };
     // sections are 4-byte aligned relative to the start of the DNA block, not to the file
-    const align = () => { o = b.offset + ((o - b.offset + 3) & ~3); };
-    const end = b.offset + b.size;
-    const strings = (n: number) => { if (n < 0 || n > b.size) throw new Error('Ungültige Strukturbeschreibung'); const out: string[] = []; for (let i = 0; i < n && o < end; i++) { let e = o; while (this.bytes[e]) e++; out.push(String.fromCharCode(...this.bytes.subarray(o, e))); o = e + 1; } return out; };
+    const align = () => { cursor = block.offset + ((cursor - block.offset + 3) & ~3); };
+    const end = block.offset + block.size;
+    const strings = (count: number) => { if (count < 0 || count > block.size) throw new Error('Ungültige Strukturbeschreibung'); const out: string[] = []; for (let i = 0; i < count && cursor < end; i++) { let scan = cursor; while (this.bytes[scan]) scan++; out.push(String.fromCharCode(...this.bytes.subarray(cursor, scan))); cursor = scan + 1; } return out; };
     if (tag() !== 'SDNA') throw new Error('Ungültige Strukturbeschreibung');
-    tag(); const nNames = v.getInt32(o, le); o += 4; const names = strings(nNames); align();
-    tag(); const nTypes = v.getInt32(o, le); o += 4; const types = strings(nTypes); align();
-    tag(); const lens: number[] = []; for (let i = 0; i < nTypes; i++) { lens.push(v.getInt16(o, le)); o += 2; } align();
-    types.forEach((t, i) => this.typeSize.set(t, lens[i]));
-    tag(); const nStructs = v.getInt32(o, le); o += 4;
+    tag(); const nNames = view.getInt32(cursor, littleEndian); cursor += 4; const names = strings(nNames); align();
+    tag(); const nTypes = view.getInt32(cursor, littleEndian); cursor += 4; const types = strings(nTypes); align();
+    tag(); const lens: number[] = []; for (let i = 0; i < nTypes; i++) { lens.push(view.getInt16(cursor, littleEndian)); cursor += 2; } align();
+    types.forEach((typeName, i) => this.typeSize.set(typeName, lens[i]));
+    tag(); const nStructs = view.getInt32(cursor, littleEndian); cursor += 4;
     for (let i = 0; i < nStructs; i++) {
-      const type = types[v.getInt16(o, le)]; const nf = v.getInt16(o + 2, le); o += 4;
+      const type = types[view.getInt16(cursor, littleEndian)]; const fieldCount = view.getInt16(cursor + 2, littleEndian); cursor += 4;
       const fields = new Map<string, DnaField>(); let off = 0;
-      for (let f = 0; f < nf; f++) {
-        const ft = types[v.getInt16(o, le)], fname = names[v.getInt16(o + 2, le)]; o += 4;
+      for (let fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
+        const fieldType = types[view.getInt16(cursor, littleEndian)], fname = names[view.getInt16(cursor + 2, littleEndian)]; cursor += 4;
         const pointer = fname.startsWith('*') || fname.startsWith('(*');
-        const dims = [...fname.matchAll(/\[(\d+)\]/g)].map(m => parseInt(m[1], 10));
-        const n = dims.reduce((a, d) => a * d, 1);
-        const size = (pointer ? this.ptrSize : (this.typeSize.get(ft) ?? 0)) * n;
+        const dims = [...fname.matchAll(/\[(\d+)\]/g)].map(match => parseInt(match[1], 10));
+        const elementCount = dims.reduce((product, dim) => product * dim, 1);
+        const size = (pointer ? this.ptrSize : (this.typeSize.get(fieldType) ?? 0)) * elementCount;
         const bare = fname.replace(/^\(?\*+/, '').replace(/\)\(.*$/, '').replace(/\[.*$/, '');
-        fields.set(bare, { type: ft, name: fname, offset: off, size, pointer, dims });
+        fields.set(bare, { type: fieldType, name: fname, offset: off, size, pointer, dims });
         off += size;
       }
-      const s: DnaStruct = { type, size: this.typeSize.get(type) ?? off, fields };
-      this.structs.push(s); this.structByType.set(type, s);
+      const dnaStruct: DnaStruct = { type, size: this.typeSize.get(type) ?? off, fields };
+      this.structs.push(dnaStruct); this.structByType.set(type, dnaStruct);
     }
   }
 
   // ------------------------------------------------------------ access
   block(addr: string | null | undefined) { return addr ? this.byAddr.get(addr) : undefined; }
-  blocksOf(code: string) { return this.blocks.filter(b => b.code === code); }
+  blocksOf(code: string) { return this.blocks.filter(block => block.code === code); }
   /** Struct reader for element `i` of a block (blocks of struct type), or at an explicit struct type. */
-  struct(b: BlendBlock, i = 0, type?: string): BStruct | null {
-    const s = type ? this.structByType.get(type) : this.structs[b.sdna];
-    if (!s) return null;
-    return new BStruct(this, s, b.offset + i * s.size);
+  struct(block: BlendBlock, i = 0, type?: string): BStruct | null {
+    const dnaStruct = type ? this.structByType.get(type) : this.structs[block.sdna];
+    if (!dnaStruct) return null;
+    return new BStruct(this, dnaStruct, block.offset + i * dnaStruct.size);
   }
-  readPointer(at: number): string | null {
-    const v = this.ptrSize === 8 ? this.view.getBigUint64(at, this.little) : BigInt(this.view.getUint32(at, this.little));
-    return v === 0n ? null : v.toString(16);
+  readPointer(offset: number): string | null {
+    const value = this.ptrSize === 8 ? this.view.getBigUint64(offset, this.little) : BigInt(this.view.getUint32(offset, this.little));
+    return value === 0n ? null : value.toString(16);
   }
   /** Zero-terminated string stored in its own block (char* fields, e.g. Attribute.name in Blender 5). */
   cstring(addr: string | null): string {
-    const b = this.block(addr); if (!b) return '';
-    let e = b.offset; const end = b.offset + b.size; while (e < end && this.bytes[e]) e++;
-    return new TextDecoder().decode(this.bytes.subarray(b.offset, e));
+    const block = this.block(addr); if (!block) return '';
+    let scan = block.offset; const end = block.offset + block.size; while (scan < end && this.bytes[scan]) scan++;
+    return new TextDecoder().decode(this.bytes.subarray(block.offset, scan));
   }
   /** Array of pointers stored in a block (e.g. Mesh.mat → Material*[]). */
-  pointerArray(addr: string | null, n?: number): (string | null)[] {
-    const b = this.block(addr); if (!b) return [];
-    const max = Math.floor(b.size / this.ptrSize);
-    const count = Math.min(n ?? max, max); // never trust a count beyond the block
-    return Array.from({ length: count }, (_, i) => this.readPointer(b.offset + i * this.ptrSize));
+  pointerArray(addr: string | null, itemCount?: number): (string | null)[] {
+    const block = this.block(addr); if (!block) return [];
+    const max = Math.floor(block.size / this.ptrSize);
+    const count = Math.min(itemCount ?? max, max); // never trust a count beyond the block
+    return Array.from({ length: count }, (_, i) => this.readPointer(block.offset + i * this.ptrSize));
   }
   floats(addr: string | null): Float32Array | null {
-    const b = this.block(addr); if (!b) return null;
-    const out = new Float32Array(Math.floor(b.size / 4)); for (let i = 0; i < out.length; i++) out[i] = this.view.getFloat32(b.offset + i * 4, this.little);
+    const block = this.block(addr); if (!block) return null;
+    const out = new Float32Array(Math.floor(block.size / 4)); for (let i = 0; i < out.length; i++) out[i] = this.view.getFloat32(block.offset + i * 4, this.little);
     return out;
   }
   ints(addr: string | null): Int32Array | null {
-    const b = this.block(addr); if (!b) return null;
-    const out = new Int32Array(Math.floor(b.size / 4)); for (let i = 0; i < out.length; i++) out[i] = this.view.getInt32(b.offset + i * 4, this.little);
+    const block = this.block(addr); if (!block) return null;
+    const out = new Int32Array(Math.floor(block.size / 4)); for (let i = 0; i < out.length; i++) out[i] = this.view.getInt32(block.offset + i * 4, this.little);
     return out;
   }
 }
 
 /** One struct instance inside the file: typed field access by name. */
 export class BStruct {
-  constructor(readonly file: BlendFile, readonly def: DnaStruct, readonly at: number) {}
+  constructor(readonly file: BlendFile, readonly def: DnaStruct, readonly base: number) {}
   has(name: string) { return this.def.fields.has(name); }
-  private f(name: string) { return this.def.fields.get(name); }
+  private fieldOf(name: string) { return this.def.fields.get(name); }
   int(name: string, fallback = 0): number {
-    const f = this.f(name); if (!f || f.pointer) return fallback;
-    const v = this.file.view, le = this.file.little, o = this.at + f.offset;
-    switch (f.type) {
-      case 'char': case 'uchar': case 'int8_t': case 'uint8_t': return f.type === 'char' || f.type === 'int8_t' ? v.getInt8(o) : v.getUint8(o);
-      case 'short': case 'int16_t': return v.getInt16(o, le);
-      case 'ushort': case 'uint16_t': return v.getUint16(o, le);
-      case 'int': case 'int32_t': return v.getInt32(o, le);
-      case 'uint': case 'uint32_t': return v.getUint32(o, le);
-      case 'int64_t': case 'uint64_t': return Number(v.getBigInt64(o, le));
+    const field = this.fieldOf(name); if (!field || field.pointer) return fallback;
+    const view = this.file.view, littleEndian = this.file.little, offset = this.base + field.offset;
+    switch (field.type) {
+      case 'char': case 'uchar': case 'int8_t': case 'uint8_t': return field.type === 'char' || field.type === 'int8_t' ? view.getInt8(offset) : view.getUint8(offset);
+      case 'short': case 'int16_t': return view.getInt16(offset, littleEndian);
+      case 'ushort': case 'uint16_t': return view.getUint16(offset, littleEndian);
+      case 'int': case 'int32_t': return view.getInt32(offset, littleEndian);
+      case 'uint': case 'uint32_t': return view.getUint32(offset, littleEndian);
+      case 'int64_t': case 'uint64_t': return Number(view.getBigInt64(offset, littleEndian));
       default: return fallback;
     }
   }
   float(name: string, fallback = 0): number {
-    const f = this.f(name); if (!f) return fallback;
-    return f.type === 'double' ? this.file.view.getFloat64(this.at + f.offset, this.file.little) : this.file.view.getFloat32(this.at + f.offset, this.file.little);
+    const field = this.fieldOf(name); if (!field) return fallback;
+    return field.type === 'double' ? this.file.view.getFloat64(this.base + field.offset, this.file.little) : this.file.view.getFloat32(this.base + field.offset, this.file.little);
   }
   floatArray(name: string): number[] | null {
-    const f = this.f(name); if (!f || (f.type !== 'float' && f.type !== 'double')) return null;
-    const n = f.dims.reduce((a, d) => a * d, 1), w = f.type === 'double' ? 8 : 4;
-    return Array.from({ length: n }, (_, i) => (w === 8 ? this.file.view.getFloat64(this.at + f.offset + i * 8, this.file.little) : this.file.view.getFloat32(this.at + f.offset + i * 4, this.file.little)));
+    const field = this.fieldOf(name); if (!field || (field.type !== 'float' && field.type !== 'double')) return null;
+    const count = field.dims.reduce((product, dim) => product * dim, 1), byteWidth = field.type === 'double' ? 8 : 4;
+    return Array.from({ length: count }, (_, i) => (byteWidth === 8 ? this.file.view.getFloat64(this.base + field.offset + i * 8, this.file.little) : this.file.view.getFloat32(this.base + field.offset + i * 4, this.file.little)));
   }
   str(name: string): string {
-    const f = this.f(name); if (!f) return '';
-    const b = this.file.bytes; let e = this.at + f.offset; const end = e + f.size; const s = e;
-    while (e < end && b[e]) e++;
-    return new TextDecoder().decode(b.subarray(s, e));
+    const field = this.fieldOf(name); if (!field) return '';
+    const bytes = this.file.bytes; let scan = this.base + field.offset; const end = scan + field.size; const begin = scan;
+    while (scan < end && bytes[scan]) scan++;
+    return new TextDecoder().decode(bytes.subarray(begin, scan));
   }
-  ptr(name: string): string | null { const f = this.f(name); return f && f.pointer ? this.file.readPointer(this.at + f.offset) : null; }
+  ptr(name: string): string | null { const field = this.fieldOf(name); return field && field.pointer ? this.file.readPointer(this.base + field.offset) : null; }
   /** Embedded struct field (e.g. Object.id, Mesh.vdata). */
   sub(name: string): BStruct | null {
-    const f = this.f(name); if (!f || f.pointer) return null;
-    const s = this.file.structByType.get(f.type); return s ? new BStruct(this.file, s, this.at + f.offset) : null;
+    const field = this.fieldOf(name); if (!field || field.pointer) return null;
+    const dnaStruct = this.file.structByType.get(field.type); return dnaStruct ? new BStruct(this.file, dnaStruct, this.base + field.offset) : null;
   }
   /** Follows a pointer field to the struct it points at (struct type taken from the field). */
   deref(name: string): BStruct | null {
-    const f = this.f(name); if (!f || !f.pointer) return null;
-    const b = this.file.block(this.file.readPointer(this.at + f.offset)); if (!b) return null;
-    return this.file.struct(b, 0, f.type);
+    const field = this.fieldOf(name); if (!field || !field.pointer) return null;
+    const block = this.file.block(this.file.readPointer(this.base + field.offset)); if (!block) return null;
+    return this.file.struct(block, 0, field.type);
   }
 }

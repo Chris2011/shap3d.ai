@@ -18,59 +18,59 @@ export interface MeshOptions {
 }
 
 /** True if the text looks like an OBJ mesh rather than a script. */
-export function looksLikeObj(text: string): boolean {
+export const looksLikeObj = (text: string): boolean => {
   return (text.match(/^\s*v\s+-?[\d.]/gm) ?? []).length >= 3 && /^\s*f\s+\d/m.test(text) && !/\b(s3d|fw|su)\./.test(text);
-}
+};
 
-export function parseObj(text: string): ObjMesh {
+export const parseObj = (text: string): ObjMesh => {
   const verts: THREE.Vector3[] = []; const faces: number[][] = [];
   for (const line of text.split(/\r?\n/)) {
-    const p = line.trim().split(/\s+/);
-    if (p[0] === 'v' && p.length >= 4) verts.push(new THREE.Vector3(+p[1], +p[2], +p[3]));
-    else if (p[0] === 'f' && p.length >= 4) faces.push(p.slice(1).map(x => parseInt(x.split('/')[0], 10)).map(i => (i < 0 ? verts.length + i : i - 1)));
+    const parts = line.trim().split(/\s+/);
+    if (parts[0] === 'v' && parts.length >= 4) verts.push(new THREE.Vector3(+parts[1], +parts[2], +parts[3]));
+    else if (parts[0] === 'f' && parts.length >= 4) faces.push(parts.slice(1).map(x => parseInt(x.split('/')[0], 10)).map(i => (i < 0 ? verts.length + i : i - 1)));
   }
   return { verts, faces };
-}
+};
 
 /** Builds the mesh into `ents`: scaled to `size`, centred in X/Y, standing on z = 0. Returns the face count. */
-export function buildMesh(ents: Entities, mesh: ObjMesh, opts: MeshOptions = {}): number {
+export const buildMesh = (ents: Entities, mesh: ObjMesh, opts: MeshOptions = {}): number => {
   const { size = 1, yUp = true, smooth = 30 } = opts;
   if (!mesh.verts.length || !mesh.faces.length) throw new Error('Kein Mesh gefunden – erwartet werden Zeilen wie „v 1 2 3“ und „f 1 2 3“.');
-  if (mesh.verts.some(v => !isFinite(v.x + v.y + v.z))) throw new Error('Ungültige Koordinaten im Mesh');
-  const pts = mesh.verts.map(v => (yUp ? new THREE.Vector3(v.x, -v.z, v.y) : v.clone()));
-  const bb = new THREE.Box3().setFromPoints(pts); const sz = bb.getSize(new THREE.Vector3());
-  const k = size / Math.max(sz.x, sz.y, sz.z, 1e-9);
-  const c = bb.getCenter(new THREE.Vector3());
-  const ids = pts.map(v => ents.addVertex(new THREE.Vector3((v.x - c.x) * k, (v.y - c.y) * k, (v.z - bb.min.z) * k)));
+  if (mesh.verts.some(vertex => !isFinite(vertex.x + vertex.y + vertex.z))) throw new Error('Ungültige Koordinaten im Mesh');
+  const pts = mesh.verts.map(vertex => (yUp ? new THREE.Vector3(vertex.x, -vertex.z, vertex.y) : vertex.clone()));
+  const box = new THREE.Box3().setFromPoints(pts); const extent = box.getSize(new THREE.Vector3());
+  const scale = size / Math.max(extent.x, extent.y, extent.z, 1e-9);
+  const center = box.getCenter(new THREE.Vector3());
+  const ids = pts.map(point => ents.addVertex(new THREE.Vector3((point.x - center.x) * scale, (point.y - center.y) * scale, (point.z - box.min.z) * scale)));
   let made = 0;
-  for (const f of mesh.faces) {
-    if (f.some(i => !(i >= 0 && i < ids.length))) continue;
-    const loop = f.map(i => ids[i]).filter((x, i, a) => x !== a[(i + 1) % a.length]);
+  for (const faceIndices of mesh.faces) {
+    if (faceIndices.some(i => !(i >= 0 && i < ids.length))) continue;
+    const loop = faceIndices.map(i => ids[i]).filter((x, i, all) => x !== all[(i + 1) % all.length]);
     if (new Set(loop).size < 3) continue;
     if (ents.createFaceRaw(loop)) made++;
   }
   ents.mergeCoplanar([...ents.edges.keys()]);
   if (smooth > 0) ents.autoSoften([...ents.edges.keys()], smooth);
   return made;
-}
+};
 
 /** Import OBJ text as a component placed next to the existing model (one undo step). */
-export function importObj(ed: Editor, text: string, opts: MeshOptions & { name?: string; label?: string } = {}): RunResult {
-  const t0 = performance.now();
+export const importObj = (editor: Editor, text: string, opts: MeshOptions & { name?: string; label?: string } = {}): RunResult => {
+  const startedAt = performance.now();
   try {
     const mesh = parseObj(text);
     const ents = new Entities();
     const made = buildMesh(ents, mesh, opts);
     const size = opts.size ?? 1;
-    ed.commit(opts.label ?? 'Mesh einfügen', () => {
-      const def = ed.model.newDefinition(ed.model.uniqueDefName(opts.name ?? 'Mesh'), true, ents);
-      const mb = ed.model.bounds(); const x = mb.isEmpty() ? 0 : mb.max.x + 0.5 + size / 2;
-      const inst = ed.entities.addInstance(def, new THREE.Matrix4().makeTranslation(x, 0, 0), '');
-      ed.select([{ kind: 'instance', id: inst.id }]);
+    editor.commit(opts.label ?? 'Mesh einfügen', () => {
+      const def = editor.model.newDefinition(editor.model.uniqueDefName(opts.name ?? 'Mesh'), true, ents);
+      const box = editor.model.bounds(); const x = box.isEmpty() ? 0 : box.max.x + 0.5 + size / 2;
+      const inst = editor.entities.addInstance(def, new THREE.Matrix4().makeTranslation(x, 0, 0), '');
+      editor.select([{ kind: 'instance', id: inst.id }]);
     });
-    ed.zoomExtents();
-    return { ok: true, logs: [{ kind: 'log', text: `${mesh.verts.length} Ecken, ${made} Flächen importiert` }], ms: performance.now() - t0 };
-  } catch (e: any) {
-    return { ok: false, logs: [], error: e?.message ?? String(e), ms: performance.now() - t0 };
+    editor.zoomExtents();
+    return { ok: true, logs: [{ kind: 'log', text: `${mesh.verts.length} Ecken, ${made} Flächen importiert` }], durationMs: performance.now() - startedAt };
+  } catch (error: any) {
+    return { ok: false, logs: [], error: error?.message ?? String(error), durationMs: performance.now() - startedAt };
   }
-}
+};

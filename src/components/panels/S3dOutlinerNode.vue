@@ -2,7 +2,7 @@
   <div v-if="visible">
     <div class="flex cursor-pointer items-center gap-1 rounded-[3px] px-1.5 py-0.75" :class="[selected ? 'bg-active' : 'hover:bg-hover', inContext && 'font-semibold text-blue']" :style="{ paddingLeft: depth * 0.875 + 'rem' }" @click="click" @dblclick="dbl">
       <span class="w-3 text-[0.6875rem] text-[#6b7680]" @click.stop="open = !open">{{ node.children.length ? (open ? '▾' : '▸') : '' }}</span>
-      <S3dIcon :name="node.inst.def.isComponent ? 'component' : 'group'" :size="16" />
+      <S3dIcon :name="node.inst.definition.isComponent ? 'component' : 'group'" :size="16" />
       <span class="flex-1 truncate" :class="node.inst.hidden && 'text-[#9aa3ab] italic'">{{ label }}</span>
       <button class="flex bg-transparent px-0.5 opacity-55 hover:opacity-100" :title="node.inst.hidden ? 'Einblenden' : 'Ausblenden'" @click.stop="toggleHidden"><S3dIcon :name="node.inst.hidden ? 'eyeOff' : 'eye'" :size="14" /></button>
     </div>
@@ -20,8 +20,8 @@ import { useModel } from '../../composables/useModel';
 interface ONode { inst: Instance; path: Instance[]; children: ONode[] }
 const props = defineProps<{ node: ONode; depth: number; filter: string }>();
 const editor = useEditor(); const open = ref(true);
-const label = computed(() => { const instance = props.node.inst; return (instance.name ? `${instance.name} ` : '') + `<${instance.def.name}>`; });
-const matches = (candidate: ONode): boolean => !props.filter || (candidate.inst.name + ' ' + candidate.inst.def.name).toLowerCase().includes(props.filter) || candidate.children.some(matches);
+const label = computed(() => { const instance = props.node.inst; return (instance.name ? `${instance.name} ` : '') + `<${instance.definition.name}>`; });
+const matches = (candidate: ONode): boolean => !props.filter || (candidate.inst.name + ' ' + candidate.inst.definition.name).toLowerCase().includes(props.filter) || candidate.children.some(matches);
 const visible = computed(() => matches(props.node));
 const parentPath = computed(() => props.node.path.slice(0, -1));
 const sameContext = () => parentPath.value.length === editor.activePath.length && parentPath.value.every((instance, i) => editor.activePath[i] === instance);

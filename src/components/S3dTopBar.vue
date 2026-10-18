@@ -46,7 +46,7 @@ const menuOpen = ref(false);
 const editing = ref(false); const name = ref(''); const nameInput = ref<HTMLInputElement | null>(null);
 const modelName = useModel(() => editor.model.name);
 const startEdit = () => { name.value = editor.model.name; editing.value = true; nextTick(() => { nameInput.value?.focus(); nameInput.value?.select(); }); };
-const commitName = () => { if (!editing.value) return; editing.value = false; if (name.value.trim()) { editor.model.name = name.value.trim(); editor.ui.saved = false; editor.ui.rev++; } };
+const commitName = () => { if (!editing.value) return; editing.value = false; if (name.value.trim()) { editor.model.name = name.value.trim(); editor.ui.saved = false; editor.ui.revision++; } };
 const run = (id: string) => { runCommand(editor, id); };
 const { open: exportOpen, toggle: toggleExport, close: closeExport } = usePopover(useTemplateRef('exportBox'));
 </script>
