@@ -69,13 +69,13 @@
         <div class="s3d-caption text-muted">Schritt {{ tour.step + 1 }} von {{ STEPS.length }}</div>
         <h2 class="mt-1 mb-1.5 text-[1.1875rem] font-bold text-ink">{{ cur.title }}</h2>
         <p class="text-[0.84375rem]/normal text-ink-2">{{ cur.text }}</p>
-        <ul v-if="cur.tips" class="mt-2.5 list-disc pl-4.5 text-[0.78125rem]/[1.8] text-ink [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-line-2 [&_kbd]:bg-surface-2 [&_kbd]:px-1.25 [&_kbd]:font-mono [&_kbd]:text-[0.6875rem]"><li v-for="t in cur.tips" :key="t" v-html="t"></li></ul>
+        <ul v-if="cur.tips" class="mt-2.5 list-disc pl-4.5 text-[0.78125rem]/[1.8] text-ink [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-line-2 [&_kbd]:bg-surface-2 [&_kbd]:px-1.25 [&_kbd]:font-mono [&_kbd]:text-[0.6875rem]"><li v-for="tip in cur.tips" :key="tip" v-html="tip"></li></ul>
         <button v-if="cur.action" class="s3d-btn small mt-3" @click="cur.action.run()">{{ cur.action.label }}</button>
       </div>
 
       <div class="flex items-center gap-2 px-5.5 pt-3.5 pb-4.5">
         <div class="flex gap-1.5">
-          <button v-for="(s, i) in STEPS" :key="s.title" class="h-2 rounded-full p-0 transition-[width,background-color] duration-200" :class="i === tour.step ? 'w-5.5 rounded bg-brand-deep' : i < tour.step ? 'w-2 bg-[#5fa9bf]' : 'w-2 bg-line-2'" :title="s.title" :aria-label="`Schritt ${i + 1}: ${s.title}`" @click="tour.step = i"></button>
+          <button v-for="(stepInfo, i) in STEPS" :key="stepInfo.title" class="h-2 rounded-full p-0 transition-[width,background-color] duration-200" :class="i === tour.step ? 'w-5.5 rounded bg-brand-deep' : i < tour.step ? 'w-2 bg-[#5fa9bf]' : 'w-2 bg-line-2'" :title="stepInfo.title" :aria-label="`Schritt ${i + 1}: ${stepInfo.title}`" @click="tour.step = i"></button>
         </div>
         <span class="flex-1"></span>
         <button v-if="tour.step === 0" class="bg-transparent px-1.5 text-[0.8125rem] text-ink-2 hover:text-ink hover:underline" @click="closeTour()">Überspringen</button>
@@ -109,14 +109,14 @@ const STEPS: { title: string; text: string; tips?: string[]; action?: { label: s
     tips: ['☾ / ☀ oben links – Pfeil daneben für mehr Optionen', '<b>Menü › Einführung</b> öffnet diese Tour erneut'] },
 ];
 const cur = computed(() => STEPS[tour.step] ?? STEPS[0]);
-function next() { if (tour.step < STEPS.length - 1) tour.step++; else closeTour(); }
+const next = () => { if (tour.step < STEPS.length - 1) tour.step++; else closeTour(); };
 
-function key(e: KeyboardEvent) {
+const key = (event: KeyboardEvent) => {
   if (!tour.open) return;
-  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeTour(); }
-  else if (e.key === 'ArrowRight') { e.stopPropagation(); next(); }
-  else if (e.key === 'ArrowLeft' && tour.step > 0) { e.stopPropagation(); tour.step--; }
-}
+  if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeTour(); }
+  else if (event.key === 'ArrowRight') { event.stopPropagation(); next(); }
+  else if (event.key === 'ArrowLeft' && tour.step > 0) { event.stopPropagation(); tour.step--; }
+};
 useEventListener(window, 'keydown', key, { capture: true });
 </script>
 

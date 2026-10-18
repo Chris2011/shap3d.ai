@@ -12,7 +12,7 @@
       </label>
       <div class="-mx-3 my-2.5 h-px bg-line"></div>
       <div class="mt-2 mb-1.25 s3d-caption text-muted">Oberfläche</div>
-      <S3dSegmentedControl :model-value="theme.mode" :options="UI" @update:model-value="setTheme" />
+      <S3dSegmentedControl :model-value="theme.mode" :options="INTERFACE_OPTIONS" @update:model-value="setTheme" />
       <div class="mt-2 mb-1.25 s3d-caption text-muted">3D-Szene</div>
       <S3dSegmentedControl :model-value="theme.scene" :options="SCENE" @update:model-value="setScene" />
       <p class="mt-2.5 mb-0 text-[0.71875rem]/[1.4] text-ink-2">{{ hint }}</p>
@@ -28,7 +28,7 @@ import { usePopover } from '../composables/usePopover';
 import S3dIcon from './S3dIcon.vue';
 import { theme, toggleTheme, setTheme, setScene, type ThemeMode, type SceneMode } from '../theme';
 
-const UI: { value: ThemeMode; label: string; icon: string }[] = [
+const INTERFACE_OPTIONS: { value: ThemeMode; label: string; icon: string }[] = [
   { value: 'light', label: 'Hell', icon: 'sun' }, { value: 'dark', label: 'Dunkel', icon: 'moon' }, { value: 'system', label: 'System', icon: 'monitor' },
 ];
 const SCENE: { value: SceneMode; label: string; icon: string }[] = [

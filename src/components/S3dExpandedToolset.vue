@@ -1,10 +1,10 @@
 <template>
   <div class="fixed inset-0 z-24" @pointerdown="$emit('close')"></div>
   <div class="s3d-panel absolute top-0 left-13 z-26 max-h-[calc(100vh-7.5rem)] w-53 overflow-auto px-1" @pointerdown.stop>
-    <div v-for="(g, i) in groups" :key="i" class="grid grid-cols-[repeat(3,4.25rem)] border-b border-[#d5d7df] py-1.5 last:border-b-0 dark:border-line">
-      <button v-for="it in g" :key="it.id" class="flex min-h-15.5 flex-col items-center gap-0.5 border-0 px-0.5 pt-2 pb-1 text-center text-[0.625rem]/[1.1] break-words text-ink" :class="ed.ui.tool === it.id ? 'bg-active' : 'hover:bg-hover'" :title="it.title ?? it.label" @click="pick(it)">
-        <S3dIcon :name="it.icon" />
-        <span :class="ed.ui.tool === it.id ? 'text-navy' : 'text-label'">{{ it.label }}</span>
+    <div v-for="(group, i) in groups" :key="i" class="grid grid-cols-[repeat(3,4.25rem)] border-b border-[#d5d7df] py-1.5 last:border-b-0 dark:border-line">
+      <button v-for="cell in group" :key="cell.id" class="flex min-h-15.5 flex-col items-center gap-0.5 border-0 px-0.5 pt-2 pb-1 text-center text-[0.625rem]/[1.1] break-words text-ink" :class="editor.ui.tool === cell.id ? 'bg-active' : 'hover:bg-hover'" :title="cell.title ?? cell.label" @click="pick(cell)">
+        <S3dIcon :name="cell.icon" />
+        <span :class="editor.ui.tool === cell.id ? 'text-navy' : 'text-label'">{{ cell.label }}</span>
       </button>
     </div>
   </div>
@@ -16,23 +16,23 @@ import { useEditor } from './keys';
 import { TOOL_INFO } from '../engine/setup';
 import { runCommand } from '../engine/commands';
 
-const emit = defineEmits<{ (e: 'close'): void }>();
-const ed = useEditor();
+const emit = defineEmits<{ (event: 'close'): void }>();
+const editor = useEditor();
 interface Cell { id: string; label: string; icon: string; cmd?: string; action?: () => void; title?: string }
-const T = (id: string): Cell => ({ id, label: TOOL_INFO[id].name, icon: TOOL_INFO[id].icon, title: TOOL_INFO[id].name + (TOOL_INFO[id].key ? ` (${TOOL_INFO[id].key})` : '') });
-const C = (id: string, label: string, icon: string, cmd: string): Cell => ({ id, label, icon, cmd });
+const toolCell = (id: string): Cell => ({ id, label: TOOL_INFO[id].name, icon: TOOL_INFO[id].icon, title: TOOL_INFO[id].name + (TOOL_INFO[id].key ? ` (${TOOL_INFO[id].key})` : '') });
+const commandCell = (id: string, label: string, icon: string, cmd: string): Cell => ({ id, label, icon, cmd });
 // same grouping and order as SketchUp Web's expanded toolset
 const groups: Cell[][] = [
-  [T('lasso'), T('sample')],
-  [T('circle'), T('arc2'), T('arc'), T('polygon'), T('arc3'), T('pie'), T('freehand'), T('rotrect'), { id: 'text3d', label: '3D-Text', icon: 'text3d', action: () => { ed.ui.dialog = { kind: 'text3d' }; } }],
-  [T('offset'), T('followme'), T('terrain'), C('flipx', 'Spiegeln', 'flip', 'flipX'), C('outershell', 'Äußere Schale', 'solid', 'solid-outershell'), C('sintersect', 'Verschneiden', 'union', 'solid-intersect'), C('union', 'Vereinigen', 'union', 'solid-union'), C('subtract', 'Entfernen', 'subtract', 'solid-subtract'), C('trim', 'Abschneiden', 'subtract', 'solid-trim'), C('split', 'Teilen', 'solid', 'solid-split')],
-  [T('dimension'), T('protractor'), T('text'), T('section'), C('makeGroup', 'Gruppe', 'group', 'makeGroup'), C('makeComponent', 'Komponente', 'component', 'makeComponent')],
-  [T('zoom'), C('zoomExtents', 'Alles zeigen', 'zoomext', 'zoomExtents'), T('zoomwindow'), T('poscam'), T('lookaround'), T('walk')],
+  [toolCell('lasso'), toolCell('sample')],
+  [toolCell('circle'), toolCell('arc2'), toolCell('arc'), toolCell('polygon'), toolCell('arc3'), toolCell('pie'), toolCell('freehand'), toolCell('rotrect'), { id: 'text3d', label: '3D-Text', icon: 'text3d', action: () => { editor.ui.dialog = { kind: 'text3d' }; } }],
+  [toolCell('offset'), toolCell('followme'), toolCell('terrain'), commandCell('flipx', 'Spiegeln', 'flip', 'flipX'), commandCell('outershell', 'Äußere Schale', 'solid', 'solid-outershell'), commandCell('sintersect', 'Verschneiden', 'union', 'solid-intersect'), commandCell('union', 'Vereinigen', 'union', 'solid-union'), commandCell('subtract', 'Entfernen', 'subtract', 'solid-subtract'), commandCell('trim', 'Abschneiden', 'subtract', 'solid-trim'), commandCell('split', 'Teilen', 'solid', 'solid-split')],
+  [toolCell('dimension'), toolCell('protractor'), toolCell('text'), toolCell('section'), commandCell('makeGroup', 'Gruppe', 'group', 'makeGroup'), commandCell('makeComponent', 'Komponente', 'component', 'makeComponent')],
+  [toolCell('zoom'), commandCell('zoomExtents', 'Alles zeigen', 'zoomext', 'zoomExtents'), toolCell('zoomwindow'), toolCell('poscam'), toolCell('lookaround'), toolCell('walk')],
 ];
-function pick(it: Cell) {
+const pick = (cell: Cell) => {
   emit('close');
-  if (it.action) it.action();
-  else if (it.cmd) runCommand(ed, it.cmd);
-  else ed.setTool(it.id);
-}
+  if (cell.action) cell.action();
+  else if (cell.cmd) runCommand(editor, cell.cmd);
+  else editor.setTool(cell.id);
+};
 </script>

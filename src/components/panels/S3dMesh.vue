@@ -29,7 +29,7 @@
       </div>
       <input v-model.number="draft" class="mt-2 mb-1 w-full" type="range" :min="res.min" max="96" step="1" @change="applyRes(draft)" />
       <div class="flex flex-wrap gap-1">
-        <button v-for="n in res.presets" :key="n" class="s3d-chip tabular-nums" :class="{ on: res.value === n }" @click="applyRes(n)">{{ n }}</button>
+        <button v-for="preset in res.presets" :key="preset" class="s3d-chip tabular-nums" :class="{ on: res.value === preset }" @click="applyRes(preset)">{{ preset }}</button>
       </div>
       <p class="mt-2 mb-0 text-[0.71875rem]/[1.45] text-ink-2">{{ res.hint }}</p>
     </template>
@@ -62,34 +62,34 @@ import { resolutionOf, setResolution, setCircleSegments, subdivideInstance, simp
 import type { Instance, Face } from '../../core/model';
 import { useModel, useSelection } from '../../composables/useModel';
 
-const ed = useEditor();
+const editor = useEditor();
 const keep = ref(50);
-const redraw = () => ed.invalidate();
-const fmt = (n: number) => n.toLocaleString('de-DE');
+const redraw = () => editor.invalidate();
+const fmt = (count: number) => count.toLocaleString('de-DE');
 
-const sel = useSelection(() => ed.selected());
+const sel = useSelection(() => editor.selected());
 const inst = computed<Instance | null>(() => {
-  const s = sel.value; if (s.length !== 1 || s[0].kind !== 'instance') return null;
-  return ed.entities.instances.get(s[0].id) ?? null;
+  const selection = sel.value; if (selection.length !== 1 || selection[0].kind !== 'instance') return null;
+  return editor.entities.instances.get(selection[0].id) ?? null;
 });
 const face = computed<Face | null>(() => {
-  const faces = sel.value.filter(r => r.kind === 'face');
-  if (faces.length !== 1 || sel.value.some(r => r.kind === 'instance')) return null;
-  return ed.entities.faces.get(faces[0].id) ?? null;
+  const faces = sel.value.filter(entityRef => entityRef.kind === 'face');
+  if (faces.length !== 1 || sel.value.some(entityRef => entityRef.kind === 'instance')) return null;
+  return editor.entities.faces.get(faces[0].id) ?? null;
 });
 
 const scope = computed(() => (sel.value.length ? 'Auswahl' : 'Ganzes Modell'));
 const stats = useModel<MeshStats>(() => {
-  const s = sel.value;
-  if (!s.length) return meshStats(ed.model.root);
+  const selection = sel.value;
+  if (!selection.length) return meshStats(editor.model.root);
   const parts: MeshStats[] = [];
-  const faces = s.filter(r => r.kind === 'face'), edges = s.filter(r => r.kind === 'edge');
-  for (const r of s.filter(r => r.kind === 'instance')) { const i = ed.entities.instances.get(r.id); if (i) parts.push(meshStats(i.def.entities)); }
+  const faces = selection.filter(entityRef => entityRef.kind === 'face'), edges = selection.filter(entityRef => entityRef.kind === 'edge');
+  for (const entityRef of selection.filter(entityRef => entityRef.kind === 'instance')) { const instance = editor.entities.instances.get(entityRef.id); if (instance) parts.push(meshStats(instance.def.entities)); }
   if (faces.length || edges.length) {
     const verts = new Set<number>(); let tris = 0;
-    for (const r of faces) { const f = ed.entities.faces.get(r.id); if (!f) continue; [...f.outer, ...f.holes.flat()].forEach(v => verts.add(v)); tris += ed.entities.faceTriangles(f).length / 3; }
-    for (const r of edges) { const e = ed.entities.edges.get(r.id); if (e) { verts.add(e.a); verts.add(e.b); } }
-    parts.push({ vertices: verts.size, edges: edges.length, faces: faces.length, triangles: tris, softEdges: edges.filter(r => ed.entities.edges.get(r.id)?.soft).length });
+    for (const entityRef of faces) { const face = editor.entities.faces.get(entityRef.id); if (!face) continue; [...face.outer, ...face.holes.flat()].forEach(vertex => verts.add(vertex)); tris += editor.entities.faceTriangles(face).length / 3; }
+    for (const entityRef of edges) { const edge = editor.entities.edges.get(entityRef.id); if (edge) { verts.add(edge.a); verts.add(edge.b); } }
+    parts.push({ vertices: verts.size, edges: edges.length, faces: faces.length, triangles: tris, softEdges: edges.filter(entityRef => editor.entities.edges.get(entityRef.id)?.soft).length });
   }
   return sumStats(parts);
 });
@@ -97,26 +97,26 @@ const stats = useModel<MeshStats>(() => {
 const res = useModel(() => {
   
   if (inst.value) {
-    const r = resolutionOf(inst.value); if (!r) return null;
-    return { ...r, unit: r.res, presets: r.res === 'Seiten' ? [3, 4, 5, 6, 8, 12] : [8, 12, 16, 24, 32, 48, 64], hint: 'Das Objekt wird mit der neuen Auflösung exakt neu berechnet.' };
+    const resolution = resolutionOf(inst.value); if (!resolution) return null;
+    return { ...resolution, unit: resolution.res, presets: resolution.res === 'Seiten' ? [3, 4, 5, 6, 8, 12] : [8, 12, 16, 24, 32, 48, 64], hint: 'Das Objekt wird mit der neuen Auflösung exakt neu berechnet.' };
   }
   if (face.value) {
-    const c = detectCircle(ed.entities, face.value); if (!c) return null;
-    return { value: c.segments, min: 3, label: 'Kreis', unit: 'Segmente', presets: [6, 8, 12, 16, 24, 32, 48, 64], hint: 'Geht, solange der Kreis noch flach ist – vor Drücken/Ziehen einstellen.' };
+    const circle = detectCircle(editor.entities, face.value); if (!circle) return null;
+    return { value: circle.segments, min: 3, label: 'Kreis', unit: 'Segmente', presets: [6, 8, 12, 16, 24, 32, 48, 64], hint: 'Geht, solange der Kreis noch flach ist – vor Drücken/Ziehen einstellen.' };
   }
   return null;
 });
 const draft = ref(24);
-watch(res, r => { if (r) draft.value = r.value; }, { immediate: true });
-const step = (v: number) => (v < 12 ? 1 : v < 32 ? 4 : 8);
+watch(res, resolution => { if (resolution) draft.value = resolution.value; }, { immediate: true });
+const step = (value: number) => (value < 12 ? 1 : value < 32 ? 4 : 8);
 
-function applyRes(v: number) {
-  if (!res.value || !Number.isFinite(v)) return;
-  const n = Math.max(res.value.min, Math.min(256, Math.round(v)));
-  if (n === res.value.value) return;
-  if (inst.value) setResolution(ed, inst.value, n);
-  else if (face.value) setCircleSegments(ed, ed.entities, face.value, n);
-}
-function more(round: boolean) { if (!inst.value) return; const err = subdivideInstance(ed, inst.value, round); ed.toast(err ?? 'Mehr Polygone – Strg+Z macht es rückgängig'); }
-async function less() { if (!inst.value) return; const err = await simplifyInstance(ed, inst.value, keep.value / 100); ed.toast(err ?? 'Weniger Polygone – Strg+Z macht es rückgängig'); }
+const applyRes = (value: number) => {
+  if (!res.value || !Number.isFinite(value)) return;
+  const segments = Math.max(res.value.min, Math.min(256, Math.round(value)));
+  if (segments === res.value.value) return;
+  if (inst.value) setResolution(editor, inst.value, segments);
+  else if (face.value) setCircleSegments(editor, editor.entities, face.value, segments);
+};
+const more = (round: boolean) => { if (!inst.value) return; const err = subdivideInstance(editor, inst.value, round); editor.toast(err ?? 'Mehr Polygone – Strg+Z macht es rückgängig'); };
+const less = async () => { if (!inst.value) return; const err = await simplifyInstance(editor, inst.value, keep.value / 100); editor.toast(err ?? 'Weniger Polygone – Strg+Z macht es rückgängig'); };
 </script>

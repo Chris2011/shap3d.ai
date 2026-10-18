@@ -6,15 +6,15 @@
     <S3dMainToolbar @search="openPalette()" />
     <S3dRightPanels />
     <S3dStatusBar ref="statusBar" />
-    <S3dContextMenu v-if="ctx" :x="ctx.x" :y="ctx.y" @close="ctx = null" />
+    <S3dContextMenu v-if="contextMenu" :x="contextMenu.x" :y="contextMenu.y" @close="contextMenu = null" />
     <S3dCommandPalette v-if="palette.open" />
     <S3dTerrainPanel />
     <S3dDialogs />
     <S3dWelcomeTour />
-    <transition enter-active-class="transition-opacity duration-200" leave-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-to-class="opacity-0"><div v-if="ed.ui.toast" class="pointer-events-none absolute bottom-12 left-1/2 z-80 -translate-x-1/2 rounded bg-[#2b3035] px-4 py-2 text-[0.8125rem] text-white shadow-[0_2px_8px_rgba(0,0,0,.3)]">{{ ed.ui.toast }}</div></transition>
-    <div v-if="ed.ui.contextName" class="s3d-panel absolute top-13 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 py-1 pr-1.5 pl-2.5 text-xs">
-      <S3dIcon name="group" :size="16" /> Bearbeiten: <b>{{ ed.ui.contextName }}</b>
-      <button class="s3d-btn small" @click="ed.exitContext(true)">Schließen</button>
+    <transition enter-active-class="transition-opacity duration-200" leave-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-to-class="opacity-0"><div v-if="editor.ui.toast" class="pointer-events-none absolute bottom-12 left-1/2 z-80 -translate-x-1/2 rounded bg-[#2b3035] px-4 py-2 text-[0.8125rem] text-white shadow-[0_2px_8px_rgba(0,0,0,.3)]">{{ editor.ui.toast }}</div></transition>
+    <div v-if="editor.ui.contextName" class="s3d-panel absolute top-13 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 py-1 pr-1.5 pl-2.5 text-xs">
+      <S3dIcon name="group" :size="16" /> Bearbeiten: <b>{{ editor.ui.contextName }}</b>
+      <button class="s3d-btn small" @click="editor.exitContext(true)">Schließen</button>
     </div>
   </div>
 </template>
@@ -40,51 +40,51 @@ import { EDITOR } from './components/keys';
 import { autosave } from './engine/defaults';
 import { importFile } from './engine/commands';
 
-const ed = createEditor();
-provide(EDITOR, ed);
-(window as any).editor = ed; // handy for debugging in the console
+const editor = createEditor();
+provide(EDITOR, editor);
+(window as any).editor = editor; // handy for debugging in the console
 
-const ctx = ref<{ x: number; y: number } | null>(null);
+const contextMenu = ref<{ x: number; y: number } | null>(null);
 const statusBar = ref<InstanceType<typeof S3dStatusBar> | null>(null);
-function openContext(p: { x: number; y: number }) { ctx.value = p; }
+const openContext = (position: { x: number; y: number }) => { contextMenu.value = position; };
 
 // drag & drop import
 const dragging = ref(false);
-const hasFiles = (e: DragEvent) => [...(e.dataTransfer?.types ?? [])].includes('Files');
-function onDrag(e: DragEvent) { if (hasFiles(e)) { dragging.value = true; if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; } }
-function onLeave(e: DragEvent) { if (!e.relatedTarget || !(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) dragging.value = false; }
-async function onDrop(e: DragEvent) {
+const hasFiles = (event: DragEvent) => [...(event.dataTransfer?.types ?? [])].includes('Files');
+const onDrag = (event: DragEvent) => { if (hasFiles(event)) { dragging.value = true; if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'; } };
+const onLeave = (event: DragEvent) => { if (!event.relatedTarget || !(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node)) dragging.value = false; };
+const onDrop = async (event: DragEvent) => {
   dragging.value = false;
-  const f = e.dataTransfer?.files?.[0]; if (!f) return;
-  await importFile(ed, f).catch(err => ed.toast(String(err?.message ?? err)));
-}
+  const file = event.dataTransfer?.files?.[0]; if (!file) return;
+  await importFile(editor, file).catch(reason => editor.toast(String(reason?.message ?? reason)));
+};
 
-useEventListener(window, 'beforeunload', () => autosave(ed));
+useEventListener(window, 'beforeunload', () => autosave(editor));
 
 // command palette like VS Code / IntelliJ: Strg+Umschalt+P, F1, Strg+K or Umschalt twice
 let lastShift = 0, otherKey = false;
-useEventListener(window, 'keydown', (e: KeyboardEvent) => {
-  const ctrl = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
-  if ((ctrl && e.shiftKey && k === 'p') || (ctrl && !e.shiftKey && !e.altKey && k === 'k') || (e.key === 'F1' && !ctrl)) {
-    e.preventDefault(); e.stopPropagation();
+useEventListener(window, 'keydown', (event: KeyboardEvent) => {
+  const ctrl = event.ctrlKey || event.metaKey, k = event.key.toLowerCase();
+  if ((ctrl && event.shiftKey && k === 'p') || (ctrl && !event.shiftKey && !event.altKey && k === 'k') || (event.key === 'F1' && !ctrl)) {
+    event.preventDefault(); event.stopPropagation();
     if (palette.open) closePalette(); else openPalette();
     return;
   }
-  otherKey = e.key !== 'Shift';
+  otherKey = event.key !== 'Shift';
 }, { capture: true });
 // Umschalt + mouse (pan, Umschalt+wheel orbit) must not count as a tap
 useEventListener(window, ['pointerdown', 'wheel'], () => { otherKey = true; }, { capture: true, passive: true });
-useEventListener(window, 'keyup', (e: KeyboardEvent) => {
-  if (e.key !== 'Shift') return;
-  if (otherKey || e.ctrlKey || e.altKey || e.metaKey) { otherKey = false; lastShift = 0; return; }
-  const t = e.target as HTMLElement | null;
-  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) && !palette.open) return;
+useEventListener(window, 'keyup', (event: KeyboardEvent) => {
+  if (event.key !== 'Shift') return;
+  if (otherKey || event.ctrlKey || event.altKey || event.metaKey) { otherKey = false; lastShift = 0; return; }
+  const target = event.target as HTMLElement | null;
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) && !palette.open) return;
   const now = performance.now();
   if (now - lastShift < 350) { lastShift = 0; if (!palette.open) openPalette(); } else lastShift = now;
 }, { capture: true });
 
 onMounted(() => {
-  installKeyboard(ed, (ch) => statusBar.value?.focusVcb(ch));
+  installKeyboard(editor, (firstKey) => statusBar.value?.focusVcb(firstKey));
   // first start: show the welcome tour once the splash is gone
   if (!tourSeen() && !new URLSearchParams(location.search).has('shot')) setTimeout(() => openTour(), 2500);
 });

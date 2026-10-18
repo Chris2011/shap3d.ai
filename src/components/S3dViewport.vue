@@ -1,7 +1,7 @@
 <template>
   <div ref="wrap" class="absolute touch-none overflow-hidden bg-[#dfe8f0]" :style="{ cursor }" @pointerdown="down" @pointermove="move" @pointerup="up" @pointerleave="leave" @dblclick="dbl" @wheel.prevent="wheel">
-    <canvas ref="gl" class="absolute inset-0 block size-full"></canvas>
-    <canvas ref="ov" class="pointer-events-none absolute inset-0 block size-full"></canvas>
+    <canvas ref="glCanvas" class="absolute inset-0 block size-full"></canvas>
+    <canvas ref="overlayCanvas" class="pointer-events-none absolute inset-0 block size-full"></canvas>
   </div>
 </template>
 
@@ -15,60 +15,60 @@ import { pickRef } from '../tools/select';
 import { autosave } from '../engine/defaults';
 import { toolCursor } from '../engine/cursors';
 
-const emit = defineEmits<{ (e: 'context', p: { x: number; y: number }): void }>();
-const ed = useEditor();
+const emit = defineEmits<{ (event: 'context', position: { x: number; y: number }): void }>();
+const editor = useEditor();
 const wrap = ref<HTMLDivElement | null>(null);
-const gl = ref<HTMLCanvasElement | null>(null);
-const ov = ref<HTMLCanvasElement | null>(null);
+const glCanvas = ref<HTMLCanvasElement | null>(null);
+const overlayCanvas = ref<HTMLCanvasElement | null>(null);
 let rightDown: { x: number; y: number } | null = null;
 
 // middle mouse navigation temporarily shows the orbit/pan cursor like SketchUp
 const nav = ref<'orbit' | 'pan' | null>(null);
-const cursor = computed(() => toolCursor(nav.value ?? ed.ui.tool));
+const cursor = computed(() => toolCursor(nav.value ?? editor.ui.tool));
 
-function evt(e: PointerEvent | MouseEvent): PEvt {
-  const r = wrap.value!.getBoundingClientRect();
-  return { x: e.clientX - r.left, y: e.clientY - r.top, button: e.button, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, detail: e.detail };
-}
-function down(e: PointerEvent) {
+const evt = (event: PointerEvent | MouseEvent): PEvt => {
+  const rect = wrap.value!.getBoundingClientRect();
+  return { x: event.clientX - rect.left, y: event.clientY - rect.top, button: event.button, shift: event.shiftKey, ctrl: event.ctrlKey || event.metaKey, alt: event.altKey, detail: event.detail };
+};
+const down = (event: PointerEvent) => {
   (document.activeElement as HTMLElement)?.blur?.();
-  wrap.value!.setPointerCapture(e.pointerId);
-  if (e.button === 2) { rightDown = { x: e.clientX, y: e.clientY }; return; }
-  if (e.button === 1) { e.preventDefault(); nav.value = e.shiftKey ? 'pan' : 'orbit'; }
-  ed.pointerDown(evt(e));
-}
-function move(e: PointerEvent) { ed.pointerMove(evt(e)); }
-function up(e: PointerEvent) {
-  wrap.value!.releasePointerCapture(e.pointerId);
-  if (e.button === 1) nav.value = null;
-  if (e.button === 2) {
-    if (rightDown && Math.hypot(e.clientX - rightDown.x, e.clientY - rightDown.y) < 5) {
+  wrap.value!.setPointerCapture(event.pointerId);
+  if (event.button === 2) { rightDown = { x: event.clientX, y: event.clientY }; return; }
+  if (event.button === 1) { event.preventDefault(); nav.value = event.shiftKey ? 'pan' : 'orbit'; }
+  editor.pointerDown(evt(event));
+};
+const move = (event: PointerEvent) => { editor.pointerMove(evt(event)); };
+const up = (event: PointerEvent) => {
+  wrap.value!.releasePointerCapture(event.pointerId);
+  if (event.button === 1) nav.value = null;
+  if (event.button === 2) {
+    if (rightDown && Math.hypot(event.clientX - rightDown.x, event.clientY - rightDown.y) < 5) {
       // right click selects the entity under the cursor if it isn't selected yet (like SketchUp)
-      const p = evt(e); const { ref: r } = pickRef(ed, p.x, p.y); if (r && !ed.selection.has(ed.key(r))) ed.select([r]);
-      emit('context', { x: e.clientX, y: e.clientY });
+      const point = evt(event); const { ref: picked } = pickRef(editor, point.x, point.y); if (picked && !editor.selection.has(editor.key(picked))) editor.select([picked]);
+      emit('context', { x: event.clientX, y: event.clientY });
     }
     rightDown = null; return;
   }
-  ed.pointerUp(evt(e));
-}
-function leave() { ed.mouse.inside = false; ed.setHover(null); ed.redraw(); }
-function dbl(e: MouseEvent) { ed.dblClick(evt(e)); }
-function wheel(e: WheelEvent) { const p = evt(e); ed.wheel(p.x, p.y, { dx: e.deltaX, dy: e.deltaY, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, mode: e.deltaMode }); }
+  editor.pointerUp(evt(event));
+};
+const leave = () => { editor.mouse.inside = false; editor.setHover(null); editor.redraw(); };
+const dbl = (event: MouseEvent) => { editor.dblClick(evt(event)); };
+const wheel = (event: WheelEvent) => { const point = evt(event); editor.wheel(point.x, point.y, { dx: event.deltaX, dy: event.deltaY, shift: event.shiftKey, ctrl: event.ctrlKey || event.metaKey, mode: event.deltaMode }); };
 
 onMounted(() => {
-  ed.attach(gl.value!, ov.value!);
+  editor.attach(glCanvas.value!, overlayCanvas.value!);
   resize();
   // restore the last session or start with SketchUp's default scene
   let restored = false;
-  try { const s = localStorage.getItem('s3d:autosave'); if (s) { const j = JSON.parse(s); if (j?._dirty) { ed.loadJSON(j); restored = true; ed.ui.saved = false; ed.toast('Letztes Modell wiederhergestellt'); } } } catch { /* ignore broken autosave */ }
-  if (!restored) { addScaleFigure(ed); ed.resetHistory(); ed.ui.saved = true; }
+  try { const saved = localStorage.getItem('s3d:autosave'); if (saved) { const data = JSON.parse(saved); if (data?._dirty) { editor.loadJSON(data); restored = true; editor.ui.saved = false; editor.toast('Letztes Modell wiederhergestellt'); } } } catch { /* ignore broken autosave */ }
+  if (!restored) { addScaleFigure(editor); editor.resetHistory(); editor.ui.saved = true; }
 });
-onUnmounted(() => ed.viewer?.dispose());
+onUnmounted(() => editor.viewer?.dispose());
 
-function resize() {
-  if (!wrap.value || !ed.viewer) return;
-  const r = wrap.value.getBoundingClientRect(); ed.viewer.resize(Math.max(1, r.width), Math.max(1, r.height));
-}
+const resize = () => {
+  if (!wrap.value || !editor.viewer) return;
+  const rect = wrap.value.getBoundingClientRect(); editor.viewer.resize(Math.max(1, rect.width), Math.max(1, rect.height));
+};
 useResizeObserver(wrap, resize);
-useIntervalFn(() => autosave(ed), 15000); // autosave every 15 s (and on unload, see App.vue)
+useIntervalFn(() => autosave(editor), 15000); // autosave every 15 s (and on unload, see App.vue)
 </script>

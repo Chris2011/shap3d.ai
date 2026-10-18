@@ -5,11 +5,11 @@
     <button class="s3d-btn small" :disabled="!scenes.length" @click="play">{{ playing ? 'Stopp' : 'Abspielen' }}</button>
   </div>
   <div>
-    <div v-for="sc in scenes" :key="sc.id" class="flex cursor-pointer items-center gap-2 rounded-[3px] p-1.5" :class="sel === sc.id ? 'bg-active' : 'hover:bg-hover'" @click="go(sc)">
+    <div v-for="scene in scenes" :key="scene.id" class="flex cursor-pointer items-center gap-2 rounded-[3px] p-1.5" :class="sel === scene.id ? 'bg-active' : 'hover:bg-hover'" @click="go(scene)">
       <S3dIcon name="scenes" :size="18" />
-      <input v-if="editing === sc.id" class="s3d-input" :value="sc.name" @change="rename(sc, ($event.target as HTMLInputElement).value)" @blur="editing = null" />
-      <span v-else class="flex-1" @dblclick="editing = sc.id">{{ sc.name }}</span>
-      <button class="flex bg-transparent opacity-60 hover:opacity-100" title="Löschen" @click.stop="remove(sc)"><S3dIcon name="trash" :size="15" /></button>
+      <input v-if="editing === scene.id" class="s3d-input" :value="scene.name" @change="rename(scene, ($event.target as HTMLInputElement).value)" @blur="editing = null" />
+      <span v-else class="flex-1" @dblclick="editing = scene.id">{{ scene.name }}</span>
+      <button class="flex bg-transparent opacity-60 hover:opacity-100" title="Löschen" @click.stop="remove(scene)"><S3dIcon name="trash" :size="15" /></button>
     </div>
     <div v-if="!scenes.length" class="px-0.5 py-2 text-xs text-ink-2">Noch keine Szenen. Szenen speichern Kamera, Stil und sichtbare Tags.</div>
   </div>
@@ -25,23 +25,23 @@ import type { Scene } from '../../core/document';
 import { applyScene } from '../../engine/scenes';
 import { useModel } from '../../composables/useModel';
 
-const ed = useEditor(); const sel = ref<number | null>(null); const editing = ref<number | null>(null); 
-const scenes = useModel(() => ed.model.scenes);
-function capture(): Omit<Scene, 'id' | 'name'> { return { camera: ed.viewer.rig.getState(), style: { ...ed.model.settings.style }, hiddenTags: ed.model.tags.filter(t => !t.visible).map(t => t.name) }; }
-function add() { const sc: Scene = { id: newId(), name: `Szene ${ed.model.scenes.length + 1}`, ...capture() }; ed.commit('Szene hinzufügen', () => ed.model.scenes.push(sc)); sel.value = sc.id; }
-function update() { const sc = ed.model.scenes.find(s => s.id === sel.value); if (sc) ed.commit('Szene aktualisieren', () => Object.assign(sc, capture())); }
-function go(sc: Scene) {
-  sel.value = sc.id; applyScene(ed, sc);
-}
-function rename(sc: Scene, n: string) { editing.value = null; if (n.trim()) ed.commit('Szene umbenennen', () => { sc.name = n.trim(); }); }
-function remove(sc: Scene) { ed.commit('Szene löschen', () => { ed.model.scenes = ed.model.scenes.filter(s => s !== sc); }); }
+const editor = useEditor(); const sel = ref<number | null>(null); const editing = ref<number | null>(null); 
+const scenes = useModel(() => editor.model.scenes);
+const capture = (): Omit<Scene, 'id' | 'name'> => { return { camera: editor.viewer.rig.getState(), style: { ...editor.model.settings.style }, hiddenTags: editor.model.tags.filter(tag => !tag.visible).map(tag => tag.name) }; };
+const add = () => { const scene: Scene = { id: newId(), name: `Szene ${editor.model.scenes.length + 1}`, ...capture() }; editor.commit('Szene hinzufügen', () => editor.model.scenes.push(scene)); sel.value = scene.id; };
+const update = () => { const scene = editor.model.scenes.find(entry => entry.id === sel.value); if (scene) editor.commit('Szene aktualisieren', () => Object.assign(scene, capture())); };
+const go = (scene: Scene) => {
+  sel.value = scene.id; applyScene(editor, scene);
+};
+const rename = (scene: Scene, name: string) => { editing.value = null; if (name.trim()) editor.commit('Szene umbenennen', () => { scene.name = name.trim(); }); };
+const remove = (scene: Scene) => { editor.commit('Szene löschen', () => { editor.model.scenes = editor.model.scenes.filter(other => other !== scene); }); };
 // slide show: one scene every 2.5 s, stops by itself when the panel closes
 let next = 0;
-const { pause, resume, isActive: playing } = useIntervalFn(step, 2500, { immediate: false });
-function step() { const l = ed.model.scenes; if (!l.length) { pause(); return; } go(l[next % l.length]); next++; }
-function play() {
+const { pause, resume, isActive: playing } = useIntervalFn(() => step(), 2500, { immediate: false });
+const step = () => { const list = editor.model.scenes; if (!list.length) { pause(); return; } go(list[next % list.length]); next++; };
+const play = () => {
   if (playing.value) { pause(); return; }
-  next = Math.max(0, ed.model.scenes.findIndex(s => s.id === sel.value));
+  next = Math.max(0, editor.model.scenes.findIndex(scene => scene.id === sel.value));
   step(); resume();
-}
+};
 </script>

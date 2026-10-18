@@ -10,13 +10,11 @@ const draft = useStorage<ScriptDraft | null>('s3d:script-draft', null, undefined
 const saved = useStorage<SavedScript[]>('s3d:scripts', []);
 
 /** The script editor's draft and the user's saved scripts ("Meine Skripte"). */
-export function useScripts() {
-  return {
-    draft,
-    saved,
-    /** store under `name`, replacing a script with the same name */
-    save(script: SavedScript) { saved.value = [...saved.value.filter(s => s.name !== script.name), script]; },
-    remove(name: string) { saved.value = saved.value.filter(s => s.name !== name); },
-    find: (name: string) => saved.value.find(s => s.name === name),
-  };
-}
+export const useScripts = () => ({
+  draft,
+  saved,
+  /** store under `name`, replacing a script with the same name */
+  save: (script: SavedScript) => { saved.value = [...saved.value.filter(other => other.name !== script.name), script]; },
+  remove: (name: string) => { saved.value = saved.value.filter(script => script.name !== name); },
+  find: (name: string) => saved.value.find(script => script.name === name),
+});

@@ -2,10 +2,10 @@
   <div class="mt-1.5 mb-2.5 flex items-center gap-3"><S3dIcon :name="info.icon" :size="28" /><div><div class="text-[0.9375rem] font-bold">{{ info.name }}</div><div v-if="info.key" class="text-xs text-ink-2">Tastenkürzel: {{ info.key }}</div></div></div>
   <p class="mb-1.5">{{ text.desc }}</p>
   <div class="s3d-section-title">Bedienung</div>
-  <ol class="list-decimal pl-4.5"><li v-for="(s, i) in text.steps" :key="i" class="my-1">{{ s }}</li></ol>
+  <ol class="list-decimal pl-4.5"><li v-for="(step, i) in text.steps" :key="i" class="my-1">{{ step }}</li></ol>
   <template v-if="text.mods?.length">
     <div class="s3d-section-title">Zusatztasten</div>
-    <ul class="list-disc pl-4.5"><li v-for="(s, i) in text.mods" :key="i" class="my-1">{{ s }}</li></ul>
+    <ul class="list-disc pl-4.5"><li v-for="(modifier, i) in text.mods" :key="i" class="my-1">{{ modifier }}</li></ul>
   </template>
 </template>
 
@@ -15,9 +15,9 @@ import S3dIcon from '../S3dIcon.vue';
 import { useEditor } from '../keys';
 import { TOOL_INFO } from '../../engine/setup';
 
-const ed = useEditor();
-const info = computed(() => TOOL_INFO[ed.ui.tool] ?? TOOL_INFO.select);
-const T: Record<string, { desc: string; steps: string[]; mods?: string[] }> = {
+const editor = useEditor();
+const info = computed(() => TOOL_INFO[editor.ui.tool] ?? TOOL_INFO.select);
+const TEXTS: Record<string, { desc: string; steps: string[]; mods?: string[] }> = {
   select: { desc: 'Wählt Elemente für andere Werkzeuge und Befehle aus.', steps: ['Klicken Sie auf ein Element.', 'Ziehen Sie von links nach rechts (Fenster) oder rechts nach links (Kreuzen).', 'Doppelklick: Fläche mit Kanten bzw. Gruppe öffnen. Dreifachklick: alles Verbundene.'], mods: ['Strg: hinzufügen', 'Umschalt: hinzufügen/entfernen', 'Strg+Umschalt: entfernen'] },
   line: { desc: 'Zeichnet Kanten. Geschlossene Kanten in einer Ebene bilden automatisch eine Fläche.', steps: ['Klicken Sie auf den Startpunkt.', 'Klicken Sie auf den Endpunkt oder geben Sie eine Länge ein.', 'Weiterzeichnen oder Esc zum Beenden.'], mods: ['Pfeiltasten: Achse sperren', 'Umschalt: Inferenz sperren', 'Eingabe [x;y;z] absolut oder <x;y;z> relativ'] },
   rectangle: { desc: 'Zeichnet rechteckige Flächen auf dem Boden oder auf vorhandenen Flächen.', steps: ['Klicken Sie auf die erste Ecke.', 'Klicken Sie auf die gegenüberliegende Ecke.', 'Geben Sie z. B. „3m;4m“ ein, um die Maße festzulegen (auch nachträglich).'] },
@@ -46,5 +46,5 @@ const T: Record<string, { desc: string; steps: string[]; mods?: string[] }> = {
   zoom: { desc: 'Zoomt hinein und heraus.', steps: ['Nach oben/unten ziehen.', 'Mausrad zoomt zum Cursor.', 'Sichtfeld eingeben (z. B. 35).'] },
   followme: { desc: 'Extrudiert ein Profil entlang eines Pfades (z. B. Rohr, Gesims, Drehkörper).', steps: ['Pfad-Kanten auswählen (Doppelklick auf eine Fläche wählt deren Kanten).', 'Werkzeug wählen.', 'Auf die Profilfläche klicken.'] },
 };
-const text = computed(() => T[ed.ui.tool] ?? { desc: ed.ui.status, steps: [ed.ui.status] });
+const text = computed(() => TEXTS[editor.ui.tool] ?? { desc: editor.ui.status, steps: [editor.ui.status] });
 </script>

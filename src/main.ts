@@ -18,13 +18,13 @@ if (!webglAvailable()) {
   failSplash('webgl');
 } else {
   import('./startApp')
-    .then(m => {
-      m.startApp();
+    .then(module => {
+      module.startApp();
       hideSplash(shot ? 0 : reduced ? 300 : 2100, shot ? 0 : 600);
     })
-    .catch((e: unknown) => {
-      console.error(e);
-      const err = e as Error;
-      failSplash(err?.name === 'WebGLUnavailableError' ? 'webgl' : 'other', String(err?.message ?? e));
+    .catch((error: unknown) => {
+      console.error(error);
+      const err = error as Error;
+      failSplash(err?.name === 'WebGLUnavailableError' ? 'webgl' : 'other', String(err?.message ?? error));
     });
 }

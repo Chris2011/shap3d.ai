@@ -11,5 +11,5 @@
 <script setup lang="ts">
 /** On/off switch (v-model). `readonly` only shows the state, e.g. inside a clickable list row. */
 defineProps<{ modelValue: boolean; label?: string; small?: boolean; readonly?: boolean }>();
-const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void }>();
+const emit = defineEmits<{ (event: 'update:modelValue', value: boolean): void }>();
 </script>

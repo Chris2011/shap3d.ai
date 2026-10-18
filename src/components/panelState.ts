@@ -1,8 +1,8 @@
 import { ref } from 'vue';
 
 export const openPanel = ref<string | null>(null);
-export function showPanel(id: string) { openPanel.value = id; }
-export function togglePanel(id: string) { openPanel.value = openPanel.value === id ? null : id; }
+export const showPanel = (id: string) => { openPanel.value = id; };
+export const togglePanel = (id: string) => { openPanel.value = openPanel.value === id ? null : id; };
 
 /** Right-hand panels (order = order of the tiles). The components are attached in S3dRightPanels.vue. */
 export const PANEL_INFO: { id: string; label: string; icon: string; width: number; flush?: boolean }[] = [

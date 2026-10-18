@@ -2,14 +2,14 @@
   <div class="mt-1 mb-2.5 flex items-center gap-2.5">
     <div class="size-12 flex-none rounded-[3px] border border-line-2" :style="swatchStyle(cur)"></div>
     <div>
-      <div class="font-semibold">{{ ed.ui.currentMaterial ?? 'Standard' }}</div>
+      <div class="font-semibold">{{ editor.ui.currentMaterial ?? 'Standard' }}</div>
       <div class="s3d-label">Klicken Sie ein Material an, dann auf Flächen (Farbeimer, B).</div>
     </div>
   </div>
   <input v-model="filter" class="s3d-input" placeholder="Materialien durchsuchen" />
   <div class="my-2.5 grid grid-cols-[repeat(6,1fr)] gap-1.5">
-    <div class="flex aspect-square cursor-pointer items-end justify-center rounded-[3px] border border-line-2 bg-[linear-gradient(135deg,var(--s3d-bg)_50%,#a4b2bf_50%)] text-[0.5625rem] text-[#333]" :class="{ [ON]: ed.ui.currentMaterial == null }" title="Standard" @click="choose(null)"><span>Std</span></div>
-    <div v-for="m in list" :key="m.name" class="aspect-square cursor-pointer rounded-[3px] border border-line-2" :class="{ [ON]: ed.ui.currentMaterial === m.name }" :style="swatchStyle(m)" :title="m.name" @click="choose(m.name)"></div>
+    <div class="flex aspect-square cursor-pointer items-end justify-center rounded-[3px] border border-line-2 bg-[linear-gradient(135deg,var(--s3d-bg)_50%,#a4b2bf_50%)] text-[0.5625rem] text-[#333]" :class="{ [SELECTED_OUTLINE]: editor.ui.currentMaterial == null }" title="Standard" @click="choose(null)"><span>Std</span></div>
+    <div v-for="material in list" :key="material.name" class="aspect-square cursor-pointer rounded-[3px] border border-line-2" :class="{ [SELECTED_OUTLINE]: editor.ui.currentMaterial === material.name }" :style="swatchStyle(material)" :title="material.name" @click="choose(material.name)"></div>
   </div>
 
   <template v-if="cur">
@@ -20,10 +20,10 @@
     <div class="s3d-row"><span class="s3d-label">Textur</span>
       <select class="s3d-input" :value="cur.texture ?? ''" @change="setTexture(($event.target as HTMLSelectElement).value)">
         <option value="">Keine (nur Farbe)</option>
-        <option v-for="(n, k) in TEXTURES" :key="k" :value="k">{{ n }}</option>
+        <option v-for="(label, kind) in TEXTURES" :key="kind" :value="kind">{{ label }}</option>
       </select>
     </div>
-    <div v-if="cur.texture" class="s3d-row"><span class="s3d-label">Größe</span><input class="s3d-input" :value="ed.fmt(cur.textureSize ?? defaultSize(cur.texture))" @change="setTexSize(($event.target as HTMLInputElement).value)" /></div>
+    <div v-if="cur.texture" class="s3d-row"><span class="s3d-label">Größe</span><input class="s3d-input" :value="editor.fmt(cur.textureSize ?? defaultSize(cur.texture))" @change="setTexSize(($event.target as HTMLInputElement).value)" /></div>
     <div class="s3d-row"><span class="s3d-label">Verwendet</span><span>{{ usage }}×</span></div>
     <button class="s3d-btn small" @click="remove">Material löschen</button>
   </template>
@@ -43,45 +43,45 @@ import { swatchStyle } from '../../utils/materialSwatch';
 import { parseLength } from '../../core/units';
 import { useModel } from '../../composables/useModel';
 
-const ed = useEditor();
-const ON = 'outline-2 outline-offset-1 outline-blue';
+const editor = useEditor();
+const SELECTED_OUTLINE = 'outline-2 outline-offset-1 outline-blue';
 const filter = ref(''); const newName = ref(''); const newColor = ref('#c08040');
-const mats = useModel(() => ed.model.materials);
-const list = computed(() => mats.value.filter(m => !filter.value || m.name.toLowerCase().includes(filter.value.toLowerCase())));
-const cur = useModel(() => ed.model.material(ed.ui.currentMaterial ?? undefined) ?? null);
+const mats = useModel(() => editor.model.materials);
+const list = computed(() => mats.value.filter(material => !filter.value || material.name.toLowerCase().includes(filter.value.toLowerCase())));
+const cur = useModel(() => editor.model.material(editor.ui.currentMaterial ?? undefined) ?? null);
 const usage = useModel(() => {
-  const n = cur.value?.name; if (!n) return 0; let c = 0; const seen = new Set<Entities>();
-  const walk = (e: Entities) => { if (seen.has(e)) return; seen.add(e); for (const f of e.faces.values()) { if (f.material === n) c++; if (f.backMaterial === n) c++; } for (const i of e.instances.values()) { if (i.material === n) c++; walk(i.def.entities); } };
-  walk(ed.model.root); return c;
+  const name = cur.value?.name; if (!name) return 0; let count = 0; const seen = new Set<Entities>();
+  const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === name) count++; if (face.backMaterial === name) count++; } for (const instance of entities.instances.values()) { if (instance.material === name) count++; walk(instance.def.entities); } };
+  walk(editor.model.root); return count;
 });
-function choose(n: string | null) { ed.ui.currentMaterial = n; if (ed.ui.tool !== 'paint') ed.setTool('paint'); else ed.refreshStatus(); }
-function change(label: string, fn: () => void) { ed.commit(label, fn); }
-function setColor(c: string) { const m = cur.value; if (!m || !/^#[0-9a-f]{6}$/i.test(c)) return; m.color = c; ed.invalidate(); ed.ui.saved = false; }
-function setTexture(k: string) { const m = cur.value; if (!m) return; m.texture = k || undefined; m.textureSize = undefined; ed.invalidate(); ed.ui.saved = false; }
-function setTexSize(v: string) { const m = cur.value; const L = parseLength(v, ed.model.settings.units); if (!m || L == null || L <= 0) return; m.textureSize = L; ed.invalidate(); ed.ui.saved = false; }
-const defaultSize = (k: string) => (TEXTURE_SIZE as Record<string, number>)[k] ?? 1;
-function setOpacity(o: number) { const m = cur.value; if (!m) return; m.opacity = o; ed.invalidate(); ed.ui.saved = false; }
-function rename(n: string) {
-  const m = cur.value; n = n.trim(); if (!m || !n || ed.model.materials.some(x => x.name === n)) return; const old = m.name;
+const choose = (name: string | null) => { editor.ui.currentMaterial = name; if (editor.ui.tool !== 'paint') editor.setTool('paint'); else editor.refreshStatus(); };
+const change = (label: string, apply: () => void) => { editor.commit(label, apply); };
+const setColor = (color: string) => { const material = cur.value; if (!material || !/^#[0-9a-f]{6}$/i.test(color)) return; material.color = color; editor.invalidate(); editor.ui.saved = false; };
+const setTexture = (kind: string) => { const material = cur.value; if (!material) return; material.texture = kind || undefined; material.textureSize = undefined; editor.invalidate(); editor.ui.saved = false; };
+const setTexSize = (text: string) => { const material = cur.value; const size = parseLength(text, editor.model.settings.units); if (!material || size == null || size <= 0) return; material.textureSize = size; editor.invalidate(); editor.ui.saved = false; };
+const defaultSize = (kind: string) => (TEXTURE_SIZE as Record<string, number>)[kind] ?? 1;
+const setOpacity = (opacity: number) => { const material = cur.value; if (!material) return; material.opacity = opacity; editor.invalidate(); editor.ui.saved = false; };
+const rename = (name: string) => {
+  const material = cur.value; name = name.trim(); if (!material || !name || editor.model.materials.some(other => other.name === name)) return; const old = material.name;
   change('Material umbenennen', () => {
-    m.name = n; const seen = new Set<Entities>();
-    const walk = (e: Entities) => { if (seen.has(e)) return; seen.add(e); for (const f of e.faces.values()) { if (f.material === old) f.material = n; if (f.backMaterial === old) f.backMaterial = n; } for (const i of e.instances.values()) { if (i.material === old) i.material = n; walk(i.def.entities); } };
-    walk(ed.model.root);
+    material.name = name; const seen = new Set<Entities>();
+    const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === old) face.material = name; if (face.backMaterial === old) face.backMaterial = name; } for (const instance of entities.instances.values()) { if (instance.material === old) instance.material = name; walk(instance.def.entities); } };
+    walk(editor.model.root);
   });
-  ed.ui.currentMaterial = n;
-}
-function remove() {
-  const m = cur.value; if (!m) return; const old = m.name;
+  editor.ui.currentMaterial = name;
+};
+const remove = () => {
+  const material = cur.value; if (!material) return; const old = material.name;
   change('Material löschen', () => {
-    ed.model.materials = ed.model.materials.filter(x => x !== m); const seen = new Set<Entities>();
-    const walk = (e: Entities) => { if (seen.has(e)) return; seen.add(e); for (const f of e.faces.values()) { if (f.material === old) f.material = undefined; if (f.backMaterial === old) f.backMaterial = undefined; } for (const i of e.instances.values()) { if (i.material === old) i.material = undefined; walk(i.def.entities); } };
-    walk(ed.model.root);
+    editor.model.materials = editor.model.materials.filter(other => other !== material); const seen = new Set<Entities>();
+    const walk = (entities: Entities) => { if (seen.has(entities)) return; seen.add(entities); for (const face of entities.faces.values()) { if (face.material === old) face.material = undefined; if (face.backMaterial === old) face.backMaterial = undefined; } for (const instance of entities.instances.values()) { if (instance.material === old) instance.material = undefined; walk(instance.def.entities); } };
+    walk(editor.model.root);
   });
-  ed.ui.currentMaterial = null;
-}
-function create() {
-  let n = newName.value.trim() || 'Material'; let k = 1; const base = n; while (ed.model.materials.some(x => x.name === n)) n = `${base} ${++k}`;
-  change('Material erstellen', () => ed.model.materials.push({ name: n, color: newColor.value, opacity: 1 }));
-  newName.value = ''; choose(n);
-}
+  editor.ui.currentMaterial = null;
+};
+const create = () => {
+  let name = newName.value.trim() || 'Material'; let counter = 1; const base = name; while (editor.model.materials.some(other => other.name === name)) name = `${base} ${++counter}`;
+  change('Material erstellen', () => editor.model.materials.push({ name: name, color: newColor.value, opacity: 1 }));
+  newName.value = ''; choose(name);
+};
 </script>

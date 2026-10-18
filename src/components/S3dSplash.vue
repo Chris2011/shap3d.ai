@@ -13,9 +13,9 @@
 
     <!-- "Shap3D.ai" letter by letter – 3D and ai light up in the accent colour -->
     <div class="flex flex-none text-[2.125rem] font-semibold tracking-[0.0625rem] text-brand-ice">
-      <component :is="l.accent ? 'b' : 'span'" v-for="(l, i) in LETTERS" :key="i"
-        :class="l.accent ? 'font-bold animate-splash-in-lit motion-reduce:animate-none motion-reduce:text-brand' : 'animate-splash-in motion-reduce:animate-none'"
-        :style="{ animationDelay: l.delay }">{{ l.ch }}</component>
+      <component :is="letter.accent ? 'b' : 'span'" v-for="(letter, i) in LETTERS" :key="i"
+        :class="letter.accent ? 'font-bold animate-splash-in-lit motion-reduce:animate-none motion-reduce:text-brand' : 'animate-splash-in motion-reduce:animate-none'"
+        :style="{ animationDelay: letter.delay }">{{ letter.ch }}</component>
     </div>
     <div class="flex-none text-[0.8125rem] tracking-[0.15625rem] text-[#7d8794] uppercase animate-splash-tag motion-reduce:animate-none">{{ BRAND.tagline }}</div>
 
@@ -53,10 +53,10 @@ import { splash } from './splashState';
 const EDGE = 'fill-none stroke-brand-ice [stroke-linecap:round] [stroke-linejoin:round] [stroke-dasharray:1] motion-reduce:animate-none';
 
 /** Letters appear one after another (50 ms apart); 3D and ai light up 0.35 s after they appear. */
-const LETTERS = [...BRAND.name].map((ch, i) => {
-  const accent = i >= 4 && ch !== '.';
-  const t = 1 + i * 0.05;
-  return { ch, accent, delay: accent ? `${t.toFixed(2)}s, ${(t + 0.35).toFixed(2)}s` : `${t.toFixed(2)}s` };
+const LETTERS = [...BRAND.name].map((letter, i) => {
+  const accent = i >= 4 && letter !== '.';
+  const start = 1 + i * 0.05;
+  return { ch: letter, accent, delay: accent ? `${start.toFixed(2)}s, ${(start + 0.35).toFixed(2)}s` : `${start.toFixed(2)}s` };
 });
 const reload = () => location.reload();
 </script>

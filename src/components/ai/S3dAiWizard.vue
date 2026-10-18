@@ -1,17 +1,17 @@
 <template>
   <S3dModalDialog title="KI-Assistent einrichten" panel-class="w-[min(40rem,94vw)]" @close="$emit('close')">
     <template #header>
-        <span class="ml-auto flex gap-3 whitespace-nowrap text-xs text-[#9a9db0]"><span v-for="(s, i) in STEPS" :key="s" class="flex items-center gap-1.25" :class="i === step ? 'font-bold text-navy' : i < step ? 'text-[#2e9b4b]' : ''"><span class="inline-flex size-4.5 items-center justify-center rounded-full border border-current text-[0.625rem] font-bold" :class="i === step && 'border-navy bg-navy-bg text-white'">{{ i < step ? '✓' : i + 1 }}</span>{{ s }}</span></span>
+        <span class="ml-auto flex gap-3 whitespace-nowrap text-xs text-[#9a9db0]"><span v-for="(stepLabel, i) in STEPS" :key="stepLabel" class="flex items-center gap-1.25" :class="i === step ? 'font-bold text-navy' : i < step ? 'text-[#2e9b4b]' : ''"><span class="inline-flex size-4.5 items-center justify-center rounded-full border border-current text-[0.625rem] font-bold" :class="i === step && 'border-navy bg-navy-bg text-white'">{{ i < step ? '✓' : i + 1 }}</span>{{ stepLabel }}</span></span>
     </template>
 
       <!-- 1: provider -->
       <div v-if="step === 0" class="overflow-auto px-4 py-3.5 select-text">
         <p class="mb-3">Welcher lokale KI-Server läuft auf deinem Rechner? Alles bleibt auf deinem Gerät – nichts geht ins Internet. Am einfachsten ist <b>Ollama</b>.</p>
         <div class="grid grid-cols-[repeat(2,1fr)] gap-2">
-          <button v-for="p in PROVIDERS" :key="p.id" class="flex flex-col gap-1 border bg-surface p-2.5 text-left" :class="draft.provider === p.id ? 'border-navy bg-sel shadow-[0_0_0_1px_var(--s3d-navy)]' : 'border-line-2'" @click="choose(p.id)">
-            <div class="font-bold text-navy">{{ p.name }}</div>
+          <button v-for="provider in PROVIDERS" :key="provider.id" class="flex flex-col gap-1 border bg-surface p-2.5 text-left" :class="draft.provider === provider.id ? 'border-navy bg-sel shadow-[0_0_0_1px_var(--s3d-navy)]' : 'border-line-2'" @click="choose(provider.id)">
+            <div class="font-bold text-navy">{{ provider.name }}</div>
             <div class="flex gap-1 [&>span]:rounded-lg [&>span]:px-1.5 [&>span]:text-[0.625rem]"><span class="bg-ok-bg text-ok">lokal</span><span class="bg-surface-2 text-ink-2">kostenlos</span></div>
-            <div class="text-xs text-ink-2">{{ p.blurb }}</div>
+            <div class="text-xs text-ink-2">{{ provider.blurb }}</div>
           </button>
         </div>
       </div>
@@ -19,7 +19,7 @@
       <!-- 2: connect -->
       <div v-if="step === 1" class="overflow-auto px-4 py-3.5 select-text">
         <div class="mb-1.5 text-[0.9375rem] font-bold text-navy">{{ info.name }}</div>
-        <ol class="mb-2.5 list-decimal pl-5 [&_li]:my-1 [&_code]:bg-surface-2 [&_code]:px-1.25 [&_code]:py-px [&_code]:font-mono [&_code]:text-xs [&_code]:select-all"><li v-for="(s, i) in info.setup" :key="i"><span v-html="fmt(s)"></span></li></ol>
+        <ol class="mb-2.5 list-decimal pl-5 [&_li]:my-1 [&_code]:bg-surface-2 [&_code]:px-1.25 [&_code]:py-px [&_code]:font-mono [&_code]:text-xs [&_code]:select-all"><li v-for="(setupStep, i) in info.setup" :key="i"><span v-html="fmt(setupStep)"></span></li></ol>
         <label class="mt-2.5 mb-1 block text-xs font-semibold">Adresse (Basis-URL)</label>
         <input v-model="draft.baseUrl" class="s3d-input" spellcheck="false" />
         <label class="mt-2.5 mb-1 block text-xs font-semibold">API-Key <span v-if="!info.needsKey">(optional)</span></label>
@@ -36,28 +36,28 @@
       <div v-if="step === 2" class="overflow-auto px-4 py-3.5 select-text">
         <p class="mb-3">Wähle ein freies Modell. <b>LLaMA-Mesh</b> ist speziell für 3D trainiert und erzeugt Meshes direkt; <b>Qwen</b>-Modelle schreiben Modellier-Code und können ganze Szenen mit Materialien und Texturen bauen.</p>
         <div class="mb-1.5 flex flex-col gap-1.5">
-          <div v-for="m in MODEL_PRESETS" :key="m.id" class="cursor-pointer border bg-surface px-2.5 py-2" :class="draft.model === m.id ? 'border-navy bg-sel shadow-[0_0_0_1px_var(--s3d-navy)]' : 'border-line-2'" @click="installed(m.id) && (draft.model = m.id)">
+          <div v-for="preset in MODEL_PRESETS" :key="preset.id" class="cursor-pointer border bg-surface px-2.5 py-2" :class="draft.model === preset.id ? 'border-navy bg-sel shadow-[0_0_0_1px_var(--s3d-navy)]' : 'border-line-2'" @click="installed(preset.id) && (draft.model = preset.id)">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-navy">{{ m.label }}</span>
-              <span class="rounded-lg px-1.5 text-[0.625rem]" :class="m.mode === 'mesh' ? 'bg-[#f3e5f5] text-[#6a1b9a] dark:bg-[#2d1b36] dark:text-[#d2a8ff]' : 'bg-sel text-[#1e4f9b] dark:text-navy'">{{ m.mode === 'mesh' ? '3D-Mesh' : 'Code' }}</span>
-              <span class="text-[0.6875rem] text-muted">{{ m.size }}</span>
+              <span class="font-bold text-navy">{{ preset.label }}</span>
+              <span class="rounded-lg px-1.5 text-[0.625rem]" :class="preset.mode === 'mesh' ? 'bg-[#f3e5f5] text-[#6a1b9a] dark:bg-[#2d1b36] dark:text-[#d2a8ff]' : 'bg-sel text-[#1e4f9b] dark:text-navy'">{{ preset.mode === 'mesh' ? '3D-Mesh' : 'Code' }}</span>
+              <span class="text-[0.6875rem] text-muted">{{ preset.size }}</span>
               <span class="flex-1"></span>
-              <span v-if="installed(m.id)" class="text-xs font-semibold text-ok">✓ installiert</span>
+              <span v-if="installed(preset.id)" class="text-xs font-semibold text-ok">✓ installiert</span>
               <template v-else-if="draft.provider === 'ollama'">
-                <button v-if="downloads[m.id] && !downloads[m.id].error" class="s3d-btn small" @click.stop="cancelDownload(m.id)">Abbrechen</button>
-                <button v-else class="s3d-btn small" :disabled="anyPulling" @click.stop="install(m.id)">{{ downloads[m.id]?.error ? 'Erneut versuchen' : 'Installieren' }}</button>
+                <button v-if="downloads[preset.id] && !downloads[preset.id].error" class="s3d-btn small" @click.stop="cancelDownload(preset.id)">Abbrechen</button>
+                <button v-else class="s3d-btn small" :disabled="anyPulling" @click.stop="install(preset.id)">{{ downloads[preset.id]?.error ? 'Erneut versuchen' : 'Installieren' }}</button>
               </template>
             </div>
-            <div class="mt-0.75 text-xs text-ink-2">{{ m.note }}</div>
-            <div v-if="downloads[m.id]" class="mt-2" @click.stop>
-              <template v-if="downloads[m.id].error"><span class="text-xs text-danger">Fehler: {{ downloads[m.id].error }}</span></template>
+            <div class="mt-0.75 text-xs text-ink-2">{{ preset.note }}</div>
+            <div v-if="downloads[preset.id]" class="mt-2" @click.stop>
+              <template v-if="downloads[preset.id].error"><span class="text-xs text-danger">Fehler: {{ downloads[preset.id].error }}</span></template>
               <template v-else>
-                <S3dProgressBar :value="downloads[m.id].frac" labeled />
+                <S3dProgressBar :value="downloads[preset.id].frac" labeled />
                 <div class="mt-1 flex flex-wrap gap-x-3.5 gap-y-1 text-xs text-[#374151] tabular-nums dark:text-ink-2">
-                  <span>{{ downloads[m.id].status }}</span>
-                  <span v-if="downloads[m.id].total">{{ fmtBytes(downloads[m.id].completed) }} von {{ fmtBytes(downloads[m.id].total) }}</span>
-                  <span v-if="downloads[m.id].speed > 0 && downloads[m.id].phase === 'download'">{{ fmtBytes(downloads[m.id].speed) }}/s</span>
-                  <span v-if="downloads[m.id].phase === 'download'">{{ fmtDuration(downloads[m.id].eta) }}</span>
+                  <span>{{ downloads[preset.id].status }}</span>
+                  <span v-if="downloads[preset.id].total">{{ fmtBytes(downloads[preset.id].completed) }} von {{ fmtBytes(downloads[preset.id].total) }}</span>
+                  <span v-if="downloads[preset.id].speed > 0 && downloads[preset.id].phase === 'download'">{{ fmtBytes(downloads[preset.id].speed) }}/s</span>
+                  <span v-if="downloads[preset.id].phase === 'download'">{{ fmtDuration(downloads[preset.id].eta) }}</span>
                 </div>
               </template>
             </div>
@@ -66,7 +66,7 @@
         <template v-if="otherModels.length">
           <label class="mt-2.5 mb-1 block text-xs font-semibold">Weitere installierte Modelle</label>
           <div class="mb-1.5 flex max-h-55 flex-wrap gap-1.5 overflow-auto">
-            <button v-for="m in otherModels" :key="m" class="flex items-center gap-1.5 border px-2.25 py-1.25 font-mono text-xs" :class="draft.model === m ? 'border-navy bg-active' : 'border-line-2 bg-surface'" @click="draft.model = m">{{ m }}</button>
+            <button v-for="modelName in otherModels" :key="modelName" class="flex items-center gap-1.5 border px-2.25 py-1.25 font-mono text-xs" :class="draft.model === modelName ? 'border-navy bg-active' : 'border-line-2 bg-surface'" @click="draft.model = modelName">{{ modelName }}</button>
           </div>
         </template>
         <label class="mt-2.5 mb-1 block text-xs font-semibold">oder Modellname eingeben</label>
@@ -98,40 +98,40 @@ import { reactive, ref, computed } from 'vue';
 import S3dIcon from '../S3dIcon.vue';
 import { PROVIDERS, MODEL_PRESETS, aiConfig, providerInfo, listModels, describeError, downloads, startDownload, cancelDownload, fmtBytes, fmtDuration, ensureMeshModel, type ProviderId, type AiConfig } from '../../ai/providers';
 
-const emit = defineEmits<{ (e: 'close'): void }>();
+const emit = defineEmits<{ (event: 'close'): void }>();
 const STEPS = ['Anbieter', 'Verbinden', 'Modell', 'Fertig'];
 const step = ref(0);
 const draft = reactive<AiConfig>({ ...aiConfig });
 const info = computed(() => providerInfo(draft.provider));
 const models = ref<string[]>([]); const error = ref(''); const testing = ref(false);
-const norm = (m: string) => m.toLowerCase().replace(/:latest$/, '');
-const installed = (id: string) => models.value.some(m => norm(m) === norm(id));
-const otherModels = computed(() => models.value.filter(m => !MODEL_PRESETS.some(p => norm(p.id) === norm(m))));
-const anyPulling = computed(() => Object.values(downloads).some(d => !d.error));
-async function install(id: string) {
+const norm = (modelName: string) => modelName.toLowerCase().replace(/:latest$/, '');
+const installed = (id: string) => models.value.some(model => norm(model) === norm(id));
+const otherModels = computed(() => models.value.filter(model => !MODEL_PRESETS.some(preset => norm(preset.id) === norm(model))));
+const anyPulling = computed(() => Object.values(downloads).some(download => !download.error));
+const install = async (id: string) => {
   delete downloads[id];
-  const preset = MODEL_PRESETS.find(p => p.id === id);
+  const preset = MODEL_PRESETS.find(entry => entry.id === id);
   if (await startDownload(draft, preset?.pull ?? id, id)) {
-    if (preset?.mode === 'mesh') { try { await ensureMeshModel(draft); } catch (e) { downloads[id] = { ...(downloads[id] ?? {}), error: describeError(e) } as any; } }
+    if (preset?.mode === 'mesh') { try { await ensureMeshModel(draft); } catch (reason) { downloads[id] = { ...(downloads[id] ?? {}), error: describeError(reason) } as any; } }
     models.value = await listModels(draft); draft.model = id;
   }
-}
+};
 const canNext = computed(() => step.value === 0 ? !!draft.provider : step.value === 1 ? !!draft.baseUrl && (!info.value.needsKey || !!draft.apiKey) : step.value === 2 ? !!draft.model : true);
 
-function choose(id: ProviderId) {
+const choose = (id: ProviderId) => {
   if (draft.provider !== id) { draft.provider = id; draft.baseUrl = providerInfo(id).baseUrl; draft.model = ''; models.value = []; error.value = ''; }
-}
-const fmt = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/(ollama [a-z]+ [^\s]+|litellm [^\n]+|OLLAMA_ORIGINS="\*")/g, '<code>$1</code>');
-async function test() {
+};
+const fmt = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/(ollama [a-z]+ [^\s]+|litellm [^\n]+|OLLAMA_ORIGINS="\*")/g, '<code>$1</code>');
+const test = async () => {
   testing.value = true; error.value = ''; models.value = [];
   try { models.value = await listModels(draft); if (!models.value.length) error.value = 'Verbunden, aber keine Modelle gefunden.'; }
-  catch (e) { error.value = describeError(e); }
+  catch (reason) { error.value = describeError(reason); }
   finally { testing.value = false; }
-}
-async function next() {
+};
+const next = async () => {
   if (step.value === 1 && !models.value.length && !error.value) await test();
-  if (step.value === 1 && (!draft.model || !installed(draft.model))) draft.model = MODEL_PRESETS.find(p => installed(p.id))?.id ?? models.value[0] ?? '';
+  if (step.value === 1 && (!draft.model || !installed(draft.model))) draft.model = MODEL_PRESETS.find(preset => installed(preset.id))?.id ?? models.value[0] ?? '';
   step.value++;
-}
-function finish() { Object.assign(aiConfig, draft, { configured: true }); emit('close'); }
+};
+const finish = () => { Object.assign(aiConfig, draft, { configured: true }); emit('close'); };
 </script>

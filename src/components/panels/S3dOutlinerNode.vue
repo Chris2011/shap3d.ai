@@ -6,7 +6,7 @@
       <span class="flex-1 truncate" :class="node.inst.hidden && 'text-[#9aa3ab] italic'">{{ label }}</span>
       <button class="flex bg-transparent px-0.5 opacity-55 hover:opacity-100" :title="node.inst.hidden ? 'Einblenden' : 'Ausblenden'" @click.stop="toggleHidden"><S3dIcon :name="node.inst.hidden ? 'eyeOff' : 'eye'" :size="14" /></button>
     </div>
-    <template v-if="open"><S3dOutlinerNode v-for="c in node.children" :key="c.inst.id" :node="c" :depth="depth + 1" :filter="filter" /></template>
+    <template v-if="open"><S3dOutlinerNode v-for="child in node.children" :key="child.inst.id" :node="child" :depth="depth + 1" :filter="filter" /></template>
   </div>
 </template>
 
@@ -19,16 +19,16 @@ import { useModel } from '../../composables/useModel';
 
 interface ONode { inst: Instance; path: Instance[]; children: ONode[] }
 const props = defineProps<{ node: ONode; depth: number; filter: string }>();
-const ed = useEditor(); const open = ref(true);
-const label = computed(() => { const i = props.node.inst; return (i.name ? `${i.name} ` : '') + `<${i.def.name}>`; });
-const matches = (n: ONode): boolean => !props.filter || (n.inst.name + ' ' + n.inst.def.name).toLowerCase().includes(props.filter) || n.children.some(matches);
+const editor = useEditor(); const open = ref(true);
+const label = computed(() => { const instance = props.node.inst; return (instance.name ? `${instance.name} ` : '') + `<${instance.def.name}>`; });
+const matches = (candidate: ONode): boolean => !props.filter || (candidate.inst.name + ' ' + candidate.inst.def.name).toLowerCase().includes(props.filter) || candidate.children.some(matches);
 const visible = computed(() => matches(props.node));
 const parentPath = computed(() => props.node.path.slice(0, -1));
-const sameContext = () => parentPath.value.length === ed.activePath.length && parentPath.value.every((p, i) => ed.activePath[i] === p);
-const selected = computed(() => { void ed.ui.selRev; return sameContext() && ed.selection.has('instance:' + props.node.inst.id); });
-const inContext = useModel(() => ed.activePath.includes(props.node.inst));
-function goTo() { ed.setContext([...parentPath.value]); }
-function click() { if (!sameContext()) goTo(); ed.select([{ kind: 'instance', id: props.node.inst.id }]); }
-function dbl() { goTo(); ed.enterInstance(props.node.inst); }
-function toggleHidden() { ed.commit('Ausblenden', () => { props.node.inst.hidden = !props.node.inst.hidden; }); }
+const sameContext = () => parentPath.value.length === editor.activePath.length && parentPath.value.every((instance, i) => editor.activePath[i] === instance);
+const selected = computed(() => { void editor.ui.selRev; return sameContext() && editor.selection.has('instance:' + props.node.inst.id); });
+const inContext = useModel(() => editor.activePath.includes(props.node.inst));
+const goTo = () => { editor.setContext([...parentPath.value]); };
+const click = () => { if (!sameContext()) goTo(); editor.select([{ kind: 'instance', id: props.node.inst.id }]); };
+const dbl = () => { goTo(); editor.enterInstance(props.node.inst); };
+const toggleHidden = () => { editor.commit('Ausblenden', () => { props.node.inst.hidden = !props.node.inst.hidden; }); };
 </script>

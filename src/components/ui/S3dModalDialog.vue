@@ -21,6 +21,6 @@ import S3dCloseButton from './S3dCloseButton.vue';
  * Closes on ✕, Esc and a click on the backdrop. Without a title it is a plain box (used by S3dDialogs.vue).
  */
 defineProps<{ title?: string; panelClass?: string }>();
-const emit = defineEmits<{ (e: 'close'): void }>();
+const emit = defineEmits<{ (event: 'close'): void }>();
 onKeyStroke('Escape', () => emit('close'));
 </script>

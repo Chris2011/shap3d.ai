@@ -24,7 +24,7 @@ export const theme = reactive({
   night: false,
 });
 const listeners: (() => void)[] = [];
-export const onThemeChange = (fn: () => void) => { listeners.push(fn); };
+export const onThemeChange = (listener: () => void) => { listeners.push(listener); };
 
 // sync: data-theme must be set before the first render (no white flash in dark mode)
 watch([mode, scene, systemDark], () => {
@@ -32,10 +32,10 @@ watch([mode, scene, systemDark], () => {
   theme.night = scene.value === 'night' || (scene.value === 'auto' && theme.dark);
   document.documentElement.dataset.theme = theme.dark ? 'dark' : 'light';
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.dark ? '#0b0f14' : '#f1f1f6');
-  listeners.forEach(f => f());
+  listeners.forEach(listener => listener());
 }, { immediate: true, flush: 'sync' });
 
-export const setTheme = (m: ThemeMode) => { mode.value = m; };
-export const setScene = (s: SceneMode) => { scene.value = s; };
+export const setTheme = (newMode: ThemeMode) => { mode.value = newMode; };
+export const setScene = (newScene: SceneMode) => { scene.value = newScene; };
 /** The on/off switch: dark mode on = dark, off = light (leaves "follow system" behind). */
 export const toggleTheme = () => setTheme(theme.dark ? 'light' : 'dark');
