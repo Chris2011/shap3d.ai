@@ -5,7 +5,7 @@
     </div>
     <div class="s3d-panel flex w-10 flex-col [&_.s3d-iconbtn]:rounded-none">
       <ToolButton v-for="t in MAIN_TOOLS" :key="t" :tool="t" />
-      <div class="mx-1.5 my-[5px] h-px bg-[#c9cbd4] dark:bg-line-2"></div>
+      <div class="mx-1.5 my-1.25 h-px bg-[#c9cbd4] dark:bg-line-2"></div>
       <ToolButton v-for="t in ed.ui.recentTools" :key="'r' + t" :tool="t" />
       <button class="s3d-iconbtn" :class="{ active: expanded }" title="Weitere Werkzeuge" @click.stop="expanded = !expanded"><Icon name="more" /></button>
     </div>

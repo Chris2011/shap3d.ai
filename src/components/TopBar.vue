@@ -2,7 +2,7 @@
   <div class="s3d-panel absolute top-0 left-0 z-30 flex h-11 items-center gap-0.5 pr-3 pl-1">
     <button :class="[TB, { 'bg-hover': menuOpen }]" title="Modell/Voreinstellungen öffnen" @click.stop="menuOpen = !menuOpen"><Icon name="menu" :size="22" /></button>
     <input v-if="editing" ref="nameInput" class="mx-1 h-7 w-50 border border-navy bg-surface px-2 font-bold text-navy outline-none" v-model="name" @keydown.enter="commitName" @blur="commitName" @keydown.esc="editing = false" />
-    <div v-else class="max-w-65 cursor-text truncate pr-2 pl-1.5 text-sm/11 font-bold tracking-[.85px] text-navy" title="Modell umbenennen" @click="startEdit">{{ modelName }}</div>
+    <div v-else class="max-w-65 cursor-text truncate pr-2 pl-1.5 text-sm/11 font-bold tracking-[0.05312rem] text-navy" title="Modell umbenennen" @click="startEdit">{{ modelName }}</div>
     <button :class="[TB, { 'bg-hover': openPanel === 'ai' }]" title="KI-Assistent" @click="openPanel = openPanel === 'ai' ? null : 'ai'"><Icon name="sparkle" :size="22" /></button>
     <button :class="TB_SM" :title="'Rückgängig ' + ed.ui.undoLabel" :disabled="!ed.ui.canUndo" @click="ed.undo()"><Icon name="undo" :size="18" /></button>
     <button :class="TB_SM" :title="'Wiederholen ' + ed.ui.redoLabel" :disabled="!ed.ui.canRedo" @click="ed.redo()"><Icon name="redo" :size="18" /></button>
@@ -13,7 +13,7 @@
   </div>
 
   <div class="s3d-panel absolute top-0 right-0 z-30 flex h-11 items-center gap-2 px-2">
-    <button class="h-7 rounded-[2px] border-0 bg-navy-bg px-2.5 text-[13px] font-bold tracking-[.3px] text-white hover:bg-[#0b3457]" @click.stop="exportOpen = !exportOpen">Exportieren</button>
+    <button class="h-7 rounded-[2px] border-0 bg-navy-bg px-2.5 text-[0.8125rem] font-bold tracking-[0.01875rem] text-white hover:bg-[#0b3457]" @click.stop="exportOpen = !exportOpen">Exportieren</button>
     <div v-if="exportOpen" class="s3d-menu top-11 right-0" @click="exportOpen = false">
       <div class="s3d-menu-item" @click="run('save')"><Icon name="save" :size="18" /> Modell (.shap3d.json)</div>
       <div class="s3d-menu-item" @click="run('export-glb')"><Icon name="cube" :size="18" /> GLB</div>

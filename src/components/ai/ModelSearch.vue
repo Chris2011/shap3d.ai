@@ -1,15 +1,15 @@
 <template>
   <div class="fixed inset-0 z-95 flex items-center justify-center bg-[rgba(20,25,30,.3)]" @pointerdown.self="$emit('close')">
-    <div class="s3d-panel flex h-[min(680px,90vh)] w-[min(720px,94vw)] flex-col" @keydown.stop>
+    <div class="s3d-panel flex h-[min(42.5rem,90vh)] w-[min(45rem,94vw)] flex-col" @keydown.stop>
       <div class="flex items-center gap-3 bg-panel-2 py-2.5 pr-2 pl-4">
-        <span class="text-[15px] font-bold text-navy">Modelle suchen</span>
-        <span class="flex-1 text-[11px] text-muted">Hugging Face · nur GGUF (läuft lokal mit Ollama)</span>
+        <span class="text-[0.9375rem] font-bold text-navy">Modelle suchen</span>
+        <span class="flex-1 text-[0.6875rem] text-muted">Hugging Face · nur GGUF (läuft lokal mit Ollama)</span>
         <button class="flex size-7.5 items-center justify-center bg-transparent text-navy" title="Schließen" @click="$emit('close')"><Icon name="close" :size="16" /></button>
       </div>
 
       <div class="flex gap-2 px-4 pt-3 pb-1.5">
         <input ref="inp" v-model="query" class="s3d-input h-8 flex-1" placeholder="z. B. qwen coder, llama mesh, phi, gemma …" spellcheck="false" @keydown.enter="run" />
-        <select v-model="sort" class="s3d-input h-8 w-[170px] flex-none" title="Sortierung">
+        <select v-model="sort" class="s3d-input h-8 w-42.5 flex-none" title="Sortierung">
           <option value="downloads">Meiste Downloads</option>
           <option value="trendingScore">Gerade beliebt</option>
           <option value="likes">Meiste Likes</option>
@@ -17,34 +17,34 @@
         </select>
       </div>
       <div class="flex flex-wrap gap-1.5 px-4 pt-0.5 pb-2">
-        <button v-for="c in CHIPS" :key="c.q" class="rounded-[14px] border px-2.5 py-[3px] text-xs" :class="query === c.q ? 'border-navy bg-sel font-semibold text-navy' : 'border-line-2 bg-surface hover:border-navy hover:text-navy'" :title="c.hint" @click="pick(c)">{{ c.label }}</button>
-        <label class="s3d-check ml-auto gap-[5px] text-xs" title="Blendet Modelle mit mehr als 4 Milliarden Parametern aus – die antworten ohne Grafikkarte nur langsam"><input v-model="smallOnly" type="checkbox" /> nur kleine (≤ 4B)</label>
+        <button v-for="c in CHIPS" :key="c.q" class="rounded-[14px] border px-2.5 py-0.75 text-xs" :class="query === c.q ? 'border-navy bg-sel font-semibold text-navy' : 'border-line-2 bg-surface hover:border-navy hover:text-navy'" :title="c.hint" @click="pick(c)">{{ c.label }}</button>
+        <label class="s3d-check ml-auto gap-1.25 text-xs" title="Blendet Modelle mit mehr als 4 Milliarden Parametern aus – die antworten ohne Grafikkarte nur langsam"><input v-model="smallOnly" type="checkbox" /> nur kleine (≤ 4B)</label>
       </div>
       <p v-if="!isOllama" class="mx-4 mb-2 bg-warn-bg px-2.5 py-1.5 text-xs text-warn">Herunterladen geht nur mit Ollama als Anbieter – du kannst aber suchen und dir die Modelle ansehen.</p>
 
       <div class="flex-1 overflow-auto border-t border-line select-text">
-        <div v-if="loading" class="flex items-center gap-2 px-4 py-3.5 text-[13px] text-ink-2"><span class="size-3.5 animate-spin rounded-full border-2 border-[#cfd8e3] border-t-blue"></span> Suche läuft …</div>
-        <div v-else-if="error" class="flex items-center gap-2 px-4 py-3.5 text-[13px] text-danger">✗ {{ error }}</div>
-        <div v-else-if="!shown.length" class="flex items-center gap-2 px-4 py-3.5 text-[13px] text-ink-2">Keine GGUF-Modelle gefunden{{ smallOnly && results.length ? ' – nur größere. Nimm den Haken bei „nur kleine“ raus.' : '. Versuch einen kürzeren Suchbegriff.' }}</div>
+        <div v-if="loading" class="flex items-center gap-2 px-4 py-3.5 text-[0.8125rem] text-ink-2"><span class="size-3.5 animate-spin rounded-full border-2 border-[#cfd8e3] border-t-blue"></span> Suche läuft …</div>
+        <div v-else-if="error" class="flex items-center gap-2 px-4 py-3.5 text-[0.8125rem] text-danger">✗ {{ error }}</div>
+        <div v-else-if="!shown.length" class="flex items-center gap-2 px-4 py-3.5 text-[0.8125rem] text-ink-2">Keine GGUF-Modelle gefunden{{ smallOnly && results.length ? ' – nur größere. Nimm den Haken bei „nur kleine“ raus.' : '. Versuch einen kürzeren Suchbegriff.' }}</div>
 
         <div v-for="m in shown" :key="m.id" class="border-b border-line" :class="{ 'bg-surface-2': openId === m.id }">
-          <div class="flex cursor-pointer items-start gap-2 px-4 py-[9px] hover:bg-hover" @click="toggle(m)">
+          <div class="flex cursor-pointer items-start gap-2 px-4 py-2.25 hover:bg-hover" @click="toggle(m)">
             <span class="w-3 pt-px text-navy">{{ openId === m.id ? '▾' : '▸' }}</span>
             <div class="min-w-0 flex-1">
-              <div class="truncate text-[13px]"><span v-if="m.params" class="mr-1.5 inline-block min-w-[30px] rounded-[3px] px-1 text-center text-[10.5px] font-bold" :class="PB[paramClass(m.params)]" title="Größe des Modells (Milliarden Parameter)">{{ String(m.params).replace('.', ',') }}B</span><span class="font-bold text-navy">{{ m.id.split('/')[1] }}</span><span class="text-muted"> von {{ m.author }}</span><span v-if="m.gated" class="ml-2 text-[11px] text-warn" title="Der Anbieter verlangt eine Anmeldung bei Hugging Face">🔒 Anmeldung nötig</span></div>
-              <div class="mt-0.5 flex flex-wrap gap-3 text-[11px] text-muted">
+              <div class="truncate text-[0.8125rem]"><span v-if="m.params" class="mr-1.5 inline-block min-w-7.5 rounded-[3px] px-1 text-center text-[0.65625rem] font-bold" :class="PB[paramClass(m.params)]" title="Größe des Modells (Milliarden Parameter)">{{ String(m.params).replace('.', ',') }}B</span><span class="font-bold text-navy">{{ m.id.split('/')[1] }}</span><span class="text-muted"> von {{ m.author }}</span><span v-if="m.gated" class="ml-2 text-[0.6875rem] text-warn" title="Der Anbieter verlangt eine Anmeldung bei Hugging Face">🔒 Anmeldung nötig</span></div>
+              <div class="mt-0.5 flex flex-wrap gap-3 text-[0.6875rem] text-muted">
                 <span title="Downloads (letzte 30 Tage)">⬇ {{ fmtCount(m.downloads) }}</span>
                 <span title="Likes">♥ {{ fmtCount(m.likes) }}</span>
                 <span v-if="m.updated" title="Zuletzt aktualisiert">{{ fmtDate(m.updated) }}</span>
-                <span v-if="m.license" class="bg-surface-2 px-[5px]">{{ m.license }}</span>
+                <span v-if="m.license" class="bg-surface-2 px-1.25">{{ m.license }}</span>
                 <span v-if="installedRepo(m.id)" class="font-bold text-ok">✓ installiert</span>
               </div>
             </div>
           </div>
 
           <div v-if="openId === m.id" class="pt-0.5 pr-4 pb-3 pl-9">
-            <div v-if="detailLoading" class="flex items-center gap-2 px-4 py-3.5 text-[13px] text-ink-2"><span class="size-3.5 animate-spin rounded-full border-2 border-[#cfd8e3] border-t-blue"></span> Lade Dateien …</div>
-            <div v-else-if="detailError" class="flex items-center gap-2 px-4 py-3.5 text-[13px] text-danger">✗ {{ detailError }}</div>
+            <div v-if="detailLoading" class="flex items-center gap-2 px-4 py-3.5 text-[0.8125rem] text-ink-2"><span class="size-3.5 animate-spin rounded-full border-2 border-[#cfd8e3] border-t-blue"></span> Lade Dateien …</div>
+            <div v-else-if="detailError" class="flex items-center gap-2 px-4 py-3.5 text-[0.8125rem] text-danger">✗ {{ detailError }}</div>
             <template v-else-if="detail">
               <div class="mb-1.5 flex flex-wrap gap-3.5 text-xs text-ink [&_a]:text-blue">
                 <span v-if="detail.params">{{ fmtParams(detail.params) }} Parameter</span>
@@ -52,16 +52,16 @@
                 <span v-if="detail.context">Kontext: {{ fmtCount(detail.context) }} Tokens</span>
                 <a :href="'https://huggingface.co/' + m.id" target="_blank" rel="noopener noreferrer">Auf Hugging Face ansehen ↗</a>
               </div>
-              <p v-if="!detail.quants.length" class="flex items-center gap-2 px-4 py-3.5 text-[13px] text-ink-2">Keine einzelnen GGUF-Dateien gefunden{{ detail.split ? ' – nur aufgeteilte Dateien, die Ollama nicht direkt laden kann' : '' }}.</p>
+              <p v-if="!detail.quants.length" class="flex items-center gap-2 px-4 py-3.5 text-[0.8125rem] text-ink-2">Keine einzelnen GGUF-Dateien gefunden{{ detail.split ? ' – nur aufgeteilte Dateien, die Ollama nicht direkt laden kann' : '' }}.</p>
               <p v-else class="mt-1 mb-1.5 text-xs text-ink-2">Kleinere Varianten sind schneller, aber ungenauer. <b>{{ RECOMMENDED_QUANT }}</b> ist meist der beste Kompromiss.</p>
-              <div v-for="q in detail.quants" :key="q.quant" class="grid grid-cols-[150px_80px_150px_1fr] items-center gap-2 border-t border-line px-1.5 py-1 text-xs" :class="{ 'bg-ok-bg': q.quant === RECOMMENDED_QUANT }">
-                <span class="font-mono font-bold">{{ q.quant }}<span v-if="q.quant === RECOMMENDED_QUANT" class="font-sans text-[11px] font-semibold text-ok"> ★ empfohlen</span></span>
+              <div v-for="q in detail.quants" :key="q.quant" class="grid grid-cols-[9.375rem_5rem_9.375rem_1fr] items-center gap-2 border-t border-line px-1.5 py-1 text-xs" :class="{ 'bg-ok-bg': q.quant === RECOMMENDED_QUANT }">
+                <span class="font-mono font-bold">{{ q.quant }}<span v-if="q.quant === RECOMMENDED_QUANT" class="font-sans text-[0.6875rem] font-semibold text-ok"> ★ empfohlen</span></span>
                 <span class="text-right tabular-nums">{{ q.size ? fmtBytes(q.size) : '?' }}</span>
                 <span :class="SPEED[speedClass(q.size).cls]">{{ speedClass(q.size).label }}</span>
                 <span class="flex items-center justify-end gap-2">
                   <template v-if="downloads[q.ollamaName] && !downloads[q.ollamaName].error">
                     <span class="flex items-center gap-1.5 whitespace-nowrap text-ink tabular-nums">
-                      <span class="inline-block h-1.5 w-[70px] bg-line"><span class="block h-full bg-navy-bg transition-[width] duration-300" :style="{ width: (downloads[q.ollamaName].frac * 100).toFixed(1) + '%' }"></span></span>
+                      <span class="inline-block h-1.5 w-17.5 bg-line"><span class="block h-full bg-navy-bg transition-[width] duration-300" :style="{ width: (downloads[q.ollamaName].frac * 100).toFixed(1) + '%' }"></span></span>
                       {{ (downloads[q.ollamaName].frac * 100).toFixed(0) }} % · {{ fmtDuration(downloads[q.ollamaName].eta) }}
                     </span>
                     <button class="bg-transparent p-0 text-xs text-blue" @click="cancelDownload(q.ollamaName)">Abbrechen</button>
@@ -75,7 +75,7 @@
           </div>
         </div>
       </div>
-      <div class="border-t border-line px-4 py-2 text-[11px] text-muted">Nur die Suche geht ins Internet. Heruntergeladene Modelle laufen komplett auf deinem Rechner.</div>
+      <div class="border-t border-line px-4 py-2 text-[0.6875rem] text-muted">Nur die Suche geht ins Internet. Heruntergeladene Modelle laufen komplett auf deinem Rechner.</div>
     </div>
   </div>
 </template>

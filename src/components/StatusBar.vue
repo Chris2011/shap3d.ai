@@ -17,21 +17,21 @@
           </div>
         </template>
         <table class="mt-2 w-full border-collapse">
-          <tr v-for="r in mapping" :key="r[0]"><td class="py-0.5"><kbd class="whitespace-nowrap border border-line-2 bg-surface px-[5px] font-mono text-[11px]">{{ r[0] }}</kbd></td><td class="py-0.5">{{ r[1] }}</td></tr>
+          <tr v-for="r in mapping" :key="r[0]"><td class="py-0.5"><kbd class="whitespace-nowrap border border-line-2 bg-surface px-1.25 font-mono text-[0.6875rem]">{{ r[0] }}</kbd></td><td class="py-0.5">{{ r[1] }}</td></tr>
         </table>
         <div :class="DT">Feineinstellung</div>
-        <div v-for="a in ACTIONS" :key="'s' + a" class="my-[3px] flex items-center gap-1.5">
+        <div v-for="a in ACTIONS" :key="'s' + a" class="my-0.75 flex items-center gap-1.5">
           <span class="w-16">{{ ACTION_LABEL[a] }}</span>
           <input class="flex-1" type="range" min="0.25" max="3" step="0.05" v-model.number="nav.sensitivity[a]" />
-          <label class="flex items-center gap-[3px] whitespace-nowrap"><input type="checkbox" v-model="nav.invert[a]" /> umkehren</label>
+          <label class="flex items-center gap-0.75 whitespace-nowrap"><input type="checkbox" v-model="nav.invert[a]" /> umkehren</label>
         </div>
       </div>
     </div>
-    <div class="min-w-0 flex-1 truncate pl-1.5 text-[13.3px] text-ink" :title="ed.ui.status">{{ ed.ui.status }}</div>
+    <div class="min-w-0 flex-1 truncate pl-1.5 text-[0.83125rem] text-ink" :title="ed.ui.status">{{ ed.ui.status }}</div>
     <div v-if="selInfo" class="whitespace-nowrap px-3 text-ink-2">{{ selInfo }}</div>
-    <div class="flex items-center gap-1 pl-2.5 text-[13.3px]">
+    <div class="flex items-center gap-1 pl-2.5 text-[0.83125rem]">
       <label class="whitespace-nowrap text-ink">{{ ed.ui.vcbLabel || 'Maßangaben' }}</label>
-      <input ref="input" v-model="value" class="h-5.5 w-40 rounded-none border border-[#8e919c] bg-surface px-1 text-left text-[13px] outline-none focus:border-blue" spellcheck="false" @focus="onFocus" @blur="onBlur" @keydown.enter.prevent="submit" @keydown.esc.prevent="cancel" @keydown.stop />
+      <input ref="input" v-model="value" class="h-5.5 w-40 rounded-none border border-[#8e919c] bg-surface px-1 text-left text-[0.8125rem] outline-none focus:border-blue" spellcheck="false" @focus="onFocus" @blur="onBlur" @keydown.enter.prevent="submit" @keydown.esc.prevent="cancel" @keydown.stop />
     </div>
   </div>
 </template>
@@ -44,8 +44,8 @@ import { onMounted, onUnmounted } from 'vue';
 import { useEditor } from './keys';
 
 const ed = useEditor();
-const DT = 'mt-2 mb-[5px] font-bold tracking-[.5px] text-navy';
-const SEG = 'flex flex-1 items-center justify-center gap-[5px] border-r border-line-2 bg-transparent px-1 py-[5px] text-xs last:border-r-0';
+const DT = 'mt-2 mb-1.25 font-bold tracking-[0.03125rem] text-navy';
+const SEG = 'flex flex-1 items-center justify-center gap-1.25 border-r border-line-2 bg-transparent px-1 py-1.25 text-xs last:border-r-0';
 const SEG_ON = 'bg-active font-bold text-navy';
 const devOpen = ref(false);
 const ACTIONS: NavAction[] = ['orbit', 'pan', 'zoom'];

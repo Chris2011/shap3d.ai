@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible">
-    <div class="flex cursor-pointer items-center gap-1 rounded-[3px] px-1.5 py-[3px]" :class="[selected ? 'bg-active' : 'hover:bg-hover', inContext && 'font-semibold text-blue']" :style="{ paddingLeft: depth * 14 + 'px' }" @click="click" @dblclick="dbl">
-      <span class="w-3 text-[11px] text-[#6b7680]" @click.stop="open = !open">{{ node.children.length ? (open ? '▾' : '▸') : '' }}</span>
+    <div class="flex cursor-pointer items-center gap-1 rounded-[3px] px-1.5 py-0.75" :class="[selected ? 'bg-active' : 'hover:bg-hover', inContext && 'font-semibold text-blue']" :style="{ paddingLeft: depth * 0.875 + 'rem' }" @click="click" @dblclick="dbl">
+      <span class="w-3 text-[0.6875rem] text-[#6b7680]" @click.stop="open = !open">{{ node.children.length ? (open ? '▾' : '▸') : '' }}</span>
       <Icon :name="node.inst.def.isComponent ? 'component' : 'group'" :size="16" />
       <span class="flex-1 truncate" :class="node.inst.hidden && 'text-[#9aa3ab] italic'">{{ label }}</span>
       <button class="flex bg-transparent px-0.5 opacity-55 hover:opacity-100" :title="node.inst.hidden ? 'Einblenden' : 'Ausblenden'" @click.stop="toggleHidden"><Icon :name="node.inst.hidden ? 'eyeOff' : 'eye'" :size="14" /></button>

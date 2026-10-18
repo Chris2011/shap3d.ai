@@ -1,12 +1,12 @@
 <template>
   <div class="fixed inset-0 z-55" @pointerdown="$emit('close')"></div>
   <div class="s3d-menu top-11 left-0 z-60 rounded-none" @pointerdown.stop>
-    <div class="-mt-1 mb-1 flex flex-col items-start gap-1.5 bg-brand-night px-3.5 pt-3 pb-2.5"><Logo :size="30" :word-size="18" /><span class="pl-[39px] text-[10.5px] tracking-[1.6px] text-[#7d8794] uppercase">{{ BRAND.tagline }}</span><span class="-mt-[3px] pl-[39px] text-[11px] text-brand">sprich „{{ BRAND.pronounced }}“ · {{ BRAND.ipa }}</span></div>
+    <div class="-mt-1 mb-1 flex flex-col items-start gap-1.5 bg-brand-night px-3.5 pt-3 pb-2.5"><Logo :size="30" :word-size="18" /><span class="pl-9.75 text-[0.65625rem] tracking-[0.1rem] text-[#7d8794] uppercase">{{ BRAND.tagline }}</span><span class="-mt-0.75 pl-9.75 text-[0.6875rem] text-brand">sprich „{{ BRAND.pronounced }}“ · {{ BRAND.ipa }}</span></div>
     <template v-for="(it, i) in items" :key="i">
       <div v-if="it.sep" class="s3d-menu-sep"></div>
       <div v-else class="s3d-menu-item relative" :class="{ disabled: it.cmd && !enabled(it.cmd) }" @mouseenter="sub = it.sub ? i : -1" @click="click(it)">
         <Icon v-if="it.icon" :name="it.icon" :size="18" />
-        <span v-else class="w-[18px]"></span>
+        <span v-else class="w-4.5"></span>
         {{ it.label }}
         <span v-if="it.cmd && shortcut(it.cmd)" class="sc">{{ shortcut(it.cmd) }}</span>
         <Icon v-if="it.sub" name="chevron" :size="14" class="ml-auto" />

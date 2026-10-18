@@ -1,10 +1,10 @@
 <template>
   <div v-if="tour.open" class="fixed inset-0 z-120 flex animate-fade-in items-center justify-center bg-[rgba(8,12,18,.45)] motion-reduce:animate-none" @pointerdown.self="closeTour()" @keydown.stop>
-    <div class="s3d-panel relative w-[min(520px,94vw)] animate-rise overflow-hidden rounded-[10px] motion-reduce:animate-none" role="dialog" aria-modal="true" :aria-label="`Einführung, Schritt ${tour.step + 1} von ${STEPS.length}`">
+    <div class="s3d-panel relative w-[min(32.5rem,94vw)] animate-rise overflow-hidden rounded-[10px] motion-reduce:animate-none" role="dialog" aria-modal="true" :aria-label="`Einführung, Schritt ${tour.step + 1} von ${STEPS.length}`">
       <button class="absolute top-2 right-2 z-2 flex size-7 items-center justify-center rounded bg-transparent text-ink-2 hover:bg-hover" title="Einführung schließen (Esc)" @click="closeTour()"><Icon name="close" :size="16" /></button>
 
       <!-- illustration – :key restarts the animation on every step -->
-      <div :key="tour.step" class="art flex h-[190px] items-center justify-center bg-brand-night bg-[linear-gradient(rgba(230,235,241,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(230,235,241,.04)_1px,transparent_1px)] bg-size-[24px_24px]">
+      <div :key="tour.step" class="art flex h-47.5 items-center justify-center bg-brand-night bg-[linear-gradient(rgba(230,235,241,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(230,235,241,.04)_1px,transparent_1px)] bg-size-[24px_24px]">
         <!-- 1 welcome: the logo draws itself -->
         <svg v-if="tour.step === 0" viewBox="0 0 300 170" class="ill">
           <g transform="translate(118 38) scale(1)">
@@ -66,19 +66,19 @@
       </div>
 
       <div class="px-5.5 pt-4 pb-1.5">
-        <div class="text-[11px] font-bold tracking-[.6px] text-muted uppercase">Schritt {{ tour.step + 1 }} von {{ STEPS.length }}</div>
-        <h2 class="mt-1 mb-1.5 text-[19px] font-bold text-ink">{{ cur.title }}</h2>
-        <p class="text-[13.5px]/normal text-ink-2">{{ cur.text }}</p>
-        <ul v-if="cur.tips" class="mt-2.5 list-disc pl-[18px] text-[12.5px]/[1.8] text-ink [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-line-2 [&_kbd]:bg-surface-2 [&_kbd]:px-[5px] [&_kbd]:font-mono [&_kbd]:text-[11px]"><li v-for="t in cur.tips" :key="t" v-html="t"></li></ul>
+        <div class="text-[0.6875rem] font-bold tracking-[0.0375rem] text-muted uppercase">Schritt {{ tour.step + 1 }} von {{ STEPS.length }}</div>
+        <h2 class="mt-1 mb-1.5 text-[1.1875rem] font-bold text-ink">{{ cur.title }}</h2>
+        <p class="text-[0.84375rem]/normal text-ink-2">{{ cur.text }}</p>
+        <ul v-if="cur.tips" class="mt-2.5 list-disc pl-4.5 text-[0.78125rem]/[1.8] text-ink [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-line-2 [&_kbd]:bg-surface-2 [&_kbd]:px-1.25 [&_kbd]:font-mono [&_kbd]:text-[0.6875rem]"><li v-for="t in cur.tips" :key="t" v-html="t"></li></ul>
         <button v-if="cur.action" class="s3d-btn small mt-3" @click="cur.action.run()">{{ cur.action.label }}</button>
       </div>
 
       <div class="flex items-center gap-2 px-5.5 pt-3.5 pb-4.5">
         <div class="flex gap-1.5">
-          <button v-for="(s, i) in STEPS" :key="s.title" class="h-2 rounded-full p-0 transition-[width,background-color] duration-200" :class="i === tour.step ? 'w-[22px] rounded bg-brand-deep' : i < tour.step ? 'w-2 bg-[#5fa9bf]' : 'w-2 bg-line-2'" :title="s.title" :aria-label="`Schritt ${i + 1}: ${s.title}`" @click="tour.step = i"></button>
+          <button v-for="(s, i) in STEPS" :key="s.title" class="h-2 rounded-full p-0 transition-[width,background-color] duration-200" :class="i === tour.step ? 'w-5.5 rounded bg-brand-deep' : i < tour.step ? 'w-2 bg-[#5fa9bf]' : 'w-2 bg-line-2'" :title="s.title" :aria-label="`Schritt ${i + 1}: ${s.title}`" @click="tour.step = i"></button>
         </div>
         <span class="flex-1"></span>
-        <button v-if="tour.step === 0" class="bg-transparent px-1.5 text-[13px] text-ink-2 hover:text-ink hover:underline" @click="closeTour()">Überspringen</button>
+        <button v-if="tour.step === 0" class="bg-transparent px-1.5 text-[0.8125rem] text-ink-2 hover:text-ink hover:underline" @click="closeTour()">Überspringen</button>
         <button v-else class="s3d-btn" @click="tour.step--">Zurück</button>
         <button class="s3d-btn primary" @click="next()">{{ tour.step === STEPS.length - 1 ? 'Loslegen' : tour.step === 0 ? 'Los geht’s' : 'Weiter' }}</button>
       </div>

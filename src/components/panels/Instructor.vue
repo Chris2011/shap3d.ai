@@ -1,11 +1,11 @@
 <template>
-  <div class="mt-1.5 mb-2.5 flex items-center gap-3"><Icon :name="info.icon" :size="28" /><div><div class="text-[15px] font-bold">{{ info.name }}</div><div v-if="info.key" class="text-xs text-ink-2">Tastenkürzel: {{ info.key }}</div></div></div>
+  <div class="mt-1.5 mb-2.5 flex items-center gap-3"><Icon :name="info.icon" :size="28" /><div><div class="text-[0.9375rem] font-bold">{{ info.name }}</div><div v-if="info.key" class="text-xs text-ink-2">Tastenkürzel: {{ info.key }}</div></div></div>
   <p class="mb-1.5">{{ text.desc }}</p>
   <div class="s3d-section-title">Bedienung</div>
-  <ol class="list-decimal pl-[18px]"><li v-for="(s, i) in text.steps" :key="i" class="my-1">{{ s }}</li></ol>
+  <ol class="list-decimal pl-4.5"><li v-for="(s, i) in text.steps" :key="i" class="my-1">{{ s }}</li></ol>
   <template v-if="text.mods?.length">
     <div class="s3d-section-title">Zusatztasten</div>
-    <ul class="list-disc pl-[18px]"><li v-for="(s, i) in text.mods" :key="i" class="my-1">{{ s }}</li></ul>
+    <ul class="list-disc pl-4.5"><li v-for="(s, i) in text.mods" :key="i" class="my-1">{{ s }}</li></ul>
   </template>
 </template>
 

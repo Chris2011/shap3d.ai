@@ -1,6 +1,6 @@
 <template>
   <p class="s3d-label my-3">Mildert Kanten zwischen Flächen der Auswahl ab, deren Winkel kleiner als der eingestellte Wert ist.</p>
-  <div class="s3d-row"><span class="s3d-label">Winkel</span><input type="range" min="0" max="180" step="1" v-model.number="angle" class="flex-1" /><span class="w-[42px] text-right">{{ angle }}°</span></div>
+  <div class="s3d-row"><span class="s3d-label">Winkel</span><input type="range" min="0" max="180" step="1" v-model.number="angle" class="flex-1" /><span class="w-10.5 text-right">{{ angle }}°</span></div>
   <label class="s3d-check"><input type="checkbox" v-model="coplanar" /> Koplanare abmildern</label>
   <div class="mt-2 flex gap-1.5"><button class="s3d-btn small" :disabled="!ed.selection.size" @click="apply">Auf Auswahl anwenden</button><button class="s3d-btn small" :disabled="!ed.selection.size" @click="clear">Zurücksetzen</button></div>
 </template>

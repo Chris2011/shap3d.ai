@@ -16,14 +16,14 @@
     <div v-if="view === 'history'" class="flex-1 overflow-auto px-3 py-2.5 select-text">
       <input v-model="search" class="s3d-input" placeholder="Verlauf durchsuchen …" @keydown.stop />
       <template v-for="(g, gi) in historyGroups" :key="gi">
-        <div class="mt-3 mb-1 text-[11px] font-bold tracking-[.5px] text-navy uppercase">{{ g.day }}</div>
-        <div v-for="s in g.sessions" :key="s.id" class="relative mb-[5px] cursor-pointer border bg-surface py-[7px] pr-[30px] pl-2.5" :class="s.id === aiHistory.currentId ? 'border-navy shadow-[inset_3px_0_0_var(--s3d-navy)]' : 'border-line hover:border-line-2'" @click="open(s.id)">
-          <div class="truncate text-[13px]">{{ s.title }}</div>
-          <div class="mt-0.5 text-[11px] text-muted">{{ clock(s.created) }}<template v-if="!sameDay(s.created, s.updated) || clock(s.created) !== clock(s.updated)"> – {{ clock(s.updated) }}</template> · {{ reqCount(s) }} {{ reqCount(s) === 1 ? 'Anfrage' : 'Anfragen' }} · {{ s.model || '—' }}</div>
+        <div class="mt-3 mb-1 text-[0.6875rem] font-bold tracking-[0.03125rem] text-navy uppercase">{{ g.day }}</div>
+        <div v-for="s in g.sessions" :key="s.id" class="relative mb-1.25 cursor-pointer border bg-surface py-1.75 pr-7.5 pl-2.5" :class="s.id === aiHistory.currentId ? 'border-navy shadow-[inset_3px_0_0_var(--s3d-navy)]' : 'border-line hover:border-line-2'" @click="open(s.id)">
+          <div class="truncate text-[0.8125rem]">{{ s.title }}</div>
+          <div class="mt-0.5 text-[0.6875rem] text-muted">{{ clock(s.created) }}<template v-if="!sameDay(s.created, s.updated) || clock(s.created) !== clock(s.updated)"> – {{ clock(s.updated) }}</template> · {{ reqCount(s) }} {{ reqCount(s) === 1 ? 'Anfrage' : 'Anfragen' }} · {{ s.model || '—' }}</div>
           <button class="absolute top-2 right-1.5 bg-transparent opacity-50 hover:opacity-100" title="Löschen" @click.stop="deleteSession(s.id)"><Icon name="trash" :size="14" /></button>
         </div>
       </template>
-      <div v-if="!historyGroups.length" class="p-3 text-[11px] text-muted">Noch keine Gespräche{{ search ? ' mit diesem Suchbegriff' : '' }}.</div>
+      <div v-if="!historyGroups.length" class="p-3 text-[0.6875rem] text-muted">Noch keine Gespräche{{ search ? ' mit diesem Suchbegriff' : '' }}.</div>
       <button v-if="aiHistory.sessions.length" class="mt-2.5 mb-1 bg-transparent p-0 text-xs text-danger hover:underline" @click="clearAll">Gesamten Verlauf löschen</button>
     </div>
 
@@ -40,20 +40,20 @@
         <Icon name="sparkle" :size="40" />
         <p>Beschreibe, was du bauen möchtest, und der Assistent modelliert es für dich: Würfel, Möbel, Häuser, Tiere – mit Farben und Texturen.</p>
         <button class="s3d-btn primary" @click="wizard = true">KI einrichten</button>
-        <p class="text-[11px] text-muted">Läuft komplett lokal mit Ollama, LM Studio, LiteLLM oder einem anderen OpenAI-kompatiblen Server auf deinem Rechner.</p>
+        <p class="text-[0.6875rem] text-muted">Läuft komplett lokal mit Ollama, LM Studio, LiteLLM oder einem anderen OpenAI-kompatiblen Server auf deinem Rechner.</p>
       </div>
       <div v-else-if="!aiState.turns.length" class="flex flex-col items-center gap-2 px-2.5 py-5 text-center text-ink">
         <Icon name="sparkle" :size="34" />
         <p>Was soll ich bauen?</p>
-        <p v-if="isMesh" class="text-[11px] text-muted">LLaMA-Mesh erzeugt einzelne Objekte als Mesh. Für ganze Szenen mit Materialien eignet sich ein Code-Modell wie Qwen2.5-Coder besser.</p>
+        <p v-if="isMesh" class="text-[0.6875rem] text-muted">LLaMA-Mesh erzeugt einzelne Objekte als Mesh. Für ganze Szenen mit Materialien eignet sich ein Code-Modell wie Qwen2.5-Coder besser.</p>
         <div class="flex flex-wrap justify-center gap-1.5"><button v-for="q in QUICK" :key="q" class="rounded-[14px] border border-line-2 bg-surface px-2.5 py-1 text-xs hover:border-navy hover:text-navy" @click="ask(q)">{{ q }}</button></div>
       </div>
 
       <template v-for="(t, i) in aiState.turns" :key="t.id">
-        <div v-if="i === 0 || !sameDay(aiState.turns[i - 1].ts, t.ts)" class="my-1 flex items-center gap-2 text-[11px] text-muted before:h-px before:flex-1 before:bg-line before:content-[''] after:h-px after:flex-1 after:bg-line after:content-['']"><span>{{ dayLabel(t.ts) }}</span></div>
-        <div v-if="t.role === 'user'" class="max-w-[92%] self-end px-2.5 py-2 text-[13px]/[1.45] break-words whitespace-pre-wrap" :class="t.auto ? 'bg-warn-bg text-xs text-warn' : 'bg-navy-bg text-white'">{{ t.auto ? '↻ Fehler zurückgemeldet – Assistent korrigiert …' : t.text }}<span class="mt-[3px] block text-right text-[10px] opacity-70">{{ clock(t.ts) }}</span></div>
-        <div v-else class="max-w-[92%] self-start border border-line bg-surface px-2.5 py-2 text-[13px]/[1.45] break-words whitespace-pre-wrap">
-          <div class="mb-[3px] flex items-center gap-2 text-[10.5px] text-muted"><span>{{ clock(t.ts) }}</span><span v-if="t.model" class="bg-surface-2 px-[5px]">{{ t.model.replace(/^hf\.co\/[^/]+\//, '') }}</span>
+        <div v-if="i === 0 || !sameDay(aiState.turns[i - 1].ts, t.ts)" class="my-1 flex items-center gap-2 text-[0.6875rem] text-muted before:h-px before:flex-1 before:bg-line before:content-[''] after:h-px after:flex-1 after:bg-line after:content-['']"><span>{{ dayLabel(t.ts) }}</span></div>
+        <div v-if="t.role === 'user'" class="max-w-[92%] self-end px-2.5 py-2 text-[0.8125rem]/[1.45] break-words whitespace-pre-wrap" :class="t.auto ? 'bg-warn-bg text-xs text-warn' : 'bg-navy-bg text-white'">{{ t.auto ? '↻ Fehler zurückgemeldet – Assistent korrigiert …' : t.text }}<span class="mt-0.75 block text-right text-[0.625rem] opacity-70">{{ clock(t.ts) }}</span></div>
+        <div v-else class="max-w-[92%] self-start border border-line bg-surface px-2.5 py-2 text-[0.8125rem]/[1.45] break-words whitespace-pre-wrap">
+          <div class="mb-0.75 flex items-center gap-2 text-[0.65625rem] text-muted"><span>{{ clock(t.ts) }}</span><span v-if="t.model" class="bg-surface-2 px-1.25">{{ t.model.replace(/^hf\.co\/[^/]+\//, '') }}</span>
             <span v-if="t.status === 'streaming' || t.status === 'running'" class="font-bold text-blue tabular-nums">⏱ {{ elapsed(now - t.ts) }}</span>
             <span v-else-if="t.endTs" class="tabular-nums" :title="'Start ' + clockSec(t.ts) + ' · Ende ' + clockSec(t.endTs)">⏱ {{ elapsed(t.endTs - t.ts) }}</span>
           </div>
@@ -63,7 +63,7 @@
               <CodeBlock v-else :code="p.code" :lang="p.lang" :streaming="p.open && t.status === 'streaming'" />
             </template>
           </template>
-          <div v-if="t.status === 'streaming'" class="mt-1 text-xs text-ink-2"><span class="after:animate-blink after:tracking-[2px] after:text-blue after:content-['●●●']"></span> {{ t.text ? 'schreibt …' : 'denkt nach …' }} <b class="text-blue tabular-nums">{{ elapsed(now - t.ts) }}</b></div>
+          <div v-if="t.status === 'streaming'" class="mt-1 text-xs text-ink-2"><span class="after:animate-blink after:tracking-[0.125rem] after:text-blue after:content-['●●●']"></span> {{ t.text ? 'schreibt …' : 'denkt nach …' }} <b class="text-blue tabular-nums">{{ elapsed(now - t.ts) }}</b></div>
           <CodeBlock v-if="t.code" :code="t.code" :lang="t.lang ?? 'js'" :start-collapsed="t.lang === 'obj'" />
           <div v-if="t.status === 'done' && t.result" class="mt-1 text-xs text-ok">✓ {{ t.result }}</div>
           <div v-if="t.status === 'error'" class="mt-1 text-xs text-danger">✗ {{ t.error }}</div>
@@ -79,11 +79,11 @@
     </div>
 
     <div class="flex gap-1.5 border-t border-line px-3 pt-2 pb-1">
-      <textarea ref="ta" class="flex-1 resize-none border border-line-2 bg-surface px-2 py-1.5 font-sans text-[13px] outline-none focus:border-navy" v-model="prompt" rows="2" :disabled="!aiConfig.configured" :placeholder="isMesh ? 'Ein einzelnes Objekt, am besten auf Englisch, z. B. „a wooden chair“ (Enter = senden)' : 'z. B. „Erstelle eine Spinne mit roten Augen“ (Enter = senden)'" @keydown.stop @keydown.enter.exact.prevent="submit"></textarea>
-      <button v-if="aiState.busy" class="flex w-[38px] items-center justify-center bg-[#c62828] text-white" title="Stopp" @click="stop"><Icon name="stop" :size="16" /></button>
-      <button v-else class="flex w-[38px] items-center justify-center bg-navy-bg text-white disabled:cursor-default disabled:opacity-40" title="Senden" :disabled="!prompt.trim() || !aiConfig.configured" @click="submit"><Icon name="send" :size="16" /></button>
+      <textarea ref="ta" class="flex-1 resize-none border border-line-2 bg-surface px-2 py-1.5 font-sans text-[0.8125rem] outline-none focus:border-navy" v-model="prompt" rows="2" :disabled="!aiConfig.configured" :placeholder="isMesh ? 'Ein einzelnes Objekt, am besten auf Englisch, z. B. „a wooden chair“ (Enter = senden)' : 'z. B. „Erstelle eine Spinne mit roten Augen“ (Enter = senden)'" @keydown.stop @keydown.enter.exact.prevent="submit"></textarea>
+      <button v-if="aiState.busy" class="flex w-9.5 items-center justify-center bg-[#c62828] text-white" title="Stopp" @click="stop"><Icon name="stop" :size="16" /></button>
+      <button v-else class="flex w-9.5 items-center justify-center bg-navy-bg text-white disabled:cursor-default disabled:opacity-40" title="Senden" :disabled="!prompt.trim() || !aiConfig.configured" @click="submit"><Icon name="send" :size="16" /></button>
     </div>
-    <div class="flex items-center gap-3.5 px-3 pt-0.5 pb-2 text-[11px] text-ink-2 [&_label]:flex [&_label]:cursor-pointer [&_label]:items-center [&_label]:gap-1.5">
+    <div class="flex items-center gap-3.5 px-3 pt-0.5 pb-2 text-[0.6875rem] text-ink-2 [&_label]:flex [&_label]:cursor-pointer [&_label]:items-center [&_label]:gap-1.5">
       <label><input v-model="aiConfig.autoRun" type="checkbox" /> Code automatisch ausführen</label>
       <label v-if="!isMesh" :class="{ 'font-bold text-warn': aiConfig.fast }" title="Kurzer Systemprompt, kleiner Kontext, kurze Antworten – deutlich schneller auf Rechnern ohne Grafikkarte, dafür einfachere Objekte"><input v-model="aiConfig.fast" type="checkbox" /> ⚡ Schnellmodus</label>
     </div>

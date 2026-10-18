@@ -1,8 +1,8 @@
 <template>
   <div class="fixed inset-0 z-24" @pointerdown="$emit('close')"></div>
-  <div class="s3d-panel absolute top-0 left-13 z-26 max-h-[calc(100vh-120px)] w-53 overflow-auto px-1" @pointerdown.stop>
-    <div v-for="(g, i) in groups" :key="i" class="grid grid-cols-[repeat(3,68px)] border-b border-[#d5d7df] py-1.5 last:border-b-0 dark:border-line">
-      <button v-for="it in g" :key="it.id" class="flex min-h-[62px] flex-col items-center gap-0.5 border-0 px-0.5 pt-2 pb-1 text-center text-[10px]/[1.1] break-words text-ink" :class="ed.ui.tool === it.id ? 'bg-active' : 'hover:bg-hover'" :title="it.title ?? it.label" @click="pick(it)">
+  <div class="s3d-panel absolute top-0 left-13 z-26 max-h-[calc(100vh-7.5rem)] w-53 overflow-auto px-1" @pointerdown.stop>
+    <div v-for="(g, i) in groups" :key="i" class="grid grid-cols-[repeat(3,4.25rem)] border-b border-[#d5d7df] py-1.5 last:border-b-0 dark:border-line">
+      <button v-for="it in g" :key="it.id" class="flex min-h-15.5 flex-col items-center gap-0.5 border-0 px-0.5 pt-2 pb-1 text-center text-[0.625rem]/[1.1] break-words text-ink" :class="ed.ui.tool === it.id ? 'bg-active' : 'hover:bg-hover'" :title="it.title ?? it.label" @click="pick(it)">
         <Icon :name="it.icon" />
         <span :class="ed.ui.tool === it.id ? 'text-navy' : 'text-label'">{{ it.label }}</span>
       </button>

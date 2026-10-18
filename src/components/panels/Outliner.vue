@@ -1,7 +1,7 @@
 <template>
   <input v-model="filter" class="s3d-input mb-2" placeholder="Filter" />
-  <div class="text-[12.5px]">
-    <div class="flex cursor-pointer items-center gap-1.5 rounded-[3px] px-1.5 py-[3px] font-semibold hover:bg-hover" :class="{ 'text-blue': !ed.activePath.length }" @click="ed.exitContext(true)"><Icon name="file" :size="16" /> {{ ed.model.name }}</div>
+  <div class="text-[0.78125rem]">
+    <div class="flex cursor-pointer items-center gap-1.5 rounded-[3px] px-1.5 py-0.75 font-semibold hover:bg-hover" :class="{ 'text-blue': !ed.activePath.length }" @click="ed.exitContext(true)"><Icon name="file" :size="16" /> {{ ed.model.name }}</div>
     <OutlinerNode v-for="n in nodes" :key="n.inst.id" :node="n" :depth="1" :filter="filter.toLowerCase()" />
     <div v-if="!nodes.length" class="px-1 py-2 text-xs text-ink-2">Keine Gruppen oder Komponenten im Modell.</div>
   </div>

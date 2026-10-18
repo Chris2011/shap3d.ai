@@ -1,15 +1,15 @@
 <template>
-  <div class="absolute top-1/2 right-1.5 z-27 flex -translate-y-1/2 flex-col gap-[9px]">
+  <div class="absolute top-1/2 right-1.5 z-27 flex -translate-y-1/2 flex-col gap-2.25">
     <div v-for="p in PANELS" :key="p.id" class="flex items-center justify-end gap-2.5" @mouseenter="hot = p.id" @mouseleave="hot = null">
-      <span v-if="!openPanel || hot === p.id" class="cursor-pointer whitespace-nowrap rounded-[2px] bg-panel px-[7px] py-0.5 text-[11px] font-bold tracking-[.75px] text-navy shadow-panel" @click="toggle(p.id)">{{ p.label }}</span>
+      <span v-if="!openPanel || hot === p.id" class="cursor-pointer whitespace-nowrap rounded-[2px] bg-panel px-1.75 py-0.5 text-[0.6875rem] font-bold tracking-[0.04688rem] text-navy shadow-panel" @click="toggle(p.id)">{{ p.label }}</span>
       <button class="s3d-panel flex size-10 items-center justify-center border-0 p-0 text-ink" :class="openPanel === p.id ? 'bg-active shadow-[inset_-3px_0_0_#1f6fbf,var(--s3d-shadow)]' : 'hover:bg-hover'" :title="p.label" @click="toggle(p.id)">
         <Icon :name="p.icon" :size="22" />
       </button>
     </div>
   </div>
-  <div v-if="current" class="s3d-panel absolute top-13 right-14 bottom-[calc(var(--s3d-status-h)+8px)] z-28 flex flex-col" :style="{ width: current.width + 'px' }">
+  <div v-if="current" class="s3d-panel absolute top-13 right-14 bottom-[calc(var(--s3d-status-h)+0.5rem)] z-28 flex flex-col" :style="{ width: current.width / 16 + 'rem' }">
     <div class="flex h-10 flex-none items-center gap-2 bg-panel-2 pr-1 pl-3.5">
-      <span class="flex-1 text-base font-semibold tracking-[.75px] text-navy">{{ current.label }}</span>
+      <span class="flex-1 text-base font-semibold tracking-[0.04688rem] text-navy">{{ current.label }}</span>
       <button class="flex size-7.5 items-center justify-center border-0 bg-transparent text-navy hover:bg-hover" title="Schließen" @click="openPanel = null"><Icon name="close" :size="16" /></button>
     </div>
     <div class="flex-1 select-text" :class="current.flush ? 'flex flex-col overflow-hidden' : 'overflow-auto px-3.5 pt-2 pb-3'"><component :is="current.comp" /></div>

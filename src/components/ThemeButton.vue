@@ -8,18 +8,18 @@
     <div v-if="open" class="s3d-menu top-10 -left-2 w-67 cursor-default px-3 pt-2.5 pb-3">
       <label class="flex items-center justify-between gap-2.5">
         <span class="flex items-center gap-2 font-semibold"><Icon name="moon" :size="16" /> Dunkelmodus</span>
-        <button class="relative h-5.5 w-[38px] rounded-[11px] p-0 transition-colors" role="switch" :aria-checked="theme.dark" :class="theme.dark ? 'bg-blue' : 'bg-line-2'" @click="toggleTheme()"><span class="absolute top-[3px] left-[3px] size-4 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.3)] transition-transform" :class="theme.dark && 'translate-x-4'"></span></button>
+        <button class="relative h-5.5 w-9.5 rounded-[11px] p-0 transition-colors" role="switch" :aria-checked="theme.dark" :class="theme.dark ? 'bg-blue' : 'bg-line-2'" @click="toggleTheme()"><span class="absolute top-0.75 left-0.75 size-4 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.3)] transition-transform" :class="theme.dark && 'translate-x-4'"></span></button>
       </label>
       <div class="-mx-3 my-2.5 h-px bg-line"></div>
-      <div class="mt-2 mb-[5px] text-[11px] font-bold tracking-[.4px] text-muted uppercase">Oberfläche</div>
+      <div class="mt-2 mb-1.25 text-[0.6875rem] font-bold tracking-[0.025rem] text-muted uppercase">Oberfläche</div>
       <div class="grid grid-cols-[repeat(3,1fr)] overflow-hidden rounded border border-line-2">
         <button v-for="o in UI" :key="o.v" :class="[SEG, theme.mode === o.v ? SEG_ON : SEG_OFF]" @click="setTheme(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
       </div>
-      <div class="mt-2 mb-[5px] text-[11px] font-bold tracking-[.4px] text-muted uppercase">3D-Szene</div>
+      <div class="mt-2 mb-1.25 text-[0.6875rem] font-bold tracking-[0.025rem] text-muted uppercase">3D-Szene</div>
       <div class="grid grid-cols-[repeat(3,1fr)] overflow-hidden rounded border border-line-2">
         <button v-for="o in SCENE" :key="o.v" :class="[SEG, theme.scene === o.v ? SEG_ON : SEG_OFF]" @click="setScene(o.v)"><Icon :name="o.icon" :size="14" />{{ o.label }}</button>
       </div>
-      <p class="mt-2.5 mb-0 text-[11.5px]/[1.4] text-ink-2">{{ hint }}</p>
+      <p class="mt-2.5 mb-0 text-[0.71875rem]/[1.4] text-ink-2">{{ hint }}</p>
     </div>
   </div>
 </template>

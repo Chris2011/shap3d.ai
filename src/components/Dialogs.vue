@@ -3,20 +3,20 @@
     <div class="s3d-panel max-h-[86vh] w-95 overflow-auto px-4.5 py-4" @keydown.stop>
       <!-- prompt -->
       <template v-if="d.kind === 'prompt'">
-        <div class="mb-3 text-[15px] font-semibold">{{ d.data.title }}</div>
-        <textarea v-if="d.data.multiline" ref="first" v-model="val" class="s3d-input h-[70px] resize-y px-2 py-1.5" @keydown.enter.exact.prevent="ok" @keydown.esc="cancel"></textarea>
+        <div class="mb-3 text-[0.9375rem] font-semibold">{{ d.data.title }}</div>
+        <textarea v-if="d.data.multiline" ref="first" v-model="val" class="s3d-input h-17.5 resize-y px-2 py-1.5" @keydown.enter.exact.prevent="ok" @keydown.esc="cancel"></textarea>
         <input v-else ref="first" v-model="val" class="s3d-input" @keydown.enter="ok" @keydown.esc="cancel" />
         <div class="mt-3.5 flex justify-end gap-2"><button class="s3d-btn" @click="cancel">Abbrechen</button><button class="s3d-btn primary" @click="ok">OK</button></div>
       </template>
       <!-- confirm -->
       <template v-else-if="d.kind === 'confirm'">
-        <div class="mb-3 text-[15px] font-semibold">{{ d.data.title }}</div>
+        <div class="mb-3 text-[0.9375rem] font-semibold">{{ d.data.title }}</div>
         <div class="mt-3.5 flex justify-end gap-2"><button class="s3d-btn" @click="answer(false)">Nein</button><button ref="first" class="s3d-btn primary" @click="answer(true)">Ja</button></div>
       </template>
       <!-- 3D text -->
       <template v-else-if="d.kind === 'text3d'">
-        <div class="mb-3 text-[15px] font-semibold">3D-Text einfügen</div>
-        <textarea ref="first" v-model="t.text" class="s3d-input h-[70px] resize-y px-2 py-1.5" placeholder="Text eingeben"></textarea>
+        <div class="mb-3 text-[0.9375rem] font-semibold">3D-Text einfügen</div>
+        <textarea ref="first" v-model="t.text" class="s3d-input h-17.5 resize-y px-2 py-1.5" placeholder="Text eingeben"></textarea>
         <div class="s3d-row"><span class="s3d-label">Schriftart</span><select v-model="t.font" class="s3d-input"><option v-for="(n, k) in FONT_NAMES" :key="k" :value="k">{{ n }}</option></select></div>
         <div class="s3d-row"><span class="s3d-label">Höhe</span><input v-model="t.size" class="s3d-input" /></div>
         <label class="s3d-check"><input type="checkbox" v-model="t.filled" /> Gefüllt</label>
@@ -26,9 +26,9 @@
       </template>
       <!-- help -->
       <template v-else-if="d.kind === 'help'">
-        <div class="mb-3 text-[15px] font-semibold">Tastenkürzel & Bedienung</div>
+        <div class="mb-3 text-[0.9375rem] font-semibold">Tastenkürzel & Bedienung</div>
         <div class="grid gap-1">
-          <div v-for="r in HELP" :key="r[0]" class="flex items-baseline gap-2.5"><kbd class="min-w-32 rounded-[3px] border border-line-2 bg-surface-2 px-1.5 text-center font-mono text-[11px]/[1.6]">{{ r[0] }}</kbd><span>{{ r[1] }}</span></div>
+          <div v-for="r in HELP" :key="r[0]" class="flex items-baseline gap-2.5"><kbd class="min-w-32 rounded-[3px] border border-line-2 bg-surface-2 px-1.5 text-center font-mono text-[0.6875rem]/[1.6]">{{ r[0] }}</kbd><span>{{ r[1] }}</span></div>
         </div>
         <div class="mt-3.5 flex justify-end gap-2"><button ref="first" class="s3d-btn primary" @click="ed.ui.dialog = null">Schließen</button></div>
       </template>

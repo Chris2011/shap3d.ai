@@ -2,7 +2,7 @@
   <div class="s3d-section-title">Anzeigen</div>
   <label v-for="o in OPTS" :key="o.id" class="s3d-check"><input type="checkbox" :checked="check(o.id)" @change="toggle(o.id)" /> {{ o.label }}</label>
   <div class="s3d-section-title">Schnittebenen</div>
-  <div v-for="s in sections" :key="s.id" class="flex items-center gap-1 [&_.s3d-btn]:px-[7px]">
+  <div v-for="s in sections" :key="s.id" class="flex items-center gap-1 [&_.s3d-btn]:px-1.75">
     <label class="s3d-check flex-1"><input type="radio" name="activesec" :checked="s.active" @change="activate(s.id)" /> {{ s.name }}</label>
     <button class="s3d-btn small" title="Ebene umdrehen" @click="flip(s.id)">⇄</button>
     <button class="s3d-btn small" title="Ebene verschieben" @click="shift(s.id, -0.1)">−</button>

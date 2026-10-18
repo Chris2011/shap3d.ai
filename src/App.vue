@@ -1,6 +1,6 @@
 <template>
   <div class="relative h-screen w-screen overflow-hidden" @contextmenu.prevent @dragenter.prevent="onDrag" @dragover.prevent="onDrag" @dragleave="onLeave" @drop.prevent="onDrop">
-    <div v-if="dragging" class="pointer-events-none absolute inset-0 z-90 flex items-center justify-center bg-brand-deep/12 outline-3 -outline-offset-12 outline-dashed outline-brand-deep"><div class="s3d-panel flex flex-col items-center gap-2 px-7.5 py-5.5 text-center text-ink"><Icon name="import" :size="28" /><b class="text-[15px]">Datei loslassen zum Importieren</b><span class="text-xs text-ink-2">SketchUp (SKP, DAE) · Blender (BLEND) · 3ds Max (FBX, 3DS) · OBJ · STL · glTF/GLB · PLY · 3MF · USDZ · Shap3D (.json)</span></div></div>
+    <div v-if="dragging" class="pointer-events-none absolute inset-0 z-90 flex items-center justify-center bg-brand-deep/12 outline-3 -outline-offset-12 outline-dashed outline-brand-deep"><div class="s3d-panel flex flex-col items-center gap-2 px-7.5 py-5.5 text-center text-ink"><Icon name="import" :size="28" /><b class="text-[0.9375rem]">Datei loslassen zum Importieren</b><span class="text-xs text-ink-2">SketchUp (SKP, DAE) · Blender (BLEND) · 3ds Max (FBX, 3DS) · OBJ · STL · glTF/GLB · PLY · 3MF · USDZ · Shap3D (.json)</span></div></div>
     <Viewport class="inset-x-0 top-0 bottom-status" @context="openContext" />
     <TopBar />
     <MainToolbar @search="openPalette()" />
@@ -11,7 +11,7 @@
     <TerrainPanel />
     <Dialogs />
     <WelcomeTour />
-    <transition enter-active-class="transition-opacity duration-200" leave-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-to-class="opacity-0"><div v-if="ed.ui.toast" class="pointer-events-none absolute bottom-12 left-1/2 z-80 -translate-x-1/2 rounded bg-[#2b3035] px-4 py-2 text-[13px] text-white shadow-[0_2px_8px_rgba(0,0,0,.3)]">{{ ed.ui.toast }}</div></transition>
+    <transition enter-active-class="transition-opacity duration-200" leave-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-to-class="opacity-0"><div v-if="ed.ui.toast" class="pointer-events-none absolute bottom-12 left-1/2 z-80 -translate-x-1/2 rounded bg-[#2b3035] px-4 py-2 text-[0.8125rem] text-white shadow-[0_2px_8px_rgba(0,0,0,.3)]">{{ ed.ui.toast }}</div></transition>
     <div v-if="ed.ui.contextName" class="s3d-panel absolute top-13 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 py-1 pr-1.5 pl-2.5 text-xs">
       <Icon name="group" :size="16" /> Bearbeiten: <b>{{ ed.ui.contextName }}</b>
       <button class="s3d-btn small" @click="ed.exitContext(true)">Schließen</button>

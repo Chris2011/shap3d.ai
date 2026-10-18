@@ -1,34 +1,34 @@
 <template>
   <div class="fixed inset-0 z-109 bg-[rgba(8,12,18,.18)]" @pointerdown="closePalette()"></div>
-  <div class="s3d-panel fixed top-14 left-1/2 z-110 flex max-h-[calc(100vh-90px)] w-[min(660px,calc(100vw-32px))] -translate-x-1/2 flex-col overflow-hidden rounded-lg" role="dialog" aria-label="Befehlspalette">
-    <div class="flex items-center gap-2 border-b border-line px-3 py-[9px] text-ink-2">
+  <div class="s3d-panel fixed top-14 left-1/2 z-110 flex max-h-[calc(100vh-5.625rem)] w-[min(41.25rem,calc(100vw-2rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg" role="dialog" aria-label="Befehlspalette">
+    <div class="flex items-center gap-2 border-b border-line px-3 py-2.25 text-ink-2">
       <Icon name="search" :size="18" />
-      <input ref="inp" class="min-w-0 flex-1 border-0 bg-transparent text-[14.5px] text-ink outline-none" v-model="palette.query" spellcheck="false" autocomplete="off" :placeholder="placeholder" aria-label="Suchen"
+      <input ref="inp" class="min-w-0 flex-1 border-0 bg-transparent text-[0.90625rem] text-ink outline-none" v-model="palette.query" spellcheck="false" autocomplete="off" :placeholder="placeholder" aria-label="Suchen"
         @keydown="key" />
-      <span class="text-[11px] text-muted">{{ rows.length }}{{ rows.length >= LIMIT ? '+' : '' }}</span>
+      <span class="text-[0.6875rem] text-muted">{{ rows.length }}{{ rows.length >= LIMIT ? '+' : '' }}</span>
     </div>
     <div ref="listEl" class="min-h-0 overflow-auto py-1" role="listbox">
       <template v-for="(r, i) in rows" :key="r.item.id">
-        <div v-if="r.header" class="px-3.5 pt-2 pb-[3px] text-[10.5px] font-bold tracking-[.6px] text-muted uppercase">{{ r.header }}</div>
-        <div class="flex cursor-pointer items-center gap-2.5 px-3.5 py-[5px] text-[13px] text-ink" role="option" :aria-selected="i === sel" :class="[i === sel && 'bg-active', r.disabled && 'cursor-default opacity-45']" :data-i="i"
+        <div v-if="r.header" class="px-3.5 pt-2 pb-0.75 text-[0.65625rem] font-bold tracking-[0.0375rem] text-muted uppercase">{{ r.header }}</div>
+        <div class="flex cursor-pointer items-center gap-2.5 px-3.5 py-1.25 text-[0.8125rem] text-ink" role="option" :aria-selected="i === sel" :class="[i === sel && 'bg-active', r.disabled && 'cursor-default opacity-45']" :data-i="i"
           @mousemove="sel = i" @click="run(r, $event.shiftKey)">
           <Icon :name="r.item.icon ?? 'chevron'" :size="18" />
           <span class="min-w-0 flex-1 truncate"><template v-for="(seg, k) in r.segs" :key="k"><b v-if="seg.hit" class="font-bold text-brand-deep dark:text-brand">{{ seg.t }}</b><template v-else>{{ seg.t }}</template></template></span>
-          <span class="whitespace-nowrap text-[11px] text-ink-2 max-[560px]:hidden">{{ r.item.group }}</span>
-          <span v-if="r.item.checked" class="relative h-3.5 w-[26px] flex-none rounded-[7px] transition-colors" :class="r.state ? 'bg-brand-deep' : 'bg-line-2'" :title="r.state ? 'An' : 'Aus'"><i class="absolute top-0.5 left-0.5 size-2.5 rounded-full bg-white transition-transform" :class="r.state && 'translate-x-3'"></i></span>
+          <span class="whitespace-nowrap text-[0.6875rem] text-ink-2 max-[35rem]:hidden">{{ r.item.group }}</span>
+          <span v-if="r.item.checked" class="relative h-3.5 w-6.5 flex-none rounded-[7px] transition-colors" :class="r.state ? 'bg-brand-deep' : 'bg-line-2'" :title="r.state ? 'An' : 'Aus'"><i class="absolute top-0.5 left-0.5 size-2.5 rounded-full bg-white transition-transform" :class="r.state && 'translate-x-3'"></i></span>
           <kbd v-if="r.item.shortcut" class="s3d-kbd">{{ r.item.shortcut }}</kbd>
         </div>
       </template>
       <div v-if="!rows.length" class="p-3.5 text-ink-2">Keine Treffer für „{{ palette.query }}“</div>
     </div>
-    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-line px-3 py-1.5 text-[11px] text-ink-2 max-[560px]:[&>span:not(.flex-1)]:hidden">
+    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-line px-3 py-1.5 text-[0.6875rem] text-ink-2 max-[35rem]:[&>span:not(.flex-1)]:hidden">
       <span><kbd class="s3d-kbd">↑↓</kbd> wählen</span>
       <span><kbd class="s3d-kbd">Enter</kbd> ausführen</span>
       <span title="Ausführen bzw. umschalten, Palette bleibt offen"><kbd class="s3d-kbd">Umschalt+Enter</kbd> offen lassen</span>
       <span class="flex-1"></span>
-      <button class="whitespace-nowrap rounded-[10px] border px-[7px] py-px text-[11px]" :class="prefix === '>' ? 'border-brand-deep bg-active text-ink' : 'border-line-2 bg-transparent text-ink-2'" @click="setPrefix('>')">&gt; Befehle</button>
-      <button class="whitespace-nowrap rounded-[10px] border px-[7px] py-px text-[11px]" :class="prefix === '@' ? 'border-brand-deep bg-active text-ink' : 'border-line-2 bg-transparent text-ink-2'" @click="setPrefix('@')">@ Objekte</button>
-      <button class="whitespace-nowrap rounded-[10px] border px-[7px] py-px text-[11px]" :class="prefix === '#' ? 'border-brand-deep bg-active text-ink' : 'border-line-2 bg-transparent text-ink-2'" @click="setPrefix('#')"># Materialien</button>
+      <button class="whitespace-nowrap rounded-[10px] border px-1.75 py-px text-[0.6875rem]" :class="prefix === '>' ? 'border-brand-deep bg-active text-ink' : 'border-line-2 bg-transparent text-ink-2'" @click="setPrefix('>')">&gt; Befehle</button>
+      <button class="whitespace-nowrap rounded-[10px] border px-1.75 py-px text-[0.6875rem]" :class="prefix === '@' ? 'border-brand-deep bg-active text-ink' : 'border-line-2 bg-transparent text-ink-2'" @click="setPrefix('@')">@ Objekte</button>
+      <button class="whitespace-nowrap rounded-[10px] border px-1.75 py-px text-[0.6875rem]" :class="prefix === '#' ? 'border-brand-deep bg-active text-ink' : 'border-line-2 bg-transparent text-ink-2'" @click="setPrefix('#')"># Materialien</button>
     </div>
   </div>
 </template>

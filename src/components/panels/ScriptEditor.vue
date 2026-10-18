@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full min-h-0 flex-col">
     <div class="flex gap-1.5 px-2.5 pt-2 pb-1">
-      <select class="s3d-input w-[110px] flex-none" :value="lang" @change="setLang(($event.target as HTMLSelectElement).value as any)">
+      <select class="s3d-input w-27.5 flex-none" :value="lang" @change="setLang(($event.target as HTMLSelectElement).value as any)">
         <option value="js">JavaScript</option><option value="json">JSON</option><option value="obj">OBJ-Mesh</option>
       </select>
       <select class="s3d-input flex-1" value="" @change="loadExample(($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''">
@@ -20,21 +20,21 @@
       <button class="bg-transparent p-0 text-xs text-blue hover:underline" v-if="currentSaved" @click="delSaved">Löschen</button>
       <button class="bg-transparent p-0 text-xs text-blue hover:underline" @click="showHelp = !showHelp">{{ showHelp ? 'API-Info ausblenden' : 'API-Info' }}</button>
     </div>
-    <div v-if="lang === 'obj'" class="flex items-center gap-3.5 px-2.5 pb-1.5 text-xs [&_label]:flex [&_label]:items-center [&_label]:gap-[5px]">
+    <div v-if="lang === 'obj'" class="flex items-center gap-3.5 px-2.5 pb-1.5 text-xs [&_label]:flex [&_label]:items-center [&_label]:gap-1.25">
       <label title="Größte Seite des Objekts">Größe <input class="s3d-input h-6 w-16" v-model="objSize" @keydown.stop /></label>
       <label class="s3d-check" title="OBJ-Dateien und LLaMA-Mesh sind Y-oben – wird nach Z-oben gedreht"><input type="checkbox" v-model="objYUp" /> Y ist oben</label>
-      <label title="Kanten zwischen Flächen flacher als dieser Winkel werden geglättet (0 = alle Kanten sichtbar)">Glätten <input class="s3d-input h-6 w-[52px]" type="number" min="0" max="180" v-model.number="objSmooth" @keydown.stop />°</label>
+      <label title="Kanten zwischen Flächen flacher als dieser Winkel werden geglättet (0 = alle Kanten sichtbar)">Glätten <input class="s3d-input h-6 w-13" type="number" min="0" max="180" v-model.number="objSmooth" @keydown.stop />°</label>
     </div>
-    <pre v-if="showHelp && lang === 'obj'" class="mx-2.5 mt-0 mb-1.5 max-h-[220px] overflow-auto rounded-[3px] border border-line bg-surface-2 p-2 font-mono text-[11px]/[1.45] whitespace-pre-wrap select-text">{{ OBJ_HELP }}</pre>
+    <pre v-if="showHelp && lang === 'obj'" class="mx-2.5 mt-0 mb-1.5 max-h-55 overflow-auto rounded-[3px] border border-line bg-surface-2 p-2 font-mono text-[0.6875rem]/[1.45] whitespace-pre-wrap select-text">{{ OBJ_HELP }}</pre>
     <ApiReference v-if="showHelp && lang !== 'obj'" class="flex-[0_0_52%]" @insert="insertText" @try="tryExample" />
-    <div ref="edWrap" class="flex min-h-[120px] flex-1 border-y border-line bg-surface-2 font-mono text-[12.5px]/[18px]">
-      <div ref="gutter" class="w-[38px] flex-none overflow-hidden bg-surface-2 py-1.5 pr-1.5 text-right text-muted select-none"><div v-for="n in lines" :key="n">{{ n }}</div></div>
+    <div ref="edWrap" class="flex min-h-30 flex-1 border-y border-line bg-surface-2 font-mono text-[0.78125rem]/[1.125rem]">
+      <div ref="gutter" class="w-9.5 flex-none overflow-hidden bg-surface-2 py-1.5 pr-1.5 text-right text-muted select-none"><div v-for="n in lines" :key="n">{{ n }}</div></div>
       <div class="relative min-w-0 flex-1">
         <pre ref="hl" class="s3d-syntax pointer-events-none absolute inset-0 m-0 overflow-hidden px-2 py-1.5 font-mono whitespace-pre text-ink [tab-size:2]" aria-hidden="true" v-html="highlighted"></pre>
         <textarea ref="ta" v-model="code" class="absolute inset-0 m-0 resize-none overflow-auto border-0 bg-transparent px-2 py-1.5 whitespace-pre text-transparent caret-ink outline-none select-text [tab-size:2] selection:bg-[rgba(0,95,158,.25)] selection:text-transparent" spellcheck="false" wrap="off" @scroll="sync" @keydown="key" @keydown.stop @paste="onPaste"></textarea>
       </div>
     </div>
-    <div ref="cons" class="h-[150px] flex-none overflow-auto px-2.5 pb-2 font-mono text-xs/normal select-text">
+    <div ref="cons" class="h-37.5 flex-none overflow-auto px-2.5 pb-2 font-mono text-xs/normal select-text">
       <div class="sticky top-0 flex items-center gap-2.5 bg-surface py-1.5 font-sans text-xs font-semibold">Konsole <span v-if="lastMs != null" class="ml-auto font-normal text-ink-2">{{ lastMs.toFixed(0) }} ms</span><button class="bg-transparent p-0 text-xs text-blue hover:underline" @click="out = []">Leeren</button></div>
       <div v-for="(l, i) in out" :key="i" class="whitespace-pre-wrap break-words" :class="LN[l.kind]">{{ l.text }}</div>
       <div v-if="!out.length" class="whitespace-pre-wrap break-words text-ink-2">Ausgaben von s3d.log(…) und Fehler erscheinen hier. Jeder Lauf ist ein einziger Rückgängig-Schritt.</div>

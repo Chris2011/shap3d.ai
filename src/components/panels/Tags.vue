@@ -8,7 +8,7 @@
       <button class="flex bg-transparent p-0.5 text-[#4a535b] dark:text-ink-2" @click.stop="toggle(t)"><Icon :name="t.visible ? 'eye' : 'eyeOff'" :size="16" /></button>
       <input v-if="editing === t.name" class="s3d-input" :value="t.name" @change="rename(t, ($event.target as HTMLInputElement).value)" @blur="editing = null" @keydown.enter="($event.target as HTMLInputElement).blur()" />
       <span v-else class="flex-1 truncate" @dblclick="t.name !== 'Untagged' && (editing = t.name)">{{ t.name === 'Untagged' ? 'Ohne Tag' : t.name }}</span>
-      <input class="h-[18px] w-5.5 rounded-[2px] border border-line-2 p-0" type="color" :value="t.color" @click.stop @change="setColor(t, ($event.target as HTMLInputElement).value)" />
+      <input class="h-4.5 w-5.5 rounded-[2px] border border-line-2 p-0" type="color" :value="t.color" @click.stop @change="setColor(t, ($event.target as HTMLInputElement).value)" />
       <button v-if="t.name !== 'Untagged'" class="flex bg-transparent p-0.5 text-[#4a535b] dark:text-ink-2" title="Löschen" @click.stop="remove(t)"><Icon name="trash" :size="15" /></button>
     </div>
   </div>
