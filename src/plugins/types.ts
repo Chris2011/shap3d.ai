@@ -5,6 +5,8 @@ import type { Editor, Tool } from '../engine/editor';
 import type { PointTool } from '../tools/base';
 import type { Overlay } from '../engine/overlay';
 import type { RunResult, ScriptApi } from '../scripting/api';
+import type { ScriptLanguage } from '../scripting/languages';
+import type { Entities } from '../core/model';
 
 /**
  * A Shap3D.ai plugin: an ES module whose default export is this object.
@@ -75,6 +77,28 @@ export interface PluginExporter {
   export: (editor: Editor) => Blob | string | Promise<Blob | string>;
 }
 
+/** A polygon mesh: vertex positions and faces as lists of vertex indices (0-based). */
+export interface PluginMesh {
+  vertices: [number, number, number][];
+  faces: number[][];
+  /** optional material name per face (same order as `faces`; null = no material) */
+  faceMaterials?: (string | null)[];
+}
+
+/** colour (CSS, e.g. "#ff0000") and opacity 0–1 of a material */
+export interface PluginMaterial { color: string; opacity?: number }
+
+export interface PluginMeshOptions {
+  /** name of the group that is created (meshes.add) */
+  name?: string;
+  /** factor from mesh units to metres, e.g. 0.001 for millimetres – default 1 */
+  scale?: number;
+  /** soften edges between faces flatter than this angle (deg) – default 20 */
+  smooth?: number;
+  /** materials used in `faceMaterials` that may not exist yet – created in the same undo step (meshes.add) */
+  materials?: Record<string, PluginMaterial>;
+}
+
 export interface ScriptExtension {
   /** shown in the API reference (category "Plugins") */
   signature?: string;
@@ -101,12 +125,41 @@ export interface PluginContext {
     /** adds `s3d.<name>(...)`; `implementation` receives the script API as first argument */
     extend: (name: string, implementation: (api: ScriptApi, ...args: any[]) => unknown, info?: ScriptExtension) => Disposer;
     run: (code: string) => RunResult;
+    /** an extra language in the script editor (language selector, examples, help) */
+    registerLanguage: (language: ScriptLanguage) => Disposer;
+    /** opens the script editor with this code */
+    openInEditor: (language: string, code: string) => void;
+    /** awaited by the script editor before a JavaScript script runs – e.g. to prepare what s3d.<extension>() needs */
+    beforeRun: (prepare: (code: string) => void | Promise<void>) => Disposer;
+  };
+  /** files shipped in the plugin package (folder install), by path relative to its package.json */
+  assets: { list: () => string[]; blob: (path: string) => Blob | undefined; url: (path: string) => string };
+  meshes: {
+    /** builds a mesh into `entities` (e.g. `api.ents` inside a script extension); returns the number of faces */
+    build: (entities: Entities, mesh: PluginMesh, options?: PluginMeshOptions) => number;
+    /** adds a mesh as a new group to the current context – one undo step */
+    add: (mesh: PluginMesh, options?: PluginMeshOptions) => void;
+  };
+  materials: {
+    /** creates the material if the model doesn't have it yet (call inside editor.commit or a script for undo); returns its name */
+    ensure: (name: string, material: PluginMaterial) => string;
   };
   files: { registerImporter: (importer: PluginImporter) => Disposer; registerExporter: (exporter: PluginExporter) => Disposer };
   overlay: { draw: (draw: (overlay: Overlay, editor: Editor) => void) => Disposer };
   events: { onToolChange: (listener: () => void) => Disposer; onNewModel: (listener: () => void) => Disposer };
   /** JSON storage, namespaced per plugin */
-  storage: { get: <T>(key: string, fallback: T) => T; set: (key: string, value: unknown) => void };
+  storage: {
+    get: <T>(key: string, fallback: T) => T;
+    set: (key: string, value: unknown) => void;
+    /** files the plugin keeps for the user in the browser (IndexedDB), by path – e.g. libraries or fonts */
+    files: {
+      list: () => Promise<{ path: string; size: number }[]>;
+      get: (path: string) => Promise<Blob | undefined>;
+      put: (path: string, file: Blob) => Promise<void>;
+      remove: (path: string) => Promise<void>;
+      clear: () => Promise<void>;
+    };
+  };
   ui: { toast: (message: string) => void; prompt: (title: string, value?: string) => Promise<string | null>; confirm: (title: string) => Promise<boolean> };
   /** register any extra clean-up */
   onDispose: (disposer: Disposer) => void;

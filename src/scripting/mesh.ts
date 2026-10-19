@@ -7,7 +7,11 @@ import type { RunResult } from './api';
  * OBJ meshes (e.g. raw LLaMA-Mesh output: only `v x y z` and `f a b c` lines).
  * Everything else – prose, code fences, normals, texture coords, groups – is ignored.
  */
-export interface ObjMesh { verts: THREE.Vector3[]; faces: number[][] }
+export interface ObjMesh {
+  verts: THREE.Vector3[]; faces: number[][];
+  /** optional material name per face (same order as `faces`) */
+  materials?: (string | null | undefined)[];
+}
 export interface MeshOptions {
   /** largest side in metres (default 1) */
   size?: number;
@@ -15,6 +19,10 @@ export interface MeshOptions {
   yUp?: boolean;
   /** soften edges between faces flatter than this angle (deg), 0 = keep all edges – default 30 */
   smooth?: number;
+  /** false = keep the coordinates as they are (times `scale`) instead of fitting to `size` and centring – default true */
+  fit?: boolean;
+  /** with fit: false – factor from file units to metres (e.g. 0.001 for millimetres) */
+  scale?: number;
 }
 
 /** True if the text looks like an OBJ mesh rather than a script. */
@@ -32,22 +40,25 @@ export const parseObj = (text: string): ObjMesh => {
   return { verts, faces };
 };
 
-/** Builds the mesh into `ents`: scaled to `size`, centred in X/Y, standing on z = 0. Returns the face count. */
+/** Builds the mesh into `ents`: scaled to `size`, centred in X/Y, standing on z = 0 (or kept in place with `fit: false`). Returns the face count. */
 export const buildMesh = (ents: Entities, mesh: ObjMesh, opts: MeshOptions = {}): number => {
-  const { size = 1, yUp = true, smooth = 30 } = opts;
+  const { size = 1, yUp = true, smooth = 30, fit = true } = opts;
   if (!mesh.verts.length || !mesh.faces.length) throw new Error('Kein Mesh gefunden – erwartet werden Zeilen wie „v 1 2 3“ und „f 1 2 3“.');
   if (mesh.verts.some(vertex => !isFinite(vertex.x + vertex.y + vertex.z))) throw new Error('Ungültige Koordinaten im Mesh');
   const pts = mesh.verts.map(vertex => (yUp ? new THREE.Vector3(vertex.x, -vertex.z, vertex.y) : vertex.clone()));
   const box = new THREE.Box3().setFromPoints(pts); const extent = box.getSize(new THREE.Vector3());
-  const scale = size / Math.max(extent.x, extent.y, extent.z, 1e-9);
+  const scale = fit ? size / Math.max(extent.x, extent.y, extent.z, 1e-9) : (opts.scale ?? 1);
+  // fit: centred on the ground; otherwise in place
   const center = box.getCenter(new THREE.Vector3());
-  const ids = pts.map(point => ents.addVertex(new THREE.Vector3((point.x - center.x) * scale, (point.y - center.y) * scale, (point.z - box.min.z) * scale)));
+  const origin = fit ? new THREE.Vector3(center.x, center.y, box.min.z) : new THREE.Vector3();
+  const ids = pts.map(point => ents.addVertex(point.clone().sub(origin).multiplyScalar(scale)));
   let made = 0;
-  for (const faceIndices of mesh.faces) {
+  for (const [faceNumber, faceIndices] of mesh.faces.entries()) {
     if (faceIndices.some(i => !(i >= 0 && i < ids.length))) continue;
     const loop = faceIndices.map(i => ids[i]).filter((x, i, all) => x !== all[(i + 1) % all.length]);
     if (new Set(loop).size < 3) continue;
-    if (ents.createFaceRaw(loop)) made++;
+    const material = mesh.materials?.[faceNumber] ?? undefined;
+    if (ents.createFaceRaw(loop, [], material ? { material } : {})) made++;
   }
   ents.mergeCoplanar([...ents.edges.keys()]);
   if (smooth > 0) ents.autoSoften([...ents.edges.keys()], smooth);

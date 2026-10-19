@@ -1,3 +1,4 @@
+import { prepareScript } from '../scripting/languages';
 import * as THREE from 'three';
 import { reactive } from 'vue';
 import type { Editor } from '../engine/editor';
@@ -102,7 +103,7 @@ const sendMesh = async (editor: Editor, prompt: string) => {
   turn.text = `Mesh für „${prompt}“` + (size ? ` (Größe ${size[1]})` : ' (größte Seite 1 m)');
   turn.targetSize = size ? parseLength(size[1], 'm') ?? 1 : 1;
   if (!aiConfig.autoRun) { finish(turn, 'pending'); return; }
-  execute(editor, turn);
+  await execute(editor, turn);
 };
 
 
@@ -134,7 +135,7 @@ export const send = async (editor: Editor, prompt: string) => {
       turn.code = block.code; turn.lang = block.lang;
       turn.text = turn.text.replace(/```[\s\S]*?```/, '').trim();
       if (!aiConfig.autoRun) { finish(turn, 'pending'); return; }
-      if (execute(editor, turn)) return;
+      if (await execute(editor, turn)) return;
       // feed the error back so the model can fix its own code
       if (attempt < attempts - 1) push({ role: 'user', auto: true, text: `Der Code ist mit diesem Fehler abgebrochen: ${turn.error}\nBitte korrigiere ihn und gib das vollständige Skript erneut aus.` });
     }
@@ -142,9 +143,10 @@ export const send = async (editor: Editor, prompt: string) => {
 };
 
 /** Run the code of an assistant turn as one undo step. */
-export const execute = (editor: Editor, turn: AiTurn): boolean => {
+export const execute = async (editor: Editor, turn: AiTurn): Promise<boolean> => {
   if (!turn.code) return false;
   turn.status = 'running';
+  if (turn.lang !== 'obj' && turn.lang !== 'json') await prepareScript(turn.code); // plugins prepare their s3d extensions
   const facesBefore = editor.model.root.stats().faces;
   const result = runCode(editor, turn);
   if (result.ok) {

@@ -134,14 +134,15 @@ export class Model implements DefinitionRegistry {
     });
     return {
       format: MODEL_FORMAT, name: this.name,
-      settings: this.settings, materials: this.materials, tags: this.tags,
+      // copies, not references – undo snapshots must not change when the model changes later
+      settings: JSON.parse(JSON.stringify(this.settings)), materials: this.materials.map(material => ({ ...material })), tags: this.tags.map(tag => ({ ...tag })),
       definitions: [...this.definitions.values()].map(definition => ({ id: definition.id, name: definition.name, isComponent: definition.isComponent, faceMe: definition.faceMe || undefined, terrain: definition.terrain ? terrainToJSON(definition.terrain) : undefined, shape: definition.shape, entities: entitiesToJSON(definition.entities) })),
       root: entitiesToJSON(this.root),
       guides: this.guides.map(guide => ({ id: guide.id, kind: guide.kind, point: toArray(guide.point), direction: guide.direction ? toArray(guide.direction) : undefined })),
       dimensions: this.dimensions.map(dimension => ({ id: dimension.id, start: toArray(dimension.start), end: toArray(dimension.end), offset: toArray(dimension.offset) })),
       labels: this.labels.map(label => ({ id: label.id, point: toArray(label.point), text: label.text, offset: toArray(label.offset) })),
       sections: this.sections.map(section => ({ id: section.id, point: toArray(section.point), normal: toArray(section.normal), active: section.active, name: section.name })),
-      scenes: this.scenes.map(scene => ({ ...scene, camera: { position: scene.camera.position, target: scene.camera.target, fov: scene.camera.fov, ortho: scene.camera.ortho } })),
+      scenes: JSON.parse(JSON.stringify(this.scenes.map(scene => ({ ...scene, camera: { position: scene.camera.position, target: scene.camera.target, fov: scene.camera.fov, ortho: scene.camera.ortho } })))),
     };
   }
 
@@ -157,8 +158,8 @@ export class Model implements DefinitionRegistry {
     const toVector = (values: number[]) => new THREE.Vector3(values[0], values[1], values[2]);
     this.name = json.name ?? 'Unbenannt';
     this.settings = { ...this.settings, ...(json.settings ?? {}), style: { ...DEFAULT_STYLE, ...(json.settings?.style ?? {}) } };
-    if (json.materials) this.materials = json.materials;
-    if (json.tags) this.tags = json.tags;
+    if (json.materials) this.materials = json.materials.map((material: MaterialDef) => ({ ...material }));
+    if (json.tags) this.tags = json.tags.map((tag: Tag) => ({ ...tag }));
     const definitions = new Map<number, Definition>();
     for (const stored of json.definitions ?? []) {
       const definition = new Definition(stored.name, !!stored.isComponent);

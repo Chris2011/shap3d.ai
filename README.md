@@ -50,6 +50,7 @@
 - [Scripting example](#scripting-example)
 - [Writing plugins](#writing-plugins)
   - [The `context` API](#the-context-api)
+  - [Plugin packages](#plugin-packages)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
 - [Credits](#credits)
@@ -65,7 +66,7 @@
 - **Polygon inspector** – see every vertex and triangle, change the segment count of round shapes, subdivide or simplify any mesh.
 - **Command palette like in VS Code or IntelliJ** – <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, <kbd>F1</kbd> or <kbd>Shift</kbd> twice finds every tool, command, panel, switch, material, scene and object in one fuzzy search.
 - **Measuring aids** – rulers on the axes that switch from metres to centimetres to millimetres as you zoom in, and reference people that show their height.
-- **Plugin system** – extend the app with plain JavaScript modules: commands, tools, panels, script commands, file importers and exporters, overlay drawings. Switch them on and off in the plugin manager; three examples are included.
+- **Plugin system** – extend the app with plain JavaScript modules or whole plugin packages: commands, tools, panels, script commands and languages, file importers and exporters, overlay drawings. Three examples are included, plus an **OpenSCAD plugin** that runs the real OpenSCAD in the browser.
 - **Welcome tour** – six short animated steps on the first start, available again any time from the menu.
 - **Dark mode with a real night scene**, a split button for every combination, and a German user interface.
 
@@ -298,12 +299,17 @@ export default {
 | Tools | `tools.register({ id, name, icon?, key?, create: editor => tool })` | Adds an interactive tool to the expanded toolset and the palette. Subclass `context.classes.PointTool` for snapping (`this.pick(pointer, from)`) or `context.classes.Tool` for anything else. `key` is a single-key shortcut, used only when no other tool has it. |
 | Panels | `panels.register({ id, label, icon?, width?, mount(element) })` or `{ …, component }` | A side panel. `mount` fills a plain DOM element (return a clean-up function if needed); `component` takes a Vue component – `context.vue` exposes `h`, `ref`, `computed`, `defineComponent` … to write one without a bundler. Plugin panels open from the Plugins menu, the palette and the plugin manager. |
 | Script API | `script.extend(name, (api, ...args) => …, { signature?, description?, example? })`, `script.run(code)` | Adds `s3d.<name>(…)` to the scripting API and lists it in the API reference (*Hilfen* tab). `script.run` runs a script as one undo step. |
+| Script languages | `script.registerLanguage({ id, label, run(code, editor), examples?, help?, highlight? })`, `script.openInEditor(language, code)` | A new language in the script editor's language selector, with its own examples and help. `run` may be async and returns `{ ok, logs, error?, durationMs }`. `script.beforeRun(code => …)` is awaited before a JavaScript script runs – to prepare what a script extension needs. |
+| Meshes | `meshes.add({ vertices, faces, faceMaterials? }, { name?, scale?, smooth?, materials? })`, `meshes.build(entities, mesh, options?)` | Turns a polygon mesh into real faces – as a new group (one undo step) or inside a script extension (`api.ents`). `scale` converts the mesh units to metres; `faceMaterials` gives each face a material, `materials` defines missing ones (`{ name: { color, opacity } }`) in the same undo step. |
+| Materials | `materials.ensure(name, { color, opacity? })` | Creates a material if the model doesn't have it yet. |
+| Package files | `assets.url(path)`, `assets.blob(path)`, `assets.list()` | Files that came with a plugin package (see below), e.g. a WebAssembly build: `await import(context.assets.url('engine.js'))`. |
 | Files | `files.registerImporter({ extensions, label, import(file, editor) })` | Opens new file types through *Importieren…* and drag & drop. |
 | | `files.registerExporter({ id, label, fileName(editor), mimeType?, export(editor) })` | Adds *Exportieren: …* to the export menu; `export` returns a string or a `Blob`. |
 | Drawing | `overlay.draw((overlay, editor) => …)` | Draws on the 2D overlay above the 3D view on every redraw (`overlay.line`, `overlay.text`, `overlay.context` for the raw canvas). |
 | Icons | `icons.register(name, svgContent)` | An icon for commands, tools and panels (inner SVG markup for a 24 × 24 view box). |
 | Events | `events.onToolChange(listener)`, `events.onNewModel(listener)` | React to tool changes and new models. |
 | Storage | `storage.get(key, fallback)`, `storage.set(key, value)` | JSON settings, kept per plugin in the browser. |
+| | `storage.files.list()`, `.get(path)`, `.put(path, blob)`, `.remove(path)`, `.clear()` | Files the plugin keeps for the user (IndexedDB), e.g. libraries or fonts – removed together with the plugin. |
 | UI | `ui.toast(text)`, `ui.prompt(title, value?)`, `ui.confirm(title)` | Messages and simple dialogs. |
 | Model | `editor`, `THREE`, `newId()` | The full editor (model, selection, viewer; `editor.commit(label, change)` makes one undo step) and three.js. |
 
@@ -314,6 +320,31 @@ The three bundled examples in [`src/plugins/examples/`](src/plugins/examples) ca
 - **Würfelraster** (`grid-generator.js`) – a command with an input dialog, a DOM panel and the script command `s3d.boxGrid()`.
 - **Koordinaten & Hilfspunkte** (`cursor-coordinates.js`) – an overlay with the coordinates of the snapped point, a toggle command and the tool *Hilfspunkt* (key <kbd>J</kbd>) built on `PointTool`.
 - **Stückliste & Punktimport** (`parts-list.js`) – a CSV parts-list exporter and an importer for `.xyz`/`.pts` point lists.
+
+### Plugin packages
+
+A plugin that needs more than one file – a WebAssembly engine, fonts, data – is a **package folder with its own `package.json`**. It is installed with **Plugin-Ordner laden…** in the plugin manager:
+
+```json
+{
+  "name": "s3d-plugin-example",
+  "version": "1.0.0",
+  "license": "MIT",
+  "shap3d": { "main": "plugin.js" }
+}
+```
+
+`shap3d.main` (or `main`) names the plugin module. Every other file in the folder (without `node_modules`) is stored in the browser (IndexedDB) and reachable through `context.assets` by its path relative to the `package.json`. The plugin manager shows the package name, size and license. Such packages are separate programs with their own dependencies and license – they are not part of the app.
+
+**Example: the OpenSCAD plugin** in [`plugins/openscad/`](plugins/openscad) runs the official OpenSCAD as WebAssembly: it opens `.scad` files (with `color()` turned into materials), adds *OpenSCAD* as a language to the script editor (with examples), keeps a file library in the browser so `include`, `use`, `import()` and `text()` fonts work, provides `s3d.scad(code)` for JavaScript scripts and exports the model as an OpenSCAD `polyhedron()`. Because OpenSCAD is GPL-licensed, it is a package of its own (GPL-2.0-or-later) and never bundled with the app:
+
+```bash
+cd plugins/openscad
+npm install
+npm run build
+```
+
+Then *Plugins › Plugin-Ordner laden…* and pick `plugins/openscad/dist`. Details in [its README](plugins/openscad/README.md).
 
 Type definitions for the whole API are in [`src/plugins/types.ts`](src/plugins/types.ts); reference them with `/** @type {import('./types').S3dPlugin} */` for autocompletion in your editor.
 
@@ -335,6 +366,7 @@ src/
   utils/       pure helper functions – e.g. material swatches
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo and README screenshots
+plugins/       stand-alone plugin packages with their own package.json – e.g. openscad/ (not part of the app build)
 scripts/       screenshot automation (headless Chrome)
 ```
 

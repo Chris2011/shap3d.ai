@@ -1,7 +1,10 @@
 <template>
   <div class="mb-2 flex flex-wrap gap-1.5 [&_.s3d-btn]:flex [&_.s3d-btn]:items-center [&_.s3d-btn]:gap-1">
     <button class="s3d-btn small" :disabled="busy" @click="installFromFile"><S3dIcon name="import" :size="14" /> Plugin-Datei laden…</button>
+    <button class="s3d-btn small" :disabled="busy" title="Ordner mit package.json – z. B. der gebaute dist-Ordner eines Plugin-Pakets" @click="folderInput?.click()"><S3dIcon name="folder" :size="14" /> Plugin-Ordner laden…</button>
+    <input ref="folderInput" type="file" webkitdirectory multiple class="hidden" @change="installFromFolder" />
   </div>
+  <p v-if="busy" class="mb-2 text-xs text-ink-2">Plugin wird installiert …</p>
   <p class="mb-2 text-xs text-ink-2">Plugins sind JavaScript-Module und laufen mit vollem Zugriff auf die Anwendung. Installiere nur Plugins, deren Quelle du vertraust. Sie werden nur in diesem Browser gespeichert.</p>
   <p v-if="message" class="mb-2 rounded-[3px] border px-2 py-1.5 text-xs" :class="message.error ? 'border-danger/40 bg-danger/8 text-danger' : 'border-line bg-surface text-ink-2'">{{ message.text }}</p>
 
@@ -15,6 +18,7 @@
     <p v-if="plugin.description" class="mt-1 text-xs text-ink-2">{{ plugin.description }}</p>
     <p v-if="plugin.error" class="mt-1 text-xs text-danger">Fehler: {{ plugin.error }}</p>
     <p class="mt-1 text-[0.6875rem] text-ink-2">{{ plugin.author ? `von ${plugin.author} · ` : '' }}<code>{{ plugin.id }}</code></p>
+    <p v-if="plugin.package" class="mt-0.5 text-[0.6875rem] text-ink-2">Paket {{ plugin.package.name }} · {{ plugin.package.files }} {{ plugin.package.files === 1 ? 'Datei' : 'Dateien' }}, {{ megabytes(plugin.package.bytes) }}<template v-if="plugin.package.license"> · Lizenz {{ plugin.package.license }}</template></p>
     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
       <button v-for="panel in panelsOf(plugin.id)" :key="panel.id" class="s3d-link" @click="showPanel(panel.id)">{{ panel.label }} öffnen</button>
       <button class="s3d-link" @click="downloadSource(plugin.id)">Quelltext</button>
@@ -43,10 +47,12 @@ import S3dToggleSwitch from '../ui/S3dToggleSwitch.vue';
 import { useEditor } from '../keys';
 import { PANEL_INFO, showPanel } from '../panelState';
 import { pickFile, download } from '../../engine/commands';
-import { plugins, installPlugin, setPluginEnabled, removePlugin, pluginSource, EXAMPLE_PLUGINS } from '../../plugins/registry';
+import { plugins, installPlugin, installPluginPackage, setPluginEnabled, removePlugin, pluginSource, EXAMPLE_PLUGINS } from '../../plugins/registry';
 
 const editor = useEditor();
 const busy = ref(false);
+const folderInput = ref<HTMLInputElement | null>(null);
+const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toLocaleString('de-DE', { maximumFractionDigits: 1 })} MB`;
 const message = ref<{ text: string; error: boolean } | null>(null);
 
 /** reads a metadata string field from source without running it */
@@ -57,10 +63,10 @@ const examples = computed(() => EXAMPLE_PLUGINS
   // new examples, or bundled ones that changed since they were installed
   .filter(example => !example.installed || pluginSource(example.id) !== example.code));
 
-const install = async (code: string) => {
+const install = async (code: string | File[]) => {
   busy.value = true; message.value = null;
   try {
-    const plugin = await installPlugin(code);
+    const plugin = typeof code === 'string' ? await installPlugin(code) : await installPluginPackage(code);
     const entry = plugins.find(candidate => candidate.id === plugin.id);
     message.value = entry?.error ? { text: `„${plugin.name}“ installiert, aber beim Start fehlgeschlagen: ${entry.error}`, error: true } : { text: `„${plugin.name}“ ist installiert und aktiv.`, error: false };
   } catch (error: any) { message.value = { text: `Plugin konnte nicht geladen werden: ${error?.message ?? error}`, error: true }; }
@@ -73,6 +79,12 @@ const installFromFile = async () => {
 };
 
 const panelsOf = (id: string) => PANEL_INFO.filter(panel => panel.id.startsWith(id + '.'));
+const installFromFolder = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const files = [...(input.files ?? [])]; input.value = '';
+  if (files.length) await install(files);
+};
+
 const toggle = (id: string, enabled: boolean) => { setPluginEnabled(id, enabled); };
 
 const remove = async (id: string, name: string) => {

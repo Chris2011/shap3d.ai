@@ -3,15 +3,17 @@
     <div class="flex gap-1.5 px-2.5 pt-2 pb-1">
       <select class="s3d-input w-27.5 flex-none" :value="lang" @change="setLang(($event.target as HTMLSelectElement).value as any)">
         <option value="js">JavaScript</option><option value="json">JSON</option><option value="obj">OBJ-Mesh</option>
+        <option v-for="language in SCRIPT_LANGUAGES" :key="language.id" :value="language.id">{{ language.label }}</option>
       </select>
       <select class="s3d-input flex-1" value="" @change="loadExample(($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''">
         <option value="" disabled>Beispiel laden…</option>
         <optgroup label="JavaScript"><option v-for="example in EXAMPLES.filter(candidate => candidate.lang === 'js')" :key="example.id" :value="example.id">{{ example.name }}</option></optgroup>
         <optgroup label="JSON"><option v-for="example in EXAMPLES.filter(candidate => candidate.lang === 'json')" :key="example.id" :value="example.id">{{ example.name }}</option></optgroup>
         <optgroup label="OBJ-Mesh"><option v-for="example in EXAMPLES.filter(candidate => candidate.lang === 'obj')" :key="example.id" :value="example.id">{{ example.name }}</option></optgroup>
+        <optgroup v-for="language in SCRIPT_LANGUAGES.filter(candidate => candidate.examples?.length)" :key="language.id" :label="language.label"><option v-for="example in language.examples" :key="example.id" :value="`plugin:${language.id}:${example.id}`">{{ example.name }}</option></optgroup>
         <optgroup v-if="saved.length" label="Meine Skripte"><option v-for="script in saved" :key="script.name" :value="'my:' + script.name">{{ script.name }}</option></optgroup>
       </select>
-      <button class="s3d-btn primary flex h-7 items-center gap-1.5" title="Ausführen (Strg+Enter)" @click="run"><S3dIcon name="play" :size="14" /> Ausführen</button>
+      <button class="s3d-btn primary flex h-7 items-center gap-1.5" title="Ausführen (Strg+Enter)" :disabled="running" @click="run"><S3dIcon name="play" :size="14" /> Ausführen</button>
     </div>
     <div class="flex items-center gap-2.5 px-2.5 pb-1.5 text-xs">
       <label class="s3d-check"><input type="checkbox" v-model="clearFirst" /> Vorher Modell leeren</label>
@@ -26,7 +28,8 @@
       <label title="Kanten zwischen Flächen flacher als dieser Winkel werden geglättet (0 = alle Kanten sichtbar)">Glätten <input class="s3d-input h-6 w-13" type="number" min="0" max="180" v-model.number="objSmooth" @keydown.stop />°</label>
     </div>
     <pre v-if="showHelp && lang === 'obj'" class="mx-2.5 mt-0 mb-1.5 max-h-55 overflow-auto rounded-[3px] border border-line bg-surface-2 p-2 font-mono text-[0.6875rem]/[1.45] whitespace-pre-wrap select-text">{{ OBJ_HELP }}</pre>
-    <S3dApiReference v-if="showHelp && lang !== 'obj'" class="flex-[0_0_52%]" @insert="insertText" @try="tryExample" />
+    <pre v-if="showHelp && pluginLanguage" class="mx-2.5 mt-0 mb-1.5 max-h-55 overflow-auto rounded-[3px] border border-line bg-surface-2 p-2 font-mono text-[0.6875rem]/[1.45] whitespace-pre-wrap select-text">{{ pluginLanguage.help ?? 'Keine Hilfe für diese Sprache.' }}</pre>
+    <S3dApiReference v-if="showHelp && !pluginLanguage && lang !== 'obj'" class="flex-[0_0_52%]" @insert="insertText" @try="tryExample" />
     <div ref="edWrap" class="flex min-h-30 flex-1 border-y border-line bg-surface-2 font-mono text-[0.78125rem]/[1.125rem]">
       <div ref="gutter" class="w-9.5 flex-none overflow-hidden bg-surface-2 py-1.5 pr-1.5 text-right text-muted select-none"><div v-for="lineNumber in lines" :key="lineNumber">{{ lineNumber }}</div></div>
       <div class="relative min-w-0 flex-1">
@@ -50,9 +53,10 @@ import { useEditor } from '../keys';
 import { EXAMPLES } from '../../scripting/examples';
 import S3dApiReference from './S3dApiReference.vue';
 import { runScript, runJson, type ScriptLog } from '../../scripting/api';
-import { highlight } from '../../scripting/highlight';
+import { highlight, type CodeLang } from '../../scripting/highlight';
 import { importObj, looksLikeObj } from '../../scripting/mesh';
 import { parseLength } from '../../core/units';
+import { SCRIPT_LANGUAGES, findScriptLanguage, prepareScript } from '../../scripting/languages';
 
 type Lang = ScriptLang;
 const OBJ_HELP = `OBJ-Mesh: Zeilen „v x y z“ (Ecke) und „f a b c …“ (Fläche, Eckennummern ab 1).
@@ -71,13 +75,19 @@ const clearFirst = ref(false); const showHelp = ref(false); const currentSaved =
 const textarea = ref<HTMLTextAreaElement | null>(null); const highlightLayer = ref<HTMLElement | null>(null); const gutter = ref<HTMLElement | null>(null); const cons = ref<HTMLElement | null>(null);
 onMounted(() => {
   const draft = scripts.draft.value; // last session – or code the AI assistant just sent over
-  if (draft) { lang.value = draft.lang; code.value = draft.code; if (draft.size) objSize.value = `${draft.size}m`; }
+  if (draft) { lang.value = isKnownLang(draft.lang) ? draft.lang : 'js'; code.value = draft.code; if (draft.size) objSize.value = `${draft.size}m`; }
   if (!code.value) loadExample('house');
 });
 watch([code, lang], () => { scripts.draft.value = { lang: lang.value, code: code.value }; });
+// code sent over while the editor is open (plugins)
+watch(scripts.request, request => { if (!request) return; lang.value = request.lang; code.value = request.code; currentSaved.value = null; scripts.request.value = null; }, { immediate: true });
 
 const lines = computed(() => Math.max(1, code.value.split('\n').length));
-const highlighted = computed(() => highlight(code.value + '\n', lang.value));
+const BUILT_IN_LANGS: readonly string[] = ['js', 'json', 'obj'];
+const isKnownLang = (id: string) => BUILT_IN_LANGS.includes(id) || !!findScriptLanguage(id);
+/** the plugin language that is selected, if any */
+const pluginLanguage = computed(() => findScriptLanguage(lang.value));
+const highlighted = computed(() => highlight(code.value + '\n', pluginLanguage.value ? (pluginLanguage.value.highlight ?? 'js') : (lang.value as CodeLang)));
 const sync = () => { if (!textarea.value) return; if (highlightLayer.value) { highlightLayer.value.scrollTop = textarea.value.scrollTop; highlightLayer.value.scrollLeft = textarea.value.scrollLeft; } if (gutter.value) gutter.value.scrollTop = textarea.value.scrollTop; };
 
 const key = (event: KeyboardEvent) => {
@@ -104,19 +114,40 @@ const onPaste = (event: ClipboardEvent) => {
   if (lang.value !== 'obj' && looksLikeObj(text)) { lang.value = 'obj'; editor.toast('OBJ-Mesh erkannt – Sprache auf „OBJ-Mesh“ gestellt'); }
 };
 const loadExample = (id: string) => {
+  if (id.startsWith('plugin:')) {
+    const [, languageId, exampleId] = id.split(':');
+    const language = findScriptLanguage(languageId); const example = language?.examples?.find(candidate => candidate.id === exampleId);
+    if (!language || !example) return;
+    lang.value = language.id; code.value = example.code; currentSaved.value = null;
+    out.value = [{ kind: 'log', text: `Beispiel „${example.name}“${example.description ? ': ' + example.description : ''}` }];
+    return;
+  }
   if (id.startsWith('my:')) { const script = scripts.find(id.slice(3)); if (script) { lang.value = script.lang; code.value = script.code; currentSaved.value = script.name; } return; }
   const example = EXAMPLES.find(candidate => candidate.id === id); if (!example) return;
   lang.value = example.lang; code.value = example.code; currentSaved.value = null;
   out.value = [{ kind: 'log', text: `Beispiel „${example.name}“: ${example.description}` }];
 };
-const run = () => {
+const running = ref(false);
+const run = async () => {
+  if (running.value) return;
   if (clearFirst.value) { editor.newModel(); }
   let result;
-  if (lang.value === 'obj') {
+  if (pluginLanguage.value) {
+    running.value = true; out.value = [{ kind: 'log', text: `${pluginLanguage.value.label} läuft …` }];
+    const startedAt = performance.now();
+    try { result = await pluginLanguage.value.run(code.value, editor); }
+    catch (error: any) { result = { ok: false, logs: [], error: error?.message ?? String(error), durationMs: performance.now() - startedAt }; }
+    finally { running.value = false; }
+  } else if (lang.value === 'obj') {
     const size = parseLength(objSize.value, 'm');
     if (size == null || size <= 0) { out.value = [{ kind: 'error', text: `✗ Ungültige Größe: ${objSize.value}` }]; return; }
     result = importObj(editor, code.value, { size, yUp: objYUp.value, smooth: objSmooth.value || 0, name: currentSaved.value ?? 'Mesh' });
-  } else result = lang.value === 'json' ? runJson(editor, code.value) : runScript(editor, code.value);
+  } else if (lang.value === 'json') result = runJson(editor, code.value);
+  else {
+    running.value = true;
+    try { await prepareScript(code.value); } finally { running.value = false; }
+    result = runScript(editor, code.value);
+  }
   lastMs.value = result.durationMs;
   out.value = [...result.logs];
   if (result.ok) out.value.push({ kind: 'log', text: `✓ Fertig – ${editor.model.root.stats().faces} Flächen im Modell.` });
