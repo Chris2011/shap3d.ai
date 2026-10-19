@@ -70,7 +70,7 @@
         <h2 class="mt-1 mb-1.5 text-[1.1875rem] font-bold text-ink">{{ cur.title }}</h2>
         <p class="text-[0.84375rem]/normal text-ink-2">{{ cur.text }}</p>
         <ul v-if="cur.tips" class="mt-2.5 list-disc pl-4.5 text-[0.78125rem]/[1.8] text-ink [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-line-2 [&_kbd]:bg-surface-2 [&_kbd]:px-1.25 [&_kbd]:font-mono [&_kbd]:text-[0.6875rem]"><li v-for="tip in cur.tips" :key="tip" v-html="tip"></li></ul>
-        <button v-if="cur.action" class="s3d-btn small mt-3" @click="cur.action.run()">{{ cur.action.label }}</button>
+        <button v-if="cur.action && (cur.action.available?.() ?? true)" class="s3d-btn small mt-3" @click="cur.action.run()">{{ cur.action.label }}</button>
       </div>
 
       <div class="flex items-center gap-2 px-5.5 pt-3.5 pb-4.5">
@@ -93,16 +93,19 @@ import { useEventListener } from '@vueuse/core';
 import S3dIcon from './S3dIcon.vue';
 import { BRAND } from '../brand';
 import { tour, closeTour } from './tour';
-import { openPanel } from './panelState';
+import { PANEL_INFO, showPanel } from './panelState';
 
-const STEPS: { title: string; text: string; tips?: string[]; action?: { label: string; run: () => void } }[] = [
+/** the chat panel of the built-in AI plugin (plugins/builtin/ai) – only there while the plugin is on */
+const AI_PANEL = 'ai.chat';
+
+const STEPS: { title: string; text: string; tips?: string[]; action?: { label: string; run: () => void; available?: () => boolean } }[] = [
   { title: `Willkommen bei ${BRAND.name}`, text: 'Easy 3D-Modellieren direkt im Browser – mit einer KI, die auf deinem eigenen Rechner läuft. In ein paar kurzen Schritten zeigen wir dir das Wichtigste.' },
   { title: 'Zeichnen und hochziehen', text: 'Zeichne eine Fläche auf den Boden und zieh sie mit Drücken/Ziehen in die Höhe – so entstehen Wände, Möbel und ganze Häuser.',
     tips: ['<kbd>R</kbd> Rechteck, <kbd>C</kbd> Kreis, <kbd>L</kbd> Linie', '<kbd>P</kbd> Drücken/Ziehen, <kbd>M</kbd> Verschieben', 'Maße einfach eintippen, z. B. <kbd>2,5</kbd> <kbd>Enter</kbd>'] },
   { title: 'Umsehen', text: 'Mit der Maus bewegst du dich frei durch dein Modell.',
     tips: ['Mittlere Maustaste ziehen = drehen (Orbit)', '<kbd>Umschalt</kbd> + mittlere Maustaste = schwenken', 'Mausrad = zoomen · <kbd>Umschalt</kbd>+<kbd>Z</kbd> = alles zeigen'] },
   { title: 'Der KI-Assistent', text: 'Beschreib einfach, was du haben willst – „Ein Tisch mit 4 Stühlen“ oder „eine Spinne mit roten Augen“ – und die KI baut es. Sie läuft lokal, z. B. mit Ollama; ein Assistent hilft beim Einrichten.',
-    action: { label: '✦ KI-Assistent öffnen', run: () => { closeTour(); openPanel.value = 'ai'; } } },
+    action: { label: '✦ KI-Assistent öffnen', run: () => { closeTour(); showPanel(AI_PANEL); }, available: () => PANEL_INFO.some(panel => panel.id === AI_PANEL) } },
   { title: 'Gelände, Skripte und Import', text: 'Forme Berge und Täler mit dem Gelände-Werkzeug, baue Objekte per Skript (s3d.box …) oder zieh Dateien aus SketchUp, Blender, 3ds Max & Co. einfach ins Fenster.',
     tips: ['Werkzeug <b>Gelände</b> – Pinsel für Hügel, Täler und Texturen', 'Skript-Editor rechts – mit API-Info und Beispielen', 'SKP · BLEND · FBX · 3DS · DAE · OBJ · STL · glTF …'] },
   { title: 'Dein Look', text: 'Oben schaltest du zwischen Hell und Dunkel um – auch nur die Menüs oder eine Nachtszene. Diese Einführung findest du jederzeit wieder im Menü.',

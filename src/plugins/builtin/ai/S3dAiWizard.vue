@@ -92,11 +92,11 @@
 </template>
 
 <script setup lang="ts">
-import S3dProgressBar from '../ui/S3dProgressBar.vue';
-import S3dModalDialog from '../ui/S3dModalDialog.vue';
+import S3dProgressBar from '../../../components/ui/S3dProgressBar.vue';
+import S3dModalDialog from '../../../components/ui/S3dModalDialog.vue';
 import { reactive, ref, computed } from 'vue';
-import S3dIcon from '../S3dIcon.vue';
-import { PROVIDERS, MODEL_PRESETS, aiConfig, providerInfo, listModels, describeError, downloads, startDownload, cancelDownload, fmtBytes, fmtDuration, ensureMeshModel, type ProviderId, type AiConfig } from '../../ai/providers';
+import S3dIcon from '../../../components/S3dIcon.vue';
+import { PROVIDERS, MODEL_PRESETS, aiConfig, providerInfo, listModels, describeError, downloads, startDownload, cancelDownload, fmtBytes, fmtDuration, ensureMeshModel, type ProviderId, type AiConfig } from './providers';
 
 const emit = defineEmits<{ (event: 'close'): void }>();
 const STEPS = ['Anbieter', 'Verbinden', 'Modell', 'Fertig'];

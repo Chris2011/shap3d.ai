@@ -1,8 +1,12 @@
+<img src="docs/openscad-logo.png" alt="OpenSCAD-Logo" width="96" align="right">
+
 # OpenSCAD-Plugin für Shap3D.ai
 
 Bringt das **offizielle OpenSCAD** (als WebAssembly, npm-Paket [`openscad-wasm`](https://www.npmjs.com/package/openscad-wasm)) in Shap3D.ai – ohne Installation von OpenSCAD und ohne Server, alles läuft lokal im Browser.
 
 Das Plugin ist ein eigenes Paket mit eigener `package.json` und gehört **nicht** zur Anwendung: OpenSCAD steht unter der GPL, Shap3D.ai unter Apache-2.0. Die Anwendung enthält nur das allgemeine Plugin-System; OpenSCAD kommt erst durch die Installation dieses Pakets in den Browser.
+
+![OpenSCAD-Code im Skript-Editor von Shap3D.ai](../../docs/screenshots/openscad.png)
 
 ## Funktionen
 

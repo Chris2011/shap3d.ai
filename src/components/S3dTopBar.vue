@@ -3,7 +3,7 @@
     <button :class="[TOOLBAR_BUTTON, { 'bg-hover': menuOpen }]" title="Modell/Voreinstellungen öffnen" @click.stop="menuOpen = !menuOpen"><S3dIcon name="menu" :size="22" /></button>
     <input v-if="editing" ref="nameInput" class="mx-1 h-7 w-50 border border-navy bg-surface px-2 font-bold text-navy outline-none" v-model="name" @keydown.enter="commitName" @blur="commitName" @keydown.esc="editing = false" />
     <div v-else class="max-w-65 cursor-text truncate pr-2 pl-1.5 text-sm/11 font-bold tracking-[0.05312rem] text-navy" title="Modell umbenennen" @click="startEdit">{{ modelName }}</div>
-    <button :class="[TOOLBAR_BUTTON, { 'bg-hover': openPanel === 'ai' }]" title="KI-Assistent" @click="openPanel = openPanel === 'ai' ? null : 'ai'"><S3dIcon name="sparkle" :size="22" /></button>
+    <button v-for="(button, i) in TOP_BAR_BUTTONS" :key="i" :class="[TOOLBAR_BUTTON, { 'bg-hover': button.active?.() }]" :title="button.title" @click="button.run(editor)"><S3dIcon :name="button.icon" :size="22" /></button>
     <button :class="TB_SM" :title="'Rückgängig ' + editor.ui.undoLabel" :disabled="!editor.ui.canUndo" @click="editor.undo()"><S3dIcon name="undo" :size="18" /></button>
     <button :class="TB_SM" :title="'Wiederholen ' + editor.ui.redoLabel" :disabled="!editor.ui.canRedo" @click="editor.redo()"><S3dIcon name="redo" :size="18" /></button>
     <button :class="[TB_SM, 'hover:text-danger']" title="Arbeitsfläche leeren (rückgängig mit Strg+Z)" @click="run('clearAll')"><S3dIcon name="trash" :size="18" /></button>
@@ -34,7 +34,7 @@ import S3dIcon from './S3dIcon.vue';
 import S3dMainMenu from './S3dMainMenu.vue';
 import { useEditor } from './keys';
 import { runCommand } from '../engine/commands';
-import { openPanel } from './panelState';
+import { TOP_BAR_BUTTONS } from '../plugins/uiExtensions';
 import S3dThemeButton from './S3dThemeButton.vue';
 import { useModel } from '../composables/useModel';
 

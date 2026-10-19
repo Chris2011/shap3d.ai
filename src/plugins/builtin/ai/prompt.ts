@@ -1,7 +1,7 @@
-import { EXAMPLES } from '../scripting/examples';
-import { TEXTURES } from '../core/textures';
-import { catalogText } from '../scripting/catalog';
-import { MATERIAL_LIBRARY, MATERIAL_CATEGORIES } from '../core/materialLibrary';
+import { EXAMPLES } from '../../../scripting/examples';
+import { TEXTURES } from '../../../core/textures';
+import { catalogText } from '../../../scripting/catalog';
+import { MATERIAL_LIBRARY, MATERIAL_CATEGORIES } from '../../../core/materialLibrary';
 
 /** Full reference of the `s3d` scripting API – generated from the catalog (src/scripting/catalog.ts), built on demand so commands added by plugins are included. */
 export const suReference = () => `

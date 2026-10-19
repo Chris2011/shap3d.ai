@@ -93,20 +93,20 @@
 </template>
 
 <script setup lang="ts">
-import S3dProgressBar from '../ui/S3dProgressBar.vue';
-import { useScripts } from '../../composables/useScripts';
+import S3dProgressBar from '../../../components/ui/S3dProgressBar.vue';
+import { useScripts } from '../../../composables/useScripts';
 import { ref, computed, watch, nextTick } from 'vue';
-import S3dIcon from '../S3dIcon.vue';
-import S3dAiWizard from '../ai/S3dAiWizard.vue';
-import S3dModelSearch from '../ai/S3dModelSearch.vue';
+import S3dIcon from '../../../components/S3dIcon.vue';
+import S3dAiWizard from './S3dAiWizard.vue';
+import S3dModelSearch from './S3dModelSearch.vue';
 import S3dCodeBlock from './S3dCodeBlock.vue';
-import { splitFences } from '../../scripting/highlight';
-import { useEditor } from '../keys';
-import { aiConfig, providerInfo, modeFor, downloads, cancelDownload, fmtBytes, fmtDuration } from '../../ai/providers';
-import { aiState, send, stop, clearChat, execute, type AiTurn } from '../../ai/agent';
-import { aiHistory, openSession, deleteSession, clearHistory, dayLabel, sameDay, clock, clockSec, elapsed, type AiSession } from '../../ai/history';
+import { splitFences } from '../../../scripting/highlight';
+import { useEditor } from '../../../components/keys';
+import { aiConfig, providerInfo, modeFor, downloads, cancelDownload, fmtBytes, fmtDuration } from './providers';
+import { aiState, send, stop, clearChat, execute, type AiTurn } from './agent';
+import { aiHistory, openSession, deleteSession, clearHistory, dayLabel, sameDay, clock, clockSec, elapsed, type AiSession } from './history';
 import { useIntervalFn } from '@vueuse/core';
-import { showPanel } from '../panelState';
+import { showPanel } from '../../../components/panelState';
 
 const editor = useEditor(); const scripts = useScripts();
 const wizard = ref(false);

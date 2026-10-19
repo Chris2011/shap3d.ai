@@ -8,7 +8,7 @@ import type { RunResult, ScriptApi } from '../scripting/api';
 import type { ScriptLanguage } from '../scripting/languages';
 import type { Definition, Entities } from '../core/model';
 import type { ApiCategory } from '../scripting/catalog';
-import type { ContextMenuEntry } from './uiExtensions';
+import type { ContextMenuEntry, TopBarButton } from './uiExtensions';
 import type { LoadedScene } from './fileFormats';
 import type { CodeFormat } from '../scripting/codeExport';
 export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
@@ -64,6 +64,10 @@ export interface PluginPanel {
   component?: Component;
   /** … or plain DOM: fill `element`, optionally return a clean-up function */
   mount?: (element: HTMLElement) => void | Disposer;
+  /** a tile in the right-hand bar: 'first' (top) or 'last'; without one, a command "Label…" opens the panel */
+  tile?: 'first' | 'last';
+  /** no padding and no scrolling – the component lays itself out (chat, editor) */
+  flush?: boolean;
 }
 
 export interface PluginImporter {
@@ -189,6 +193,8 @@ export interface PluginContext {
     addContextMenuEntry: (entry: ContextMenuEntry) => Disposer;
     /** a floating window (Vue component, rendered once – it decides itself when it is visible) */
     addWindow: (component: Component) => Disposer;
+    /** a button in the top bar next to the model name */
+    addTopBarButton: (button: TopBarButton) => Disposer;
   };
   /** JSON data the plugin keeps on a group/component definition – saved with the model */
   data: {

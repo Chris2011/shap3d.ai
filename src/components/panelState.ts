@@ -14,7 +14,6 @@ export interface PanelInfo {
 
 /** Right-hand panels (order = order of the tiles); reactive so plugins can add and remove panels. */
 export const PANEL_INFO = shallowReactive<PanelInfo[]>([
-  { id: 'ai', label: 'KI-Assistent', icon: 'sparkle', width: 400, flush: true },
   { id: 'entityinfo', label: 'Elementinformationen', icon: 'entityinfo', width: 300 },
   { id: 'components', label: 'Komponenten', icon: 'component', width: 300 },
   { id: 'instructor', label: 'Mentor', icon: 'instructor', width: 300 },
@@ -32,11 +31,11 @@ export const PANEL_INFO = shallowReactive<PanelInfo[]>([
   { id: 'plugins', label: 'Plugins', icon: 'plugin', width: 340 },
 ]);
 
-/** Adds a panel at runtime (plugins, no tile by default); returns a function that removes it again. */
-export const addPanel = (panel: PanelInfo) => {
+/** Adds a panel at runtime (plugins, no tile by default; `first` puts its tile on top); returns a function that removes it again. */
+export const addPanel = (panel: PanelInfo, first = false) => {
   if (PANEL_INFO.some(existing => existing.id === panel.id)) throw new Error(`Panel „${panel.id}“ gibt es schon`);
   const entry = { tile: false, ...panel, component: panel.component && markRaw(panel.component) };
-  PANEL_INFO.push(entry);
+  if (first) PANEL_INFO.unshift(entry); else PANEL_INFO.push(entry);
   return () => {
     const index = PANEL_INFO.indexOf(entry); if (index >= 0) PANEL_INFO.splice(index, 1);
     if (openPanel.value === panel.id) openPanel.value = null;

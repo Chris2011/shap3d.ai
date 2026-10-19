@@ -15,7 +15,7 @@ import { buildMesh } from '../scripting/mesh';
 import { registerScriptLanguage, registerBeforeRun } from '../scripting/languages';
 import { useScripts } from '../composables/useScripts';
 import { putPluginFile, getPluginFile, removePluginFile, clearPluginFiles, listPluginFiles, type PluginAssets } from './assetStore';
-import { addContextMenuEntry, addPluginWindow } from './uiExtensions';
+import { addContextMenuEntry, addPluginWindow, addTopBarButton } from './uiExtensions';
 import { registerCodeFormat } from '../scripting/codeExport';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
 
@@ -99,8 +99,9 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
         const component = panel.component ?? (panel.mount ? domPanel(panel.mount) : null);
         if (!component) throw new Error(`Panel „${panel.id}“ braucht component oder mount`);
         const id = qualified(panel.id);
-        track(addPanel({ id, label: panel.label, icon: panel.icon ?? 'plugin', width: panel.width ?? 300, component }));
-        // plugin panels have no tile – a menu/palette entry opens them
+        track(addPanel({ id, label: panel.label, icon: panel.icon ?? 'plugin', width: panel.width ?? 300, flush: panel.flush, component, tile: !!panel.tile }, panel.tile === 'first'));
+        // a tile is found in the palette like the built-in panels; without one a menu/palette entry opens the panel
+        if (panel.tile) return () => {};
         const command = { id: `${id}.open`, label: `${panel.label}…`, group: 'Plugins', icon: panel.icon ?? 'plugin', keywords: 'panel', run: () => showPanel(id) };
         COMMANDS.push(command);
         return track(() => removeFrom(COMMANDS, command));
@@ -207,6 +208,7 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
       confirm: title => editor.confirm(title),
       addContextMenuEntry: entry => track(addContextMenuEntry(entry)),
       addWindow: component => track(addPluginWindow(component)),
+      addTopBarButton: button => track(addTopBarButton(button)),
     },
 
     data: {

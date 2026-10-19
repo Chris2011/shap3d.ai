@@ -8,7 +8,6 @@ import { personDefinition } from './defaults';
 import { PEOPLE } from '../core/people';
 import { MATERIAL_LIBRARY } from '../core/materialLibrary';
 import { ScriptApi } from '../scripting/api';
-import { aiConfig } from '../ai/providers';
 import { openPanel, PANEL_INFO, togglePanel } from '../components/panelState';
 import type { PlaceTool } from '../tools/place';
 
@@ -78,8 +77,6 @@ export const paletteItems = (editor: Editor): PaletteItem[] => {
   toggle('v:mesh-tris', 'Polygonansicht: Dreiecke der Flächen', 'Polygone & Punkte', () => meshView.triangles, value => (meshView.triangles = value), 'mesh', 'triangles');
   toggle('v:mesh-soft', 'Polygonansicht: Weiche Kanten', 'Polygone & Punkte', () => meshView.soft, value => (meshView.soft = value), 'mesh', 'soft edges');
   toggle('v:backedges', 'Rückseitige Kanten', 'Stile', () => editor.model.settings.style.backEdges, value => (editor.model.settings.style.backEdges = value), 'styles', 'back edges K');
-  toggle('ai:fast', 'KI: Schnellmodus', 'KI-Assistent', () => aiConfig.fast, value => (aiConfig.fast = value), 'sparkle', 'fast schnell');
-  toggle('ai:autorun', 'KI: Code automatisch ausführen', 'KI-Assistent', () => aiConfig.autoRun, value => (aiConfig.autoRun = value), 'sparkle', 'autorun');
 
   // components: people, built-in library, components of this model
   for (const [key, person] of Object.entries(PEOPLE)) {

@@ -1,13 +1,13 @@
-import { prepareScript } from '../scripting/languages';
+import { prepareScript } from '../../../scripting/languages';
 import * as THREE from 'three';
 import { reactive } from 'vue';
-import type { Editor } from '../engine/editor';
-import { runScript, runJson, type RunResult } from '../scripting/api';
+import type { Editor } from '../../../engine/editor';
+import { runScript, runJson, type RunResult } from '../../../scripting/api';
 import { aiConfig, chat, describeError, modeFor, ensureMeshModel, type ChatMsg } from './providers';
 import { buildSystemPrompt, buildFastPrompt } from './prompt';
 import { currentSession, newSession, touch } from './history';
-import { importObj } from '../scripting/mesh';
-import { parseLength } from '../core/units';
+import { importObj } from '../../../scripting/mesh';
+import { parseLength } from '../../../core/units';
 
 export interface AiTurn {
   id: number; role: 'user' | 'assistant'; text: string;

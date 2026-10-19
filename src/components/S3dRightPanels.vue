@@ -35,12 +35,11 @@ import S3dMesh from './panels/S3dMesh.vue';
 import S3dModelInfo from './panels/S3dModelInfo.vue';
 import S3dScriptEditor from './panels/S3dScriptEditor.vue';
 import S3dComponents from './panels/S3dComponents.vue';
-import S3dAiChat from './panels/S3dAiChat.vue';
 import S3dPluginManager from './panels/S3dPluginManager.vue';
 
 const hot = ref<string | null>(null);
 const COMPS: Record<string, Component> = {
-  ai: S3dAiChat, entityinfo: S3dEntityInfo, components: S3dComponents, instructor: S3dInstructor, materials: S3dMaterials, styles: S3dStyles, tags: S3dTags,
+  entityinfo: S3dEntityInfo, components: S3dComponents, instructor: S3dInstructor, materials: S3dMaterials, styles: S3dStyles, tags: S3dTags,
   shadows: S3dShadows, scenes: S3dScenes, display: S3dDisplay, soften: S3dSoften, mesh: S3dMesh, modelinfo: S3dModelInfo, outliner: S3dOutliner, scripts: S3dScriptEditor, plugins: S3dPluginManager,
 };
 const PANELS = computed(() => PANEL_INFO.map(panel => ({ ...panel, comp: markRaw(panel.component ?? COMPS[panel.id]) })));

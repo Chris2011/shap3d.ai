@@ -11,6 +11,17 @@ export interface ContextMenuEntry {
 
 export const CONTEXT_MENU_ENTRIES = shallowReactive<ContextMenuEntry[]>([]);
 
+/** A button in the top bar (next to the model name), e.g. the AI assistant's sparkle. */
+export interface TopBarButton {
+  icon: string;
+  title: string;
+  /** highlighted while true (e.g. its panel is open) */
+  active?: () => boolean;
+  run: (editor: Editor) => void;
+}
+
+export const TOP_BAR_BUTTONS = shallowReactive<TopBarButton[]>([]);
+
 /** Floating windows contributed by plugins – rendered once in App.vue, the component decides when it is visible. */
 export const PLUGIN_WINDOWS = shallowReactive<Component[]>([]);
 
@@ -20,4 +31,5 @@ const addTo = <T>(list: T[], item: T) => {
 };
 
 export const addContextMenuEntry = (entry: ContextMenuEntry) => addTo(CONTEXT_MENU_ENTRIES, entry);
+export const addTopBarButton = (button: TopBarButton) => addTo(TOP_BAR_BUTTONS, button);
 export const addPluginWindow = (component: Component) => addTo(PLUGIN_WINDOWS, markRaw(component) as Component);

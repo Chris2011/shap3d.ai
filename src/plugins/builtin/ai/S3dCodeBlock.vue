@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useClipboard } from '@vueuse/core';
-import { highlight, type CodeLang } from '../../scripting/highlight';
+import { highlight, type CodeLang } from '../../../scripting/highlight';
 
 const props = withDefaults(defineProps<{ code: string; lang?: CodeLang; streaming?: boolean; startCollapsed?: boolean }>(), { lang: 'js' });
 const LABEL: Record<CodeLang, string> = { js: 'JavaScript', json: 'JSON', obj: 'OBJ-Mesh' };

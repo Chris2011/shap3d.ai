@@ -75,12 +75,12 @@
 </template>
 
 <script setup lang="ts">
-import S3dProgressBar from '../ui/S3dProgressBar.vue';
-import S3dModalDialog from '../ui/S3dModalDialog.vue';
+import S3dProgressBar from '../../../components/ui/S3dProgressBar.vue';
+import S3dModalDialog from '../../../components/ui/S3dModalDialog.vue';
 import { ref, computed, watch, onMounted } from 'vue';
-import S3dIcon from '../S3dIcon.vue';
-import { aiConfig, listModels, downloads, startDownload, cancelDownload, fmtBytes, fmtDuration } from '../../ai/providers';
-import { searchModels, modelDetail, speedClass, fmtCount, RECOMMENDED_QUANT, type HfModel, type HfDetail, type HfQuant, type HfSort } from '../../ai/hfsearch';
+import S3dIcon from '../../../components/S3dIcon.vue';
+import { aiConfig, listModels, downloads, startDownload, cancelDownload, fmtBytes, fmtDuration } from './providers';
+import { searchModels, modelDetail, speedClass, fmtCount, RECOMMENDED_QUANT, type HfModel, type HfDetail, type HfQuant, type HfSort } from './hfsearch';
 
 const emit = defineEmits<{ (event: 'close'): void; (event: 'use', model: string): void }>();
 

@@ -52,6 +52,7 @@
   - [The `context` API](#the-context-api)
   - [Built-in plugins](#built-in-plugins)
   - [Plugin packages](#plugin-packages)
+  - [The OpenSCAD plugin](#the-openscad-plugin)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
 - [Credits](#credits)
@@ -270,6 +271,8 @@ Older scripts written with `su.` or `fw.` keep working – both are aliases of `
 
 A plugin is a plain JavaScript **ES module** whose default export describes the plugin and has an `activate(context)` function. No build step and no server are needed. You load the `.js` file in the **Plugins** panel (*Plugin-Datei laden…*); it is stored in your browser and started again with every app start. Everything a plugin registers through `context` is removed automatically when it is switched off or removed.
 
+![The plugin manager with the built-in plugins (AI assistant, terrain sandbox, import formats) and the OpenSCAD package](docs/screenshots/plugins.png)
+
 > Plugins run with full access to the app (like a browser extension). Only install plugins whose source you trust – the plugin manager can download the source of every installed plugin.
 
 ```js
@@ -302,7 +305,7 @@ export default {
 |---|---|---|
 | Commands | `commands.register({ id, label, run, group?, icon?, shortcut?, keywords?, checked?, enabled? })` | Adds a command to the main menu (*Plugins*, or another `group`) and to the command palette. With `checked` it becomes a switch; `shortcut` is only shown as a hint. |
 | Tools | `tools.register({ id, name, icon?, key?, create: editor => tool })` | Adds an interactive tool to the expanded toolset and the palette. Subclass `context.classes.PointTool` for snapping (`this.pick(pointer, from)`) or `context.classes.Tool` for anything else. `key` is a single-key shortcut, used only when no other tool has it. |
-| Panels | `panels.register({ id, label, icon?, width?, mount(element) })` or `{ …, component }` | A side panel. `mount` fills a plain DOM element (return a clean-up function if needed); `component` takes a Vue component – `context.vue` exposes `h`, `ref`, `computed`, `defineComponent` … to write one without a bundler. Plugin panels open from the Plugins menu, the palette and the plugin manager. |
+| Panels | `panels.register({ id, label, icon?, width?, tile?, flush?, mount(element) })` or `{ …, component }` | A side panel. `mount` fills a plain DOM element (return a clean-up function if needed); `component` takes a Vue component – `context.vue` exposes `h`, `ref`, `computed`, `defineComponent` … to write one without a bundler. Without `tile`, plugin panels open from the Plugins menu, the palette and the plugin manager; `tile: 'first'` or `'last'` gives them a tile in the right-hand bar. `flush: true` drops the padding and scrolling for components that lay themselves out. |
 | Script API | `script.extend(name, (api, ...args) => …, { signature?, description?, example? })`, `script.run(code)` | Adds `s3d.<name>(…)` to the scripting API and lists it in the API reference (*Hilfen* tab). `script.run` runs a script as one undo step. |
 | Script languages | `script.registerLanguage({ id, label, run(code, editor), examples?, help?, highlight? })`, `script.openInEditor(language, code)` | A new language in the script editor's language selector, with its own examples and help. `run` may be async and returns `{ ok, logs, error?, durationMs }`. `script.beforeRun(code => …)` is awaited before a JavaScript script runs – to prepare what a script extension needs. |
 | Meshes | `meshes.add({ vertices, faces, faceMaterials? }, { name?, scale?, smooth?, materials? })`, `meshes.build(entities, mesh, options?)` | Turns a polygon mesh into real faces – as a new group (one undo step) or inside a script extension (`api.ents`). `scale` converts the mesh units to metres; `faceMaterials` gives each face a material, `materials` defines missing ones (`{ name: { color, opacity } }`) in the same undo step. |
@@ -319,6 +322,7 @@ export default {
 | UI | `ui.toast(text)`, `ui.prompt(title, value?)`, `ui.confirm(title)` | Messages and simple dialogs. |
 | | `ui.addContextMenuEntry({ label, when?(editor), run(editor) })` | An entry in the viewport's context menu, shown when `when` is true. |
 | | `ui.addWindow(component)` | A floating window (Vue component, rendered once; it decides itself when to show). |
+| | `ui.addTopBarButton({ icon, title, active?(), run(editor) })` | A button in the top bar next to the model name, highlighted while `active()` is true. |
 | Model data | `data.get(definition)`, `data.set(definition, value)` | JSON the plugin keeps on a group/component – saved with the model and kept while the plugin is off (the terrain plugin stores its height grid here). |
 | Model | `editor`, `THREE`, `newId()` | The full editor (model, selection, viewer; `editor.commit(label, change)` makes one undo step) and three.js. |
 
@@ -336,6 +340,7 @@ The three bundled examples in [`src/plugins/examples/`](src/plugins/examples) ca
 
 Some features of the app are written as plugins themselves, in [`src/plugins/builtin/`](src/plugins/builtin), against the same API. They are part of the app, loaded as their own chunk on demand, on by default and can be switched off (not removed) in the plugin manager:
 
+- **KI-Assistent** (`src/plugins/builtin/ai/`) – the chat panel with its tile, the ✦ button in the top bar, the setup wizard, the model search, the chat history and the palette switches *KI: Schnellmodus* and *KI: Code automatisch ausführen*. Switched off, an answer that is being written and running model downloads stop; settings and history stay.
 - **Importformate** (`src/plugins/builtin/imports/`) – FBX, Collada, KMZ, 3DS, PLY, 3MF, AMF, VRML, USD/USDZ and Blender. It only registers the file types (`files.registerImporter` with `loadScene`); the three.js loaders and the Blender reader are a separate chunk loaded on the first import. The app turns the scene into faces, guesses units and places it.
 - **Gelände (Sandkiste)** (`src/plugins/builtin/terrain/`) – the terrain tool, its floating window, the *Gelände bearbeiten / aus Fläche* context-menu entries, the command and `s3d.terrain()`. Terrains in a model stay intact while it is off; they just can't be sculpted until it is on again.
 
@@ -354,7 +359,13 @@ A plugin that needs more than one file – a WebAssembly engine, fonts, data –
 
 `shap3d.main` (or `main`) names the plugin module. Every other file in the folder (without `node_modules`) is stored in the browser (IndexedDB) and reachable through `context.assets` by its path relative to the `package.json`. The plugin manager shows the package name, size and license. Such packages are separate programs with their own dependencies and license – they are not part of the app.
 
-**Example: the OpenSCAD plugin** in [`plugins/openscad/`](plugins/openscad) runs the official OpenSCAD as WebAssembly: it opens `.scad` files (with `color()` turned into materials), adds *OpenSCAD* as a language to the script editor (with examples), keeps a file library in the browser so `include`, `use`, `import()` and `text()` fonts work, provides `s3d.scad(code)` for JavaScript scripts, exports the model as an OpenSCAD `polyhedron()` and registers *OpenSCAD* as a code format (*Als Code öffnen ▸ OpenSCAD*, *Umwandeln in…*). Because OpenSCAD is GPL-licensed, it is a package of its own (GPL-2.0-or-later) and never bundled with the app:
+Type definitions for the whole API are in [`src/plugins/types.ts`](src/plugins/types.ts); reference them with `/** @type {import('./types').S3dPlugin} */` for autocompletion in your editor.
+
+### The OpenSCAD plugin
+
+<img src="plugins/openscad/docs/openscad-logo.png" alt="OpenSCAD logo" width="96" align="right">
+
+The example package in [`plugins/openscad/`](plugins/openscad) runs the official [OpenSCAD](https://openscad.org) as WebAssembly: it opens `.scad` files (with `color()` turned into materials), adds *OpenSCAD* as a language to the script editor (with examples), keeps a file library in the browser so `include`, `use`, `import()` and `text()` fonts work, provides `s3d.scad(code)` for JavaScript scripts, exports the model as an OpenSCAD `polyhedron()` and registers *OpenSCAD* as a code format (*Als Code öffnen ▸ OpenSCAD*, *Umwandeln in…*). Because OpenSCAD is GPL-licensed, it is a package of its own (GPL-2.0-or-later) and never bundled with the app:
 
 ```bash
 cd plugins/openscad
@@ -364,7 +375,11 @@ npm run build
 
 Then *Plugins › Plugin-Ordner laden…* and pick `plugins/openscad/dist`. Details in [its README](plugins/openscad/README.md).
 
-Type definitions for the whole API are in [`src/plugins/types.ts`](src/plugins/types.ts); reference them with `/** @type {import('./types').S3dPlugin} */` for autocompletion in your editor.
+![OpenSCAD code in the script editor – the OpenSCAD logo modelled with difference() and hull(), colours turned into materials](docs/screenshots/openscad.png)
+
+With the plugin switched on, *OpenSCAD* also shows up when you right-click an object and choose *Als Code öffnen ▸* – next to the built-in formats JavaScript, JSON and OBJ:
+
+![Right-click › Als Code öffnen ▸ JavaScript (s3d), JSON, OBJ-Mesh and OpenSCAD](docs/screenshots/convert.png)
 
 ## Project structure
 
@@ -375,9 +390,9 @@ src/
   tools/       interactive tools (draw, modify, select, construct, terrain)
   scripting/   s3d API, API catalog, examples, OBJ import, resolution changes
   plugins/     plugin system – the plugin API (types), context, loader/registry, example plugins;
-               builtin/ holds the plugins that ship with the app (terrain sandbox, import formats)
-  ai/          providers, prompts, agent, chat history, Hugging Face search
-  components/  Vue UI – toolbars, panels, dialogs, AI chat, terrain window, command palette, welcome tour
+               builtin/ holds the plugins that ship with the app (AI assistant with providers, prompts,
+               agent, chat history and Hugging Face search; terrain sandbox; import formats)
+  components/  Vue UI – toolbars, panels, dialogs, command palette, welcome tour
                (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components)
   components/ui/  small reusable building blocks – S3dModalDialog, S3dToggleSwitch, S3dSegmentedControl, S3dProgressBar, S3dCloseButton
   composables/ reusable stateful logic – useModel/useSelection, usePopover, useScripts (built on VueUse)
@@ -390,12 +405,14 @@ scripts/       screenshot automation (headless Chrome)
 
 ## Regenerating the screenshots
 
-The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
+The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`, `openscad`, `convert`, `plugins`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
 
 ```bash
 npm run dev
 powershell -File scripts/screenshots.ps1
 ```
+
+`openscad`, `convert` and `plugins` install the OpenSCAD plugin from `plugins/openscad/dist`, so build it first (`npm run build` in `plugins/openscad`). Single scenes: `powershell -File scripts/screenshots.ps1 -Shots "openscad,plugins"`.
 
 ## Credits
 
@@ -403,6 +420,7 @@ powershell -File scripts/screenshots.ps1
 - [three.js](https://threejs.org) (MIT), [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh) (MIT), [Vue](https://vuejs.org) (MIT), [Vite](https://vitejs.dev) (MIT), [Tailwind CSS](https://tailwindcss.com) (MIT)
 - Reference people built from the [Humaaans](https://www.humaaans.com) illustrations by Pablo Stanley (CC0) – see `src/assets/people/LICENSE.md`
 - Helvetiker and Optimer typefaces from the three.js examples, © MAGENTA Ltd. – see `src/assets/fonts/LICENSE`
+- OpenSCAD logo from the [OpenSCAD repository](https://github.com/openscad/openscad) (GPL-2.0) – kept in the plugin package at `plugins/openscad/docs/`, not in the app
 - AI models are **not** bundled. Models you download (e.g. Qwen, Llama, LLaMA-Mesh) come with their own licenses.
 
 ## Legal notice

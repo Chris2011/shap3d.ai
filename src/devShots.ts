@@ -8,10 +8,12 @@ import { EXAMPLES } from './scripting/examples';
 import { setTheme, setScene } from './theme';
 import { openPanel } from './components/panelState';
 import { meshView } from './engine/meshView';
-import { aiConfig } from './ai/providers';
-import { aiHistory } from './ai/history';
+import { aiConfig } from './plugins/builtin/ai/providers';
+import { aiHistory } from './plugins/builtin/ai/history';
+import { AI_PANEL } from './plugins/builtin/ai';
 import { openTerrain, generate } from './plugins/builtin/terrain/session';
-import { pluginsReady } from './plugins/registry';
+import { pluginsReady, plugins, installPluginPackage } from './plugins/registry';
+import { useScripts } from './composables/useScripts';
 import { Entities } from './core/model';
 import { bakeTerrain, cellSize, heightAt, terrainOf } from './plugins/builtin/terrain/terrainData';
 import { addScaleFigure } from './engine/defaults';
@@ -53,6 +55,41 @@ const settleLandscape = (editor: Editor) => {
   }
 };
 
+/**
+ * Installs the OpenSCAD plugin package from plugins/openscad/dist (run `npm run build` there first) –
+ * like "Plugin-Ordner laden…", just without the folder dialog. Scripts are read with ?raw so Vite
+ * hands them over untouched; the fonts are left out (only text() needs them).
+ */
+const installOpenScad = async () => {
+  if (plugins.some(entry => entry.id === 'openscad' && entry.active)) return;
+  const base = '/plugins/openscad/dist/';
+  const manifest = await fetch(base + 'package.json');
+  if (!manifest.ok) throw new Error('plugins/openscad/dist fehlt – dort zuerst npm run build ausführen');
+  const raw = async (path: string) => ((await import(/* @vite-ignore */ `${base}${path}?raw`)) as { default: string }).default;
+  const asFile = (path: string, content: string) => { const entry = new File([content], path); Object.defineProperty(entry, 'webkitRelativePath', { value: `dist/${path}` }); return entry; };
+  await installPluginPackage([asFile('package.json', await manifest.text()), asFile('plugin.js', await raw('plugin.js')), asFile('openscad.js', await raw('openscad.js'))]);
+};
+/** waits until `done()` is true (OpenSCAD compiles in the background), at most `limit` ms */
+const until = async (done: () => boolean, limit = 60000) => { for (let waited = 0; !done() && waited < limit; waited += 250) await wait(250); };
+const button = (label: string) => ([...document.querySelectorAll('button')] as HTMLElement[]).find(candidate => candidate.textContent?.trim().endsWith(label));
+
+/** the OpenSCAD logo as an OpenSCAD model – colours become materials */
+const OPENSCAD_DEMO = `// OpenSCAD direkt in Shap3D.ai – Maße in Millimetern
+$fn = 96;
+
+// das OpenSCAD-Logo: Kugel minus drei Zylinder
+color("Gold") difference() {
+  sphere(r = 50);
+  for (axis = [[0, 0, 0], [90, 0, 0], [0, 90, 0]])
+    rotate(axis) cylinder(h = 120, r = 27, center = true);
+}
+
+// ein Sockel mit abgerundeten Ecken
+color("SteelBlue") translate([0, 0, -62])
+  hull() for (x = [-45, 45], y = [-45, 45])
+    translate([x, y, 0]) cylinder(h = 10, r = 10);
+`;
+
 const SCENES: Record<string, (editor: Editor) => Promise<void>> = {
   async hero(editor) {
     setTheme('light'); setScene('day'); editor.newModel(); run(editor, LANDSCAPE); settleLandscape(editor);
@@ -68,7 +105,7 @@ const SCENES: Record<string, (editor: Editor) => Promise<void>> = {
         code: EXAMPLES.find(example => example.id === 'house')!.code.split('\n').slice(0, 14).join('\n'), lang: 'js', result: '+40 Flächen in 12 ms', undoable: true },
     ] } as any);
     aiHistory.currentId = 'demo';
-    openPanel.value = 'ai';
+    openPanel.value = AI_PANEL;
     cam(editor, [-17, -21, 11], [1, 2, 1.2]);
   },
   async scripts(editor) {
@@ -123,6 +160,43 @@ s3d.torus([6.3, 0, 0.3], 0.6, 0.25, { segments: 18, material: 'Gold' });`);
 });`);
     measureView.rulers = true; measureView.people = true;
     cam(editor, [0.1, -1.4, 0.95], [2.4, 2.6, 0.55], 52);
+  },
+  async openscad(editor) {
+    // the OpenSCAD plugin: OpenSCAD code in the script editor, compiled by the real OpenSCAD (WebAssembly)
+    setTheme('light'); setScene('day'); empty(editor);
+    await installOpenScad();
+    useScripts().open({ lang: 'openscad', code: OPENSCAD_DEMO });
+    openPanel.value = 'scripts';
+    await wait(600);
+    button('Ausführen')?.click();
+    await until(() => editor.model.root.instances.size > 0);
+    cam(editor, [-0.32, -0.42, 0.22], [0.1, 0, -0.01], 35);
+  },
+  async convert(editor) {
+    // right-click › "Als Code öffnen ▸" – JavaScript, JSON, OBJ and (from the plugin) OpenSCAD
+    setTheme('dark'); setScene('night'); empty(editor);
+    await installOpenScad();
+    await until(() => plugins.some(entry => entry.id === 'openscad' && entry.active), 10000);
+    run(editor, EXAMPLES.find(example => example.id === 'house')!.code);
+    cam(editor, [-13, -15, 8], [3, 3, 1.5]);
+    editor.invalidate();
+    await wait(400);
+    // a real right-click on the house (the viewport selects what is under the cursor)
+    const canvas = document.querySelector('canvas')!; const box = canvas.getBoundingClientRect();
+    const point = { clientX: box.left + box.width * 0.42, clientY: box.top + box.height * 0.5 };
+    const options = { ...point, button: 2, bubbles: true, pointerId: 1, pointerType: 'mouse' };
+    canvas.dispatchEvent(new PointerEvent('pointerdown', { ...options, buttons: 2 }));
+    canvas.dispatchEvent(new PointerEvent('pointerup', { ...options, buttons: 0 }));
+    await wait(300);
+    const entry = ([...document.querySelectorAll('.s3d-menu-item')] as HTMLElement[]).find(item => item.textContent?.trim().startsWith('Als Code öffnen'));
+    entry?.dispatchEvent(new MouseEvent('mouseenter'));
+  },
+  async plugins(editor) {
+    // the plugin manager: built-in plugins (AI assistant, terrain, import formats) and the OpenSCAD package
+    setTheme('light'); setScene('day'); editor.newModel(); run(editor, LANDSCAPE); settleLandscape(editor);
+    await installOpenScad();
+    cam(editor, [-19, -23, 13], [3, 3, 1.2]);
+    openPanel.value = 'plugins';
   },
   async tour(editor) {
     setTheme('light'); setScene('day'); editor.newModel(); run(editor, LANDSCAPE); settleLandscape(editor);

@@ -20,6 +20,7 @@ export const EXAMPLE_PLUGINS: { file: string; code: string }[] = [
  * Loaded on demand as their own chunk; on by default, can be switched off but not removed.
  */
 const BUILTIN_PLUGINS: { id: string; load: () => Promise<{ default: S3dPlugin }> }[] = [
+  { id: 'ai', load: () => import('./builtin/ai') },
   { id: 'terrain', load: () => import('./builtin/terrain') },
   { id: 'imports', load: () => import('./builtin/imports') },
 ];
