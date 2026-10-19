@@ -146,7 +146,7 @@ export const send = async (editor: Editor, prompt: string) => {
 export const execute = async (editor: Editor, turn: AiTurn): Promise<boolean> => {
   if (!turn.code) return false;
   turn.status = 'running';
-  if (turn.lang !== 'obj' && turn.lang !== 'json') await prepareScript(turn.code); // plugins prepare their s3d extensions
+  if (turn.lang !== 'obj') await prepareScript(turn.code); // plugins prepare their s3d extensions (fonts, OpenSCAD …)
   const facesBefore = editor.model.root.stats().faces;
   const result = runCode(editor, turn);
   if (result.ok) {

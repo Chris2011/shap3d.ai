@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import type { Editor } from '../engine/editor';
 import type { Entities, EntityRef, Instance, Definition } from '../core/model';
 import { newId } from '../core/model';
-import { buildText, type FontName } from '../core/text3d';
 import { parseLength } from '../core/units';
 import { offsetPolygon } from '../core/geometry';
 import { TEXTURES, isTextureKind } from '../core/textures';
@@ -370,12 +369,6 @@ export class ScriptApi {
     };
     return { def, place };
   }
-  /** 3D text as a component. */
-  text3d(text: string, opts: { at?: Pt; size?: number | string; depth?: number | string; font?: FontName; upright?: boolean; material?: string } = {}): GroupHandle {
-    const group = this.group(`Text „${text}“`, () => { buildText(this.ents, text, { size: this.length(opts.size ?? 1), depth: this.length(opts.depth ?? 0.2), font: opts.font, upright: opts.upright ?? true }); if (opts.material) this.paintAll(this.ents, opts.material); });
-    if (opts.at) group.move(opts.at);
-    return group;
-  }
   /** OBJ mesh text (`v …` / `f …` lines, e.g. from LLaMA-Mesh) as a group; `size` = largest side. */
   mesh(obj: string, opts: { at?: Pt; size?: number | string; yUp?: boolean; smooth?: number; name?: string; material?: string } = {}): GroupHandle {
     const group = this.group(opts.name ?? 'Mesh', () => {
@@ -471,7 +464,12 @@ export const runJson = (editor: Editor, text: string): RunResult => {
       case 'face': res = api.face(node.points); if (node.material) res.material(node.material); if (node.pushpull) res = res.pushpull(node.pushpull); break;
       case 'line': api.polyline(node.points, !!node.closed); break;
       case 'polyhedron': api.polyhedron(node.points ?? [], node.faces ?? [], { material: node.material }); return null;
-      case 'text3d': res = api.text3d(node.text ?? 'Text', { at: node.at, size: node.size, depth: node.depth, material: node.material, upright: node.upright }); break;
+      case 'text3d': {
+        // provided by the built-in 3D-text plugin
+        const text3d = (api as unknown as Record<string, unknown>).text3d as ((text: string, opts: object) => GroupHandle) | undefined;
+        if (!text3d) throw new Error('3D-Text braucht das Plugin „3D-Text“ (Plugins-Verwaltung)');
+        res = text3d.call(api, node.text ?? 'Text', { at: node.at, size: node.size, depth: node.depth, material: node.material, upright: node.upright, filled: node.filled, font: node.font }); break;
+      }
       case 'group': res = api.group(node.name ?? 'Gruppe', () => { for (const child of node.children ?? []) build(child); }); break;
       case 'array': { const count = node.count ?? 2; const off = toVec(node.offset ?? [1, 0, 0]); for (let i = 0; i < count; i++) { const result = build(node.object); if (result instanceof GroupHandle) result.move(off.clone().multiplyScalar(i)); } return null; }
       case 'guide': api.guide(node.at ?? [0, 0, 0], node.direction); return null;

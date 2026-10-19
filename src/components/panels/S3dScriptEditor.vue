@@ -176,11 +176,11 @@ const run = async () => {
     const size = parseLength(objSize.value, 'm');
     if (size == null || size <= 0) { out.value = [{ kind: 'error', text: `✗ Ungültige Größe: ${objSize.value}` }]; return; }
     result = importObj(editor, code.value, { size, yUp: objYUp.value, smooth: objSmooth.value || 0, name: currentSaved.value ?? 'Mesh' });
-  } else if (lang.value === 'json') result = runJson(editor, code.value);
-  else {
+  } else {
+    // plugins prepare what the script uses (e.g. fonts for text3d) – for JSON as for JavaScript
     running.value = true;
     try { await prepareScript(code.value); } finally { running.value = false; }
-    result = runScript(editor, code.value);
+    result = lang.value === 'json' ? runJson(editor, code.value) : runScript(editor, code.value);
   }
   lastMs.value = result.durationMs;
   out.value = [...result.logs];

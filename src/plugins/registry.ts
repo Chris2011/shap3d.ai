@@ -22,6 +22,7 @@ export const EXAMPLE_PLUGINS: { file: string; code: string }[] = [
 const BUILTIN_PLUGINS: { id: string; load: () => Promise<{ default: S3dPlugin }> }[] = [
   { id: 'ai', load: () => import('./builtin/ai') },
   { id: 'terrain', load: () => import('./builtin/terrain') },
+  { id: 'text3d', load: () => import('./builtin/text3d') },
   { id: 'imports', load: () => import('./builtin/imports') },
 ];
 

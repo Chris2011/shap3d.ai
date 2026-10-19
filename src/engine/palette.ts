@@ -54,7 +54,6 @@ export const paletteItems = (editor: Editor): PaletteItem[] => {
     if (tool.id === 'place') continue;
     out.push({ id: 't:' + tool.id, label: tool.name, group: 'Werkzeug', icon: tool.icon, shortcut: tool.key, keywords: 'werkzeug tool ' + tool.id, run: () => editor.setTool(tool.id) });
   }
-  out.push({ id: 't:text3d', label: '3D-Text', group: 'Werkzeug', icon: 'text3d', keywords: 'schrift text', run: () => { editor.ui.dialog = { kind: 'text3d' }; } });
 
   // commands (menus)
   for (const command of COMMANDS) {

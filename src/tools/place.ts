@@ -3,10 +3,8 @@ import type { PEvt } from '../engine/editor';
 import type { Overlay } from '../engine/overlay';
 import { PointTool } from './base';
 import type { Definition } from '../core/model';
-import { Entities } from '../core/model';
-import { buildText, type FontName } from '../core/text3d';
 
-/** Places a component definition at the clicked point (used by 3D text and the component browser). */
+/** Places a component definition at the clicked point (used by the component browser and the 3D-text plugin). */
 export class PlaceTool extends PointTool {
   id = 'place'; name = 'Platzieren'; cursor = 'crosshair';
   definition: Definition | null = null; box = new THREE.Box3(); orient: 'auto' | 'flat' = 'auto'; rotation = 0; material?: string;
@@ -48,12 +46,3 @@ export class PlaceTool extends PointTool {
   }
 }
 
-export interface Text3DOptions { text: string; font: FontName; size: number; depth: number; filled: boolean; upright: boolean; material?: string }
-
-export const start3DText = (editor: any, options: Text3DOptions) => {
-  const ents = new Entities();
-  buildText(ents, options.text, { size: options.size, depth: options.filled ? options.depth : 0, font: options.font, filled: options.filled, upright: options.upright });
-  if (options.material) for (const face of ents.faces.values()) face.material = options.material;
-  const def = editor.model.newDefinition(`3D-Text „${options.text.slice(0, 20)}“`, true, ents);
-  (editor.tools.get('place') as PlaceTool).start(def);
-};

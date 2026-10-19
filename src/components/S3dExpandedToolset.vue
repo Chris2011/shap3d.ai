@@ -25,7 +25,7 @@ const commandCell = (id: string, label: string, icon: string, cmd: string): Cell
 // same grouping and order as SketchUp Web's expanded toolset
 const BUILT_IN_GROUPS: Cell[][] = [
   [toolCell('lasso'), toolCell('sample')],
-  [toolCell('circle'), toolCell('arc2'), toolCell('arc'), toolCell('polygon'), toolCell('arc3'), toolCell('pie'), toolCell('freehand'), toolCell('rotrect'), { id: 'text3d', label: '3D-Text', icon: 'text3d', action: () => { editor.ui.dialog = { kind: 'text3d' }; } }],
+  [toolCell('circle'), toolCell('arc2'), toolCell('arc'), toolCell('polygon'), toolCell('arc3'), toolCell('pie'), toolCell('freehand'), toolCell('rotrect')],
   [toolCell('offset'), toolCell('followme'), commandCell('flipx', 'Spiegeln', 'flip', 'flipX'), commandCell('outershell', 'Äußere Schale', 'solid', 'solid-outershell'), commandCell('sintersect', 'Verschneiden', 'union', 'solid-intersect'), commandCell('union', 'Vereinigen', 'union', 'solid-union'), commandCell('subtract', 'Entfernen', 'subtract', 'solid-subtract'), commandCell('trim', 'Abschneiden', 'subtract', 'solid-trim'), commandCell('split', 'Teilen', 'solid', 'solid-split')],
   [toolCell('dimension'), toolCell('protractor'), toolCell('text'), toolCell('section'), commandCell('makeGroup', 'Gruppe', 'group', 'makeGroup'), commandCell('makeComponent', 'Komponente', 'component', 'makeComponent')],
   [toolCell('zoom'), commandCell('zoomExtents', 'Alles zeigen', 'zoomext', 'zoomExtents'), toolCell('zoomwindow'), toolCell('poscam'), toolCell('lookaround'), toolCell('walk')],

@@ -14,6 +14,8 @@ import { AI_PANEL } from './plugins/builtin/ai';
 import { openTerrain, generate } from './plugins/builtin/terrain/session';
 import { pluginsReady, plugins, installPluginPackage } from './plugins/registry';
 import { useScripts } from './composables/useScripts';
+import { prepareScript } from './scripting/languages';
+import { textDialog } from './plugins/builtin/text3d/state';
 import { Entities } from './core/model';
 import { bakeTerrain, cellSize, heightAt, terrainOf } from './plugins/builtin/terrain/terrainData';
 import { addScaleFigure } from './engine/defaults';
@@ -197,6 +199,22 @@ s3d.torus([6.3, 0, 0.3], 0.6, 0.25, { segments: 18, material: 'Gold' });`);
     await installOpenScad();
     cam(editor, [-19, -23, 13], [3, 3, 1.2]);
     openPanel.value = 'plugins';
+  },
+  async text3d(editor) {
+    // the 3D-text plugin: letters in several free fonts, the dialog with its live preview
+    setTheme('light'); setScene('day'); empty(editor);
+    // stacked like a sign, so it fits next to the dialog
+    const code = `s3d.text3d('Shap3D', { at: [0, 0, 3.3], size: 1.2, depth: 0.3, font: 'pacifico', material: 'Gold' });
+s3d.text3d('BEBAS 2025', { at: [0, 0, 2.1], size: 0.9, depth: 0.25, font: 'bebas', material: 'Rot' });
+s3d.text3d('Fredoka rund', { at: [0, 0, 1], size: 0.7, depth: 0.2, font: 'fredoka', material: 'Blau' });
+s3d.text3d('Orbitron 3D', { at: [0, 0, 0], size: 0.6, depth: 0.15, font: 'orbitron', material: 'Edelstahl' });`;
+    await prepareScript(code);
+    run(editor, code);
+    cam(editor, [0.9, -17, 5], [9.3, 0, 2], 38); // text on the left, the dialog in the middle
+    editor.setTool('text3d.text');
+    Object.assign(textDialog.form, { text: 'Hallo Welt!', font: 'lobster' });
+    await until(() => !!document.querySelector('[role=dialog]') && !document.querySelector('[role=dialog]')?.textContent?.includes('wird geladen'), 10000);
+    await document.fonts.ready;
   },
   async tour(editor) {
     setTheme('light'); setScene('day'); editor.newModel(); run(editor, LANDSCAPE); settleLandscape(editor);

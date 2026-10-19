@@ -80,7 +80,7 @@ The toolset follows the familiar push/pull workflow: draw a shape, pull it into 
 
 | Area | What you get |
 | --- | --- |
-| Drawing | Line, freehand, rectangle, rotated rectangle, circle, polygon, three arc tools, pie, 3D text |
+| Drawing | Line, freehand, rectangle, rotated rectangle, circle, polygon, three arc tools, pie, 3D text in 16 fonts (plus your own) |
 | Modifying | Push/pull, offset, move/copy, rotate, scale, follow me, flip, eraser, paint bucket |
 | Precision | Inference engine (endpoints, midpoints, edges, faces, axis and parallel locks), measurement box for typed values, tape measure, protractor, dimensions, guides |
 | Structure | Groups, reusable components with live instances, tags, outliner, entity info |
@@ -344,6 +344,9 @@ Some features of the app are written as plugins themselves, in [`src/plugins/bui
 - **KI-Assistent** (`src/plugins/builtin/ai/`) – the chat panel with its tile, the ✦ button in the top bar, the setup wizard, the model search, the chat history and the palette switches *KI: Schnellmodus* and *KI: Code automatisch ausführen*. Switched off, an answer that is being written and running model downloads stop; settings and history stay.
 - **Importformate** (`src/plugins/builtin/imports/`) – FBX, Collada, KMZ, 3DS, PLY, 3MF, AMF, VRML, USD/USDZ and Blender. It only registers the file types (`files.registerImporter` with `loadScene`); the three.js loaders and the Blender reader are a separate chunk loaded on the first import. The app turns the scene into faces, guesses units and places it.
 - **Gelände (Sandkiste)** (`src/plugins/builtin/terrain/`) – the terrain tool, its floating window, the *Gelände bearbeiten / aus Fläche* context-menu entries, the command and `s3d.terrain()`. Terrains in a model stay intact while it is off; they just can't be sculpted until it is on again.
+- **3D-Text** (`src/plugins/builtin/text3d/`) – 3D letters and numbers: the *3D-Text* tool opens a dialog with a live preview in the chosen font; the text becomes a component you place with a click (flat or upright, filled, extruded or as an outline, several lines). Besides Helvetiker and Optimer it brings 13 free fonts under the SIL Open Font License – Roboto, Playfair Display, Bebas Neue, Fredoka, Black Ops One (stencil), Pacifico, Lobster, Caveat, Orbitron, Press Start 2P (pixel), JetBrains Mono – and *Eigene Schrift laden…* adds your own TTF, OTF or WOFF file (kept in the browser). Fonts and the font reader ([opentype.js](https://opentype.js.org)) load only when used. Scripts use it as `s3d.text3d('Hallo', { font: 'bebas', size: 0.5, depth: 0.1 })`; the fonts a script names are loaded before it runs.
+
+![The 3D-text plugin: letters in Pacifico, Bebas Neue, Fredoka and Orbitron, and the dialog with the preview in Lobster](docs/screenshots/text3d.png)
 
 ### Plugin packages
 
@@ -392,7 +395,7 @@ src/
   scripting/   s3d API, API catalog, examples, OBJ import, resolution changes
   plugins/     plugin system – the plugin API (types), context, loader/registry, example plugins;
                builtin/ holds the plugins that ship with the app (AI assistant with providers, prompts,
-               agent, chat history and Hugging Face search; terrain sandbox; import formats)
+               agent, chat history and Hugging Face search; terrain sandbox; 3D text with its fonts; import formats)
   components/  Vue UI – toolbars, panels, dialogs, command palette, welcome tour
                (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components)
   components/ui/  small reusable building blocks – S3dModalDialog, S3dToggleSwitch, S3dSegmentedControl, S3dProgressBar, S3dCloseButton
@@ -406,7 +409,7 @@ scripts/       screenshot automation (headless Chrome)
 
 ## Regenerating the screenshots
 
-The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`, `openscad`, `convert`, `plugins`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
+The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`, `openscad`, `convert`, `plugins`, `text3d`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
 
 ```bash
 npm run dev
@@ -420,7 +423,8 @@ powershell -File scripts/screenshots.ps1
 - [fzstd](https://github.com/101arrowz/fzstd) (MIT) – zstd decompression for compressed Blender files
 - [three.js](https://threejs.org) (MIT), [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh) (MIT), [Vue](https://vuejs.org) (MIT), [Vite](https://vitejs.dev) (MIT), [Tailwind CSS](https://tailwindcss.com) (MIT)
 - Reference people built from the [Humaaans](https://www.humaaans.com) illustrations by Pablo Stanley (CC0) – see `src/assets/people/LICENSE.md`
-- Helvetiker and Optimer typefaces from the three.js examples, © MAGENTA Ltd. – see `src/assets/fonts/LICENSE`
+- Helvetiker and Optimer typefaces from the three.js examples, © MAGENTA Ltd. – see `src/plugins/builtin/text3d/fonts/LICENSE`
+- Fonts of the 3D-text plugin from [Fontsource](https://fontsource.org) (SIL Open Font License 1.1, licenses in `node_modules/@fontsource/*/LICENSE`): Roboto, Playfair Display, Bebas Neue, Fredoka, Black Ops One, Pacifico, Lobster, Caveat, Orbitron, Press Start 2P, JetBrains Mono; read with [opentype.js](https://github.com/opentypejs/opentype.js) (MIT)
 - OpenSCAD logo from the [OpenSCAD repository](https://github.com/openscad/openscad) (GPL-2.0) – kept in the plugin package at `plugins/openscad/docs/`, not in the app
 - AI models are **not** bundled. Models you download (e.g. Qwen, Llama, LLaMA-Mesh) come with their own licenses.
 
