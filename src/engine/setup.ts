@@ -5,7 +5,6 @@ import { LineTool, FreehandTool, RectangleTool, RotatedRectangleTool, CircleTool
 import { PushPullTool, OffsetTool, MoveTool, RotateTool, ScaleTool, FollowMeTool } from '../tools/modify';
 import { TapeTool, ProtractorTool, DimensionTool, TextTool, SectionTool, OrbitTool, PanTool, ZoomTool, ZoomWindowTool, LookAroundTool, WalkTool, PositionCameraTool } from '../tools/construct';
 import { PlaceTool } from '../tools/place';
-import { TerrainTool } from '../tools/terrain';
 import { runCommand } from './commands';
 import { installDefaults } from './defaults';
 import { onThemeChange } from '../theme';
@@ -50,7 +49,6 @@ export const TOOL_INFO: Record<string, ToolInfo> = {
   lookaround: { id: 'lookaround', name: 'Umsehen', icon: 'lookaround' },
   walk: { id: 'walk', name: 'Gehen', icon: 'walk' },
   place: { id: 'place', name: 'Platzieren', icon: 'component' },
-  terrain: { id: 'terrain', name: 'Gelände (Sandkiste)', icon: 'terrain' },
 };
 
 export const createEditor = (): Editor => {
@@ -62,7 +60,7 @@ export const createEditor = (): Editor => {
     new PushPullTool(editor), new OffsetTool(editor), new MoveTool(editor), new RotateTool(editor), new ScaleTool(editor), new FollowMeTool(editor),
     new TapeTool(editor), new ProtractorTool(editor), new DimensionTool(editor), new TextTool(editor), new SectionTool(editor),
     new OrbitTool(editor), new PanTool(editor), new ZoomTool(editor), new ZoomWindowTool(editor), new LookAroundTool(editor), new WalkTool(editor), new PositionCameraTool(editor),
-    new PlaceTool(editor), new TerrainTool(editor),
+    new PlaceTool(editor),
   ];
   tools.forEach(tool => editor.register(tool));
   installDefaults(editor);

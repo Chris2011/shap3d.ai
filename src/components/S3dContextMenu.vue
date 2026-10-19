@@ -13,6 +13,7 @@ import { computed } from 'vue';
 import { useEditor } from './keys';
 import { runCommand } from '../engine/commands';
 import { showPanel } from './panelState';
+import { CONTEXT_MENU_ENTRIES } from '../plugins/uiExtensions';
 
 const props = defineProps<{ x: number; y: number }>();
 const emit = defineEmits<{ (event: 'close'): void }>();
@@ -27,9 +28,9 @@ const items = computed<It[]>(() => {
     out.push({ sep: true });
     out.push({ label: 'Löschen', cmd: 'delete', sc: 'Entf' }, { label: 'Ausblenden', cmd: 'hide' });
     out.push({ sep: true });
-    const terrainInst = selection.find(entityRef => entityRef.kind === 'instance' && editor.entities.instances.get(entityRef.id)?.definition.terrain);
-    if (terrainInst) out.push({ label: '⛰ Gelände bearbeiten', cmd: 'terrain' }, { sep: true });
-    else if (selection.length === 1 && has('face')) out.push({ label: '⛰ Gelände aus Fläche', cmd: 'terrain' }, { sep: true });
+    // entries from plugins (e.g. "Gelände bearbeiten")
+    const pluginEntries = CONTEXT_MENU_ENTRIES.filter(entry => !entry.when || entry.when(editor));
+    if (pluginEntries.length) out.push(...pluginEntries.map(entry => ({ label: entry.label, fn: () => entry.run(editor) })), { sep: true });
     if (has('instance')) {
       out.push({ label: 'Gruppe/Komponente bearbeiten', cmd: 'editGroup' }, { label: 'Auflösen', cmd: 'explode' }, { label: 'Eindeutig machen', cmd: 'makeUnique' });
       out.push({ label: 'Sperren', cmd: 'lock' }, { label: 'Entsperren', cmd: 'unlock' });

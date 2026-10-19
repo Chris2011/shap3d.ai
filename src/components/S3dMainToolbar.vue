@@ -6,7 +6,7 @@
     <div class="s3d-panel flex w-10 flex-col [&_.s3d-iconbtn]:rounded-none">
       <S3dToolButton v-for="tool in MAIN_TOOLS" :key="tool" :tool="tool" />
       <div class="mx-1.5 my-1.25 h-px bg-[#c9cbd4] dark:bg-line-2"></div>
-      <S3dToolButton v-for="tool in editor.ui.recentTools" :key="'r' + tool" :tool="tool" />
+      <S3dToolButton v-for="tool in recentTools" :key="'r' + tool" :tool="tool" />
       <button class="s3d-iconbtn" :class="{ active: expanded }" title="Weitere Werkzeuge" @click.stop="expanded = !expanded"><S3dIcon name="more" /></button>
     </div>
     <S3dExpandedToolset v-if="expanded" @close="expanded = false" />
@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import S3dIcon from './S3dIcon.vue';
 import S3dToolButton from './S3dToolButton.vue';
 import S3dExpandedToolset from './S3dExpandedToolset.vue';
@@ -24,4 +24,6 @@ import { MAIN_TOOLS } from '../engine/editor';
 defineEmits<{ (event: 'search'): void }>();
 const editor = useEditor();
 const expanded = ref(false);
+/** recently used tools that are still there (a plugin's tool disappears as soon as the plugin is off) */
+const recentTools = computed(() => editor.ui.recentTools.filter(id => editor.hasTool(id)));
 </script>

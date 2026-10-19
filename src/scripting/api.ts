@@ -8,7 +8,6 @@ import { offsetPolygon } from '../core/geometry';
 import { TEXTURES, isTextureKind } from '../core/textures';
 import { buildMesh, parseObj } from './mesh';
 import { MATERIAL_LIBRARY, libraryMaterial } from '../core/materialLibrary';
-import { newTerrain, generateHills, bakeTerrain } from '../core/terrain';
 
 export type Pt = [number, number, number] | { x: number; y: number; z: number } | THREE.Vector3;
 const toVec = (point: Pt | undefined, def: [number, number, number] = [0, 0, 0]): THREE.Vector3 => {
@@ -321,25 +320,6 @@ export class ScriptApi {
       this.face(pts.map(point => point.add(base))).extrude(widthValue, 'y');
       if (opts.material) this.paintAll(this.ents, opts.material);
     });
-  }
-
-  /**
-   * Terrain (landscape) with hills/mountains as a group – editable later with the terrain tool.
-   * hills = peak height in m (0 = flat), scale = metres per hill, rock/snow = height where rock/snow starts.
-   */
-  terrain(corner: Pt, width: number | string, depth: number | string, opts: { hills?: number | string; scale?: number | string; seed?: number; rock?: number | string; snow?: number | string; water?: number | string; skirt?: boolean; cell?: number | string; name?: string } = {}): GroupHandle {
-    const base = toVec(corner), widthValue = this.length(width), depthValue = this.length(depth);
-    const data = newTerrain(widthValue, depthValue, opts.cell != null ? this.length(opts.cell) : undefined);
-    const hills = opts.hills != null ? this.length(opts.hills) : Math.max(widthValue, depthValue) * 0.1;
-    if (hills > 0) generateHills(data, { height: hills, scale: opts.scale != null ? this.length(opts.scale) : undefined, seed: opts.seed });
-    if (opts.rock != null) data.layers.rockHeight = this.length(opts.rock);
-    else data.layers.rockHeight = Math.max(1, hills * 0.7);
-    if (opts.snow != null) data.layers.snowHeight = this.length(opts.snow);
-    if (opts.water != null) data.water = this.length(opts.water);
-    if (opts.skirt === false) data.skirt = false;
-    const group = this.group(opts.name ?? 'Gelände', () => { bakeTerrain(this.ents, data, this.editor.model); });
-    group.inst.definition.terrain = data;
-    return group.move([base.x, base.y, base.z]);
   }
 
   /** Names of the ready-made materials (optionally one category, e.g. 'Holz', 'Metall'). */

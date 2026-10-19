@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { Tool, type PEvt } from '../engine/editor';
-import type { Overlay } from '../engine/overlay';
+import { Tool, type PEvt } from '../../../engine/editor';
+import type { Overlay } from '../../../engine/overlay';
 import {
   terrainUi, session, openTerrain, applyTerrain, hitTerrain, toGrid, gridHeight, gridToWorld, dab, syncGeometry, pushUndo, undoStroke,
-} from '../terrain/session';
+} from './session';
 
 const MODE_COLOR: Record<string, string> = { raise: '#2e9b4b', lower: '#c62828', smooth: '#1f6fbf', flatten: '#8a5300', rough: '#7b4bb3' };
 const MODE_NAME: Record<string, string> = { raise: 'Anheben', lower: 'Absenken', smooth: 'Glätten', flatten: 'Ebnen', rough: 'Zerklüften' };
 
 /** Sculpt brush for terrain ("Sandkiste"): hold the mouse to raise/lower, Shift inverts. */
 export class TerrainTool extends Tool {
-  id = 'terrain';
+  id = 'sandbox'; // registered as terrain.sandbox
   name = 'Gelände';
   cursor = 'crosshair';
   private hit: THREE.Vector3 | null = null;

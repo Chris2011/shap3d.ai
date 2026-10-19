@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { Definition, Entities, ensureIdAbove, newId, type DefinitionRegistry, type Instance } from './model';
-import { terrainToJSON, terrainFromJSON, cloneTerrain } from './terrain';
 
 export interface MaterialDef { name: string; color: string; opacity: number; texture?: string; textureSize?: number }
 export interface Tag { name: string; visible: boolean; color: string }
@@ -103,7 +102,7 @@ export class Model implements DefinitionRegistry {
     const definition = new Definition(name, isComponent, entities); this.definitions.set(definition.id, definition); return definition;
   }
   cloneDefinition(source: Definition): Definition {
-    const definition = new Definition(source.name, source.isComponent, source.entities.clone(this)); definition.faceMe = source.faceMe; if (source.terrain) definition.terrain = cloneTerrain(source.terrain); if (source.shape) definition.shape = JSON.parse(JSON.stringify(source.shape));
+    const definition = new Definition(source.name, source.isComponent, source.entities.clone(this)); definition.faceMe = source.faceMe; if (source.pluginData) definition.pluginData = JSON.parse(JSON.stringify(source.pluginData)); if (source.shape) definition.shape = JSON.parse(JSON.stringify(source.shape));
     this.definitions.set(definition.id, definition); return definition;
   }
   uniqueDefName(base: string) { let i = 1; const names = new Set([...this.definitions.values()].map(definition => definition.name)); while (names.has(`${base}#${i}`)) i++; return `${base}#${i}`; }
@@ -136,7 +135,7 @@ export class Model implements DefinitionRegistry {
       format: MODEL_FORMAT, name: this.name,
       // copies, not references – undo snapshots must not change when the model changes later
       settings: JSON.parse(JSON.stringify(this.settings)), materials: this.materials.map(material => ({ ...material })), tags: this.tags.map(tag => ({ ...tag })),
-      definitions: [...this.definitions.values()].map(definition => ({ id: definition.id, name: definition.name, isComponent: definition.isComponent, faceMe: definition.faceMe || undefined, terrain: definition.terrain ? terrainToJSON(definition.terrain) : undefined, shape: definition.shape, entities: entitiesToJSON(definition.entities) })),
+      definitions: [...this.definitions.values()].map(definition => ({ id: definition.id, name: definition.name, isComponent: definition.isComponent, faceMe: definition.faceMe || undefined, pluginData: definition.pluginData ? JSON.parse(JSON.stringify(definition.pluginData)) : undefined, shape: definition.shape, entities: entitiesToJSON(definition.entities) })),
       root: entitiesToJSON(this.root),
       guides: this.guides.map(guide => ({ id: guide.id, kind: guide.kind, point: toArray(guide.point), direction: guide.direction ? toArray(guide.direction) : undefined })),
       dimensions: this.dimensions.map(dimension => ({ id: dimension.id, start: toArray(dimension.start), end: toArray(dimension.end), offset: toArray(dimension.offset) })),
@@ -164,7 +163,8 @@ export class Model implements DefinitionRegistry {
     for (const stored of json.definitions ?? []) {
       const definition = new Definition(stored.name, !!stored.isComponent);
       definition.faceMe = !!stored.faceMe;
-      if (stored.terrain) definition.terrain = terrainFromJSON(stored.terrain);
+      if (stored.pluginData) definition.pluginData = JSON.parse(JSON.stringify(stored.pluginData));
+      else if (stored.terrain) definition.pluginData = { terrain: stored.terrain }; // files from before the terrain plugin
       if (stored.shape) definition.shape = stored.shape;
       (definition as any).id = seen(stored.id); definitions.set(stored.id, definition); this.definitions.set(stored.id, definition);
     }

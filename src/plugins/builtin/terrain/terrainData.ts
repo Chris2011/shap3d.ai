@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import type { Entities } from './model';
-import type { Model } from './document';
-import { libraryMaterial } from './materialLibrary';
+import type { Definition, Entities } from '../../../core/model';
+import type { Model } from '../../../core/document';
+import { libraryMaterial } from '../../../core/materialLibrary';
 
 /**
  * Terrain = regular height grid (like SketchUp's Sandbox). It is sculpted live as a plain three.js
@@ -211,3 +211,14 @@ export const terrainFromJSON = (json: any): TerrainData | undefined => {
   return { width: json.width, depth: json.depth, columns: json.columns, rows: json.rows, heights: json.heights.slice(), layers: { ...DEFAULT_LAYERS, ...(json.layers ?? {}) }, skirt: json.skirt ?? true, water: json.water ?? null };
 };
 export const cloneTerrain = (terrain: TerrainData): TerrainData => ({ ...terrain, heights: terrain.heights.slice(), layers: { ...terrain.layers } });
+
+/** id of the terrain plugin – its data lives in `definition.pluginData.terrain` */
+export const TERRAIN_PLUGIN = 'terrain';
+
+/** The height grid stored on a group (made by the terrain plugin), or undefined. */
+export const terrainOf = (definition: Definition): TerrainData | undefined => terrainFromJSON(definition.pluginData?.[TERRAIN_PLUGIN]);
+
+/** Stores the height grid on a group so it can be sculpted again later (saved with the model). */
+export const setTerrain = (definition: Definition, terrain: TerrainData) => {
+  definition.pluginData = { ...(definition.pluginData ?? {}), [TERRAIN_PLUGIN]: terrainToJSON(terrain) };
+};

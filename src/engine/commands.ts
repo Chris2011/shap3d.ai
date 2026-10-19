@@ -5,17 +5,7 @@ import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
-import { KMZLoader } from 'three/examples/jsm/loaders/KMZLoader.js';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader.js';
-import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
-import { ThreeMFLoader } from 'three/examples/jsm/loaders/3MFLoader.js';
-import { AMFLoader } from 'three/examples/jsm/loaders/AMFLoader.js';
-import { VRMLLoader } from 'three/examples/jsm/loaders/VRMLLoader.js';
-import { USDLoader } from 'three/examples/jsm/loaders/USDLoader.js';
 import { sceneToEntities } from './importMesh';
-import { readBlend } from '../core/blend/blendScene';
 import type { Editor } from './editor';
 import { theme, setTheme, setScene } from '../theme';
 import { openTour } from '../components/tour';
@@ -25,7 +15,7 @@ import type { Entities, EntityRef } from '../core/model';
 import { Entities as EntitiesClass } from '../core/model';
 import type { FaceStyle } from '../core/document';
 import { solidOp, isSolid, type SolidOp } from '../core/solids';
-import { pluginImporters } from '../plugins/fileFormats';
+import { pluginImporters, type LoadedScene } from '../plugins/fileFormats';
 import { showPanel } from '../components/panelState';
 
 export interface Command { id: string; label: string; shortcut?: string; group: string; icon?: string; keywords?: string; run: (editor: Editor) => void; enabled?: (editor: Editor) => boolean; checked?: (editor: Editor) => boolean }
@@ -89,11 +79,11 @@ export const exportAs = async (editor: Editor, kind: 'glb' | 'gltf' | 'stl' | 'o
 };
 
 /** Import mesh files as a component made of faces (coplanar triangles merged). */
-/** File extensions the importer understands (menu filter, drop overlay, README). */
-export const IMPORT_EXTS = ['skp', 'blend', 'dae', 'kmz', 'fbx', '3ds', 'obj', 'stl', 'glb', 'gltf', 'ply', '3mf', 'amf', 'wrl', 'vrml', 'usdz', 'usda', 'usdc', 'usd'];
+/** File extensions the app reads itself; further formats come from plugins (built-in "Importformate": FBX, DAE, 3DS, .blend …). */
+export const IMPORT_EXTS = ['skp', 'obj', 'stl', 'glb', 'gltf'];
 
-/** Sends a .skp/.blend file to the local converter and returns the resulting .glb. */
-const convertLocally = async (ext: 'skp' | 'blend', file: File): Promise<ArrayBuffer> => {
+/** Sends a .skp file to the local converter and returns the resulting .glb. */
+const convertLocally = async (ext: 'skp', file: File): Promise<ArrayBuffer> => {
   let response: Response;
   try { response = await fetch(`/__convert?from=${ext}`, { method: 'POST', body: file }); }
   catch { throw new Error('Der lokale Konverter ist nicht erreichbar – die App über „npm run dev“ oder „npm run preview“ starten.'); }
@@ -103,78 +93,31 @@ const convertLocally = async (ext: 'skp' | 'blend', file: File): Promise<ArrayBu
 };
 
 /**
- * FBX stores its unit in GlobalSettings › UnitScaleFactor (centimetres per unit: cm = 1, m = 100, inch = 2.54).
- * Returns the factor to metres, or null if the file does not say.
- */
-const fbxUnitScale = (data: ArrayBuffer): number | null => {
-  const bytes = new Uint8Array(data);
-  const head = new TextDecoder('latin1').decode(bytes.subarray(0, 23));
-  if (!head.startsWith('Kaydara FBX Binary')) {
-    const match = new TextDecoder().decode(bytes).match(/"UnitScaleFactor"[^\n]*?,\s*([-\d.eE+]+)\s*$/m);
-    return match ? parseFloat(match[1]) / 100 : null;
-  }
-  // binary: P: "UnitScaleFactor", "double", "Number", "", <double> – three 'S' string props, then a 'D'
-  const key = new TextEncoder().encode('UnitScaleFactor');
-  outer: for (let i = 0; i < bytes.length - key.length; i++) {
-    for (let k = 0; k < key.length; k++) if (bytes[i + k] !== key[k]) continue outer;
-    const view = new DataView(data); let cursor = i + key.length;
-    for (let skip = 0; skip < 3; skip++) { if (bytes[cursor] !== 0x53) return null; cursor += 5 + view.getUint32(cursor + 1, true); }
-    if (bytes[cursor] !== 0x44) return null;
-    const value = view.getFloat64(cursor + 1, true);
-    return value > 0 ? value / 100 : null;
-  }
-  return null;
-};
-
-/**
  * Loads a foreign 3D file into a three.js scene.
  * upY: the scene comes Y-up and must be turned to our Z-up; scale: known unit factor to metres (null = guess).
  */
-const loadForeign = async (ext: string, file: File): Promise<{ object: THREE.Object3D; upY: boolean; scale: number | null }> => {
+const loadForeign = async (ext: string, file: File): Promise<LoadedScene> => {
   const buf = () => file.arrayBuffer(), txt = () => file.text();
   switch (ext) {
     case 'obj': return { object: new OBJLoader().parse(await txt()), upY: true, scale: null };
     case 'stl': return { object: new THREE.Mesh(new STLLoader().parse(await buf())), upY: false, scale: 1 };
     case 'glb': return { object: (await new GLTFLoader().parseAsync(await buf(), '')).scene, upY: true, scale: 1 };
     case 'gltf': return { object: (await new GLTFLoader().parseAsync(await txt(), '')).scene, upY: true, scale: 1 };
-    // Collada handles its own unit (<unit meter>) and up axis (<up_axis>) and hands back a Y-up scene in metres
-    case 'dae': { const collada = new ColladaLoader().parse(await txt(), ''); if (!collada?.scene) throw new Error('Die Collada-Datei konnte nicht gelesen werden.'); return { object: collada.scene, upY: true, scale: 1 }; }
-    case 'kmz': return { object: new KMZLoader().parse(await buf()).scene, upY: true, scale: 1 };
-    // FBX (3ds Max, Blender, Maya): the loader turns Z-up files to Y-up, units vary (often cm)
-    case 'fbx': { const data = await buf(); return { object: new FBXLoader().parse(data, ''), upY: true, scale: fbxUnitScale(data) }; }
-    // 3DS (old 3ds Max format): stays in its own Z-up space, units vary
-    case '3ds': return { object: new TDSLoader().parse(await buf(), ''), upY: false, scale: null };
-    case 'ply': { const geometry = new PLYLoader().parse(await buf()); geometry.computeVertexNormals(); return { object: new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ vertexColors: geometry.hasAttribute('color') })), upY: true, scale: null }; }
-    // 3MF and AMF (3D printing) are Z-up in millimetres
-    case '3mf': return { object: new ThreeMFLoader().parse(await buf()), upY: false, scale: 0.001 };
-    case 'amf': return { object: new AMFLoader().parse(await buf()), upY: false, scale: 0.001 };
-    case 'wrl': case 'vrml': return { object: new VRMLLoader().parse(await txt(), ''), upY: true, scale: 1 };
-    // SketchUp and Blender files are converted to glTF by the local converter (tools/convertBridge.ts)
-    // Blender files are read right here in the browser (Z-up, metres) – no Blender needed
-    case 'blend': {
-      const result = readBlend(await buf());
-      if (!result.objects) throw new Error(`In der Blender-Datei (Version ${(result.version / 100).toFixed(2)}) wurden keine Mesh-Objekte gefunden.` + (result.skipped.length ? ` Übersprungen: ${result.skipped.slice(0, 3).join(', ')}` : ''));
-      return { object: result.scene, upY: false, scale: 1 };
-    }
     // SketchUp files are converted to glTF by the local converter (tools/convertBridge.ts + SketchUp SDK)
     // (tools/skp/skp2glb.py writes Z-up in metres, like SketchUp itself)
     case 'skp': return { object: (await new GLTFLoader().parseAsync(await convertLocally('skp', file), '')).scene, upY: false, scale: 1 };
-    case 'usdz': case 'usda': case 'usdc': case 'usd': {
-      const data = await buf();
-      const obj = await new Promise<THREE.Object3D>((res, rej) => new USDLoader().parse(data, '', res as any, rej as any));
-      return { object: obj, upY: true, scale: 1 };
-    }
   }
-  throw new Error('Nicht unterstütztes Format: ' + ext);
+  throw new Error(`Das Format .${ext} wird nicht unterstützt – weitere Formate (FBX, Collada, 3DS, Blender …) bringt das Plugin „Importformate“ mit (Plugins › Plugins verwalten).`);
 };
 
 export const importFile = async (editor: Editor, file: File) => {
   const ext = file.name.split('.').pop()!.toLowerCase();
   const pluginImporter = pluginImporters.get(ext);
-  if (pluginImporter) { await pluginImporter.import(file, editor); editor.invalidate(); return; }
+  if (pluginImporter?.import) { await pluginImporter.import(file, editor); editor.invalidate(); return; }
   if (ext === 'json') { const json = JSON.parse(await file.text()); if (typeof json.format === 'string' && json.format.startsWith('shap3d/')) { editor.loadJSON(json); editor.model.name = file.name.replace(/\.(shap3d|formwerk|suv)\.json$|\.json$/i, ''); return; } throw new Error('Unbekanntes JSON-Format'); }
   if (ext === 'max') throw new Error('3ds-Max-Dateien (.max) kann nur 3ds Max selbst lesen – dort über Datei › Exportieren als FBX (oder .3ds/.obj) speichern und diese Datei importieren.');
-  const { object: obj, upY, scale: fixedScale } = await loadForeign(ext, file);
+  // plugins may only read the file (loadScene) – the conversion below is the same for every format
+  const { object: obj, upY, scale: fixedScale } = pluginImporter?.loadScene ? await pluginImporter.loadScene(file) : await loadForeign(ext, file);
   // unit guess for formats without reliable units (cm/mm are common in FBX and 3DS)
   let scale = fixedScale ?? 1, unitNote = '';
   if (fixedScale == null) {
@@ -430,7 +373,6 @@ export const COMMANDS: Command[] = [
   { id: 'invertSel', label: 'Auswahl umkehren', shortcut: 'Strg+Umschalt+I', group: 'Bearbeiten', run: editor => { const cur = new Set(editor.selected().map(entityRef => editor.key(entityRef))); editor.selectAll(); editor.select(editor.selected().filter(entityRef => !cur.has(editor.key(entityRef)))); } },
   { id: 'hide', label: 'Ausblenden', shortcut: 'H (Auswahl)', group: 'Bearbeiten', run: hideSelection },
   { id: 'unhideAll', label: 'Alle einblenden', group: 'Bearbeiten', run: unhideAll },
-  { id: 'terrain', label: 'Gelände (Sandkiste): Berge & Täler formen', group: 'Bearbeiten', run: editor => editor.setTool('terrain') },
   { id: 'makeGroup', label: 'Gruppe erstellen', group: 'Bearbeiten', run: editor => makeGroup(editor, false) },
   { id: 'makeComponent', label: 'Komponente erstellen…', shortcut: 'G', group: 'Bearbeiten', run: async editor => { if (!editor.selected().length) { editor.toast('Nichts ausgewählt'); return; } const componentName = await editor.prompt('Name der Komponente', editor.model.uniqueDefName('Komponente')); if (componentName != null) makeGroup(editor, true, componentName); } },
   { id: 'explode', label: 'Auflösen', group: 'Bearbeiten', run: explode },

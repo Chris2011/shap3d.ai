@@ -53,6 +53,8 @@ export interface UiState {
   projection: 'persp' | 'ortho';
   dialog: null | { kind: string; data?: any };
   recentTools: string[];
+  /** bumped when a tool is registered or removed (plugins) – the toolbars re-check what exists */
+  toolsRevision: number;
 }
 
 export class Editor {
@@ -62,7 +64,7 @@ export class Editor {
   ui: UiState = reactive({
     tool: 'select', status: '', vcbLabel: '', vcbValue: '', vcbEditing: false, revision: 0, selRev: 0,
     canUndo: false, canRedo: false, undoLabel: '', redoLabel: '', currentMaterial: null, contextName: '', toast: '', saved: true,
-    renderer: 'WebGL', projection: 'persp', dialog: null, recentTools: ['circle', 'offset', 'arc2'],
+    renderer: 'WebGL', projection: 'persp', dialog: null, recentTools: ['circle', 'offset', 'arc2'], toolsRevision: 0,
   });
   tools = new Map<string, Tool>();
   tool!: Tool;
@@ -93,7 +95,16 @@ export class Editor {
     this.dirty = true;
   }
 
-  register(tool: Tool) { this.tools.set(tool.id, markRaw(tool)); }
+  register(tool: Tool) { this.tools.set(tool.id, markRaw(tool)); this.ui.toolsRevision++; }
+  /** Removes a tool (plugin switched off): leaves it if active and drops it from the toolbar right away. */
+  unregister(id: string) {
+    if (this.ui.tool === id) this.setTool('select');
+    this.tools.delete(id);
+    this.ui.recentTools = this.ui.recentTools.filter(recent => recent !== id);
+    this.ui.toolsRevision++;
+  }
+  /** true if a tool with this id is registered (reactive through ui.toolsRevision) */
+  hasTool(id: string) { void this.ui.toolsRevision; return this.tools.has(id); }
 
   // ------------------------------------------------------------ context
   get entities(): Entities { return this.activePath.length ? this.activePath[this.activePath.length - 1].definition.entities : this.model.root; }

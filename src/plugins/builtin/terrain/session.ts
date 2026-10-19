@@ -1,14 +1,17 @@
 import * as THREE from 'three';
 import { reactive } from 'vue';
-import type { Editor } from '../engine/editor';
-import type { Instance } from '../core/model';
-import { shadeUniforms } from '../engine/viewer';
-import { makeTexture, isTextureKind, TEXTURE_SIZE } from '../core/textures';
-import { libraryMaterial } from '../core/materialLibrary';
+import type { Editor } from '../../../engine/editor';
+import type { Instance } from '../../../core/model';
+import { shadeUniforms } from '../../../engine/viewer';
+import { makeTexture, isTextureKind, TEXTURE_SIZE } from '../../../core/textures';
+import { libraryMaterial } from '../../../core/materialLibrary';
 import {
-  type TerrainData, type Brush, type BrushMode, newTerrain, cellSize, idx, heightAt, applyBrush, generateHills, bakeTerrain, cloneTerrain,
-} from '../core/terrain';
-import { Entities } from '../core/model';
+  type TerrainData, type Brush, type BrushMode, newTerrain, cellSize, idx, heightAt, applyBrush, generateHills, bakeTerrain, cloneTerrain, terrainOf, setTerrain, TERRAIN_PLUGIN,
+} from './terrainData';
+import { Entities } from '../../../core/model';
+
+/** the sculpt tool, as registered by the plugin (plugin id + tool id) */
+export const TERRAIN_TOOL = `${TERRAIN_PLUGIN}.sandbox`;
 
 /**
  * A terrain sculpting session. While it runs the terrain is a plain three.js mesh in the viewer
@@ -163,7 +166,7 @@ const begin = (editor: Editor, data: TerrainData, origin: THREE.Vector3, extra: 
   terrainUi.brush.radius = +Math.max(0.5, longest / 8).toFixed(1);
   Object.assign(terrainUi, { active: true, chooser: false, canUndo: false, title: extra.title });
   refreshLook();
-  if (editor.ui.tool !== 'terrain') editor.setTool('terrain');
+  if (editor.ui.tool !== TERRAIN_TOOL) editor.setTool(TERRAIN_TOOL);
   editor.clearSelection();
 };
 const end = () => {
@@ -185,14 +188,15 @@ const cellFor = (width: number, depth: number) => Math.max(0.1, Math.max(width, 
  * into terrain, or opens the "new terrain" chooser.
  */
 export const openTerrain = (editor: Editor) => {
-  if (current) { if (editor.ui.tool !== 'terrain') editor.setTool('terrain'); return; }
+  if (current) { if (editor.ui.tool !== TERRAIN_TOOL) editor.setTool(TERRAIN_TOOL); return; }
   const sel = editor.selected();
   const inst = sel.find(entityRef => entityRef.kind === 'instance');
   if (inst) {
     const instance = editor.entities.instances.get(inst.id);
-    if (instance?.definition.terrain) {
+    const storedTerrain = instance && terrainOf(instance.definition);
+    if (instance && storedTerrain) {
       const origin = new THREE.Vector3().setFromMatrixPosition(editor.contextMatrix.clone().multiply(instance.matrix));
-      begin(editor, cloneTerrain(instance.definition.terrain), origin, { inst: instance, title: instance.name || instance.definition.name });
+      begin(editor, storedTerrain, origin, { inst: instance, title: instance.name || instance.definition.name });
       return;
     }
   }
@@ -211,7 +215,7 @@ export const openTerrain = (editor: Editor) => {
     editor.toast('Gelände geht nur aus einer waagerechten Fläche – z. B. einem Rechteck auf dem Boden.');
   }
   terrainUi.chooser = true;
-  if (editor.ui.tool !== 'terrain') editor.setTool('terrain');
+  if (editor.ui.tool !== TERRAIN_TOOL) editor.setTool(TERRAIN_TOOL);
 };
 
 /** Creates a new terrain from the chooser (next to the existing model, or centred on the origin). */
@@ -239,9 +243,9 @@ export const applyTerrain = (switchTool = true) => {
       bakeTerrain(ents, data, editor.model);
       if (active.inst) {
         const def = active.inst.definition;
-        def.entities = ents; def.terrain = data; made = active.inst;
+        def.entities = ents; setTerrain(def, data); made = active.inst;
       } else {
-        const def = editor.model.newDefinition(editor.model.uniqueDefName('Gelände'), false, ents); def.terrain = data;
+        const def = editor.model.newDefinition(editor.model.uniqueDefName('Gelände'), false, ents); setTerrain(def, data);
         const local = active.origin.clone().applyMatrix4(editor.contextInverse);
         made = editor.entities.addInstance(def, new THREE.Matrix4().makeTranslation(local.x, local.y, local.z), 'Gelände');
         if (active.srcFace) {
@@ -264,7 +268,7 @@ export const discardTerrain = () => {
   if (!current) { terrainUi.chooser = false; return; }
   const editor = current.editor; end(); editor.setTool('select'); editor.toast('Gelände verworfen');
 };
-export const closeChooser = (editor: Editor) => { terrainUi.chooser = false; if (!current && editor.ui.tool === 'terrain') editor.setTool('select'); };
+export const closeChooser = (editor: Editor) => { terrainUi.chooser = false; if (!current && editor.ui.tool === TERRAIN_TOOL) editor.setTool('select'); };
 
 // ------------------------------------------------------------------ editing helpers (used by tool + panel)
 export const pushUndo = () => { if (!current) return; current.undo.push(current.data.heights.slice()); if (current.undo.length > 60) current.undo.shift(); terrainUi.canUndo = true; };

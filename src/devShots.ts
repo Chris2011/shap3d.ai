@@ -10,9 +10,10 @@ import { openPanel } from './components/panelState';
 import { meshView } from './engine/meshView';
 import { aiConfig } from './ai/providers';
 import { aiHistory } from './ai/history';
-import { openTerrain, generate } from './terrain/session';
+import { openTerrain, generate } from './plugins/builtin/terrain/session';
+import { pluginsReady } from './plugins/registry';
 import { Entities } from './core/model';
-import { bakeTerrain, cellSize, heightAt } from './core/terrain';
+import { bakeTerrain, cellSize, heightAt, terrainOf } from './plugins/builtin/terrain/terrainData';
 import { addScaleFigure } from './engine/defaults';
 import { measureView } from './engine/measureView';
 import { openPalette } from './components/paletteState';
@@ -36,8 +37,8 @@ for (const [x, y, s] of [[-4, 7, 1], [-6, 3, 0.8], [11, 8, 1.2], [13, 2, 0.9], [
 
 /** Building plot under the house (like the "Ebnen" brush) and trees standing on the ground. */
 const settleLandscape = (editor: Editor) => {
-  const terrainInstance = [...editor.model.root.instances.values()].find(instance => instance.definition.terrain); if (!terrainInstance?.definition.terrain) return;
-  const terrain = terrainInstance.definition.terrain; const originX = terrainInstance.matrix.elements[12], originY = terrainInstance.matrix.elements[13], originZ = terrainInstance.matrix.elements[14];
+  const terrainInstance = [...editor.model.root.instances.values()].find(instance => terrainOf(instance.definition)); if (!terrainInstance) return;
+  const terrain = terrainOf(terrainInstance.definition)!; const originX = terrainInstance.matrix.elements[12], originY = terrainInstance.matrix.elements[13], originZ = terrainInstance.matrix.elements[14];
   const { cx: cellX, cy: cellY } = cellSize(terrain);
   for (let j = 0; j <= terrain.rows; j++) for (let i = 0; i <= terrain.columns; i++) {
     const x = originX + i * cellX, y = originY + j * cellY;
@@ -135,6 +136,7 @@ s3d.torus([6.3, 0, 0.3], 0.6, 0.25, { segments: 18, material: 'Gold' });`);
 
 export const runShot = async (editor: Editor, name: string) => {
   const scene = SCENES[name]; if (!scene) { console.error('unknown shot', name); return; }
+  await pluginsReady; // scenes use plugin commands such as s3d.terrain()
   await scene(editor);
   editor.invalidate();
   await wait(800);

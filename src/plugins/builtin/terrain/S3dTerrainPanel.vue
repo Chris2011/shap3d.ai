@@ -77,15 +77,15 @@
 </template>
 
 <script setup lang="ts">
-import S3dCloseButton from './ui/S3dCloseButton.vue';
+import S3dCloseButton from '../../../components/ui/S3dCloseButton.vue';
 import { computed, useTemplateRef } from 'vue';
 import { useDraggable, useWindowSize } from '@vueuse/core';
-import S3dIcon from './S3dIcon.vue';
-import { useEditor } from './keys';
-import { terrainUi, terrainData, createNew, applyTerrain, discardTerrain, closeChooser, generate, undoStroke, refreshLook, stats } from '../terrain/session';
-import type { BrushMode, TerrainLayers } from '../core/terrain';
-import { MATERIAL_LIBRARY, libraryMaterial } from '../core/materialLibrary';
-import { swatchStyle } from '../utils/materialSwatch';
+import S3dIcon from '../../../components/S3dIcon.vue';
+import { useEditor } from '../../../components/keys';
+import { terrainUi, terrainData, createNew, applyTerrain, discardTerrain, closeChooser, generate, undoStroke, refreshLook, stats } from './session';
+import type { BrushMode, TerrainLayers } from './terrainData';
+import { MATERIAL_LIBRARY, libraryMaterial } from '../../../core/materialLibrary';
+import { swatchStyle } from '../../../utils/materialSwatch';
 
 const editor = useEditor();
 const MODES: { id: BrushMode; label: string; icon: string; tip: string }[] = [

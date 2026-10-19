@@ -1,4 +1,3 @@
-import { catalogText } from './catalog';
 export interface ScriptExample { id: string; name: string; lang: 'js' | 'json' | 'obj'; description: string; code: string }
 
 export const EXAMPLES: ScriptExample[] = [
@@ -546,4 +545,4 @@ f 104 106 107`,
 ];
 
 /** Plain-text API overview – generated from the catalog (src/scripting/catalog.ts). */
-export const API_HELP = catalogText();
+

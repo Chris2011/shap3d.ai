@@ -48,7 +48,7 @@ export const subdivideInstance = (editor: Editor, inst: Instance, round = true):
   if ((triMesh.triangles.length / 3) * 4 > MAX_TRIANGLES) return `Zu viele Polygone (${Math.round(triMesh.triangles.length / 3 * 4).toLocaleString('de-DE')} Dreiecke) – das würde den Browser ausbremsen.`;
   editor.commit(round ? 'Mehr Polygone (abrunden)' : 'Mehr Polygone', () => {
     inst.definition.entities = fromTriMesh(loopSubdivide(triMesh, round), 40, round);
-    inst.definition.shape = undefined; inst.definition.terrain = undefined; // no longer parametric / grid based
+    inst.definition.shape = undefined; inst.definition.pluginData = undefined; // no longer parametric / plugin-made (e.g. terrain grid)
   });
   return null;
 };
@@ -61,7 +61,7 @@ export const simplifyInstance = async (editor: Editor, inst: Instance, keep: num
   if (out.triangles.length < 3) return 'So stark lässt sich das Objekt nicht vereinfachen.';
   editor.commit('Weniger Polygone', () => {
     inst.definition.entities = fromTriMesh(out);
-    inst.definition.shape = undefined; inst.definition.terrain = undefined;
+    inst.definition.shape = undefined; inst.definition.pluginData = undefined;
   });
   return null;
 };

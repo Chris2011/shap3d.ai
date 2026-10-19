@@ -17,12 +17,12 @@
     </div>
     <p v-if="plugin.description" class="mt-1 text-xs text-ink-2">{{ plugin.description }}</p>
     <p v-if="plugin.error" class="mt-1 text-xs text-danger">Fehler: {{ plugin.error }}</p>
-    <p class="mt-1 text-[0.6875rem] text-ink-2">{{ plugin.author ? `von ${plugin.author} · ` : '' }}<code>{{ plugin.id }}</code></p>
+    <p class="mt-1 text-[0.6875rem] text-ink-2"><template v-if="plugin.builtin">Eingebaut · </template>{{ plugin.author ? `von ${plugin.author} · ` : '' }}<code>{{ plugin.id }}</code></p>
     <p v-if="plugin.package" class="mt-0.5 text-[0.6875rem] text-ink-2">Paket {{ plugin.package.name }} · {{ plugin.package.files }} {{ plugin.package.files === 1 ? 'Datei' : 'Dateien' }}, {{ megabytes(plugin.package.bytes) }}<template v-if="plugin.package.license"> · Lizenz {{ plugin.package.license }}</template></p>
     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
       <button v-for="panel in panelsOf(plugin.id)" :key="panel.id" class="s3d-link" @click="showPanel(panel.id)">{{ panel.label }} öffnen</button>
-      <button class="s3d-link" @click="downloadSource(plugin.id)">Quelltext</button>
-      <button class="s3d-link" @click="remove(plugin.id, plugin.name)">Entfernen</button>
+      <button v-if="!plugin.builtin" class="s3d-link" @click="downloadSource(plugin.id)">Quelltext</button>
+      <button v-if="!plugin.builtin" class="s3d-link" @click="remove(plugin.id, plugin.name)">Entfernen</button>
     </div>
   </div>
   <div v-if="!plugins.length" class="px-0.5 py-2 text-xs text-ink-2">Noch keine Plugins installiert.</div>

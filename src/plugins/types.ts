@@ -6,7 +6,10 @@ import type { PointTool } from '../tools/base';
 import type { Overlay } from '../engine/overlay';
 import type { RunResult, ScriptApi } from '../scripting/api';
 import type { ScriptLanguage } from '../scripting/languages';
-import type { Entities } from '../core/model';
+import type { Definition, Entities } from '../core/model';
+import type { ApiCategory } from '../scripting/catalog';
+import type { ContextMenuEntry } from './uiExtensions';
+import type { LoadedScene } from './fileFormats';
 
 /**
  * A Shap3D.ai plugin: an ES module whose default export is this object.
@@ -65,7 +68,10 @@ export interface PluginImporter {
   /** file extensions without dot, e.g. ["xyz", "pts"] */
   extensions: string[];
   label: string;
-  import: (file: File, editor: Editor) => void | Promise<void>;
+  /** does the whole import itself … */
+  import?: (file: File, editor: Editor) => void | Promise<void>;
+  /** … or only reads the file into a three.js scene; the app converts it to faces, guesses units, places it and makes it one undo step */
+  loadScene?: (file: File) => Promise<LoadedScene>;
 }
 
 export interface PluginExporter {
@@ -100,7 +106,13 @@ export interface PluginMeshOptions {
 }
 
 export interface ScriptExtension {
-  /** shown in the API reference (category "Plugins") */
+  /** API reference category – default "Plugins" */
+  category?: ApiCategory;
+  /** title in the API reference – default "name (plugin)" */
+  title?: string;
+  /** what it returns, e.g. "Gruppe" */
+  returns?: string;
+  /** shown in the API reference */
   signature?: string;
   description?: string;
   example?: string;
@@ -160,7 +172,20 @@ export interface PluginContext {
       clear: () => Promise<void>;
     };
   };
-  ui: { toast: (message: string) => void; prompt: (title: string, value?: string) => Promise<string | null>; confirm: (title: string) => Promise<boolean> };
+  ui: {
+    toast: (message: string) => void;
+    prompt: (title: string, value?: string) => Promise<string | null>;
+    confirm: (title: string) => Promise<boolean>;
+    /** an entry in the viewport's context menu */
+    addContextMenuEntry: (entry: ContextMenuEntry) => Disposer;
+    /** a floating window (Vue component, rendered once – it decides itself when it is visible) */
+    addWindow: (component: Component) => Disposer;
+  };
+  /** JSON data the plugin keeps on a group/component definition – saved with the model */
+  data: {
+    get: <T>(definition: Definition) => T | undefined;
+    set: (definition: Definition, value: unknown) => void;
+  };
   /** register any extra clean-up */
   onDispose: (disposer: Disposer) => void;
 }

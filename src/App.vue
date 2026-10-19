@@ -8,7 +8,7 @@
     <S3dStatusBar ref="statusBar" />
     <S3dContextMenu v-if="contextMenu" :x="contextMenu.x" :y="contextMenu.y" @close="contextMenu = null" />
     <S3dCommandPalette v-if="palette.open" />
-    <S3dTerrainPanel />
+    <component :is="pluginWindow" v-for="(pluginWindow, index) in PLUGIN_WINDOWS" :key="index" />
     <S3dDialogs />
     <S3dWelcomeTour />
     <transition enter-active-class="transition-opacity duration-200" leave-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-to-class="opacity-0"><div v-if="editor.ui.toast" class="pointer-events-none absolute bottom-12 left-1/2 z-80 -translate-x-1/2 rounded bg-[#2b3035] px-4 py-2 text-[0.8125rem] text-white shadow-[0_2px_8px_rgba(0,0,0,.3)]">{{ editor.ui.toast }}</div></transition>
@@ -31,7 +31,7 @@ import S3dContextMenu from './components/S3dContextMenu.vue';
 import S3dCommandPalette from './components/S3dCommandPalette.vue';
 import { palette, openPalette, closePalette } from './components/paletteState';
 import S3dDialogs from './components/S3dDialogs.vue';
-import S3dTerrainPanel from './components/S3dTerrainPanel.vue';
+import { PLUGIN_WINDOWS } from './plugins/uiExtensions';
 import S3dIcon from './components/S3dIcon.vue';
 import S3dWelcomeTour from './components/S3dWelcomeTour.vue';
 import { openTour, tourSeen } from './components/tour';

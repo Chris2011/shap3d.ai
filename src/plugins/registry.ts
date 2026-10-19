@@ -15,6 +15,15 @@ export const EXAMPLE_PLUGINS: { file: string; code: string }[] = [
   { file: 'parts-list.js', code: partsListExample },
 ];
 
+/**
+ * Plugins that ship with the app (part of this repository, written against the same plugin API).
+ * Loaded on demand as their own chunk; on by default, can be switched off but not removed.
+ */
+const BUILTIN_PLUGINS: { id: string; load: () => Promise<{ default: S3dPlugin }> }[] = [
+  { id: 'terrain', load: () => import('./builtin/terrain') },
+  { id: 'imports', load: () => import('./builtin/imports') },
+];
+
 /** what a plugin package's package.json says about itself */
 export interface PackageInfo { name: string; version: string; license: string; files: number; bytes: number }
 
@@ -31,10 +40,14 @@ export interface PluginEntry {
   error: string | null;
   /** set for plugins installed from a package folder */
   package?: PackageInfo;
+  /** part of the app – can be switched off, not removed */
+  builtin?: boolean;
 }
 
 /** installed plugins (source code kept in the browser, never sent anywhere) */
 const stored = useStorage<StoredPlugin[]>('s3d:plugins', []);
+/** on/off state of the built-in plugins (missing = on) */
+const builtinEnabled = useStorage<Record<string, boolean>>('s3d:builtin-plugins', {});
 /** what the plugin manager shows */
 export const plugins = reactive<PluginEntry[]>([]);
 
@@ -57,10 +70,13 @@ const evaluate = async (code: string): Promise<S3dPlugin> => {
 
 const entryOf = (id: string) => plugins.find(entry => entry.id === id);
 
-const describe = (plugin: S3dPlugin, enabled: boolean, packageInfo?: PackageInfo): PluginEntry => ({
+const describe = (plugin: S3dPlugin, enabled: boolean, packageInfo?: PackageInfo, builtin = false): PluginEntry => ({
   id: plugin.id, name: plugin.name, version: plugin.version ?? packageInfo?.version ?? '', description: plugin.description ?? '', author: plugin.author ?? '',
-  enabled, active: false, error: null, package: packageInfo,
+  enabled, active: false, error: null, package: packageInfo, builtin,
 });
+
+const isBuiltin = (id: string) => BUILTIN_PLUGINS.some(candidate => candidate.id === id);
+const loadBuiltin = async (id: string) => (await BUILTIN_PLUGINS.find(candidate => candidate.id === id)!.load()).default;
 
 const runDisposers = (disposers: Disposer[]) => {
   for (const disposer of disposers.reverse()) { try { disposer(); } catch (error) { console.error(error); } }
@@ -92,11 +108,30 @@ const deactivate = (id: string) => {
   editorRef?.invalidate();
 };
 
+let markReady: () => void = () => {};
+/** resolves once the plugins from the last session are running (e.g. for the screenshot mode) */
+export const pluginsReady = new Promise<void>(resolve => { markReady = resolve; });
+
 /** Loads all installed plugins (call once after the editor exists). */
 export const initPlugins = async (editor: Editor) => {
   if (editorRef) return; // already started (e.g. the app component was hot-reloaded)
   editorRef = editor;
+  try { await startPlugins(); } finally { markReady(); }
+};
+
+const startPlugins = async () => {
+  for (const builtin of BUILTIN_PLUGINS) {
+    const enabled = builtinEnabled.value[builtin.id] !== false;
+    try {
+      const plugin = await builtin.load().then(module => module.default);
+      plugins.push(describe(plugin, enabled, undefined, true));
+      if (enabled) await activate(plugin);
+    } catch (error: any) {
+      plugins.push({ id: builtin.id, name: builtin.id, version: '', description: '', author: '', enabled, active: false, error: error?.message ?? String(error), builtin: true });
+    }
+  }
   for (const item of stored.value) {
+    if (isBuiltin(item.id)) continue; // an installed copy never replaces a built-in plugin
     try {
       const plugin = await evaluate(item.code);
       plugins.push(describe(plugin, item.enabled, item.package));
@@ -110,6 +145,7 @@ export const initPlugins = async (editor: Editor) => {
 /** Installs (or updates) a plugin from its source code and switches it on. */
 export const installPlugin = async (code: string, packageFiles?: { info: PackageInfo; assets: PluginAssets }) => {
   const plugin = await evaluate(code);
+  if (isBuiltin(plugin.id)) throw new Error(`„${plugin.id}“ ist ein eingebautes Plugin und kann nicht ersetzt werden`);
   const existing = stored.value.find(item => item.id === plugin.id);
   if (existing) deactivate(plugin.id);
   if (packageFiles) await saveAssets(plugin.id, packageFiles.assets);
@@ -151,6 +187,13 @@ export const installPluginPackage = async (files: File[]) => {
 };
 
 export const setPluginEnabled = async (id: string, enabled: boolean) => {
+  if (isBuiltin(id)) {
+    builtinEnabled.value = { ...builtinEnabled.value, [id]: enabled };
+    const entry = entryOf(id); if (entry) entry.enabled = enabled;
+    if (!enabled) { deactivate(id); return; }
+    try { await activate(await loadBuiltin(id)); } catch (error: any) { if (entry) entry.error = error?.message ?? String(error); }
+    return;
+  }
   const item = stored.value.find(candidate => candidate.id === id); if (!item) return;
   item.enabled = enabled; stored.value = [...stored.value];
   const entry = entryOf(id); if (entry) entry.enabled = enabled;
@@ -159,6 +202,7 @@ export const setPluginEnabled = async (id: string, enabled: boolean) => {
 };
 
 export const removePlugin = (id: string) => {
+  if (isBuiltin(id)) return; // built-in plugins can only be switched off
   deactivate(id);
   if (stored.value.find(item => item.id === id)?.package) deleteAssets(id).catch(error => console.error(error));
   clearPluginFiles(id).catch(error => console.error(error));

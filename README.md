@@ -50,6 +50,7 @@
 - [Scripting example](#scripting-example)
 - [Writing plugins](#writing-plugins)
   - [The `context` API](#the-context-api)
+  - [Built-in plugins](#built-in-plugins)
   - [Plugin packages](#plugin-packages)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
@@ -119,6 +120,7 @@ Turn a rectangle into a landscape, or start a new terrain from scratch, then scu
 - **Automatic surfaces**: grass on flat ground, earth on slopes and in hollows, rock on peaks and cliffs, optional snow. Every layer can use any material.
 - Quick hills/mountains, an **earth base** with side walls, and an optional **water level**.
 - When you apply, the terrain becomes a normal group. It stays editable later because the height grid is saved with the model.
+- The terrain editor is a [built-in plugin](#built-in-plugins) – it can be switched off in the plugin manager.
 
 ### Polygon inspector
 
@@ -201,6 +203,8 @@ Drag a file onto the window or use **Menu › Importieren**. Every import become
 | **3ds Max**, Maya, Cinema 4D | `.fbx`, `.3ds`, `.obj` | Directly in the browser. 3ds Max's own `.max` format can only be read by 3ds Max itself – export to FBX there |
 | 3D printing | `.stl`, `.3mf`, `.amf` | Directly in the browser (3MF/AMF in millimetres) |
 | Scanners, AR, web | `.ply`, `.usdz` / `.usd`, `.wrl` / `.vrml` | Directly in the browser |
+
+OBJ, STL, glTF/GLB and SketchUp are read by the app itself. All other formats in the table come from the [built-in plugin](#built-in-plugins) **Importformate**: its readers (about 400 KB) are only loaded the first time such a file is imported, and it can be switched off in the plugin manager.
 
 What the importer takes care of:
 
@@ -303,7 +307,7 @@ export default {
 | Meshes | `meshes.add({ vertices, faces, faceMaterials? }, { name?, scale?, smooth?, materials? })`, `meshes.build(entities, mesh, options?)` | Turns a polygon mesh into real faces – as a new group (one undo step) or inside a script extension (`api.ents`). `scale` converts the mesh units to metres; `faceMaterials` gives each face a material, `materials` defines missing ones (`{ name: { color, opacity } }`) in the same undo step. |
 | Materials | `materials.ensure(name, { color, opacity? })` | Creates a material if the model doesn't have it yet. |
 | Package files | `assets.url(path)`, `assets.blob(path)`, `assets.list()` | Files that came with a plugin package (see below), e.g. a WebAssembly build: `await import(context.assets.url('engine.js'))`. |
-| Files | `files.registerImporter({ extensions, label, import(file, editor) })` | Opens new file types through *Importieren…* and drag & drop. |
+| Files | `files.registerImporter({ extensions, label, import(file, editor) })` or `{ extensions, label, loadScene(file) }` | Opens new file types through *Importieren…* and drag & drop. With `loadScene` the plugin only returns `{ object, upY, scale }` (a three.js scene) and the app does the rest like for its own formats. |
 | | `files.registerExporter({ id, label, fileName(editor), mimeType?, export(editor) })` | Adds *Exportieren: …* to the export menu; `export` returns a string or a `Blob`. |
 | Drawing | `overlay.draw((overlay, editor) => …)` | Draws on the 2D overlay above the 3D view on every redraw (`overlay.line`, `overlay.text`, `overlay.context` for the raw canvas). |
 | Icons | `icons.register(name, svgContent)` | An icon for commands, tools and panels (inner SVG markup for a 24 × 24 view box). |
@@ -311,7 +315,12 @@ export default {
 | Storage | `storage.get(key, fallback)`, `storage.set(key, value)` | JSON settings, kept per plugin in the browser. |
 | | `storage.files.list()`, `.get(path)`, `.put(path, blob)`, `.remove(path)`, `.clear()` | Files the plugin keeps for the user (IndexedDB), e.g. libraries or fonts – removed together with the plugin. |
 | UI | `ui.toast(text)`, `ui.prompt(title, value?)`, `ui.confirm(title)` | Messages and simple dialogs. |
+| | `ui.addContextMenuEntry({ label, when?(editor), run(editor) })` | An entry in the viewport's context menu, shown when `when` is true. |
+| | `ui.addWindow(component)` | A floating window (Vue component, rendered once; it decides itself when to show). |
+| Model data | `data.get(definition)`, `data.set(definition, value)` | JSON the plugin keeps on a group/component – saved with the model and kept while the plugin is off (the terrain plugin stores its height grid here). |
 | Model | `editor`, `THREE`, `newId()` | The full editor (model, selection, viewer; `editor.commit(label, change)` makes one undo step) and three.js. |
+
+`script.extend` also takes `category`, `title` and `returns` to place the command in the API reference (e.g. under *Körper*).
 
 Every `register…` call returns a function that removes the registration early. `onDispose(fn)` adds your own clean-up, and an optional `deactivate()` on the plugin runs when it is switched off. If `activate` throws, everything it registered so far is removed and the error is shown in the plugin manager.
 
@@ -320,6 +329,13 @@ The three bundled examples in [`src/plugins/examples/`](src/plugins/examples) ca
 - **Würfelraster** (`grid-generator.js`) – a command with an input dialog, a DOM panel and the script command `s3d.boxGrid()`.
 - **Koordinaten & Hilfspunkte** (`cursor-coordinates.js`) – an overlay with the coordinates of the snapped point, a toggle command and the tool *Hilfspunkt* (key <kbd>J</kbd>) built on `PointTool`.
 - **Stückliste & Punktimport** (`parts-list.js`) – a CSV parts-list exporter and an importer for `.xyz`/`.pts` point lists.
+
+### Built-in plugins
+
+Some features of the app are written as plugins themselves, in [`src/plugins/builtin/`](src/plugins/builtin), against the same API. They are part of the app, loaded as their own chunk on demand, on by default and can be switched off (not removed) in the plugin manager:
+
+- **Importformate** (`src/plugins/builtin/imports/`) – FBX, Collada, KMZ, 3DS, PLY, 3MF, AMF, VRML, USD/USDZ and Blender. It only registers the file types (`files.registerImporter` with `loadScene`); the three.js loaders and the Blender reader are a separate chunk loaded on the first import. The app turns the scene into faces, guesses units and places it.
+- **Gelände (Sandkiste)** (`src/plugins/builtin/terrain/`) – the terrain tool, its floating window, the *Gelände bearbeiten / aus Fläche* context-menu entries, the command and `s3d.terrain()`. Terrains in a model stay intact while it is off; they just can't be sculpted until it is on again.
 
 ### Plugin packages
 
@@ -352,13 +368,13 @@ Type definitions for the whole API are in [`src/plugins/types.ts`](src/plugins/t
 
 ```
 src/
-  core/        geometry kernel (entities, faces, push/pull, CSG), terrain, materials, mesh operations
+  core/        geometry kernel (entities, faces, push/pull, CSG), materials, mesh operations
   engine/      editor state, undo, three.js viewer, camera, inference, commands
   tools/       interactive tools (draw, modify, select, construct, terrain)
   scripting/   s3d API, API catalog, examples, OBJ import, resolution changes
-  plugins/     plugin system – the plugin API (types), context, loader/registry, example plugins
+  plugins/     plugin system – the plugin API (types), context, loader/registry, example plugins;
+               builtin/ holds the plugins that ship with the app (terrain sandbox, import formats)
   ai/          providers, prompts, agent, chat history, Hugging Face search
-  terrain/     live terrain sculpting session
   components/  Vue UI – toolbars, panels, dialogs, AI chat, terrain window, command palette, welcome tour
                (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components)
   components/ui/  small reusable building blocks – S3dModalDialog, S3dToggleSwitch, S3dSegmentedControl, S3dProgressBar, S3dCloseButton

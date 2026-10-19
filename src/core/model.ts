@@ -22,8 +22,11 @@ export class Definition {
   id = newId();
   /** SketchUp "always face camera": the instance turns around its Z axis towards the viewer. */
   faceMe = false;
-  /** height grid of a sculptable terrain (see core/terrain.ts) – lets the terrain be edited again */
-  terrain?: import('./terrain').TerrainData;
+  /**
+   * data plugins keep on a group/component, by plugin id (e.g. the terrain's height grid so it can be
+   * sculpted again). Plain JSON; it is saved with the model and kept even while the plugin is off.
+   */
+  pluginData?: Record<string, unknown>;
   /** how a parametric shape was made (su/s3d API call) – lets it be rebuilt with more or fewer segments */
   shape?: ShapeParams;
   constructor(public name: string, public isComponent: boolean, public entities = new Entities()) {}

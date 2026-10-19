@@ -3,8 +3,8 @@ import { TEXTURES } from '../core/textures';
 import { catalogText } from '../scripting/catalog';
 import { MATERIAL_LIBRARY, MATERIAL_CATEGORIES } from '../core/materialLibrary';
 
-/** Full reference of the `s3d` scripting API – generated from the catalog (src/scripting/catalog.ts). */
-export const SU_REFERENCE = `
+/** Full reference of the `s3d` scripting API – generated from the catalog (src/scripting/catalog.ts), built on demand so commands added by plugins are included. */
+export const suReference = () => `
 ## Grundlagen
 - Alle Zahlen sind METER. Strings mit Einheit sind auch erlaubt: "50cm", "1200mm", "2.5m".
 - Punkte sind Arrays [x, y, z]. Achsen: X = rot (rechts), Y = grün (nach hinten), Z = blau (nach oben). Boden: z = 0.
@@ -92,7 +92,7 @@ export const buildSystemPrompt = (scene: string): string => {
 ${SIZES}
 
 # Referenz der Skriptsprache „s3d“
-${SU_REFERENCE}
+${suReference()}
 
 # Beispiele
 ${example('table', 'Tisch mit 4 Stühlen')}

@@ -15,6 +15,7 @@ import { buildMesh } from '../scripting/mesh';
 import { registerScriptLanguage, registerBeforeRun } from '../scripting/languages';
 import { useScripts } from '../composables/useScripts';
 import { putPluginFile, getPluginFile, removePluginFile, clearPluginFiles, listPluginFiles, type PluginAssets } from './assetStore';
+import { addContextMenuEntry, addPluginWindow } from './uiExtensions';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
 
 const MIME_TYPES: Record<string, string> = { js: 'text/javascript', mjs: 'text/javascript', wasm: 'application/wasm', json: 'application/json', css: 'text/css', svg: 'image/svg+xml', png: 'image/png' };
@@ -84,11 +85,9 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
         const ownsKey = !!key && !TOOL_SHORTCUTS[key];
         if (ownsKey) TOOL_SHORTCUTS[key!] = id;
         return track(() => {
-          if (editor.ui.tool === id) editor.setTool('select');
-          editor.tools.delete(id);
           delete TOOL_INFO[id];
           removeFrom(PLUGIN_TOOLS, id);
-          editor.ui.recentTools = editor.ui.recentTools.filter(recent => recent !== id);
+          editor.unregister(id);
           if (ownsKey) delete TOOL_SHORTCUTS[key!];
         });
       },
@@ -115,7 +114,7 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
         const prototype = ScriptApi.prototype as unknown as Record<string, unknown>;
         if (name in prototype) throw new Error(`s3d.${name} gibt es schon`);
         prototype[name] = function (this: ScriptApi, ...args: unknown[]) { return implementation(this, ...args); };
-        const entry = { id: qualified(name), category: 'Plugins' as const, title: `${name} (${plugin.name})`, signature: info.signature ?? `s3d.${name}(…)`, desc: info.description ?? `Bereitgestellt vom Plugin „${plugin.name}“.`, example: info.example ?? '' };
+        const entry = { id: qualified(name), category: info.category ?? 'Plugins', title: info.title ?? `${name} (${plugin.name})`, returns: info.returns, signature: info.signature ?? `s3d.${name}(…)`, desc: info.description ?? `Bereitgestellt vom Plugin „${plugin.name}“.`, example: info.example ?? '' };
         API_CATALOG.push(entry);
         return track(() => { delete prototype[name]; removeFrom(API_CATALOG, entry); });
       },
@@ -159,7 +158,7 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
     },
 
     files: {
-      registerImporter: importer => track(registerImporter(importer.extensions, { label: importer.label, import: importer.import })),
+      registerImporter: importer => track(registerImporter(importer.extensions, { label: importer.label, import: importer.import, loadScene: importer.loadScene })),
       registerExporter: exporter => {
         const id = `export-${qualified(exporter.id)}`;
         const entry = {
@@ -203,6 +202,17 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
       toast: message => editor.toast(message),
       prompt: (title, value = '') => editor.prompt(title, value),
       confirm: title => editor.confirm(title),
+      addContextMenuEntry: entry => track(addContextMenuEntry(entry)),
+      addWindow: component => track(addPluginWindow(component)),
+    },
+
+    data: {
+      get: definition => definition.pluginData?.[plugin.id] as any,
+      set: (definition, value) => {
+        const data = { ...(definition.pluginData ?? {}) };
+        if (value === undefined) delete data[plugin.id]; else data[plugin.id] = value;
+        definition.pluginData = Object.keys(data).length ? data : undefined;
+      },
     },
 
     onDispose: disposer => { track(disposer); },
