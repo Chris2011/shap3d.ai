@@ -5,19 +5,25 @@ import type { Overlay } from './overlay';
 import type { Editor } from './editor';
 import { theme } from '../theme';
 import { formatLength } from '../core/units';
+import type { Units } from '../core/document';
+import { gridLevels, GRID_FADE_IN } from './gridView';
 
 /**
  * Measuring aids in the viewport:
  *  - rulers: tick marks along the axes that get finer while zooming in (m → 10 cm → cm → mm)
  *  - people: height dimension next to every reference person
+ *  - grid: labels and a legend for the infinite ground grid (the grid itself is drawn by gridView)
  */
 // README screenshots start without them and don't touch the stored setting
 const shotMode = new URLSearchParams(location.search).has('shot');
-export const measureView: { rulers: boolean; people: boolean } = shotMode
-  ? reactive({ rulers: false, people: false })
-  : useStorage('s3d:measure', { rulers: true, people: true }, undefined, { mergeDefaults: true }).value;
+export const measureView: { rulers: boolean; people: boolean; grid: boolean } = shotMode
+  ? reactive({ rulers: false, people: false, grid: false })
+  : useStorage('s3d:measure', { rulers: true, people: true, grid: true }, undefined, { mergeDefaults: true }).value;
 
-const STEPS = [100, 10, 1, 0.1, 0.01, 0.001];
+const INCH = 0.0254, FOOT = 0.3048;
+const imperial = (units: Units) => units === 'in' || units === 'ft';
+/** Ruler levels from coarse to fine, each one a whole fraction of the one before. */
+const rulerSteps = (units: Units) => (imperial(units) ? [100 * FOOT, 10 * FOOT, FOOT, INCH, INCH / 16] : [100, 10, 1, 0.1, 0.01, 0.001]);
 const MIN_TICK = 7;    // px between neighbouring ticks of one level
 const MIN_LABEL = 58;  // px between ticks before they get a label
 const AXES = [
@@ -26,12 +32,34 @@ const AXES = [
   { dir: new THREE.Vector3(0, 0, 1), color: '#3555d6' },
 ];
 
-/** Label for a tick at `t` metres whose finest level is `step`: whole metres, then cm, then mm. */
-const tickLabel = (value: number, step: number): string => {
+/** 3 5/16" – inches with sixteenths, reduced */
+const inches = (value: number): string => {
+  const sixteenths = Math.round(value / (INCH / 16)); const whole = Math.trunc(sixteenths / 16); let rest = sixteenths % 16, denominator = 16;
+  while (rest && rest % 2 === 0) { rest /= 2; denominator /= 2; }
+  if (!rest) return `${whole}"`;
+  return `${whole ? `${whole} ` : ''}${rest}/${denominator}"`;
+};
+
+/** Label for a tick at `value` metres whose finest level is `step`: whole metres, then cm, then mm (feet and inches for imperial models). */
+const tickLabel = (value: number, step: number, units: Units): string => {
   const sign = value < 0 ? '−' : ''; const magnitude = Math.abs(value);
+  if (imperial(units)) {
+    if (step >= FOOT - 1e-9) return `${sign}${Math.round(magnitude / FOOT)}'`;
+    const feet = Math.floor((magnitude + 1e-9) / FOOT);
+    return `${sign}${feet ? `${feet}' ` : ''}${inches(magnitude - feet * FOOT)}`;
+  }
   if (step >= 1) return `${sign}${Math.round(magnitude)} m`;
   if (step >= 0.01) return `${sign}${Math.round(magnitude * 100)} cm`;
   return `${sign}${Math.round(magnitude * 1000)} mm`;
+};
+
+/** Size of one grid spacing: "1 mm", "10 cm", "100 m", 1/16", 10' */
+const spacingLabel = (step: number, units: Units): string => {
+  if (imperial(units)) return step >= FOOT - 1e-9 ? `${Math.round(step / FOOT)}'` : inches(step);
+  if (step >= 1000) return `${Math.round(step / 1000)} km`;
+  if (step >= 1) return `${Math.round(step)} m`;
+  if (step >= 0.01) return `${Math.round(step * 100)} cm`;
+  return `${Math.round(step * 1000)} mm`;
 };
 
 const label = (context: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, align: CanvasTextAlign = 'center') => {
@@ -40,15 +68,17 @@ const label = (context: CanvasRenderingContext2D, text: string, x: number, y: nu
   context.strokeText(text, x, y); context.fillStyle = color; context.fillText(text, x, y);
 };
 
-const drawRulers = (overlay: Overlay) => {
+/** Ticks and labels along the axes; without ticks only the labels are drawn (grid labels along X and Y). */
+const drawRulers = (overlay: Overlay, units: Units, axes = AXES, ticks = true) => {
   const viewer = overlay.viewer, context = overlay.context, viewWidth = viewer.width, viewHeight = viewer.height, margin = 30;
   const cam = (viewer.rig.camera as THREE.Camera).position;
   const reach = Math.max(200, cam.length() * 6);
   const textCol = theme.night ? '#dfe6ee' : '#2b3035';
+  const steps = rulerSteps(units);
 
-  for (const axis of AXES) {
+  for (const axis of axes) {
     const pointAt = (distance: number) => axis.dir.clone().multiplyScalar(distance);
-    // one subdivision step: draw the tick at `start` (unless the parent already did) and recurse into tenths
+    // one subdivision step: draw the tick at `start` (unless the parent already did) and recurse into the next level
     const visit = (start: number, end: number, level: number, drawStart: boolean) => {
       const seg = overlay.projectSegment(pointAt(start), pointAt(end)); if (!seg) return;
       const [screenStart, screenEnd] = seg;
@@ -56,26 +86,59 @@ const drawRulers = (overlay: Overlay) => {
       const len = screenStart.distanceTo(screenEnd); if (len < MIN_TICK) return;
       if (drawStart && start !== 0) {
         const tickPos = overlay.screen(pointAt(start));
-        if (tickPos) {
+        // geometry wins: ticks and labels behind faces stay hidden
+        if (tickPos && !viewer.isHidden(pointAt(start))) {
           const direction = screenEnd.clone().sub(screenStart).normalize(); const tickNormal = new THREE.Vector2(-direction.y, direction.x);
           if (tickNormal.y < 0 || (Math.abs(tickNormal.y) < 1e-3 && tickNormal.x < 0)) tickNormal.negate(); // ticks hang below / to the right
-          const tickLength = Math.min(14, 3 + len * 0.06);
-          context.globalAlpha = Math.min(1, 0.3 + (len - MIN_TICK) / (MIN_TICK * 3));
-          context.strokeStyle = axis.color; context.lineWidth = len >= MIN_LABEL ? 1.6 : 1; context.setLineDash([]);
-          context.beginPath(); context.moveTo(tickPos.x, tickPos.y); context.lineTo(tickPos.x + tickNormal.x * tickLength, tickPos.y + tickNormal.y * tickLength); context.stroke();
-          context.globalAlpha = 1;
-          if (len >= MIN_LABEL) label(context, tickLabel(start, STEPS[level]), tickPos.x + tickNormal.x * (tickLength + 10), tickPos.y + tickNormal.y * (tickLength + 10), textCol);
+          const tickLength = ticks ? Math.min(14, 3 + len * 0.06) : 2;
+          if (ticks) {
+            context.globalAlpha = Math.min(1, 0.3 + (len - MIN_TICK) / (MIN_TICK * 3));
+            context.strokeStyle = axis.color; context.lineWidth = len >= MIN_LABEL ? 1.6 : 1; context.setLineDash([]);
+            context.beginPath(); context.moveTo(tickPos.x, tickPos.y); context.lineTo(tickPos.x + tickNormal.x * tickLength, tickPos.y + tickNormal.y * tickLength); context.stroke();
+            context.globalAlpha = 1;
+          }
+          if (len >= MIN_LABEL) {
+            // keep the whole text clear of the axis, also where the axis runs steeply across the screen
+            const text = tickLabel(start, steps[level], units);
+            context.font = '600 11px "Open Sans", "Segoe UI", sans-serif';
+            const gap = tickLength + 4 + Math.max(6, Math.abs(tickNormal.x) * context.measureText(text).width / 2 + Math.abs(tickNormal.y) * 7);
+            label(context, text, tickPos.x + tickNormal.x * gap, tickPos.y + tickNormal.y * gap, textCol);
+          }
         }
       }
-      if (level + 1 >= STEPS.length || len / 10 < MIN_TICK) return;
-      const subStep = (end - start) / 10;
-      for (let i = 0; i < 10; i++) visit(start + i * subStep, start + (i + 1) * subStep, level + 1, i > 0);
+      if (level + 1 >= steps.length) return;
+      const parts = Math.round(steps[level] / steps[level + 1]);
+      if (len / parts < MIN_TICK) return;
+      const subStep = (end - start) / parts;
+      for (let i = 0; i < parts; i++) visit(start + i * subStep, start + (i + 1) * subStep, level + 1, i > 0);
     };
     for (const sign of [1, -1]) {
-      const count = Math.ceil(reach / STEPS[0]);
-      for (let k = 0; k < count; k++) visit(sign * k * STEPS[0], sign * (k + 1) * STEPS[0], 0, true);
+      const count = Math.ceil(reach / steps[0]);
+      for (let k = 0; k < count; k++) visit(sign * k * steps[0], sign * (k + 1) * steps[0], 0, true);
     }
   }
+};
+
+/** Legend for the ground grid: spacing of the fine and the major lines where the view centre meets the ground. */
+const drawGridLegend = (overlay: Overlay, units: Units) => {
+  const viewer = overlay.viewer;
+  const ray = viewer.ray(viewer.width / 2, viewer.height / 2);
+  const ground = ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), new THREE.Vector3()) ?? (viewer.rig.isOrtho ? null : new THREE.Vector3(viewer.rig.target.x, viewer.rig.target.y, 0));
+  if (!ground) return;
+  const centre = overlay.screen(ground); if (!centre) return;
+  // world size of one pixel as the grid shader measures it: the coarser of the two directions
+  const probe = 0.001 * Math.max(1, viewer.rig.position.distanceTo(ground));
+  let pixel = 0;
+  for (const offset of [new THREE.Vector3(probe, 0, 0), new THREE.Vector3(0, probe, 0)]) {
+    const moved = overlay.screen(ground.clone().add(offset)); if (!moved) return;
+    pixel = Math.max(pixel, probe / Math.max(Math.abs(moved.x - centre.x), Math.abs(moved.y - centre.y), 1e-6));
+  }
+  const levels = gridLevels(units);
+  // the finest level that is clearly visible there, and the next coarser one as major lines
+  const fine = levels.findIndex(step => step / pixel >= (GRID_FADE_IN[0] + GRID_FADE_IN[1]) / 2); if (fine < 0) return;
+  const text = `Raster ${spacingLabel(levels[fine], units)}${fine + 1 < levels.length ? ` · ${spacingLabel(levels[fine + 1], units)}` : ''}`;
+  // right of the tool bar, which reaches down to the status bar
+  label(overlay.context, text, 62, viewer.height - 14, theme.night ? '#dfe6ee' : '#2b3035', 'left');
 };
 
 const drawPeople = (overlay: Overlay) => {
@@ -88,6 +151,8 @@ const drawPeople = (overlay: Overlay) => {
     const ctr = box.getCenter(new THREE.Vector3());
     const bot = overlay.screen(new THREE.Vector3(ctr.x, ctr.y, box.min.z)), top = overlay.screen(new THREE.Vector3(ctr.x, ctr.y, box.max.z));
     if (!bot || !top || Math.abs(bot.y - top.y) < 36) continue;
+    // hidden as soon as geometry covers the whole figure (the figure itself doesn't count)
+    if (viewer.isHidden(new THREE.Vector3(ctr.x, ctr.y, box.min.z), figure.group) && viewer.isHidden(new THREE.Vector3(ctr.x, ctr.y, box.max.z), figure.group)) continue;
     // right edge of the figure on screen
     let maxX = -Infinity;
     for (let i = 0; i < 8; i++) {
@@ -110,6 +175,13 @@ const drawPeople = (overlay: Overlay) => {
 };
 
 export const drawMeasure = (overlay: Overlay, editor: Editor) => {
-  if (measureView.rulers && editor.model.settings.axes) drawRulers(overlay);
+  const units = editor.model.settings.units;
+  const rulers = measureView.rulers && editor.model.settings.axes;
+  if (rulers) drawRulers(overlay, units);
+  if (measureView.grid) {
+    // the rulers already label the axes; otherwise the grid labels its lines along X and Y
+    if (!rulers) drawRulers(overlay, units, AXES.slice(0, 2), false);
+    drawGridLegend(overlay, units);
+  }
   if (measureView.people) drawPeople(overlay);
 };

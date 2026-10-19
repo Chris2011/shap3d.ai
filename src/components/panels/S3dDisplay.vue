@@ -20,7 +20,8 @@ import { useModel } from '../../composables/useModel';
 
 const editor = useEditor();
 const OPTS = [
-  { id: 'toggleAxes', label: 'Achsen' }, { id: 'toggleRulers', label: 'Maßstab an den Achsen (m · cm · mm je nach Zoom)' }, { id: 'togglePeopleSize', label: 'Größe der Personen' },
+  { id: 'toggleAxes', label: 'Achsen' }, { id: 'toggleRulers', label: 'Maßstab an den Achsen (m · cm · mm je nach Zoom)' }, { id: 'toggleGrid', label: 'Raster am Boden (mm · cm · m je nach Zoom)' },
+  { id: 'togglePeopleSize', label: 'Größe der Personen' },
   { id: 'toggleGuides', label: 'Hilfslinien' }, { id: 'toggleSectionPlanes', label: 'Schnittebenen' }, { id: 'toggleSectionCuts', label: 'Schnitte' },
   { id: 'toggleHidden', label: 'Ausgeblendete Geometrie' }, { id: 'toggleShadows', label: 'Schatten' }, { id: 'xray', label: 'Röntgen' },
 ];

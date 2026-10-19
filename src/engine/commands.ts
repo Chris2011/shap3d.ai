@@ -408,6 +408,7 @@ export const COMMANDS: Command[] = [
   { id: 'managePlugins', label: 'Plugins verwalten…', group: 'Plugins', run: () => showPanel('plugins') },
   { id: 'toggleAxes', label: 'Achsen', group: 'Ansicht', run: editor => { editor.model.settings.axes = !editor.model.settings.axes; editor.invalidate(); }, checked: editor => editor.model.settings.axes },
   { id: 'toggleRulers', label: 'Maßstab an den Achsen', group: 'Ansicht', run: editor => { measureView.rulers = !measureView.rulers; editor.invalidate(); }, checked: () => measureView.rulers },
+  { id: 'toggleGrid', label: 'Raster am Boden', group: 'Ansicht', run: editor => { measureView.grid = !measureView.grid; editor.invalidate(); }, checked: () => measureView.grid },
   { id: 'togglePeopleSize', label: 'Größe der Personen', group: 'Ansicht', run: editor => { measureView.people = !measureView.people; editor.invalidate(); }, checked: () => measureView.people },
   { id: 'toggleGuides', label: 'Hilfslinien', group: 'Ansicht', run: editor => { editor.model.settings.guides = !editor.model.settings.guides; editor.invalidate(); }, checked: editor => editor.model.settings.guides },
   { id: 'toggleShadows', label: 'Schatten', group: 'Ansicht', run: editor => { editor.model.settings.shadows = !editor.model.settings.shadows; editor.invalidate(); }, checked: editor => editor.model.settings.shadows },

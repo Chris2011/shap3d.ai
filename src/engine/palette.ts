@@ -37,7 +37,7 @@ const SYNONYMS: Record<string, string> = {
   sceneNight: 'dunkel nacht night mond', sceneDay: 'hell tag day sonne', sceneAuto: 'auto szene',
   undo: 'undo rückgängig zurück', redo: 'redo wiederholen', delete: 'löschen entfernen delete', clearAll: 'leeren clear alles löschen reset',
   save: 'speichern save download', open: 'öffnen open laden', new: 'neu new leeres modell', import: 'import einlesen datei',
-  toggleRulers: 'lineal ruler maße mm cm', togglePeopleSize: 'höhe figur person maß', toggleAxes: 'achsen axes', toggleShadows: 'schatten shadows sonne',
+  toggleRulers: 'lineal ruler maße mm cm', toggleGrid: 'raster grid gitter boden ebene unendlich mm cm', togglePeopleSize: 'höhe figur person maß', toggleAxes: 'achsen axes', toggleShadows: 'schatten shadows sonne',
   xray: 'röntgen xray durchsichtig transparent', zoomExtents: 'alles zeigen fit zoom',
   tour: 'hilfe einführung tour wizard', managePlugins: 'plugin erweiterung addon extension', commandPalette: 'palette befehle suchen',
 };

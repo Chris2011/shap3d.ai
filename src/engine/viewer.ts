@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import { MeshBVH } from 'three-mesh-bvh';
 import type { Entities, Instance, EntityRef } from '../core/model';
 import type { Model } from '../core/document';
 import { CameraRig } from './camera';
@@ -10,6 +11,8 @@ import { makeTexture, isTextureKind, TEXTURE_SIZE } from '../core/textures';
 import { planeBasis } from '../core/geometry';
 import { theme, onThemeChange } from '../theme';
 import { meshView } from './meshView';
+import { measureView } from './measureView';
+import { GroundGrid } from './gridView';
 
 /**
  * Night scene: the model's sky/ground colours are pushed towards a night sky, faces get moonlight and
@@ -18,6 +21,9 @@ import { meshView } from './meshView';
 const NIGHT_SKY = new THREE.Color('#0a1424'), NIGHT_GROUND = new THREE.Color('#0d1116');
 const NIGHT_EDGE = '#c3cedb', MOON = new THREE.Color('#b9c8ff');
 const tmpSky = new THREE.Color(), tmpGround = new THREE.Color();
+const tmpSphere = new THREE.Sphere(), tmpMatrix = new THREE.Matrix4();
+/** BVHs for the occlusion test of overlay labels, dropped together with their geometry */
+const occlusionTrees = new WeakMap<THREE.BufferGeometry, MeshBVH>();
 /** Edge colours that would vanish on a night background are replaced. */
 const nightEdge = (color: string) => (new THREE.Color(color).getHSL({ h: 0, s: 0, l: 0 }).l < 0.35 ? NIGHT_EDGE : color);
 
@@ -125,6 +131,7 @@ export class Viewer {
   ambient = new THREE.AmbientLight(0xffffff, 0.75);
   sun = new THREE.DirectionalLight(0xffffff, 1.5);
   shadowGround: THREE.Mesh;
+  grid = new GroundGrid();
   overlay: Overlay;
   model!: Model;
   edges: EdgeRec[] = [];
@@ -170,7 +177,7 @@ export class Viewer {
     this.scene.add(this.ambient, this.sun, this.sun.target, this.content, this.helpers, this.highlight);
     this.shadowGround = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.ShadowMaterial({ opacity: 0.25 }));
     this.shadowGround.receiveShadow = true; this.shadowGround.position.z = -0.001; this.shadowGround.renderOrder = -1;
-    this.scene.add(this.shadowGround);
+    this.scene.add(this.shadowGround, this.grid.mesh);
     this.rig.onChange = () => { this.needsRender = true; };
     onThemeChange(() => { this.needsRender = true; });
     this.buildAxes();
@@ -543,6 +550,8 @@ export class Viewer {
     shadeUniforms.dark.value = theme.night ? 0.2 : 0.45; shadeUniforms.light.value = theme.night ? 0.52 : 0.8;
     if (this.profileMat && style) this.profileMat.color.set(theme.night ? nightEdge(style.edgeColor) : style.edgeColor);
     if (this.model) { this.updateFaceMe(); this.updateProfiles(); }
+    this.grid.mesh.visible = measureView.grid && !!this.model;
+    if (this.grid.mesh.visible) this.grid.update(cam, this.rig.isOrtho, this.rig.target, this.model.settings.units, theme.night);
     this.renderer.clear();
     this.renderer.render(this.bgScene, this.bgCam);
     this.renderer.render(this.scene, cam);
@@ -586,6 +595,43 @@ export class Viewer {
     else depth = point.distanceTo(camPos);
     const faceDistance = this.faceDepth(x, y);
     return faceDistance < depth - Math.max(0.002, depth * 0.002);
+  }
+
+  /**
+   * Whether opaque faces hide a world point from the camera – overlay ticks, labels and dimensions behind
+   * geometry are skipped. Uses a BVH per mesh (built lazily, `indirect` keeps the triangle order for picking).
+   */
+  isHidden(point: THREE.Vector3, ignore?: THREE.Object3D): boolean {
+    const style = this.model?.settings.style;
+    if (!style || style.xray || style.faceStyle === 'wireframe' || !this.pickMeshes.length) return false;
+    const forward = this.rig.forward();
+    // parallel projection also shows what lies behind the eye, so its rays start far in front of the point
+    const origin = this.rig.isOrtho ? point.clone().addScaledVector(forward, -1e4) : (this.rig.camera as THREE.Camera).position.clone();
+    const depth = point.distanceTo(origin); if (depth < 1e-9) return false;
+    const ray = new THREE.Ray(origin, point.clone().sub(origin).divideScalar(depth));
+    const limit = depth - Math.max(0.002, (this.rig.isOrtho ? point.distanceTo((this.rig.camera as THREE.Camera).position) : depth) * 0.002);
+    for (const mesh of this.pickMeshes) {
+      const material = mesh.material as THREE.Material;
+      if (!mesh.visible || material.transparent) continue;
+      if (ignore) { let inside = false; mesh.traverseAncestors(ancestor => { if (ancestor === ignore) inside = true; }); if (inside) continue; }
+      const geometry = mesh.geometry;
+      if (!geometry.boundingSphere) geometry.computeBoundingSphere();
+      if (!ray.intersectsSphere(tmpSphere.copy(geometry.boundingSphere!).applyMatrix4(mesh.matrixWorld))) continue;
+      let bvh = occlusionTrees.get(geometry);
+      if (!bvh) { bvh = new MeshBVH(geometry, { indirect: true }); occlusionTrees.set(geometry, bvh); }
+      const toLocal = tmpMatrix.copy(mesh.matrixWorld).invert();
+      const localRay = ray.clone().applyMatrix4(toLocal);
+      // with active section cuts the first hit may be cut away, so all hits are checked
+      const hits = this.clipPlanes.length ? bvh.raycast(localRay, material) : [bvh.raycastFirst(localRay, material)];
+      for (const hit of hits) {
+        if (!hit) continue;
+        const hitPoint = hit.point.clone().applyMatrix4(mesh.matrixWorld);
+        if (hitPoint.distanceTo(origin) >= limit) continue;
+        if (this.clipPlanes.some(plane => plane.distanceToPoint(hitPoint) < -1e-6)) continue;
+        return true;
+      }
+    }
+    return false;
   }
 
   pickEdge(x: number, y: number, tolPx = 6, filter?: (edgeRec: EdgeRec) => boolean): { rec: EdgeRec; point: THREE.Vector3; dist: number } | null {
