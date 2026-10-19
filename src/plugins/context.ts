@@ -16,6 +16,7 @@ import { registerScriptLanguage, registerBeforeRun } from '../scripting/language
 import { useScripts } from '../composables/useScripts';
 import { putPluginFile, getPluginFile, removePluginFile, clearPluginFiles, listPluginFiles, type PluginAssets } from './assetStore';
 import { addContextMenuEntry, addPluginWindow } from './uiExtensions';
+import { registerCodeFormat } from '../scripting/codeExport';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
 
 const MIME_TYPES: Record<string, string> = { js: 'text/javascript', mjs: 'text/javascript', wasm: 'application/wasm', json: 'application/json', css: 'text/css', svg: 'image/svg+xml', png: 'image/png' };
@@ -156,6 +157,8 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
         return existing ? existing.name : new ScriptApi(editor).ensureMaterial(name, material.color, material.opacity ?? 1);
       },
     },
+
+    code: { registerFormat: format => track(registerCodeFormat(format)) },
 
     files: {
       registerImporter: importer => track(registerImporter(importer.extensions, { label: importer.label, import: importer.import, loadScene: importer.loadScene })),

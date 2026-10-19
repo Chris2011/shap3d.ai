@@ -181,9 +181,9 @@ const consoleLines = lines => lines.flatMap(line => {
 export default {
   id: 'openscad',
   name: 'OpenSCAD',
-  version: '1.1.0',
+  version: '1.2.0',
   author: 'Shap3D.ai (OpenSCAD: openscad.org)',
-  description: 'Öffnet .scad-Dateien, bringt OpenSCAD als Sprache in den Skript-Editor, s3d.scad() für JavaScript und den Export als .scad – mit dem echten OpenSCAD als WebAssembly.',
+  description: 'Öffnet .scad-Dateien, bringt OpenSCAD als Sprache in den Skript-Editor, s3d.scad() für JavaScript, den Export als .scad und „Als Code öffnen ▸ OpenSCAD“ – mit dem echten OpenSCAD als WebAssembly.',
 
   activate(context) {
     const { editor } = context;
@@ -442,6 +442,63 @@ export default {
         return `// ${target.model.name || 'Modell'} – exportiert aus Shap3D.ai, Einheit: ${UNIT_LABEL[settings.unit]}\n`
           + `polyhedron(\n  points = [\n    ${points.map(point => `[${point.join(', ')}]`).join(',\n    ')}\n  ],\n`
           + `  faces = [\n    ${faces.map(face => `[${face.join(', ')}]`).join(',\n    ')}\n  ]\n);\n`;
+      },
+    });
+
+    // ---------------------------------------------------------------- "Als Code öffnen ▸ OpenSCAD" and "Umwandeln in…"
+    /** '#d8b07a' + opacity → OpenSCAD's color([r, g, b, a]) */
+    const scadColor = ({ color, opacity }) => {
+      const hex = new context.THREE.Color(color).getHex(); // sRGB, as written in the material
+      return `[${[hex >> 16, (hex >> 8) & 255, hex & 255].map(channel => +(channel / 255).toFixed(3)).join(', ')}${opacity < 1 ? `, ${opacity}` : ''}]`;
+    };
+    context.code.registerFormat({
+      id: 'openscad',
+      label: 'OpenSCAD',
+      generate: scene => {
+        const scale = scaleOf();
+        const out = [`// Erzeugt mit Shap3D.ai aus ${scene.title} – Einheit: ${UNIT_LABEL[settings.unit]}, Z zeigt nach oben`];
+        let skippedLines = 0;
+        const write = (group, inherited, indent) => {
+          // one polyhedron per material – OpenSCAD colours whole objects, not single faces
+          const buckets = new Map();
+          for (const face of group.faces) {
+            const material = face.material ?? group.material ?? inherited;
+            if (!buckets.has(material)) buckets.set(material, []);
+            buckets.get(material).push(face);
+          }
+          for (const [material, faces] of buckets) {
+            const points = []; const pointIndex = new Map();
+            const indexOf = index => {
+              if (!pointIndex.has(index)) { pointIndex.set(index, points.length); points.push(group.points[index].map(value => +(value / scale).toFixed(4))); }
+              return pointIndex.get(index);
+            };
+            // OpenSCAD wants the corners clockwise seen from outside; faces with holes go in as triangles
+            const polygons = faces.flatMap(face => (face.holes.length ? face.triangles : [face.outer]).map(polygon => polygon.map(indexOf).reverse()));
+            const color = material && scene.materials[material] ? `color(${scadColor(scene.materials[material])}) ` : '';
+            if (material) out.push(`${indent}// Material: ${material}`);
+            out.push(`${indent}${color}polyhedron(`, `${indent}  points = [`);
+            for (let i = 0; i < points.length; i += 4) out.push(`${indent}    ${points.slice(i, i + 4).map(point => `[${point.join(', ')}]`).join(', ')}${i + 4 < points.length ? ',' : ''}`);
+            out.push(`${indent}  ],`, `${indent}  faces = [`);
+            for (let i = 0; i < polygons.length; i += 6) out.push(`${indent}    ${polygons.slice(i, i + 6).map(polygon => `[${polygon.join(', ')}]`).join(', ')}${i + 6 < polygons.length ? ',' : ''}`);
+            out.push(`${indent}  ]`, `${indent});`);
+          }
+          skippedLines += group.lines.length;
+          for (const child of group.children) {
+            out.push('', `${indent}// Gruppe „${child.name}“`, `${indent}union() {`);
+            write(child, child.material ?? group.material ?? inherited, indent + '  ');
+            out.push(`${indent}}`);
+          }
+        };
+        write(scene.root, undefined, '');
+        if (skippedLines) out.push('', `// ${skippedLines} ${skippedLines === 1 ? 'Kante' : 'Kanten'} ohne Fläche weggelassen – OpenSCAD kennt keine einzelnen Linien`);
+        return out.join('\n') + '\n';
+      },
+      evaluate: async (code, sandbox) => {
+        const { mesh } = compile(await instanceAsync(), code);
+        for (const [name, material] of Object.entries(mesh.materials)) {
+          if (!sandbox.model.materials.some(existing => existing.name === name)) sandbox.model.materials.push({ name, color: material.color, opacity: material.opacity ?? 1 });
+        }
+        context.meshes.build(sandbox.entities, mesh, { scale: scaleOf(), smooth: 25 });
       },
     });
 

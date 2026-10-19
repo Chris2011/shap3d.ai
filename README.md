@@ -109,6 +109,7 @@ Write JavaScript or declarative JSON and run it with <kbd>Ctrl</kbd>+<kbd>Enter<
 - **Shapes**: box, cylinder, cone, pyramid, prism, sphere, dome, ellipsoid, tube, torus, wedge, stairs, terrain, 3D text and OBJ meshes, plus faces, push/pull, offset and follow me.
 - **Materials**: 52 ready-made materials (woods, stone, metals, glass, nature, fabrics, colours) usable by name, e.g. `{ material: 'Glas' }`, and 12 procedural textures.
 - **OBJ mode**: paste raw mesh output (e.g. from LLaMA-Mesh) and it is scaled, oriented and placed for you.
+- **Objects as code**: right-click an object (or empty space for the whole model) › *Als Code öffnen ▸* JavaScript, JSON, OBJ or – with the OpenSCAD plugin – OpenSCAD. The geometry is written exactly (`s3d.polyhedron(points, faces)` with holes, materials and nested groups). *Umwandeln in…* in the script editor translates code between these formats without touching the model; *Umwandeln rückgängig* brings the previous code back. OBJ keeps no materials or loose edges, OpenSCAD keeps no loose edges and no group structure, and only closed solids survive an OpenSCAD round trip.
 
 ### Terrain editor
 
@@ -309,6 +310,7 @@ export default {
 | Package files | `assets.url(path)`, `assets.blob(path)`, `assets.list()` | Files that came with a plugin package (see below), e.g. a WebAssembly build: `await import(context.assets.url('engine.js'))`. |
 | Files | `files.registerImporter({ extensions, label, import(file, editor) })` or `{ extensions, label, loadScene(file) }` | Opens new file types through *Importieren…* and drag & drop. With `loadScene` the plugin only returns `{ object, upY, scale }` (a three.js scene) and the app does the rest like for its own formats. |
 | | `files.registerExporter({ id, label, fileName(editor), mimeType?, export(editor) })` | Adds *Exportieren: …* to the export menu; `export` returns a string or a `Blob`. |
+| Code formats | `code.registerFormat({ id, label, generate(scene), evaluate?(code, sandbox, options) })` | Adds the format to *Als Code öffnen ▸* and *Umwandeln in…*. `generate` gets a `CodeScene` (points in metres, Z up; faces with holes, materials and triangles; nested groups) and returns code. `evaluate` builds code into `sandbox.entities`, a throw-away model, so it can be converted into the other formats. Use the id of a script language so the code runs in the editor. |
 | Drawing | `overlay.draw((overlay, editor) => …)` | Draws on the 2D overlay above the 3D view on every redraw (`overlay.line`, `overlay.text`, `overlay.context` for the raw canvas). |
 | Icons | `icons.register(name, svgContent)` | An icon for commands, tools and panels (inner SVG markup for a 24 × 24 view box). |
 | Events | `events.onToolChange(listener)`, `events.onNewModel(listener)` | React to tool changes and new models. |
@@ -352,7 +354,7 @@ A plugin that needs more than one file – a WebAssembly engine, fonts, data –
 
 `shap3d.main` (or `main`) names the plugin module. Every other file in the folder (without `node_modules`) is stored in the browser (IndexedDB) and reachable through `context.assets` by its path relative to the `package.json`. The plugin manager shows the package name, size and license. Such packages are separate programs with their own dependencies and license – they are not part of the app.
 
-**Example: the OpenSCAD plugin** in [`plugins/openscad/`](plugins/openscad) runs the official OpenSCAD as WebAssembly: it opens `.scad` files (with `color()` turned into materials), adds *OpenSCAD* as a language to the script editor (with examples), keeps a file library in the browser so `include`, `use`, `import()` and `text()` fonts work, provides `s3d.scad(code)` for JavaScript scripts and exports the model as an OpenSCAD `polyhedron()`. Because OpenSCAD is GPL-licensed, it is a package of its own (GPL-2.0-or-later) and never bundled with the app:
+**Example: the OpenSCAD plugin** in [`plugins/openscad/`](plugins/openscad) runs the official OpenSCAD as WebAssembly: it opens `.scad` files (with `color()` turned into materials), adds *OpenSCAD* as a language to the script editor (with examples), keeps a file library in the browser so `include`, `use`, `import()` and `text()` fonts work, provides `s3d.scad(code)` for JavaScript scripts, exports the model as an OpenSCAD `polyhedron()` and registers *OpenSCAD* as a code format (*Als Code öffnen ▸ OpenSCAD*, *Umwandeln in…*). Because OpenSCAD is GPL-licensed, it is a package of its own (GPL-2.0-or-later) and never bundled with the app:
 
 ```bash
 cd plugins/openscad

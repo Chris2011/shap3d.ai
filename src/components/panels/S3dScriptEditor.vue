@@ -18,6 +18,11 @@
     <div class="flex items-center gap-2.5 px-2.5 pb-1.5 text-xs">
       <label class="s3d-check"><input type="checkbox" v-model="clearFirst" /> Vorher Modell leeren</label>
       <span class="flex-1"></span>
+      <select v-if="convertTargets.length" class="s3d-input h-6 w-auto py-0 text-xs" value="" title="Den Code in ein anderes Format übersetzen – das Modell bleibt dabei unverändert" :disabled="running" @change="convertTo(($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''">
+        <option value="" disabled>Umwandeln in…</option>
+        <option v-for="format in convertTargets" :key="format.id" :value="format.id">{{ format.label }}</option>
+      </select>
+      <button v-if="beforeConvert" class="s3d-link" title="Den Code von vor dem Umwandeln zurückholen" @click="undoConvert">Umwandeln rückgängig</button>
       <button class="s3d-link" @click="save">Speichern</button>
       <button class="s3d-link" v-if="currentSaved" @click="delSaved">Löschen</button>
       <button class="s3d-link" @click="showHelp = !showHelp">{{ showHelp ? 'API-Info ausblenden' : 'API-Info' }}</button>
@@ -57,6 +62,7 @@ import { highlight, type CodeLang } from '../../scripting/highlight';
 import { importObj, looksLikeObj } from '../../scripting/mesh';
 import { parseLength } from '../../core/units';
 import { SCRIPT_LANGUAGES, findScriptLanguage, prepareScript } from '../../scripting/languages';
+import { CODE_FORMATS, findCodeFormat, convertCode } from '../../scripting/codeExport';
 
 type Lang = ScriptLang;
 const OBJ_HELP = `OBJ-Mesh: Zeilen „v x y z“ (Ecke) und „f a b c …“ (Fläche, Eckennummern ab 1).
@@ -80,7 +86,35 @@ onMounted(() => {
 });
 watch([code, lang], () => { scripts.draft.value = { lang: lang.value, code: code.value }; });
 // code sent over while the editor is open (plugins)
-watch(scripts.request, request => { if (!request) return; lang.value = request.lang; code.value = request.code; currentSaved.value = null; scripts.request.value = null; }, { immediate: true });
+watch(scripts.request, request => {
+  if (!request) return;
+  lang.value = request.lang; code.value = request.code; if (request.size) objSize.value = `${request.size}m`;
+  currentSaved.value = null; scripts.request.value = null;
+}, { immediate: true });
+
+/** formats the current code can be converted into (only if its own format can be read back) */
+const convertTargets = computed(() => (findCodeFormat(lang.value)?.evaluate ? CODE_FORMATS.filter(format => format.id !== lang.value) : []));
+/** the code before the last conversion – "Umwandeln rückgängig" brings it back until the result is edited */
+const beforeConvert = ref<{ lang: Lang; code: string; size: string; result: string } | null>(null);
+watch(code, value => { if (beforeConvert.value && value !== beforeConvert.value.result) beforeConvert.value = null; });
+const convertTo = async (targetId: string) => {
+  const target = findCodeFormat(targetId); if (!target) return;
+  running.value = true;
+  try {
+    const size = parseLength(objSize.value, 'm') ?? 1;
+    const result = await convertCode(editor, lang.value, code.value, targetId, { objSize: size, objYUp: objYUp.value, objSmooth: objSmooth.value || 0 });
+    const previous = { lang: lang.value, code: code.value, size: objSize.value, result: result.code };
+    lang.value = targetId; code.value = result.code; objSize.value = `${result.size}m`; currentSaved.value = null;
+    beforeConvert.value = previous;
+    out.value = [{ kind: 'result', text: `✓ In ${target.label} umgewandelt – das Modell ist unverändert. „Ausführen“ baut es ein.` }];
+  } catch (error: any) {
+    out.value = [{ kind: 'error', text: `✗ Umwandeln fehlgeschlagen: ${error?.message ?? error}` }];
+  } finally { running.value = false; }
+};
+const undoConvert = () => {
+  const previous = beforeConvert.value; if (!previous) return;
+  lang.value = previous.lang; code.value = previous.code; objSize.value = previous.size; beforeConvert.value = null;
+};
 
 const lines = computed(() => Math.max(1, code.value.split('\n').length));
 const BUILT_IN_LANGS: readonly string[] = ['js', 'json', 'obj'];

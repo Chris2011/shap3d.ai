@@ -10,6 +10,8 @@ import type { Definition, Entities } from '../core/model';
 import type { ApiCategory } from '../scripting/catalog';
 import type { ContextMenuEntry } from './uiExtensions';
 import type { LoadedScene } from './fileFormats';
+import type { CodeFormat } from '../scripting/codeExport';
+export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
 
 /**
  * A Shap3D.ai plugin: an ES module whose default export is this object.
@@ -156,6 +158,13 @@ export interface PluginContext {
     /** creates the material if the model doesn't have it yet (call inside editor.commit or a script for undo); returns its name */
     ensure: (name: string, material: PluginMaterial) => string;
   };
+  /**
+   * Code formats for "Als Code öffnen ▸" (context menu) and "Umwandeln in…" (script editor).
+   * `generate` writes a CodeScene (metres, Z up) as code; the optional `evaluate` builds code
+   * into `sandbox.entities` so it can be converted into the other formats. The id should match
+   * a script language (script.registerLanguage) so the code runs in the editor.
+   */
+  code: { registerFormat: (format: CodeFormat) => Disposer };
   files: { registerImporter: (importer: PluginImporter) => Disposer; registerExporter: (exporter: PluginExporter) => Disposer };
   overlay: { draw: (draw: (overlay: Overlay, editor: Editor) => void) => Disposer };
   events: { onToolChange: (listener: () => void) => Disposer; onNewModel: (listener: () => void) => Disposer };

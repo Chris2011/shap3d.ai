@@ -15,6 +15,7 @@ Das Plugin ist ein eigenes Paket mit eigener `package.json` und gehört **nicht*
   ```
 - **Farben werden Materialien** – `color("red")` wird zum Material „OpenSCAD red“, `color([0, 0.5, 1, 0.4])` zu „OpenSCAD #007fff 40 %“ (mit Transparenz). Teile ohne `color()` bekommen kein Material. Funktioniert mit dem Geometrie-Kern Manifold (Standard); CGAL liefert keine Farben.
 - **Export als OpenSCAD** – *Datei › Exportieren › OpenSCAD (.scad)* schreibt das Modell als `polyhedron()`.
+- **Als Code öffnen ▸ OpenSCAD** – Rechtsklick auf ein Objekt schreibt es als OpenSCAD-Code in den Skript-Editor: ein `polyhedron()` je Material mit `color()`, Gruppen als `union()`. Im Skript-Editor wandelt *Umwandeln in…* OpenSCAD-Code in JavaScript, JSON oder OBJ um (und umgekehrt), ohne das Modell zu ändern. OpenSCAD rechnet nur mit geschlossenen Körpern: Einzelne Flächen und Kanten fallen dabei weg.
 - **Panel „OpenSCAD“** (Menü *Plugins*) – Einheit (Standard: Millimeter, wie in OpenSCAD üblich; auch cm oder m), Geometrie-Kern (Manifold oder CGAL) und die Dateibibliothek.
 
 ## Dateibibliothek: include, use, import() und Schriften

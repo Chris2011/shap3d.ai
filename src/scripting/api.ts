@@ -81,6 +81,9 @@ export class GroupHandle {
   ref(): EntityRef { return { kind: 'instance', id: this.inst.id }; }
 }
 
+/** one face of s3d.polyhedron(): point indices, or with holes and a material */
+export type PolyhedronFace = number[] | { outer: number[]; holes?: number[][]; material?: string };
+
 export interface ScriptLog { kind: 'log' | 'warn' | 'error' | 'result'; text: string }
 
 /** The `s3d` object available to scripts. Units are meters unless strings like "50cm" are used. */
@@ -169,6 +172,22 @@ export class ScriptApi {
     if (this.stack.length === 1 && !this.editor.activePath.length) { this.editor.model.guides = []; this.editor.model.dimensions = []; this.editor.model.labels = []; this.editor.model.sections = []; }
   }
   line(fromPoint: Pt, toPoint: Pt) { this.ents.addLine(toVec(fromPoint), toVec(toPoint)); }
+  /**
+   * Faces from a point list and index lists (like OpenSCAD's polyhedron) – exact, any shape.
+   * A face is [i, j, k, …] or { outer: [...], holes: [[...]], material: 'Name' }. Returns the number of faces made.
+   */
+  polyhedron(points: Pt[], faces: PolyhedronFace[], opts: { material?: string } = {}): number {
+    const ids = points.map(point => this.ents.addVertex(toVec(point)));
+    const vertexOf = (index: number) => { const id = ids[index]; if (id == null) throw new Error(`polyhedron: Punkt ${index} gibt es nicht`); return id; };
+    let made = 0;
+    for (const face of faces) {
+      const spec = Array.isArray(face) ? { outer: face } : face;
+      const material = spec.material ?? opts.material;
+      const created = this.ents.createFaceRaw(spec.outer.map(vertexOf), (spec.holes ?? []).map(hole => hole.map(vertexOf)), material ? { material: this.ensureMaterial(material) } : {});
+      if (created) made++;
+    }
+    return made;
+  }
   polyline(points: Pt[], closed = false) { const vectors = points.map(x => toVec(x)); for (let i = 0; i < vectors.length - 1; i++) this.ents.addLine(vectors[i], vectors[i + 1]); if (closed && vectors.length > 2) this.ents.addLine(vectors[vectors.length - 1], vectors[0]); return this.lastFace(); }
   private lastFace(): FaceHandle | null { let max = -1; for (const id of this.ents.faces.keys()) if (id > max) max = id; return max >= 0 ? new FaceHandle(this, this.ents, max) : null; }
   /** Create a face from points (closed loop). */
@@ -451,6 +470,7 @@ export const runJson = (editor: Editor, text: string): RunResult => {
       case 'polygon': res = api.polygon(node.at ?? [0, 0, 0], node.radius ?? 1, node.sides ?? 6, node.normal); if (node.pushpull) res = (res as FaceHandle).pushpull(node.pushpull); break;
       case 'face': res = api.face(node.points); if (node.material) res.material(node.material); if (node.pushpull) res = res.pushpull(node.pushpull); break;
       case 'line': api.polyline(node.points, !!node.closed); break;
+      case 'polyhedron': api.polyhedron(node.points ?? [], node.faces ?? [], { material: node.material }); return null;
       case 'text3d': res = api.text3d(node.text ?? 'Text', { at: node.at, size: node.size, depth: node.depth, material: node.material, upright: node.upright }); break;
       case 'group': res = api.group(node.name ?? 'Gruppe', () => { for (const child of node.children ?? []) build(child); }); break;
       case 'array': { const count = node.count ?? 2; const off = toVec(node.offset ?? [1, 0, 0]); for (let i = 0; i < count; i++) { const result = build(node.object); if (result instanceof GroupHandle) result.move(off.clone().multiplyScalar(i)); } return null; }
