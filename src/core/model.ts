@@ -121,6 +121,14 @@ export class Entities {
     const cleaned: number[] = [];
     for (const vertex of loop) if (cleaned[cleaned.length - 1] !== vertex) cleaned.push(vertex);
     while (cleaned.length > 1 && cleaned[0] === cleaned[cleaned.length - 1]) cleaned.pop();
+    // drop spikes (a → b → a) left behind when welding folds part of an outline onto itself
+    for (let i = 0; cleaned.length > 2 && i < cleaned.length;) {
+      const count = cleaned.length, previous = cleaned[(i - 1 + count) % count], next = cleaned[(i + 1) % count];
+      if (previous !== next) { i++; continue; }
+      const removeAt = [i, (i + 1) % count].sort((left, right) => right - left);
+      for (const index of removeAt) cleaned.splice(index, 1);
+      i = Math.max(0, i - 2);
+    }
     return cleaned;
   }
   faceKey(outer: number[]) { return [...outer].sort((left, right) => left - right).join(','); }
@@ -512,51 +520,187 @@ export class Entities {
 
   moveVertices(vertexIds: Iterable<number>, matrix: THREE.Matrix4) { for (const vertex of vertexIds) this.vertices.get(vertex)?.position.applyMatrix4(matrix); this.invalidateHash(); }
 
-  /** SketchUp Push/Pull. Returns the moved/created face id. */
-  pushPull(faceId: number, distance: number): number | null {
-    const sourceFace = this.faces.get(faceId); if (!sourceFace || Math.abs(distance) < 1e-9) return faceId;
+  /**
+   * SketchUp Push/Pull. Returns the moved/created face id.
+   * `keepFace` (Ctrl in SketchUp) leaves the original face in place and always builds new geometry.
+   * Faces that end up lying on an opposite face of existing geometry cancel each other out, so pushing a
+   * face onto the parallel back side cuts a hole and pushing part of a face back removes that volume.
+   */
+  pushPull(faceId: number, distance: number, opts: { keepFace?: boolean } = {}): number | null {
+    const sourceFace = this.faces.get(faceId); if (!sourceFace || Math.abs(distance) < LEN_EPS) return faceId;
     const normal = this.faceNormal(sourceFace);
     const loops = this.loops(sourceFace);
     const edges = this.faceEdges(sourceFace);
     const others = edges.map(edge => this.facesOfEdge(edge.id).filter(face => face.id !== faceId));
     // stretch: all adjacent faces are perpendicular → just translate the face
-    const stretch = others.every(faces => faces.length === 1 && Math.abs(this.faceNormal(faces[0]).dot(normal)) < 1e-6);
+    const stretch = !opts.keepFace && others.every(faces => faces.length === 1 && Math.abs(this.faceNormal(faces[0]).dot(normal)) < 1e-6);
     if (stretch) {
       const vertexIds = new Set(this.faceVertices(sourceFace));
       const matrix = new THREE.Matrix4().makeTranslation(normal.x * distance, normal.y * distance, normal.z * distance);
       this.moveVertices(vertexIds, matrix);
+      this.splitEdgesAtVertices(vertexIds);
       this.weld(vertexIds);
+      if (!this.faces.has(faceId)) return null;
+      // stretched onto the opposite side of the solid (e.g. a recess pushed on to the back face) → hole
+      const moved = this.faces.get(faceId)!; const rim = this.faceEdges(moved).map(edge => edge.id);
+      const touched = this.cancelCoincidentFaces([moved]);
+      this.eraseOrphanEdges(rim, touched);
+      this.healCollinear(touched);
       return this.faces.has(faceId) ? faceId : null;
     }
-    // the original face disappears when the solid lies behind it: every edge must touch a coplanar
-    // neighbour (face drawn on a larger face) or a face behind the extrusion direction (part of a solid)
-    const ext = normal.clone().multiplyScalar(Math.sign(distance));
-    const anchor = this.positionOf(sourceFace.outer[0]);
-    const embedded = others.every(faces => faces.some(face => {
+    // the original face disappears when material lies behind it: every edge touches a coplanar neighbour
+    // (face drawn on a larger face) or a face on its back side (part of a solid) – in both directions,
+    // pulled out the volume grows from it, pushed in its place becomes empty
+    const anchor = this.positionOf(sourceFace.outer[0]).clone();
+    const embedded = !opts.keepFace && others.every(faces => faces.some(face => {
       const otherNormal = this.faceNormal(face);
       const coplanar = Math.abs(Math.abs(otherNormal.dot(normal)) - 1) < 1e-6 && Math.abs(this.positionOf(face.outer[0]).clone().sub(anchor).dot(normal)) < PLANE_TOL;
-      return coplanar || this.faceCenter(face).sub(anchor).dot(ext) < -1e-6;
+      return coplanar || this.faceCenter(face).sub(anchor).dot(normal) < -1e-6;
     }));
     const props = { material: sourceFace.material, backMaterial: sourceFace.backMaterial, tag: sourceFace.tag };
     const map = new Map<number, number>();
-    for (const vertex of new Set(loops.flat())) map.set(vertex, this.rawVertex(this.positionOf(vertex).clone().addScaledVector(normal, distance)));
-    const reverseSides = !embedded && distance < 0;
-    for (const loop of loops) for (let i = 0; i < loop.length; i++) {
+    // new corners weld onto existing vertices and split the edges they land on (pushing onto other geometry)
+    for (const vertex of new Set(loops.flat())) map.set(vertex, this.addVertex(this.positionOf(vertex).clone().addScaledVector(normal, distance)));
+    this.splitEdgesAtVertices(new Set(map.values()));
+    const reverseSides = !embedded && !opts.keepFace && distance < 0;
+    const created: Face[] = [];
+    const orphanCandidates = new Set(edges.map(edge => edge.id));
+    for (const loop of this.loops(sourceFace)) for (let i = 0; i < loop.length; i++) {
       const vertexA = loop[i], vertexB = loop[(i + 1) % loop.length];
       const quad = [vertexA, vertexB, map.get(vertexB)!, map.get(vertexA)!];
       if (reverseSides) quad.reverse();
-      this.createFaceRaw(quad, [], { material: props.material });
+      const face = this.addPushPullFace(quad, [], { material: props.material }, orphanCandidates);
+      if (face) created.push(face);
     }
-    const top = this.createFaceRaw(sourceFace.outer.map(vertex => map.get(vertex)!), sourceFace.holes.map(hole => hole.map(vertex => map.get(vertex)!)), props);
+    const sourceOuter = sourceFace.outer.filter(vertex => map.has(vertex)), sourceHoles = sourceFace.holes.map(hole => hole.filter(vertex => map.has(vertex)));
+    const top = this.addPushPullFace(sourceOuter.map(vertex => map.get(vertex)!), sourceHoles.map(hole => hole.map(vertex => map.get(vertex)!)), props, orphanCandidates);
+    if (top) created.push(top);
     if (embedded) this.removeFace(faceId);
-    else { if (distance > 0) this.reverseFace(sourceFace); else if (top) this.reverseFace(top); }
+    else if (!opts.keepFace) { if (distance > 0) this.reverseFace(sourceFace); else if (top) this.reverseFace(top); }
     // vertical edges of curved profiles (circles, arcs) become soft like in SketchUp
     const sideEdges: number[] = [];
     for (const vertex of map.keys()) { const edge = this.edgeBetween(vertex, map.get(vertex)!); if (edge) sideEdges.push(edge.id); }
     this.autoSoften(sideEdges);
-    this.mergeCoplanar(edges.map(edge => edge.id).filter(id => this.edges.has(id)));
-    // when an embedded face is fully removed its loop edges might become orphaned (e.g. on top of a box the hole edges stay)
-    return top?.id ?? null;
+    const touched = this.cancelCoincidentFaces(created);
+    // edges left without any face (e.g. the rim of a face that was pushed back flush) go away
+    this.eraseOrphanEdges(orphanCandidates, touched);
+    const mergeEdges = new Set(edges.map(edge => edge.id));
+    for (const face of created) if (this.faces.has(face.id)) for (const edge of this.faceEdges(face)) mergeEdges.add(edge.id);
+    this.mergeCoplanar([...mergeEdges].filter(id => this.edges.has(id)));
+    this.healCollinear(touched);
+    return top && this.faces.has(top.id) ? top.id : null;
+  }
+
+  /** Erase those of the given edges that no longer border any face; their remaining ends are added to `touched`. */
+  private eraseOrphanEdges(edgeIds: Iterable<number>, touched: Set<number>) {
+    for (const id of edgeIds) {
+      const edge = this.edges.get(id); if (!edge || this.facesOfEdge(id).length) continue;
+      touched.add(edge.start); touched.add(edge.end); this.eraseEdge(id, false);
+    }
+    for (const vertex of [...touched]) if (!this.vertices.has(vertex)) touched.delete(vertex);
+  }
+
+  /** Split every edge on which one of the given vertices lies (between its ends). */
+  private splitEdgesAtVertices(vertexIds: Set<number>) {
+    if (!vertexIds.size) return;
+    const box = new THREE.Box3(); for (const vertex of vertexIds) box.expandByPoint(this.positionOf(vertex)); box.expandByScalar(LEN_EPS);
+    const edgeBox = new THREE.Box3();
+    for (const edge of [...this.edges.values()]) {
+      if (!this.edges.has(edge.id)) continue;
+      edgeBox.makeEmpty().expandByPoint(this.positionOf(edge.start)).expandByPoint(this.positionOf(edge.end));
+      if (!edgeBox.intersectsBox(box)) continue;
+      let current: Edge | undefined = edge; const pending = [current];
+      while ((current = pending.pop())) {
+        if (!this.edges.has(current.id)) continue;
+        const start = this.positionOf(current.start), end = this.positionOf(current.end);
+        for (const vertex of vertexIds) {
+          if (vertex === current.start || vertex === current.end) continue;
+          if (!pointOnSegmentInterior(this.positionOf(vertex), start, end)) continue;
+          const halves = this.splitEdge(current.id, vertex); if (halves) pending.push(...halves);
+          break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Face creation for push/pull: a face with the same corners as an existing one but opposite orientation
+   * means both lie back to back – neither is kept (the volume between them is gone).
+   */
+  private addPushPullFace(outer: number[], holes: number[][], props: Partial<Face>, orphanCandidates: Set<number>): Face | null {
+    const cleaned = this.cleanLoop(outer); if (cleaned.length < 3 || new Set(cleaned).size !== cleaned.length) return null;
+    const existing = this.findFaceByOuter(cleaned);
+    if (existing) {
+      if (this.faceNormal(existing).dot(polygonNormal(cleaned.map(vertex => this.positionOf(vertex)))) < 0) {
+        for (const edge of this.faceEdges(existing)) orphanCandidates.add(edge.id);
+        this.removeFace(existing.id);
+      }
+      return null;
+    }
+    return this.createFaceRaw(cleaned, holes, props);
+  }
+
+  /**
+   * Faces made by push/pull that lie on an existing face of opposite orientation cancel out where they
+   * overlap: the overlapping part disappears from both, the rest of each face stays. Returns touched vertices.
+   */
+  private cancelCoincidentFaces(created: Face[]): Set<number> {
+    const touched = new Set<number>();
+    const createdIds = new Set(created.map(face => face.id));
+    const area = new THREE.Box3(); for (const face of created) for (const vertex of this.faceVertices(face)) area.expandByPoint(this.positionOf(vertex));
+    area.expandByScalar(LEN_EPS);
+    const faceBox = (face: Face) => { const box = new THREE.Box3(); for (const vertex of face.outer) box.expandByPoint(this.positionOf(vertex)); return box.expandByScalar(LEN_EPS); };
+    const candidates = [...this.faces.values()].filter(face => !createdIds.has(face.id) && faceBox(face).intersectsBox(area));
+    for (const face of created) {
+      if (!this.faces.has(face.id)) continue;
+      const normal = this.faceNormal(face), anchor = this.positionOf(face.outer[0]);
+      const ownBox = faceBox(face);
+      for (const other of candidates) {
+        if (!this.faces.has(face.id)) break;
+        if (!this.faces.has(other.id) || !faceBox(other).intersectsBox(ownBox)) continue;
+        const otherNormal = this.faceNormal(other);
+        if (otherNormal.dot(normal) > -1 + 1e-6) continue;
+        if (Math.abs(this.positionOf(other.outer[0]).clone().sub(anchor).dot(normal)) > PLANE_TOL) continue;
+        this.subtractOverlap(face, other, touched);
+      }
+    }
+    return touched;
+  }
+
+  /** Remove the region two coplanar, oppositely oriented faces share; returns false when they do not overlap. */
+  private subtractOverlap(created: Face, existing: Face, touched: Set<number>): boolean {
+    const normal = this.faceNormal(existing), anchor = this.positionOf(existing.outer[0]).clone();
+    // make the outlines meet at shared points: corners on the other outline and crossing edges
+    this.splitEdgesAtVertices(new Set([...this.faceVertices(created), ...this.faceVertices(existing)]));
+    if (!this.faces.has(created.id) || !this.faces.has(existing.id)) return false;
+    for (const edgeA of this.faceEdges(created)) for (const edgeB of this.faceEdges(existing)) {
+      if (!this.edges.has(edgeA.id) || !this.edges.has(edgeB.id)) continue;
+      const startA = this.positionOf(edgeA.start), endA = this.positionOf(edgeA.end), startB = this.positionOf(edgeB.start), endB = this.positionOf(edgeB.end);
+      const closest = segmentSegmentClosest(startA, endA, startB, endB);
+      if (closest.c1.distanceTo(closest.c2) > LEN_EPS || closest.s <= 1e-7 || closest.s >= 1 - 1e-7 || closest.t <= 1e-7 || closest.t >= 1 - 1e-7) continue;
+      if (endA.clone().sub(startA).normalize().cross(endB.clone().sub(startB).normalize()).length() < 1e-6) continue;
+      const crossing = this.addVertex(closest.c1);
+      this.splitEdgesAtVertices(new Set([crossing]));
+    }
+    const shapeA = { outer: [...created.outer], holes: created.holes.map(hole => [...hole]) };
+    const shapeB = { outer: [...existing.outer], holes: existing.holes.map(hole => [...hole]) };
+    const edgeIds = new Set([...this.faceEdges(created), ...this.faceEdges(existing)].map(edge => edge.id));
+    const regions = this.extractCycles(edgeIds, normal, anchor).map(region => {
+      const sample = this.samplePoint(region.outer, region.holes);
+      return { ...region, inCreated: !!sample && this.pointInLoops(shapeA.outer, shapeA.holes, normal, sample), inExisting: !!sample && this.pointInLoops(shapeB.outer, shapeB.holes, normal, sample) };
+    });
+    if (!regions.some(region => region.inCreated && region.inExisting)) return false;
+    const propsA = { material: created.material, backMaterial: created.backMaterial, tag: created.tag };
+    const propsB = { material: existing.material, backMaterial: existing.backMaterial, tag: existing.tag, hidden: existing.hidden };
+    this.removeFace(created.id); this.removeFace(existing.id);
+    for (const region of regions) {
+      if (region.inCreated === region.inExisting) continue;
+      const face = this.createFaceRaw(region.outer, region.holes, region.inExisting ? propsB : propsA);
+      // regions follow the existing face's normal; the created face pointed the other way
+      if (face && region.inCreated) this.reverseFace(face);
+    }
+    this.eraseOrphanEdges(edgeIds, touched);
+    return true;
   }
 
   /** Split edges at vertices lying on them (T-junctions), making meshes watertight. */

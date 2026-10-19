@@ -87,7 +87,7 @@ export class Editor {
   attach(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement) {
     this.viewer = markRaw(new Viewer(canvas, overlay));
     this.viewer.model = this.model;
-    this.infer = markRaw(new InferenceEngine(this.viewer, () => this.model.guides));
+    this.infer = markRaw(new InferenceEngine(this.viewer, () => this.model.guides, () => this.entities));
     this.viewer.overlay.drawers.push(canvasOverlay => drawMeasure(canvasOverlay, this)); // below tool feedback
     this.viewer.overlay.drawers.push(canvasOverlay => this.drawOverlay(canvasOverlay));
     this.viewer.onFrame = () => this.frame();

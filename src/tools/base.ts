@@ -9,39 +9,60 @@ import type { PlaneRef, PlaneAxes } from '../core/geometry';
 export abstract class PointTool extends Tool {
   inference: Inference | null = null;
   lockAxis: 'x' | 'y' | 'z' | null = null;
+  /** down arrow: parallel / perpendicular to the last hovered edge */
+  lockDir: { direction: THREE.Vector3; label: string } | null = null;
   shiftDir: THREE.Vector3 | null = null;
   shiftAxis: 'x' | 'y' | 'z' | null = null;
+  shiftLabel = '';
+  /** shift held over an edge: points slide along that edge's line */
+  shiftOrigin: THREE.Vector3 | null = null;
+  /** shift held over a face: points stay in that face's plane */
+  shiftPlane: PlaneRef | null = null;
   downAt: { x: number; y: number } | null = null;
 
   pick(pointer: { x: number; y: number }, from: THREE.Vector3 | null, extra: Partial<InferOptions> = {}): Inference {
-    let lock: THREE.Vector3 | null = null; let lockAxis: 'x' | 'y' | 'z' | null = null;
+    let lock: THREE.Vector3 | null = null; let lockAxis: 'x' | 'y' | 'z' | null = null; let lockLabel: string | undefined;
     if (from && this.lockAxis) { lock = AXES[this.lockAxis]; lockAxis = this.lockAxis; }
-    else if (from && this.shiftDir) { lock = this.shiftDir; lockAxis = this.shiftAxis; }
-    const inference = this.editor.infer.infer(pointer.x, pointer.y, { from, lock, lockAxis, ...extra });
-    if (inference.kind === 'endpoint' || inference.kind === 'midpoint') this.editor.infer.track(inference.point);
+    else if (from && this.lockDir) { lock = this.lockDir.direction; lockLabel = this.lockDir.label; }
+    else if ((from || this.shiftOrigin) && this.shiftDir) { lock = this.shiftDir; lockAxis = this.shiftAxis; lockLabel = this.shiftAxis ? undefined : this.shiftLabel; }
+    const plane = this.shiftPlane && !lock ? { plane: this.shiftPlane } : {};
+    const lockOrigin = lock && this.shiftDir === lock ? this.shiftOrigin : null;
+    const inference = this.editor.infer.infer(pointer.x, pointer.y, { from, lock, lockAxis, lockLabel, lockOrigin, ...plane, ...extra });
+    if (['endpoint', 'midpoint', 'intersection', 'center'].includes(inference.kind)) this.editor.infer.track(inference.point);
     this.inference = inference;
     return inference;
   }
 
-  /** Default handling for arrow keys and shift inference lock. */
+  /** Arrow keys and shift lock like SketchUp: up = blue, right = red, left = green, down = parallel/perpendicular. */
   onKey(keyEvent: KeyboardEvent, down: boolean): boolean {
     if (down && ['ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(keyEvent.key)) {
       const axis = keyEvent.key === 'ArrowUp' ? 'z' : keyEvent.key === 'ArrowRight' ? 'x' : 'y';
-      this.lockAxis = this.lockAxis === axis ? null : axis;
+      this.lockAxis = this.lockAxis === axis ? null : axis; this.lockDir = null;
       this.editor.redraw(); return true;
     }
-    if (keyEvent.key === 'ArrowDown' && down) { this.lockAxis = null; return true; }
+    if (keyEvent.key === 'ArrowDown' && down) {
+      if (this.lockDir || this.lockAxis) { this.lockDir = null; this.lockAxis = null; }
+      else {
+        const inference = this.inference; const edge = this.editor.infer.trackedEdge;
+        if (inference?.direction && (inference.kind === 'parallel' || inference.kind === 'perpendicular')) this.lockDir = { direction: inference.direction.clone(), label: inference.label };
+        else if (edge) this.lockDir = { direction: edge.end.clone().sub(edge.start).normalize(), label: 'Parallel zu Kante' };
+      }
+      this.editor.redraw(); return true;
+    }
     if (keyEvent.key === 'Shift') {
-      if (down && !this.shiftDir && this.inference) {
-        if (this.inference.axis && (this.inference.kind === 'axis' || this.inference.kind === 'aligned')) { this.shiftDir = AXES[this.inference.axis].clone(); this.shiftAxis = this.inference.axis; }
-        else if (this.inference.edge && this.inference.kind === 'edge') { this.shiftDir = this.inference.edge.end.clone().sub(this.inference.edge.start).normalize(); this.shiftAxis = null; }
-      } else if (!down) { this.shiftDir = null; this.shiftAxis = null; }
+      if (down && !keyEvent.repeat && !this.shiftDir && !this.shiftPlane && this.inference) {
+        const inference = this.inference;
+        if (inference.axis && inference.direction && (inference.kind === 'axis' || inference.kind === 'aligned')) { this.shiftDir = AXES[inference.axis].clone(); this.shiftAxis = inference.axis; }
+        else if (inference.direction && (inference.kind === 'parallel' || inference.kind === 'perpendicular' || inference.kind === 'extension')) { this.shiftDir = inference.direction.clone(); this.shiftAxis = null; this.shiftLabel = inference.label; }
+        else if (inference.edge && inference.kind === 'edge') { this.shiftDir = inference.edge.end.clone().sub(inference.edge.start).normalize(); this.shiftOrigin = inference.edge.start.clone(); this.shiftAxis = null; this.shiftLabel = 'Auf Kante'; }
+        else if (inference.face && inference.kind === 'face') this.shiftPlane = { point: inference.point.clone(), normal: inference.face.normal.clone().normalize() };
+      } else if (!down) { this.shiftDir = null; this.shiftAxis = null; this.shiftPlane = null; this.shiftOrigin = null; }
       return false;
     }
     return false;
   }
 
-  resetLocks() { this.lockAxis = null; this.shiftDir = null; this.shiftAxis = null; }
+  resetLocks() { this.lockAxis = null; this.lockDir = null; this.shiftDir = null; this.shiftAxis = null; this.shiftPlane = null; this.shiftOrigin = null; }
 
   drawInference(overlay: Overlay, tip = true) { this.editor.infer.draw(overlay, this.inference, this.editor.mouse, tip); }
 

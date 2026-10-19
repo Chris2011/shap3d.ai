@@ -67,7 +67,7 @@
 - **Terrain sculpting** – raise, lower, smooth and flatten landscapes with a brush. Grass, earth, rock and snow are painted automatically.
 - **Polygon inspector** – see every vertex and triangle, change the segment count of round shapes, subdivide or simplify any mesh.
 - **Command palette like in VS Code or IntelliJ** – <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, <kbd>F1</kbd> or <kbd>Shift</kbd> twice finds every tool, command, panel, switch, material, scene and object in one fuzzy search.
-- **Measuring aids** – rulers on the axes that switch from metres to centimetres to millimetres as you zoom in, and reference people that show their height.
+- **Measuring aids** – rulers on the axes that switch from metres to centimetres to millimetres as you zoom in, an infinite ground grid whose spacing follows the zoom, and reference people that show their height.
 - **Plugin system** – extend the app with plain JavaScript modules or whole plugin packages: commands, tools, panels, script commands and languages, file importers and exporters, overlay drawings. Three examples are included, plus an **OpenSCAD plugin** that runs the real OpenSCAD in the browser.
 - **Welcome tour** – six short animated steps on the first start, available again any time from the menu.
 - **Dark mode with a real night scene**, a split button for every combination, and a German user interface.
@@ -149,7 +149,8 @@ Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, <kbd>F1</kbd>, <kbd>Ctrl</k
 
 - **Rulers on the axes**: tick marks along the red, green and blue axes. Zoomed out you see whole metres; the closer you get, the finer the scale becomes – 10 cm, centimetres and finally millimetres, with labels wherever there is room.
 - **Height of reference people**: every person shows a dimension line with its height, in metres, or in centimetres and millimetres when you are close.
-- Both can be switched on and off in **Anzeige** (Display), in **Menu › Ansicht** or in the command palette.
+- **Ground grid**: an infinite grid on the XY plane, like in Blender or KiCad. It reaches to the horizon and fades out there, and its spacing follows the zoom – millimetres, centimetres, decimetres, metres, 10 m and beyond, with stronger major lines every tenth line (1/16″, inches and feet for imperial models). The lines through the origin are tinted red and green, the lines along the X and Y axes are labelled when the rulers are off, and a small legend in the lower left shows the current spacing. Faces on the ground always stay in front of it, and geometry always wins: ruler ticks, grid labels and height dimensions behind a model stay hidden.
+- All three can be switched on and off in **Anzeige** (Display), in **Menu › Ansicht** or in the command palette.
 
 ### Welcome tour
 

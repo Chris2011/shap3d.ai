@@ -128,7 +128,8 @@ export class Model implements DefinitionRegistry {
     const entitiesToJSON = (entities: Entities) => ({
       vertices: [...entities.vertices.values()].map(vertex => ({ id: vertex.id, position: toArray(vertex.position).map(round) })),
       edges: [...entities.edges.values()].map(edge => ({ id: edge.id, start: edge.start, end: edge.end, soft: edge.soft || undefined, hidden: edge.hidden || undefined, tag: edge.tag })),
-      faces: [...entities.faces.values()].map(face => ({ id: face.id, outer: face.outer, holes: face.holes.length ? face.holes : undefined, material: face.material, backMaterial: face.backMaterial, tag: face.tag, hidden: face.hidden || undefined })),
+      // loops are copied: edits split them in place, which would otherwise corrupt older undo snapshots
+      faces: [...entities.faces.values()].map(face => ({ id: face.id, outer: [...face.outer], holes: face.holes.length ? face.holes.map(hole => [...hole]) : undefined, material: face.material, backMaterial: face.backMaterial, tag: face.tag, hidden: face.hidden || undefined })),
       instances: [...entities.instances.values()].map(instance => ({ id: instance.id, definition: instance.definition.id, matrix: instance.matrix.toArray().map(round), name: instance.name, material: instance.material, tag: instance.tag, hidden: instance.hidden || undefined, locked: instance.locked || undefined })),
     });
     return {

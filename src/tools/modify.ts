@@ -50,10 +50,16 @@ const contextFilters = (editor: Editor, live: LiveTransform | null) => {
 export class PushPullTool extends PointTool {
   id = 'pushpull'; name = 'Drücken/Ziehen'; vcbLabel = 'Abstand'; cursor = 'crosshair';
   faceId: number | null = null; start: V3 | null = null; normal = new THREE.Vector3(); distance = 0; pressed = false;
-  last: { faceId: number; distance: number; created: number | null } | null = null;
-  status() { return this.faceId != null ? 'Klicken, um die Distanz festzulegen, oder Abstand eingeben. | Doppelklick = letzte Distanz wiederholen.' : 'Klicken, um die zu drückende oder zu ziehende Fläche auszuwählen. | Doppelklick = letzte Distanz wiederholen.'; }
+  /** Ctrl: keep the original face and build a new one (SketchUp "+" mode) */
+  newFace = false;
+  last: { faceId: number; distance: number; created: number | null; newFace: boolean } | null = null;
+  status() {
+    const mode = `Strg = neue Fläche ${this.newFace ? 'aus' : 'ein'}.`;
+    return this.faceId != null ? `Klicken, um die Distanz festzulegen, oder Abstand eingeben. | Auf Ecken, Kanten und Flächen einrasten. ${mode}` : `Klicken, um die zu drückende oder zu ziehende Fläche auszuwählen. | Doppelklick = letzte Distanz wiederholen. ${mode}`;
+  }
   busy() { return this.faceId != null; }
-  cancel() { this.faceId = null; this.start = null; this.editor.setHover(null); this.editor.setVcb(''); }
+  activate() { this.newFace = false; }
+  cancel() { this.faceId = null; this.start = null; this.inference = null; this.editor.setHover(null); this.editor.setVcb(''); }
   hoverFace(pointer: { x: number; y: number }) {
     const editor = this.editor; const faceHit = editor.viewer.pickFace(pointer.x, pointer.y, (context) => context.path.length === editor.activePath.length && editor.inContext(context.path));
     return faceHit;
@@ -61,14 +67,16 @@ export class PushPullTool extends PointTool {
   onMove(pointer: PEvt) {
     const editor = this.editor;
     if (this.faceId == null) { const faceHit = this.hoverFace(pointer); editor.setHover(faceHit ? { kind: 'face', id: faceHit.faceId } : null); return; }
-    const face = editor.entities.faces.get(this.faceId); if (!face) return;
-    const own = new Set(editor.entities.faceVertices(face));
-    const inference = this.pick(pointer, this.start, { lock: this.normal, filterVert: (vertex: VertRec) => !(vertex.context.entities === editor.entities && own.has(vertex.vertexId)) } as any);
-    let point = closestOnLineToRay(this.start!, this.normal, editor.viewer.ray(pointer.x, pointer.y));
-    const vertexHit = editor.viewer.pickVertex(pointer.x, pointer.y, 10, vertex => !(vertex.context.entities === editor.entities && own.has(vertex.vertexId)));
-    if (vertexHit) point = vertexHit.rec.position.clone(); else { const faceHit = editor.viewer.pickFace(pointer.x, pointer.y, (context, faceId) => !(context.entities === editor.entities && faceId === this.faceId)); if (faceHit && Math.abs(faceHit.normal.dot(this.normal)) > 0.99) point = faceHit.point; }
-    this.distance = point.clone().sub(this.start!).dot(this.normal);
-    this.inference = { ...inference, label: vertexHit ? 'Endpunkt' : '', point: this.start!.clone().addScaledVector(this.normal, this.distance) };
+    const ents = editor.entities; const face = ents.faces.get(this.faceId); if (!face) return;
+    // the height comes from what the cursor snaps to (corner, edge or parallel face), projected onto the push direction
+    const ownVertices = new Set(ents.faceVertices(face)), ownEdges = new Set(ents.faceEdges(face).map(edge => edge.id));
+    const inference = this.pick(pointer, this.start, {
+      lock: this.normal, lockAxis: null, lockLabel: '', lockOrigin: null, plane: null,
+      filterVert: (vertex: VertRec) => !(vertex.context.entities === ents && ownVertices.has(vertex.vertexId)),
+      filterEdge: (edgeRec: EdgeRec) => !(edgeRec.context.entities === ents && ownEdges.has(edgeRec.edgeId)),
+      filterFace: (context: FaceHit['context'], faceId: number) => !(context.entities === ents && faceId === this.faceId),
+    });
+    this.distance = inference.point.clone().sub(this.start!).dot(this.normal);
     editor.setVcb(editor.fmt(Math.abs(this.distance)));
   }
   onDown(pointer: PEvt) {
@@ -76,6 +84,7 @@ export class PushPullTool extends PointTool {
     if (this.faceId == null) {
       const faceHit = this.hoverFace(pointer); if (!faceHit) return;
       this.faceId = faceHit.faceId; this.start = faceHit.point.clone(); this.normal = faceHit.normal.clone().normalize(); this.distance = 0; this.pressed = true; editor.setHover({ kind: 'face', id: faceHit.faceId });
+      editor.infer.track(this.start);
       return;
     }
     this.finish(this.distance);
@@ -88,6 +97,10 @@ export class PushPullTool extends PointTool {
     // use the face's own direction like SketchUp (repeat in the same sense)
     this.finish(this.editor.lastPushPull);
   }
+  onKey(keyEvent: KeyboardEvent, down: boolean) {
+    if (keyEvent.key === 'Control' && down && !keyEvent.repeat) { this.newFace = !this.newFace; this.editor.refreshStatus(); return true; }
+    return false;
+  }
   localDistance(distance: number): number {
     const editor = this.editor; const face = editor.entities.faces.get(this.faceId!)!;
     const localNormal = editor.entities.faceNormal(face);
@@ -96,19 +109,20 @@ export class PushPullTool extends PointTool {
   }
   finish(distance: number) {
     const editor = this.editor; if (this.faceId == null || Math.abs(distance) < 1e-6) { if (this.faceId != null && Math.abs(distance) < 1e-6 && !this.pressed) this.cancel(); return; }
-    const faceId = this.faceId; const localDist = this.localDistance(distance);
-    const created = editor.commit('Drücken/Ziehen', () => editor.entities.pushPull(faceId, localDist));
-    editor.lastPushPull = distance; this.last = { faceId: faceId, distance: localDist, created };
+    const faceId = this.faceId; const localDist = this.localDistance(distance); const newFace = this.newFace;
+    const created = editor.commit('Drücken/Ziehen', () => editor.entities.pushPull(faceId, localDist, { keepFace: newFace }));
+    editor.lastPushPull = distance; this.last = { faceId: faceId, distance: localDist, created, newFace };
     this.cancel(); editor.setVcb(editor.fmt(Math.abs(distance)));
   }
   onVcb(text: string) {
     const distance = this.lengthOf(text); if (distance == null) return false;
+    // a negative value pushes the other way
     if (this.faceId != null) { this.finish(Math.sign(this.distance || 1) * distance); return true; }
     if (this.last) { // change the last push/pull
       const editor = this.editor; const sign = Math.sign(this.last.distance) || 1; editor.undo();
-      const faceId = this.last.faceId; if (!editor.entities.faces.has(faceId)) return false;
-      const created = editor.commit('Drücken/Ziehen', () => editor.entities.pushPull(faceId, sign * distance));
-      this.last = { faceId: faceId, distance: sign * distance, created }; editor.lastPushPull = distance * sign; return true;
+      const { faceId, newFace } = this.last; if (!editor.entities.faces.has(faceId)) return false;
+      const created = editor.commit('Drücken/Ziehen', () => editor.entities.pushPull(faceId, sign * distance, { keepFace: newFace }));
+      this.last = { faceId: faceId, distance: sign * distance, created, newFace }; editor.lastPushPull = distance * sign; return true;
     }
     return false;
   }
@@ -124,7 +138,12 @@ export class PushPullTool extends PointTool {
         overlay.polyline(top, '#000', 1.2, true);
         for (let i = 0; i < base.length; i++) overlay.line(base[i], top[i], '#000', 1);
       }
-      if (this.inference?.label) overlay.tooltip(editor.mouse.x, editor.mouse.y, this.inference.label);
+      const inference = this.inference;
+      if (inference?.target && inference.alignFrom) {
+        overlay.line(inference.alignFrom, inference.point, '#000', 1, [2, 3]);
+        overlay.marker(inference.alignFrom, inference.target);
+      }
+      if (inference?.label) overlay.tooltip(editor.mouse.x, editor.mouse.y, inference.label);
     }
   }
 }

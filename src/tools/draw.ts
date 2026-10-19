@@ -3,6 +3,7 @@ import type { PEvt } from '../engine/editor';
 import type { Overlay } from '../engine/overlay';
 import { PointTool, planeFromInference, planeAxes, onPlane } from './base';
 import { parseLengthList } from '../core/units';
+import { AXIS_COLOR, MAGENTA } from '../engine/inference';
 import type { PlaneRef } from '../core/geometry';
 
 type V3 = THREE.Vector3;
@@ -52,7 +53,8 @@ export class LineTool extends PointTool {
   }
   draw(overlay: Overlay) {
     if (this.start && this.inference) {
-      const col = this.inference.axis && (this.inference.kind === 'axis' || this.inference.kind === 'locked' || this.inference.kind === 'aligned') ? ({ x: '#e00000', y: '#00a000', z: '#0000e0' } as any)[this.inference.axis] : '#000';
+      const kind = this.inference.kind, linear = kind === 'axis' || kind === 'locked' || (kind === 'aligned' && !!this.inference.direction) || kind === 'intersection';
+      const col = this.inference.axis && linear ? AXIS_COLOR[this.inference.axis] : kind === 'parallel' || kind === 'perpendicular' || (linear && this.inference.direction) ? MAGENTA : '#000';
       overlay.line(this.start, this.inference.point, col, col === '#000' ? 1 : 1.6);
     }
     this.drawInference(overlay);

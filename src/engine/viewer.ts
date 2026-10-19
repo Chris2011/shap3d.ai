@@ -648,11 +648,11 @@ export class Viewer {
       if (distance > tolPx || (best && distance >= best.dist)) continue;
       // 3D point on edge closest to the view ray
       const ray = this.ray(x, y); const dir = edgeRec.end.clone().sub(edgeRec.start);
-      const offset = ray.origin.clone().sub(edgeRec.start); const edgeDot = dir.dot(dir), crossDot = dir.dot(ray.direction), rayDot = ray.direction.dot(ray.direction), edgeOffset = dir.dot(offset), rayOffset = ray.direction.dot(offset);
+      const offset = edgeRec.start.clone().sub(ray.origin); const edgeDot = dir.dot(dir), crossDot = dir.dot(ray.direction), rayDot = ray.direction.dot(ray.direction), edgeOffset = dir.dot(offset), rayOffset = ray.direction.dot(offset);
       const den = edgeDot * rayDot - crossDot * crossDot; let edgeParam = den > 1e-12 ? (crossDot * rayOffset - rayDot * edgeOffset) / den : param; edgeParam = Math.max(0, Math.min(1, edgeParam));
       const closest = edgeRec.start.clone().addScaledVector(dir, edgeParam);
       if (this.clipPlanes.some(plane => plane.distanceToPoint(closest) < -1e-6)) continue;
-      if (this.isOccluded(closest, x, y)) continue;
+      if (this.isHidden(closest)) continue;
       best = { rec: edgeRec, point: closest, dist: distance };
     }
     return best;
@@ -666,7 +666,8 @@ export class Viewer {
       const distance = Math.hypot(projected.x - x, projected.y - y);
       if (distance > tolPx || (best && distance >= best.dist)) continue;
       if (this.clipPlanes.some(plane => plane.distanceToPoint(vertex.position) < -1e-6)) continue;
-      if (this.isOccluded(vertex.position, x, y)) continue;
+      // tested along the line of sight to the vertex itself, not under the cursor – near silhouettes the cursor ray hits other faces
+      if (this.isHidden(vertex.position)) continue;
       best = { rec: vertex, dist: distance };
     }
     return best;
