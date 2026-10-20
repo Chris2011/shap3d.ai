@@ -41,6 +41,9 @@ const text3dPlugin: S3dPlugin = {
       await Promise.all([DEFAULT_FONT, ...wanted].map(id => loadFont(id).catch(() => {})));
     });
 
+    // code completion for { font: '…' } and "font": "…"
+    context.script.completeValues('font', () => FONTS.map(font => ({ label: font.id, detail: font.category, description: font.label })));
+
     context.script.extend('text3d', (api, text: string, opts: { at?: Pt; size?: number | string; depth?: number | string; font?: string; upright?: boolean; filled?: boolean; material?: string } = {}) => {
       const group = api.group(`Text „${text}“`, inner => {
         buildText(inner.ents, String(text), { size: api.length(opts.size ?? 1), depth: api.length(opts.depth ?? 0.2), font: opts.font, upright: opts.upright ?? true, filled: opts.filled });

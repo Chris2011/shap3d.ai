@@ -5,12 +5,13 @@ import type { Editor, Tool } from '../engine/editor';
 import type { PointTool } from '../tools/base';
 import type { Overlay } from '../engine/overlay';
 import type { RunResult, ScriptApi } from '../scripting/api';
-import type { ScriptLanguage } from '../scripting/languages';
+import type { ScriptLanguage, ScriptCompletion, CompletionProvider } from '../scripting/languages';
 import type { Definition, Entities } from '../core/model';
 import type { ApiCategory } from '../scripting/catalog';
 import type { ContextMenuEntry, TopBarButton } from './uiExtensions';
 import type { LoadedScene } from './fileFormats';
 import type { CodeFormat } from '../scripting/codeExport';
+export type { ScriptCompletion, CompletionRequest, CompletionKind, CompletionProvider } from '../scripting/languages';
 export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
 
 /**
@@ -149,6 +150,16 @@ export interface PluginContext {
     openInEditor: (language: string, code: string) => void;
     /** awaited by the script editor before a JavaScript script runs – e.g. to prepare what s3d.<extension>() needs */
     beforeRun: (prepare: (code: string) => void | Promise<void>) => Disposer;
+    /**
+     * code completion: suggestions for an option value – `{ font: '…' }` in JavaScript and `"font": "…"` in JSON.
+     * `values` is asked each time the list opens, so it may change (e.g. fonts the user adds).
+     */
+    completeValues: (option: string, values: () => (string | ScriptCompletion)[]) => Disposer;
+    /**
+     * code completion for a script language (your own from registerLanguage, or another plugin's): `provider`
+     * returns candidates for the cursor, the editor filters and ranks them by the word before the cursor
+     */
+    registerCompletions: (language: string, provider: CompletionProvider) => Disposer;
   };
   /** files shipped in the plugin package (folder install), by path relative to its package.json */
   assets: { list: () => string[]; blob: (path: string) => Blob | undefined; url: (path: string) => string };

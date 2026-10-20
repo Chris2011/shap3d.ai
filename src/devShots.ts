@@ -120,6 +120,8 @@ s3d.dome([8.2, 0, 0], 0.8, { material: 'Marmor' });
 s3d.prism([0, 2.6, 0], 0.6, 1.2, { sides: 6, material: 'Glas' });
 s3d.stairs([2, 2, 0], { steps: 6, width: 1.2, material: 'Eiche hell' });
 s3d.wedge([5.4, 2.1, 0], 1.6, 1, 0.8, { material: 'Beton' });`);
+    // the editor starts empty without a draft – show the house example
+    useScripts().open({ lang: 'js', code: EXAMPLES.find(example => example.id === 'house')!.code });
     openPanel.value = 'scripts';
     await wait(600);
     (([...document.querySelectorAll('button')] as HTMLElement[]).find(button => button.textContent?.trim() === 'API-Info'))?.click();

@@ -23,6 +23,7 @@
         <option v-for="format in convertTargets" :key="format.id" :value="format.id">{{ format.label }}</option>
       </select>
       <button v-if="beforeConvert" class="s3d-link" title="Den Code von vor dem Umwandeln zurückholen" @click="undoConvert">Umwandeln rückgängig</button>
+      <button class="s3d-link" title="Leeres Skript in der gewählten Sprache – Strg+Z holt den bisherigen Code zurück" @click="newScript">Neu</button>
       <button class="s3d-link" @click="save">Speichern</button>
       <button class="s3d-link" v-if="currentSaved" @click="delSaved">Löschen</button>
       <button class="s3d-link" @click="showHelp = !showHelp">{{ showHelp ? 'API-Info ausblenden' : 'API-Info' }}</button>
@@ -39,7 +40,8 @@
       <div ref="gutter" class="w-9.5 flex-none overflow-hidden bg-surface-2 py-1.5 pr-1.5 text-right text-muted select-none"><div v-for="lineNumber in lines" :key="lineNumber">{{ lineNumber }}</div></div>
       <div class="relative min-w-0 flex-1">
         <pre ref="highlightLayer" class="s3d-syntax pointer-events-none absolute inset-0 m-0 overflow-hidden px-2 py-1.5 font-mono whitespace-pre text-ink [tab-size:2]" aria-hidden="true" v-html="highlighted"></pre>
-        <textarea ref="textarea" v-model="code" class="absolute inset-0 m-0 resize-none overflow-auto border-0 bg-transparent px-2 py-1.5 whitespace-pre text-transparent caret-ink outline-none select-text [tab-size:2] selection:bg-[rgba(0,95,158,.25)] selection:text-transparent" spellcheck="false" wrap="off" @scroll="sync" @keydown="key" @keydown.stop @paste="onPaste"></textarea>
+        <textarea ref="textarea" v-model="code" class="absolute inset-0 m-0 resize-none overflow-auto border-0 bg-transparent px-2 py-1.5 whitespace-pre text-transparent caret-ink outline-none select-text [tab-size:2] selection:bg-[rgba(0,95,158,.25)] selection:text-transparent placeholder:text-muted" :placeholder="placeholder" spellcheck="false" wrap="off" @scroll="sync" @keydown="key" @keydown.stop @paste="onPaste" @input="completion.onInput" @mousedown="completion.close" @blur="completion.close"></textarea>
+        <S3dCompletionPopup v-if="completion.isOpen.value && completion.anchor.value" :items="completion.result.value!.items" :selected="completion.selected.value" :anchor="completion.anchor.value" :word="completion.result.value!.word" @select="index => (completion.selected.value = index)" @accept="completion.accept" />
       </div>
     </div>
     <div ref="cons" class="h-37.5 flex-none overflow-auto px-2.5 pb-2 font-mono text-xs/normal select-text">
@@ -63,6 +65,8 @@ import { importObj, looksLikeObj } from '../../scripting/mesh';
 import { parseLength } from '../../core/units';
 import { SCRIPT_LANGUAGES, findScriptLanguage, prepareScript } from '../../scripting/languages';
 import { CODE_FORMATS, findCodeFormat, convertCode } from '../../scripting/codeExport';
+import S3dCompletionPopup from './S3dCompletionPopup.vue';
+import { useCodeCompletion } from '../../composables/useCodeCompletion';
 
 type Lang = ScriptLang;
 const OBJ_HELP = `OBJ-Mesh: Zeilen „v x y z“ (Ecke) und „f a b c …“ (Fläche, Eckennummern ab 1).
@@ -81,8 +85,8 @@ const clearFirst = ref(false); const showHelp = ref(false); const currentSaved =
 const textarea = ref<HTMLTextAreaElement | null>(null); const highlightLayer = ref<HTMLElement | null>(null); const gutter = ref<HTMLElement | null>(null); const cons = ref<HTMLElement | null>(null);
 onMounted(() => {
   const draft = scripts.draft.value; // last session – or code the AI assistant just sent over
+  // no draft yet: an empty editor whose placeholder points to the examples
   if (draft) { lang.value = isKnownLang(draft.lang) ? draft.lang : 'js'; code.value = draft.code; if (draft.size) objSize.value = `${draft.size}m`; }
-  if (!code.value) loadExample('house');
 });
 watch([code, lang], () => { scripts.draft.value = { lang: lang.value, code: code.value }; });
 // code sent over while the editor is open (plugins)
@@ -122,10 +126,14 @@ const isKnownLang = (id: string) => BUILT_IN_LANGS.includes(id) || !!findScriptL
 /** the plugin language that is selected, if any */
 const pluginLanguage = computed(() => findScriptLanguage(lang.value));
 const highlighted = computed(() => highlight(code.value + '\n', pluginLanguage.value ? (pluginLanguage.value.highlight ?? 'js') : (lang.value as CodeLang)));
-const sync = () => { if (!textarea.value) return; if (highlightLayer.value) { highlightLayer.value.scrollTop = textarea.value.scrollTop; highlightLayer.value.scrollLeft = textarea.value.scrollLeft; } if (gutter.value) gutter.value.scrollTop = textarea.value.scrollTop; };
+const sync = () => { if (!textarea.value) return; if (highlightLayer.value) { highlightLayer.value.scrollTop = textarea.value.scrollTop; highlightLayer.value.scrollLeft = textarea.value.scrollLeft; } if (gutter.value) gutter.value.scrollTop = textarea.value.scrollTop; completion.reposition(); };
+
+const completion = useCodeCompletion({ textarea, lang, editor });
+watch(lang, completion.close);
 
 const key = (event: KeyboardEvent) => {
   const area = textarea.value!;
+  if (completion.onKeydown(event)) return;
   if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); run(); return; }
   if (event.key === 'Tab') {
     event.preventDefault(); const start = area.selectionStart, end = area.selectionEnd;
@@ -142,6 +150,29 @@ const key = (event: KeyboardEvent) => {
 };
 
 const setLang = (language: Lang) => { lang.value = language; };
+
+/** what an empty editor shows (only visible while there is no code) */
+const placeholder = computed(() => {
+  const start = lang.value === 'js' ? "s3d.box([0, 0, 0], 1, 1, 1, { material: 'Holz' });"
+    : lang.value === 'json' ? '{ "objects": [ { "type": "box", "size": [1, 1, 1] } ] }'
+      : lang.value === 'obj' ? 'v 0 0 0 … / f 1 2 3 …' : 'Code eingeben …';
+  return `Neues Skript, z. B.\n${start}\n\nStrg+Leertaste zeigt Vorschläge, „Beispiel laden…“ fertige Skripte.\nAusführen mit Strg+Enter.`;
+});
+/** the start of a new script per language – JSON gets its frame, the caret goes where the first object belongs */
+const NEW_SCRIPT: Record<string, { code: string; caret: number }> = {
+  json: { code: '{\n  "objects": [\n    \n  ]\n}', caret: '{\n  "objects": [\n    '.length },
+};
+/** "Neu": empty editor in the current language; replaced through the textarea, so Ctrl+Z brings the old code back */
+const newScript = () => {
+  const area = textarea.value; if (!area) return;
+  const template = NEW_SCRIPT[lang.value] ?? { code: '', caret: 0 };
+  completion.close();
+  area.focus(); area.select();
+  if (!document.execCommand(template.code ? 'insertText' : 'delete', false, template.code)) code.value = template.code;
+  nextTick(() => area.setSelectionRange(template.caret, template.caret));
+  currentSaved.value = null; beforeConvert.value = null;
+  out.value = code.value ? [] : [{ kind: 'log', text: 'Neues Skript – Strg+Z im Editor holt den bisherigen Code zurück.' }];
+};
 /** Pasting raw mesh output (LLaMA-Mesh, .obj file) switches to OBJ mode automatically. */
 const onPaste = (event: ClipboardEvent) => {
   const text = event.clipboardData?.getData('text') ?? '';

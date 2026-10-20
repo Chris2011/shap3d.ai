@@ -1,10 +1,11 @@
 <template>
   <div class="mb-2 flex flex-wrap gap-1.5 [&_.s3d-btn]:flex [&_.s3d-btn]:items-center [&_.s3d-btn]:gap-1">
     <button class="s3d-btn small" :disabled="busy" @click="installFromFile"><S3dIcon name="import" :size="14" /> Plugin-Datei laden…</button>
-    <button class="s3d-btn small" :disabled="busy" title="Ordner mit package.json – z. B. der gebaute dist-Ordner eines Plugin-Pakets" @click="folderInput?.click()"><S3dIcon name="folder" :size="14" /> Plugin-Ordner laden…</button>
+    <button class="s3d-btn small" :disabled="busy" title="Ordner mit package.json – z. B. der gebaute dist-Ordner eines Plugin-Pakets" @click="installFromFolderButton"><S3dIcon name="folder" :size="14" /> Plugin-Ordner laden…</button>
+    <button v-if="folderPlugins.length" class="s3d-btn small" :disabled="busy" title="Alle aus einem Ordner installierten Pakete neu einlesen – z. B. nach npm run build" @click="updateAllFolders"><S3dIcon name="refresh" :size="14" /> Alle aktualisieren</button>
     <input ref="folderInput" type="file" webkitdirectory multiple class="hidden" @change="installFromFolder" />
   </div>
-  <p v-if="busy" class="mb-2 text-xs text-ink-2">Plugin wird installiert …</p>
+  <p v-if="busy" class="mb-2 text-xs text-ink-2">{{ updating ? 'Plugin wird aktualisiert …' : 'Plugin wird installiert …' }}</p>
   <p class="mb-2 text-xs text-ink-2">Plugins sind JavaScript-Module und laufen mit vollem Zugriff auf die Anwendung. Installiere nur Plugins, deren Quelle du vertraust. Sie werden nur in diesem Browser gespeichert.</p>
   <p v-if="message" class="mb-2 rounded-[3px] border px-2 py-1.5 text-xs" :class="message.error ? 'border-danger/40 bg-danger/8 text-danger' : 'border-line bg-surface text-ink-2'">{{ message.text }}</p>
 
@@ -18,8 +19,10 @@
     <p v-if="plugin.description" class="mt-1 text-xs text-ink-2">{{ plugin.description }}</p>
     <p v-if="plugin.error" class="mt-1 text-xs text-danger">Fehler: {{ plugin.error }}</p>
     <p class="mt-1 text-[0.6875rem] text-ink-2"><template v-if="plugin.builtin">Eingebaut · </template>{{ plugin.author ? `von ${plugin.author} · ` : '' }}<code>{{ plugin.id }}</code></p>
+    <p v-if="updateHints[plugin.id]" class="mt-1 text-xs font-semibold text-navy">{{ updateHints[plugin.id] }}</p>
     <p v-if="plugin.package" class="mt-0.5 text-[0.6875rem] text-ink-2">Paket {{ plugin.package.name }} · {{ plugin.package.files }} {{ plugin.package.files === 1 ? 'Datei' : 'Dateien' }}, {{ megabytes(plugin.package.bytes) }}<template v-if="plugin.package.license"> · Lizenz {{ plugin.package.license }}</template></p>
     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+      <button v-if="hasFolder(plugin.id)" class="s3d-btn small flex items-center gap-1" :disabled="busy" title="Paket neu aus seinem Ordner einlesen – z. B. nach npm run build" @click="update(plugin.id)"><S3dIcon name="refresh" :size="13" /> Aktualisieren</button>
       <button v-for="panel in panelsOf(plugin.id)" :key="panel.id" class="s3d-link" @click="showPanel(panel.id)">{{ panel.label }} öffnen</button>
       <button v-if="!plugin.builtin" class="s3d-link" @click="downloadSource(plugin.id)">Quelltext</button>
       <button v-if="!plugin.builtin" class="s3d-link" @click="remove(plugin.id, plugin.name)">Entfernen</button>
@@ -41,12 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import S3dIcon from '../S3dIcon.vue';
 import S3dToggleSwitch from '../ui/S3dToggleSwitch.vue';
 import { useEditor } from '../keys';
 import { PANEL_INFO, showPanel } from '../panelState';
 import { pickFile, download } from '../../engine/commands';
+import { usePluginFolders } from '../../composables/usePluginFolders';
 import { plugins, installPlugin, installPluginPackage, setPluginEnabled, removePlugin, pluginSource, EXAMPLE_PLUGINS } from '../../plugins/registry';
 
 const editor = useEditor();
@@ -63,10 +67,18 @@ const examples = computed(() => EXAMPLE_PLUGINS
   // new examples, or bundled ones that changed since they were installed
   .filter(example => !example.installed || pluginSource(example.id) !== example.code));
 
-const install = async (code: string | File[]) => {
+const folders = usePluginFolders();
+const { updateHints, updating } = folders;
+const hasFolder = (id: string) => folders.folderIds.value.has(id) && !!plugins.find(entry => entry.id === id)?.package;
+const folderPlugins = computed(() => plugins.filter(plugin => hasFolder(plugin.id)));
+// silent check: only folders that are already readable, never a permission prompt
+onMounted(() => { folders.checkSilently(); });
+
+const install = async (code: string | File[] | (() => Promise<{ id: string; name: string } | null>)) => {
   busy.value = true; message.value = null;
   try {
-    const plugin = typeof code === 'string' ? await installPlugin(code) : await installPluginPackage(code);
+    const plugin = typeof code === 'string' ? await installPlugin(code) : typeof code === 'function' ? await code() : await installPluginPackage(code);
+    if (!plugin) return; // folder picker cancelled
     const entry = plugins.find(candidate => candidate.id === plugin.id);
     message.value = entry?.error ? { text: `„${plugin.name}“ installiert, aber beim Start fehlgeschlagen: ${entry.error}`, error: true } : { text: `„${plugin.name}“ ist installiert und aktiv.`, error: false };
   } catch (error: any) { message.value = { text: `Plugin konnte nicht geladen werden: ${error?.message ?? error}`, error: true }; }
@@ -79,6 +91,24 @@ const installFromFile = async () => {
 };
 
 const panelsOf = (id: string) => PANEL_INFO.filter(panel => panel.id.startsWith(id + '.'));
+/** Chromium remembers the folder (for "Aktualisieren"); other browsers use the folder input */
+const installFromFolderButton = () => {
+  if (folders.supported) install(folders.installFromPicker); else folderInput.value?.click();
+};
+
+const update = async (id: string) => {
+  busy.value = true; message.value = null;
+  try { message.value = await folders.updateFromFolder(id); } finally { busy.value = false; }
+};
+
+const updateAllFolders = async () => {
+  busy.value = true; message.value = null;
+  try {
+    const results = await folders.updateAll();
+    if (results.length) message.value = { text: results.map(result => result.text).join(' '), error: results.some(result => result.error) };
+  } finally { busy.value = false; }
+};
+
 const installFromFolder = async (event: Event) => {
   const input = event.target as HTMLInputElement;
   const files = [...(input.files ?? [])]; input.value = '';
@@ -89,7 +119,7 @@ const toggle = (id: string, enabled: boolean) => { setPluginEnabled(id, enabled)
 
 const remove = async (id: string, name: string) => {
   if (!(await editor.confirm(`Plugin „${name}“ entfernen?`))) return;
-  removePlugin(id); message.value = { text: `„${name}“ wurde entfernt.`, error: false };
+  removePlugin(id); delete updateHints[id]; folders.folderIds.value.delete(id); message.value = { text: `„${name}“ wurde entfernt.`, error: false };
 };
 
 const downloadSource = (id: string) => download(`${id}.js`, pluginSource(id), 'text/javascript');

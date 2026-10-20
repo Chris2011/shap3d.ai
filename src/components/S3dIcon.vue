@@ -54,6 +54,7 @@ const ICONS: Record<string, string> = {
   menu: `<path d="M4 7h16M4 12h16M4 17h16" ${STROKE}/>`,
   undo: `<path d="M8 5 4 9l4 4" ${STROKE}/><path d="M4 9h10a6 6 0 0 1 0 12h-3" ${STROKE}/>`,
   redo: `<path d="M16 5l4 4-4 4" ${STROKE}/><path d="M20 9H10a6 6 0 0 0 0 12h3" ${STROKE}/>`,
+  refresh: `<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" ${STROKE}/><path d="M19.5 3.5v4h-4" ${STROKE}/>`,
   more: `<circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>`,
   close: `<path d="M6 6l12 12M18 6 6 18" ${STROKE}/>`,
   chevron: `<path d="M9 6l6 6-6 6" ${STROKE}/>`,

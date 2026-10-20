@@ -17,6 +17,7 @@ import { useScripts } from '../composables/useScripts';
 import { putPluginFile, getPluginFile, removePluginFile, clearPluginFiles, listPluginFiles, type PluginAssets } from './assetStore';
 import { addContextMenuEntry, addPluginWindow, addTopBarButton } from './uiExtensions';
 import { registerCodeFormat } from '../scripting/codeExport';
+import { registerCompletionValues, registerLanguageCompletions } from '../scripting/completion';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
 
 const MIME_TYPES: Record<string, string> = { js: 'text/javascript', mjs: 'text/javascript', wasm: 'application/wasm', json: 'application/json', css: 'text/css', svg: 'image/svg+xml', png: 'image/png' };
@@ -124,6 +125,8 @@ export const createPluginContext = (editor: Editor, plugin: { id: string; name: 
       registerLanguage: language => track(registerScriptLanguage(language)),
       openInEditor: (language, code) => { useScripts().open({ lang: language, code }); showPanel('scripts'); },
       beforeRun: prepare => track(registerBeforeRun(prepare)),
+      completeValues: (option, values) => track(registerCompletionValues(option, values)),
+      registerCompletions: (language, provider) => track(registerLanguageCompletions(language, provider)),
     },
 
     assets: {

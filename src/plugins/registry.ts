@@ -3,7 +3,7 @@ import { useStorage } from '@vueuse/core';
 import type { Editor } from '../engine/editor';
 import { createPluginContext } from './context';
 import type { Disposer, S3dPlugin } from './types';
-import { saveAssets, loadAssets, deleteAssets, clearPluginFiles, type PluginAssets } from './assetStore';
+import { saveAssets, loadAssets, deleteAssets, clearPluginFiles, deleteFolderHandle, type PluginAssets } from './assetStore';
 import gridExample from './examples/grid-generator.js?raw';
 import coordinatesExample from './examples/cursor-coordinates.js?raw';
 import partsListExample from './examples/parts-list.js?raw';
@@ -160,12 +160,15 @@ export const installPlugin = async (code: string, packageFiles?: { info: Package
   return plugin;
 };
 
+/** a plugin package read from a folder, not yet installed */
+export interface PluginPackage { code: string; info: PackageInfo; assets: PluginAssets }
+
 /**
- * Installs a plugin package from a folder (input with webkitdirectory). The folder needs a
- * package.json whose "shap3d.main" (or "main") names the plugin module; every other file
- * except node_modules is kept as an asset the plugin reaches through context.assets.
+ * Reads a plugin package from the files of a folder (input with webkitdirectory or a directory
+ * handle). The folder needs a package.json whose "shap3d.main" (or "main") names the plugin
+ * module; every other file except node_modules is kept as an asset (context.assets).
  */
-export const installPluginPackage = async (files: File[]) => {
+export const readPluginPackage = async (files: File[]): Promise<PluginPackage> => {
   const pathOf = (file: File) => (file.webkitRelativePath || file.name).replace(/\\/g, '/');
   const manifests = files.filter(file => pathOf(file).split('/').pop() === 'package.json' && !pathOf(file).includes('/node_modules/'));
   const manifestFile = manifests.sort((a, b) => pathOf(a).split('/').length - pathOf(b).split('/').length)[0];
@@ -185,7 +188,19 @@ export const installPluginPackage = async (files: File[]) => {
   }
   if (mainCode == null) throw new Error(`Die Hauptdatei „${mainPath}“ aus package.json fehlt im Ordner`);
   const info: PackageInfo = { name: manifest.name ?? '', version: manifest.version ?? '', license: manifest.license ?? '', files: Object.keys(assets).length, bytes };
-  return installPlugin(mainCode, { info, assets });
+  return { code: mainCode, info, assets };
+};
+
+/** Installs a plugin package from the files of a folder (see readPluginPackage). */
+export const installPluginPackage = async (files: File[] | PluginPackage) => {
+  const pluginPackage = Array.isArray(files) ? await readPluginPackage(files) : files;
+  return installPlugin(pluginPackage.code, { info: pluginPackage.info, assets: pluginPackage.assets });
+};
+
+/** Code and package info of an installed package plugin (to compare with a newer folder). */
+export const installedPackage = (id: string) => {
+  const item = stored.value.find(candidate => candidate.id === id);
+  return item?.package ? { code: item.code, info: item.package } : undefined;
 };
 
 export const setPluginEnabled = async (id: string, enabled: boolean) => {
@@ -208,6 +223,7 @@ export const removePlugin = (id: string) => {
   deactivate(id);
   if (stored.value.find(item => item.id === id)?.package) deleteAssets(id).catch(error => console.error(error));
   clearPluginFiles(id).catch(error => console.error(error));
+  deleteFolderHandle(id).catch(error => console.error(error));
   stored.value = stored.value.filter(item => item.id !== id);
   const index = plugins.findIndex(entry => entry.id === id); if (index >= 0) plugins.splice(index, 1);
   for (const key of Object.keys(localStorage)) if (key.startsWith(`s3d:plugin:${id}:`)) localStorage.removeItem(key);

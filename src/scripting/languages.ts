@@ -3,6 +3,27 @@ import type { Editor } from '../engine/editor';
 import type { RunResult } from './api';
 import type { CodeLang } from './highlight';
 
+export type CompletionKind = 'method' | 'property' | 'option' | 'value' | 'material' | 'keyword' | 'variable' | 'unit' | 'type';
+
+/** One suggestion of the script editor's code completion. */
+export interface ScriptCompletion {
+  /** shown in the list and used for filtering */
+  label: string;
+  /** text that is inserted – default `label` */
+  insert?: string;
+  kind?: CompletionKind;
+  /** short hint on the right, e.g. a category or the return value */
+  detail?: string;
+  signature?: string;
+  description?: string;
+  example?: string;
+  /** CSS colour shown as a swatch (materials) */
+  color?: string;
+}
+
+/** What a language's `completions` receives: the code, the cursor offset and the word before the cursor. */
+export interface CompletionRequest { code: string; offset: number; word: string }
+
 /** An extra language for the script editor (contributed by a plugin, e.g. OpenSCAD). */
 export interface ScriptLanguage {
   id: string;
@@ -15,6 +36,9 @@ export interface ScriptLanguage {
   /** short help shown by "API-Info" */
   help?: string;
 }
+
+/** candidates for the code completion at the cursor (keywords, functions …) – the editor filters and ranks them by `word` */
+export type CompletionProvider = (request: CompletionRequest) => (string | ScriptCompletion)[];
 
 export const SCRIPT_LANGUAGES = shallowReactive<ScriptLanguage[]>([]);
 
