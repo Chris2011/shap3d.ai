@@ -11,7 +11,7 @@ Das Plugin ist ein eigenes Paket mit eigener `package.json` und gehört **nicht*
 ## Funktionen
 
 - **.scad-Dateien öffnen** – *Datei › Importieren…* oder per Drag & Drop. Das Ergebnis wird eine Gruppe mit echten, bearbeitbaren Flächen.
-- **OpenSCAD im Skript-Editor** – Sprache „OpenSCAD“ in der Sprachauswahl, mit Beispielen (Beispiel laden… › OpenSCAD) und Hilfe (*API-Info*). `echo()`, Warnungen und Fehler erscheinen in der Konsole.
+- **OpenSCAD im Skript-Editor** – Sprache „OpenSCAD“ in der Sprachauswahl, mit Beispielen (Beispiel laden… › OpenSCAD) und Hilfe (*API-Info*). `echo()`, Warnungen und Fehler erscheinen in der Konsole. Die Code-Vervollständigung schlägt Module, Funktionen, Schlüsselwörter und `$fn`/`$fa`/`$fs` vor (ab Version 1.3.0 – ältere Installationen über *Plugin-Ordner laden…* neu installieren).
 - **`s3d.scad(code, { at, name })` in JavaScript-Skripten** – OpenSCAD-Code mitten in einem s3d-Skript:
   ```js
   const platte = s3d.scad('difference() { cube([80, 50, 6]); translate([40, 25, -1]) cylinder(h = 8, r = 10); }');

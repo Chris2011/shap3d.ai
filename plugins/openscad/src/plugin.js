@@ -122,6 +122,61 @@ In JavaScript-Skripten:
 .scad-Dateien öffnen: Datei › Importieren…, per Drag & Drop oder aus der Dateibibliothek.
 Exportieren: Datei › Exportieren › OpenSCAD (.scad) – das Modell als polyhedron().`;
 
+/** code completion in the script editor: OpenSCAD's modules, functions and keywords */
+const SCAD_WORDS = [
+  ['cube', 'cube(size, center = false)', '3D', 'Quader – size ist eine Zahl oder [x, y, z].'],
+  ['sphere', 'sphere(r = 1)', '3D', 'Kugel mit Radius r (oder d = Durchmesser).'],
+  ['cylinder', 'cylinder(h, r, center = false)', '3D', 'Zylinder; mit r1/r2 ein Kegel(stumpf).'],
+  ['polyhedron', 'polyhedron(points, faces)', '3D', 'Körper aus Punkten und Flächen (Punktnummern ab 0).'],
+  ['square', 'square(size, center = false)', '2D', 'Rechteck.'],
+  ['circle', 'circle(r = 1)', '2D', 'Kreis.'],
+  ['polygon', 'polygon(points, paths)', '2D', 'Vieleck aus Punkten.'],
+  ['text', 'text(text, size = 10, font = "Liberation Sans")', '2D', 'Text als 2D-Form.'],
+  ['union', 'union() { … }', 'Boolesch', 'Vereinigung aller Kinder.'],
+  ['difference', 'difference() { … }', 'Boolesch', 'Das erste Kind minus alle weiteren.'],
+  ['intersection', 'intersection() { … }', 'Boolesch', 'Nur, was alle Kinder gemeinsam haben.'],
+  ['hull', 'hull() { … }', 'Boolesch', 'Konvexe Hülle der Kinder.'],
+  ['minkowski', 'minkowski() { … }', 'Boolesch', 'Minkowski-Summe (z. B. abgerundete Kanten).'],
+  ['translate', 'translate([x, y, z])', 'Transformation', 'Verschieben.'],
+  ['rotate', 'rotate([x, y, z])', 'Transformation', 'Drehen in Grad um X, Y, Z (oder rotate(a, v)).'],
+  ['scale', 'scale([x, y, z])', 'Transformation', 'Skalieren.'],
+  ['resize', 'resize([x, y, z])', 'Transformation', 'Auf eine Größe bringen.'],
+  ['mirror', 'mirror([x, y, z])', 'Transformation', 'Spiegeln an der Ebene mit dieser Normalen.'],
+  ['multmatrix', 'multmatrix(m)', 'Transformation', 'Beliebige 4×4-Matrix.'],
+  ['color', 'color("name" | [r, g, b, a])', 'Transformation', 'Farbe – wird zum Material.'],
+  ['offset', 'offset(r | delta)', '2D', '2D-Kontur versetzen.'],
+  ['linear_extrude', 'linear_extrude(height, twist, scale)', 'Extrusion', '2D-Form zu einem Körper ziehen.'],
+  ['rotate_extrude', 'rotate_extrude(angle = 360)', 'Extrusion', '2D-Form um die Z-Achse drehen.'],
+  ['projection', 'projection(cut = false)', '2D', '3D-Körper auf die XY-Ebene projizieren.'],
+  ['import', 'import("datei.stl")', 'Datei', 'STL, OFF, 3MF, SVG, DXF aus der Dateibibliothek.'],
+  ['surface', 'surface("hoehe.png")', 'Datei', 'Höhenfeld aus Bild oder Datei.'],
+  ['module', 'module name(params) { … }', 'Schlüsselwort', 'Eigenes Modul definieren.'],
+  ['function', 'function name(params) = …;', 'Schlüsselwort', 'Eigene Funktion definieren.'],
+  ['for', 'for (i = [0 : n]) { … }', 'Schlüsselwort', 'Schleife.'],
+  ['intersection_for', 'intersection_for (i = [0 : n]) { … }', 'Schlüsselwort', 'Schnitt aller Durchläufe.'],
+  ['if', 'if (bedingung) { … } else { … }', 'Schlüsselwort', 'Bedingung.'],
+  ['let', 'let (a = 1) …', 'Schlüsselwort', 'Lokale Variablen.'],
+  ['each', 'each liste', 'Schlüsselwort', 'Liste in eine Liste ausbreiten.'],
+  ['include', 'include <datei.scad>', 'Schlüsselwort', 'Datei einbinden (mit ihrem Code).'],
+  ['use', 'use <datei.scad>', 'Schlüsselwort', 'Module und Funktionen einer Datei nutzen.'],
+  ['echo', 'echo(…)', 'Funktion', 'In die Konsole schreiben.'],
+  ['assert', 'assert(bedingung, meldung)', 'Funktion', 'Abbrechen, wenn die Bedingung nicht gilt.'],
+  ['children', 'children()', 'Funktion', 'Die Kinder eines Moduls.'],
+  ['len', 'len(liste)', 'Funktion', 'Länge einer Liste oder eines Textes.'],
+  ['concat', 'concat(a, b, …)', 'Funktion', 'Listen verbinden.'],
+  ['str', 'str(…)', 'Funktion', 'Text zusammensetzen.'],
+  ['sin', 'sin(grad)', 'Mathe', 'Sinus (Grad).'], ['cos', 'cos(grad)', 'Mathe', 'Kosinus (Grad).'], ['tan', 'tan(grad)', 'Mathe', 'Tangens (Grad).'],
+  ['sqrt', 'sqrt(x)', 'Mathe', 'Wurzel.'], ['pow', 'pow(x, y)', 'Mathe', 'Potenz.'], ['abs', 'abs(x)', 'Mathe', 'Betrag.'],
+  ['min', 'min(…)', 'Mathe', 'Kleinster Wert.'], ['max', 'max(…)', 'Mathe', 'Größter Wert.'], ['round', 'round(x)', 'Mathe', 'Runden.'],
+  ['floor', 'floor(x)', 'Mathe', 'Abrunden.'], ['ceil', 'ceil(x)', 'Mathe', 'Aufrunden.'], ['norm', 'norm(v)', 'Mathe', 'Länge eines Vektors.'],
+  ['cross', 'cross(a, b)', 'Mathe', 'Kreuzprodukt.'], ['rands', 'rands(min, max, anzahl, seed)', 'Mathe', 'Zufallszahlen.'],
+  ['PI', 'PI', 'Konstante', 'π = 3,14159…'], ['true', 'true', 'Konstante', 'wahr'], ['false', 'false', 'Konstante', 'falsch'], ['undef', 'undef', 'Konstante', 'kein Wert'],
+  ['$fn', '$fn = 64', 'Variable', 'Anzahl der Segmente für Kreise, Kugeln und Zylinder.'],
+  ['$fa', '$fa = 12', 'Variable', 'Kleinster Winkel eines Segments.'],
+  ['$fs', '$fs = 2', 'Variable', 'Kleinste Länge eines Segments.'],
+  ['$t', '$t', 'Variable', 'Animationszeit 0–1.'],
+].map(([label, signature, detail, description]) => ({ label, signature, detail, description, kind: /^(module|function|for|intersection_for|if|let|each|include|use|true|false|undef)$/.test(label) ? 'keyword' : label.startsWith('$') ? 'variable' : 'method' }));
+
 /**
  * Parses OFF text (OpenSCAD's export) into vertices and faces. Line based, because OpenSCAD
  * appends a colour to every face ("3 0 7 23 249 215 44" = triangle 0-7-23 in RGB 249/215/44).
@@ -181,7 +236,7 @@ const consoleLines = lines => lines.flatMap(line => {
 export default {
   id: 'openscad',
   name: 'OpenSCAD',
-  version: '1.2.0',
+  version: '1.3.0',
   author: 'Shap3D.ai (OpenSCAD: openscad.org)',
   description: 'Öffnet .scad-Dateien, bringt OpenSCAD als Sprache in den Skript-Editor, s3d.scad() für JavaScript, den Export als .scad und „Als Code öffnen ▸ OpenSCAD“ – mit dem echten OpenSCAD als WebAssembly.',
 
@@ -345,6 +400,8 @@ export default {
         }
       },
     });
+    // code completion in the script editor (Shap3D.ai versions without it simply skip this)
+    context.script.registerCompletions?.('openscad', () => SCAD_WORDS);
 
     // ---------------------------------------------------------------- s3d.scad() for JavaScript scripts
     context.script.extend('scad', (api, code, options = {}) => {

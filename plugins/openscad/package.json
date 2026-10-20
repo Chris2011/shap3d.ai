@@ -1,6 +1,6 @@
 {
   "name": "s3d-plugin-openscad",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "description": "OpenSCAD für Shap3D.ai: .scad-Dateien öffnen, OpenSCAD im Skript-Editor und s3d.scad() – mit dem offiziellen OpenSCAD als WebAssembly.",
   "license": "GPL-2.0-or-later",
