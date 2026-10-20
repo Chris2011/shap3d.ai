@@ -1,0 +1,12 @@
+# Keep LF in the working copy on every platform, matching oxfmt's endOfLine
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.wasm binary
+*.zst binary
+*.skp binary
+*.blend binary

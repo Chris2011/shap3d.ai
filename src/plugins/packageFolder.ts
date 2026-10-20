@@ -9,7 +9,11 @@ interface PermissionHandle {
   queryPermission(descriptor: PermissionMode): Promise<PermissionState>;
   requestPermission(descriptor: PermissionMode): Promise<PermissionState>;
 }
-type DirectoryPicker = (options?: { id?: string; startIn?: FileSystemHandle; mode?: 'read' | 'readwrite' }) => Promise<FileSystemDirectoryHandle>;
+type DirectoryPicker = (options?: {
+  id?: string;
+  startIn?: FileSystemHandle;
+  mode?: 'read' | 'readwrite';
+}) => Promise<FileSystemDirectoryHandle>;
 
 const directoryPicker = () => (window as unknown as { showDirectoryPicker?: DirectoryPicker }).showDirectoryPicker;
 
@@ -21,9 +25,13 @@ export const pickPackageFolder = async (startIn?: FileSystemDirectoryHandle): Pr
   try {
     return await directoryPicker()!.call(window, { id: 'plugin-folder', mode: 'read', startIn });
   } catch (error: any) {
-    if (error?.name === 'AbortError') return null;
+    if (error?.name === 'AbortError') {
+      return null;
+    }
     // the remembered folder may be gone – try again without it
-    if (startIn && (error?.name === 'NotFoundError' || error instanceof TypeError)) return pickPackageFolder();
+    if (startIn && (error?.name === 'NotFoundError' || error instanceof TypeError)) {
+      return pickPackageFolder();
+    }
     throw error;
   }
 };
@@ -34,7 +42,8 @@ export const queryReadPermission = (handle: FileSystemDirectoryHandle) =>
 
 /** asks for read permission if needed (only after a click) */
 export const requestReadPermission = async (handle: FileSystemDirectoryHandle) =>
-  (await queryReadPermission(handle)) === 'granted' || (await (handle as unknown as PermissionHandle).requestPermission({ mode: 'read' })) === 'granted';
+  (await queryReadPermission(handle)) === 'granted' ||
+  (await (handle as unknown as PermissionHandle).requestPermission({ mode: 'read' })) === 'granted';
 
 /**
  * Reads every file of a folder like an input with webkitdirectory would deliver it:
@@ -46,7 +55,9 @@ export const readFolderFiles = async (handle: FileSystemDirectoryHandle) => {
     for await (const child of directory.values()) {
       const childPath = `${path}/${child.name}`;
       if (child.kind === 'directory') {
-        if (child.name !== 'node_modules') await walk(child as FileSystemDirectoryHandle, childPath);
+        if (child.name !== 'node_modules') {
+          await walk(child as FileSystemDirectoryHandle, childPath);
+        }
         continue;
       }
       const file = await (child as FileSystemFileHandle).getFile();

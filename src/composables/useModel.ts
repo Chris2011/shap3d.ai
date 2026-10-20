@@ -8,11 +8,18 @@ import type { Editor } from '../engine/editor';
  */
 export const useModel = <T>(read: (editor: Editor) => T): ComputedRef<T> => {
   const editor = useEditor();
-  return computed(() => { void editor.ui.revision; return read(editor); });
+  return computed(() => {
+    void editor.ui.revision;
+    return read(editor);
+  });
 };
 
 /** Like useModel, but also follows selection changes. */
 export const useSelection = <T>(read: (editor: Editor) => T): ComputedRef<T> => {
   const editor = useEditor();
-  return computed(() => { void editor.ui.revision; void editor.ui.selRev; return read(editor); });
+  return computed(() => {
+    void editor.ui.revision;
+    void editor.ui.selRev;
+    return read(editor);
+  });
 };

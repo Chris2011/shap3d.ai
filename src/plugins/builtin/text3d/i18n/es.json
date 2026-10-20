@@ -1,0 +1,56 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "text3d": {
+      "dialog": {
+        "title": "Insertar texto 3D",
+        "placeholder": "Escribe el texto",
+        "font": "Fuente",
+        "addFontTitle": "Añadir un archivo TTF, OTF o WOFF como fuente – se guarda en el navegador",
+        "addFont": "Cargar fuente propia…",
+        "removeFont": "Quitar esta fuente",
+        "loading": "Cargando fuente …",
+        "freeFonts": "Fuentes libres (SIL OFL)",
+        "height": "Altura",
+        "filled": "Relleno",
+        "depth": "Extruido",
+        "upright": "De pie",
+        "fontAdded": "Fuente «{name}» añadida"
+      },
+      "componentName": "Texto 3D «{text}»",
+      "plugin": {
+        "status": "Texto 3D: elige texto y fuente, luego «Colocar» y haz clic en el modelo.",
+        "name": "Texto 3D",
+        "description": "Letras y números 3D en muchas fuentes libres (sin serifa, con serifa, display, manuscrita, píxel …) o tus propios archivos TTF/OTF/WOFF, planos o de pie, rellenos, extruidos o como contorno. Aporta s3d.text3d() para scripts.",
+        "apiDescription": "Letras y números 3D. size = altura de las letras, depth = extrusión (0 = plano), upright = de pie (por defecto), filled: false = solo contorno, \"\\n\" = nueva línea. Fuentes (font): {fonts} o las tuyas («eigene:nombre»)."
+      },
+      "errors": {
+        "unknownFont": "Fuente desconocida «{id}» – disponibles: {available}",
+        "fontNotFound": "Fuente «{name}» no encontrada",
+        "stillLoading": "La fuente «{id}» todavía se está cargando – vuelve a ejecutarlo en un momento.",
+        "wrongFile": "Elige un archivo TTF, OTF o WOFF (WOFF2 no funciona)"
+      },
+      "categories": {
+        "sans": "Sin serifa",
+        "serif": "Con serifa",
+        "display": "Display",
+        "script": "Manuscrita",
+        "special": "Especiales",
+        "custom": "Propias"
+      },
+      "fonts": {
+        "helvetiker_bold": "Helvetiker Bold",
+        "roboto_bold": "Roboto Bold",
+        "playfair_bold": "Playfair Display Bold",
+        "fredoka": "Fredoka (redondeada)",
+        "blackops": "Black Ops One (plantilla)",
+        "caveat": "Caveat (manuscrita)",
+        "orbitron": "Orbitron (futurista)",
+        "pressstart": "Press Start 2P (píxel)",
+        "jetbrains": "JetBrains Mono (código)"
+      }
+    }
+  }
+}

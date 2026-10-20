@@ -20,7 +20,13 @@ ${catalogText()}
 - s3d.clear() löscht das Modell – nur auf ausdrücklichen Wunsch!
 
 ## Fertige Materialien (direkt per Name nutzbar, ohne s3d.material)
-${MATERIAL_CATEGORIES.map(category => `- ${category}: ` + MATERIAL_LIBRARY.filter(material => material.category === category).map(material => material.name).join(', ')).join('\n')}
+${MATERIAL_CATEGORIES.map(
+  (category) =>
+    `- ${category}: ` +
+    MATERIAL_LIBRARY.filter((material) => material.category === category)
+      .map((material) => material.name)
+      .join(', '),
+).join('\n')}
 - Texturen für eigene Materialien (s3d.material(name, '#hex', { texture })): ${Object.keys(TEXTURES).join(', ')}.
 `;
 
@@ -28,7 +34,7 @@ ${MATERIAL_CATEGORIES.map(category => `- ${category}: ` + MATERIAL_LIBRARY.filte
 const SIZES = `Tisch: 0,75 m hoch, Platte 1,6 × 0,9 m · Stuhl: Sitz 0,45 m hoch, 0,45 × 0,45 m, Lehne bis 0,9 m · Tür: 0,9 × 2,1 m · Fenster: 1,2 × 1,2 m, Brüstung 0,9 m · Raumhöhe 2,5–2,8 m · Wand 0,2–0,3 m dick · Treppenstufe 17,5 cm hoch, 28 cm tief · Bett 2 × 1,4 m, 0,45 m hoch · Sofa 2,2 × 0,9 m, Sitz 0,45 m · Baum 4–8 m · Auto 4,5 × 1,8 × 1,5 m · Person 1,75 m.`;
 
 const example = (id: string, prompt: string): string => {
-  const entry = EXAMPLES.find(candidate => candidate.id === id);
+  const entry = EXAMPLES.find((candidate) => candidate.id === id);
   return entry ? `### Nutzer: „${prompt}“\nAntwort:\n${entry.description}\n\`\`\`js\n${entry.code.trim()}\n\`\`\`` : '';
 };
 

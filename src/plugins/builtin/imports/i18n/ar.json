@@ -1,0 +1,32 @@
+{
+  "code": "ar",
+  "name": "العربية",
+  "dir": "rtl",
+  "messages": {
+    "imports": {
+      "formats": {
+        "ply": "PLY (مسح ثلاثي الأبعاد)",
+        "3mf": "3MF (طباعة ثلاثية الأبعاد)",
+        "amf": "AMF (طباعة ثلاثية الأبعاد)"
+      },
+      "errors": {
+        "collada": "تعذّرت قراءة ملف Collada.",
+        "blendEmpty": "لم يُعثر على كائنات شبكية في ملف Blender (الإصدار {version}‏).",
+        "skipped": "تم التخطي: {list}",
+        "unsupported": "صيغة غير مدعومة: {ext}",
+        "noBlend": "ليس ملف Blender (الترويسة مفقودة).",
+        "noDna": "لا يحتوي الملف على وصف للبنية (DNA1‏).",
+        "badDna": "وصف بنية غير صالح",
+        "linked": "{name} (بيانات مرتبطة)",
+        "noVertices": "لا رؤوس",
+        "noCorners": "لا زوايا أوجه",
+        "noFaceList": "لا قائمة أوجه",
+        "noFaces": "لا أوجه"
+      },
+      "plugin": {
+        "name": "صيغ الاستيراد",
+        "description": "يفتح ملفات FBX وCollada ‏(.dae‏) وKMZ و3DS وPLY و3MF وAMF وVRML وUSD/USDZ وBlender ‏(.blend‏) – دون البرامج الأصلية. تُحمَّل القارئات عند أول استيراد."
+      }
+    }
+  }
+}

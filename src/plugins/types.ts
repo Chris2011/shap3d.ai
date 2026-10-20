@@ -11,6 +11,8 @@ import type { ApiCategory } from '../scripting/catalog';
 import type { ContextMenuEntry, TopBarButton } from './uiExtensions';
 import type { LoadedScene } from './fileFormats';
 import type { CodeFormat } from '../scripting/codeExport';
+import type { LanguageInfo, MessageTree } from '../i18n';
+export type { LanguageInfo, MessageTree, LanguageFile } from '../i18n';
 export type { ScriptCompletion, CompletionRequest, CompletionKind, CompletionProvider } from '../scripting/languages';
 export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
 
@@ -26,6 +28,11 @@ export interface S3dPlugin {
   version?: string;
   description?: string;
   author?: string;
+  /**
+   * The plugin's texts per language, e.g. { en: { "my-plugin": { hello: "Hello" } }, de: { … } } (English is required, it is the fallback) – registered as soon as
+   * the plugin is loaded (also while it is switched off, so name and description can be keys), removed when it is uninstalled.
+   */
+  messages?: Record<string, MessageTree>;
   activate: (context: PluginContext) => void | Promise<void>;
   deactivate?: () => void;
 }
@@ -34,8 +41,9 @@ export type Disposer = () => void;
 
 export interface PluginCommand {
   id: string;
+  /** text or message key (see i18n) – a getter is read each time */
   label: string;
-  /** main-menu / palette group, default "Plugins" */
+  /** main-menu group: 'file', 'edit', 'view', 'camera', 'solids' or 'plugins' (default); any other name only groups it in the palette */
   group?: string;
   /** only shown as a hint – plugins bind keys through tools (`key`) */
   shortcut?: string;
@@ -48,6 +56,7 @@ export interface PluginCommand {
 
 export interface PluginTool {
   id: string;
+  /** text or message key */
   name: string;
   icon?: string;
   /** single key that activates the tool (ignored when another tool already uses it) */
@@ -57,6 +66,7 @@ export interface PluginTool {
 
 export interface PluginPanel {
   id: string;
+  /** text or message key */
   label: string;
   icon?: string;
   /** width in px (default 300) */
@@ -99,7 +109,10 @@ export interface PluginMesh {
 }
 
 /** colour (CSS, e.g. "#ff0000") and opacity 0–1 of a material */
-export interface PluginMaterial { color: string; opacity?: number }
+export interface PluginMaterial {
+  color: string;
+  opacity?: number;
+}
 
 export interface PluginMeshOptions {
   /** name of the group that is created (meshes.add) */
@@ -211,6 +224,25 @@ export interface PluginContext {
   data: {
     get: <T>(definition: Definition) => T | undefined;
     set: (definition: Definition, value: unknown) => void;
+  };
+  /**
+   * Languages: texts as message keys (`t('my-plugin.hello', { name })`). A plugin brings its own texts – at least
+   * English (the fallback) – in `messages` or with `addMessages('en', …)`, and may add more languages or whole language packs.
+   * Labels, names and titles given to commands, tools, panels, buttons and menu entries may be keys – they follow the language.
+   */
+  i18n: {
+    /** translates a key: current language → English → the key; `{name}` placeholders, "one | many" picks by `{count}` */
+    t: (key: string, params?: Record<string, unknown>) => string;
+    /** the active language code, e.g. "de" or "en" */
+    language: () => string;
+    languages: () => LanguageInfo[];
+    /** texts for a language, nested ({ "my-plugin": { "hello": "Hallo {name}" } }) or flat ({ "my-plugin.hello": … }) */
+    addMessages: (language: string, messages: MessageTree | Record<string, string>) => Disposer;
+    /** a new language that can be chosen (optionally with its texts) */
+    addLanguage: (info: LanguageInfo, messages?: MessageTree | Record<string, string>) => Disposer;
+    /** switches the language (kept in the browser); '' = like the browser */
+    setLanguage: (code: string) => void;
+    onChange: (listener: (language: string) => void) => Disposer;
   };
   /** register any extra clean-up */
   onDispose: (disposer: Disposer) => void;

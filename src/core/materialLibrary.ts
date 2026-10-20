@@ -1,13 +1,43 @@
 import type { TextureKind } from './textures';
+import { t } from '../i18n';
 
 /**
  * Ready-made materials. Scripts can use them by name without defining them first:
  * s3d.box([0, 0, 0], 1, 1, 1, { material: 'Glas' }) – the material is created on first use.
  */
-export interface LibraryMaterial { name: string; color: string; category: MaterialCategory; texture?: TextureKind; size?: number; opacity?: number; note?: string }
+/** shown name of a library category (`materials.categories.<id>`); the category itself is part of the data */
+const CATEGORY_IDS: Record<string, string> = {
+  Farben: 'colors',
+  'Glas & Kunststoff': 'glassPlastic',
+  Holz: 'wood',
+  Metall: 'metal',
+  Natur: 'nature',
+  'Stein & Mineral': 'stone',
+  'Stoff & Leder': 'fabric',
+};
+export const categoryLabel = (category: string) =>
+  CATEGORY_IDS[category] ? t(`materials.categories.${CATEGORY_IDS[category]}`) : category;
+
+export interface LibraryMaterial {
+  name: string;
+  color: string;
+  category: MaterialCategory;
+  texture?: TextureKind;
+  size?: number;
+  opacity?: number;
+  note?: string;
+}
 export type MaterialCategory = 'Holz' | 'Stein & Mineral' | 'Metall' | 'Glas & Kunststoff' | 'Natur' | 'Stoff & Leder' | 'Farben';
 
-export const MATERIAL_CATEGORIES: MaterialCategory[] = ['Holz', 'Stein & Mineral', 'Metall', 'Glas & Kunststoff', 'Natur', 'Stoff & Leder', 'Farben'];
+export const MATERIAL_CATEGORIES: MaterialCategory[] = [
+  'Holz',
+  'Stein & Mineral',
+  'Metall',
+  'Glas & Kunststoff',
+  'Natur',
+  'Stoff & Leder',
+  'Farben',
+];
 
 export const MATERIAL_LIBRARY: LibraryMaterial[] = [
   // wood
@@ -71,5 +101,5 @@ export const MATERIAL_LIBRARY: LibraryMaterial[] = [
   { name: 'Braun', color: '#7a4e2a', category: 'Farben' },
 ];
 
-const byName = new Map(MATERIAL_LIBRARY.map(material => [material.name.toLowerCase(), material]));
+const byName = new Map(MATERIAL_LIBRARY.map((material) => [material.name.toLowerCase(), material]));
 export const libraryMaterial = (name: string) => byName.get(name.trim().toLowerCase());

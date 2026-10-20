@@ -7,8 +7,12 @@ import { PEOPLE, DEFAULT_PERSON, buildPerson } from '../core/people';
 export const personDefinition = (editor: Editor, key = DEFAULT_PERSON): Definition => {
   const person = PEOPLE[key] ?? PEOPLE[DEFAULT_PERSON];
   const name = person.label;
-  const existing = [...editor.model.definitions.values()].find(definition => definition.isComponent && definition.faceMe && definition.name === name);
-  if (existing) return existing;
+  const existing = [...editor.model.definitions.values()].find(
+    (definition) => definition.isComponent && definition.faceMe && definition.name === name,
+  );
+  if (existing) {
+    return existing;
+  }
   const ents = new Entities();
   buildPerson(ents, person.svg);
   const def = editor.model.newDefinition(name, true, ents);
@@ -22,12 +26,19 @@ export const addScaleFigure = (editor: Editor, key = DEFAULT_PERSON) => {
   editor.invalidate();
 };
 
-export const installDefaults = (editor: Editor) => { editor.onNewModel.push(() => addScaleFigure(editor)); };
+export const installDefaults = (editor: Editor) => {
+  editor.onNewModel.push(() => addScaleFigure(editor));
+};
 
 /** Keep unsaved work in the browser; a clean model clears the slot so a fresh start stays fresh. */
 export const autosave = (editor: Editor) => {
   try {
-    if (!editor.ui.saved) localStorage.setItem('s3d:autosave', JSON.stringify({ ...editor.model.toJSON(), _dirty: true }));
-    else localStorage.removeItem('s3d:autosave');
-  } catch { /* storage unavailable */ }
+    if (!editor.ui.saved) {
+      localStorage.setItem('s3d:autosave', JSON.stringify({ ...editor.model.toJSON(), _dirty: true }));
+    } else {
+      localStorage.removeItem('s3d:autosave');
+    }
+  } catch {
+    /* storage unavailable */
+  }
 };

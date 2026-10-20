@@ -5,13 +5,21 @@
  */
 try {
   const keys: string[] = [];
-  for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i)!);
+  for (let i = 0; i < localStorage.length; i++) {
+    keys.push(localStorage.key(i)!);
+  }
   // newer data wins: "fw:" is copied before the older "suv:"
   for (const prefix of ['fw:', 'suv:']) {
     for (const old of keys) {
-      if (!old.startsWith(prefix)) continue;
+      if (!old.startsWith(prefix)) {
+        continue;
+      }
       const key = 's3d:' + old.slice(prefix.length);
-      if (localStorage.getItem(key) == null) localStorage.setItem(key, localStorage.getItem(old)!);
+      if (localStorage.getItem(key) == null) {
+        localStorage.setItem(key, localStorage.getItem(old)!);
+      }
     }
   }
-} catch { /* storage unavailable */ }
+} catch {
+  /* storage unavailable */
+}

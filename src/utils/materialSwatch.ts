@@ -1,7 +1,11 @@
 import { makeTexture, isTextureKind } from '../core/textures';
 
 /** What a swatch needs to know about a material – model materials and library materials both fit. */
-export interface SwatchSource { color: string; texture?: string; opacity?: number }
+export interface SwatchSource {
+  color: string;
+  texture?: string;
+  opacity?: number;
+}
 
 const textureUrls = new Map<string, string>();
 
@@ -21,8 +25,14 @@ export const textureUrl = (kind: string, color: string): string => {
  * `null` is the default material (white/grey split).
  */
 export const swatchStyle = (material: SwatchSource | null | undefined): Record<string, string> => {
-  if (!material) return { background: 'linear-gradient(135deg, #fff 50%, #a4b2bf 50%)' };
-  if (material.texture && isTextureKind(material.texture)) return { background: `url(${textureUrl(material.texture, material.color)}) center / cover` };
-  if ((material.opacity ?? 1) < 1) return { background: `linear-gradient(135deg, ${material.color} 50%, ${material.color}66 50%)` };
+  if (!material) {
+    return { background: 'linear-gradient(135deg, #fff 50%, #a4b2bf 50%)' };
+  }
+  if (material.texture && isTextureKind(material.texture)) {
+    return { background: `url(${textureUrl(material.texture, material.color)}) center / cover` };
+  }
+  if ((material.opacity ?? 1) < 1) {
+    return { background: `linear-gradient(135deg, ${material.color} 50%, ${material.color}66 50%)` };
+  }
   return { background: material.color };
 };

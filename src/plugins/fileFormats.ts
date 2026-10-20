@@ -1,5 +1,6 @@
 import type * as THREE from 'three';
 import type { Editor } from '../engine/editor';
+import { t } from '../i18n';
 
 /** What a scene importer hands back: the three.js scene plus how to bring it into our Z-up metre world. */
 export interface LoadedScene {
@@ -24,10 +25,22 @@ export interface FileImporter {
 export const pluginImporters = new Map<string, FileImporter>();
 
 export const registerImporter = (extensions: string[], importer: FileImporter) => {
-  if (!importer.import && !importer.loadScene) throw new Error('Ein Importer braucht import oder loadScene');
-  const keys = extensions.map(extension => extension.replace(/^\./, '').toLowerCase());
-  const taken = keys.find(key => pluginImporters.has(key));
-  if (taken) throw new Error(`Für .${taken} gibt es schon einen Plugin-Import`);
-  for (const key of keys) pluginImporters.set(key, importer);
-  return () => { for (const key of keys) if (pluginImporters.get(key) === importer) pluginImporters.delete(key); };
+  if (!importer.import && !importer.loadScene) {
+    throw new Error(t('plugins.errors.importerNeedsHandler'));
+  }
+  const keys = extensions.map((extension) => extension.replace(/^\./, '').toLowerCase());
+  const taken = keys.find((key) => pluginImporters.has(key));
+  if (taken) {
+    throw new Error(t('plugins.errors.importerExists', { ext: taken }));
+  }
+  for (const key of keys) {
+    pluginImporters.set(key, importer);
+  }
+  return () => {
+    for (const key of keys) {
+      if (pluginImporters.get(key) === importer) {
+        pluginImporters.delete(key);
+      }
+    }
+  };
 };

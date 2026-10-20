@@ -1,0 +1,92 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "terrain": {
+      "panel": {
+        "sculpt": "Esculpir terreno",
+        "new": "Nuevo terreno",
+        "discardClose": "Descartar y cerrar",
+        "tip": "Consejo: dibuja un <b>rectángulo</b>, selecciónalo e inicia «Terreno» – el terreno toma su tamaño y posición. O crea uno aquí:",
+        "width": "Ancho",
+        "depth": "Fondo",
+        "detail": "Detalle",
+        "coarse": "Grueso (rápido)",
+        "medium": "Medio",
+        "fine": "Fino (más caras)",
+        "startHills": "Empezar con colinas aleatorias",
+        "create": "Crear terreno",
+        "grid": "cuadrícula {columns}×{rows} ({cell})",
+        "height": "altura {low} … {high}",
+        "brush": "Pincel",
+        "key": "tecla {key}",
+        "strength": "Intensidad",
+        "brushHint": "Mantener pulsado el botón = sigue actuando · <b>Mayús</b> invierte subir/bajar · <b>[ ]</b> tamaño · <b>Ctrl+Z</b> último trazo",
+        "quick": "Formas rápidas",
+        "hillsTitle": "Colinas suaves",
+        "hills": "〰 Colinas",
+        "mountainsTitle": "Montañas altas",
+        "mountains": "⛰ Montañas",
+        "flatTitle": "Todo plano otra vez",
+        "flat": "▭ Plano",
+        "undoTitle": "Deshacer el último trazo del pincel (Ctrl+Z)",
+        "surfaces": "Superficies",
+        "auto": "automático",
+        "rockFrom": "Roca a partir de",
+        "earthFrom": "Tierra a partir de",
+        "slope": "{degrees}° de pendiente",
+        "snowFrom": "Nieve a partir de",
+        "off": "desactivado",
+        "extras": "Extras",
+        "skirt": "Base de tierra (paredes laterales hasta debajo del valle más profundo)",
+        "water": "Agua",
+        "discardTitle": "Descartarlo todo",
+        "discard": "Descartar",
+        "applyTitle": "Añadir al modelo como grupo (Intro) – editable más tarde con clic derecho",
+        "apply": "Aplicar"
+      },
+      "modes": {
+        "raise": "Elevar",
+        "raiseTip": "Amontonar colinas y montañas",
+        "lower": "Bajar",
+        "lowerTip": "Excavar valles, hondonadas y lagos",
+        "smooth": "Suavizar",
+        "smoothTip": "Suavizar aristas y cumbres",
+        "flatten": "Allanar",
+        "flattenTip": "Nivelar a la altura del punto pulsado (solar, meseta)",
+        "rough": "Hacer rugoso",
+        "roughTip": "Irregularidades para rocas y pedregales"
+      },
+      "layers": {
+        "grass": "Llano",
+        "earth": "Ladera / valle",
+        "rock": "Montaña / acantilado",
+        "snow": "Cumbre"
+      },
+      "tool": {
+        "start": "Terreno: selecciona un rectángulo o crea un terreno nuevo en la ventana.",
+        "sculpt": "{mode} – mantener pulsado el botón y arrastrar · Mayús: invertir · [ ] tamaño del pincel · Ctrl+Z: deshacer trazo · Intro/Esc: aplicar",
+        "tooltip": "{mode} · Ø {size} · altura {height}"
+      },
+      "session": {
+        "needsFlatFace": "El terreno solo funciona a partir de una cara horizontal – p. ej. un rectángulo en el suelo.",
+        "newTitle": "Nuevo terreno {width} × {depth} m",
+        "applied": "Terreno aplicado – Ctrl+Z lo deshace",
+        "discarded": "Terreno descartado"
+      },
+      "plugin": {
+        "name": "Terreno (sandbox)",
+        "description": "Esculpe paisajes con un pincel – elevar, bajar, suavizar, allanar, hacer rugoso; hierba, tierra, roca y nieve según altura y pendiente, además de agua. Aporta s3d.terrain() para scripts.",
+        "command": "Terreno (sandbox): dar forma a montañas y valles",
+        "editEntry": "⛰ Editar terreno",
+        "edit": "Editar terreno",
+        "toolName": "Terreno",
+        "fromFace": "Terreno desde la cara",
+        "fromFaceEntry": "⛰ Terreno desde la cara",
+        "apiTitle": "Terreno (paisaje)",
+        "apiDescription": "Paisaje con colinas y montañas. Hierba en lo llano, tierra en las laderas, roca arriba, nieve y agua opcionales. hills = altura de las montañas (0 = plano). Se puede seguir esculpiendo con la herramienta Terreno."
+      }
+    }
+  }
+}

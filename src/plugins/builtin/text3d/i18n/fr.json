@@ -1,0 +1,56 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "text3d": {
+      "dialog": {
+        "title": "Insérer un texte 3D",
+        "placeholder": "Saisir le texte",
+        "font": "Police",
+        "addFontTitle": "Ajouter un fichier TTF, OTF ou WOFF comme police – conservé dans le navigateur",
+        "addFont": "Charger une police…",
+        "removeFont": "Supprimer cette police",
+        "loading": "Chargement de la police …",
+        "freeFonts": "Polices libres (SIL OFL)",
+        "height": "Hauteur",
+        "filled": "Rempli",
+        "depth": "Extrudé",
+        "upright": "Debout",
+        "fontAdded": "Police « {name} » ajoutée"
+      },
+      "componentName": "Texte 3D « {text} »",
+      "plugin": {
+        "status": "Texte 3D : choisissez le texte et la police, puis « Placer » et cliquez dans le modèle.",
+        "name": "Texte 3D",
+        "description": "Lettres et chiffres 3D dans de nombreuses polices libres (sans empattement, avec empattement, display, manuscrite, pixel …) ou vos propres fichiers TTF/OTF/WOFF, à plat ou debout, pleins, extrudés ou en contour. Apporte s3d.text3d() pour les scripts.",
+        "apiDescription": "Lettres et chiffres 3D. size = hauteur des lettres, depth = extrusion (0 = plat), upright = debout (par défaut), filled: false = contour uniquement, \"\\n\" = nouvelle ligne. Polices (font) : {fonts} ou les vôtres (« eigene:nom »)."
+      },
+      "errors": {
+        "unknownFont": "Police inconnue « {id} » – disponibles : {available}",
+        "fontNotFound": "Police « {name} » introuvable",
+        "stillLoading": "La police « {id} » est encore en cours de chargement – relancez dans un instant.",
+        "wrongFile": "Choisissez un fichier TTF, OTF ou WOFF (WOFF2 ne fonctionne pas)"
+      },
+      "categories": {
+        "sans": "Sans empattement",
+        "serif": "Avec empattement",
+        "display": "Display",
+        "script": "Manuscrite",
+        "special": "Spéciales",
+        "custom": "Personnelles"
+      },
+      "fonts": {
+        "helvetiker_bold": "Helvetiker Bold",
+        "roboto_bold": "Roboto Bold",
+        "playfair_bold": "Playfair Display Bold",
+        "fredoka": "Fredoka (arrondie)",
+        "blackops": "Black Ops One (pochoir)",
+        "caveat": "Caveat (manuscrite)",
+        "orbitron": "Orbitron (futuriste)",
+        "pressstart": "Press Start 2P (pixel)",
+        "jetbrains": "JetBrains Mono (code)"
+      }
+    }
+  }
+}

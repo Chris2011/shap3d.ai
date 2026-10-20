@@ -1,0 +1,92 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "terrain": {
+      "panel": {
+        "sculpt": "Sculpter le terrain",
+        "new": "Nouveau terrain",
+        "discardClose": "Abandonner et fermer",
+        "tip": "Astuce : dessinez un <b>rectangle</b>, sélectionnez-le puis lancez « Terrain » – le terrain reprend sa taille et sa position. Ou créez-en un ici :",
+        "width": "Largeur",
+        "depth": "Profondeur",
+        "detail": "Détail",
+        "coarse": "Grossier (rapide)",
+        "medium": "Moyen",
+        "fine": "Fin (plus de faces)",
+        "startHills": "Commencer avec des collines aléatoires",
+        "create": "Créer le terrain",
+        "grid": "grille {columns}×{rows} ({cell})",
+        "height": "hauteur {low} … {high}",
+        "brush": "Pinceau",
+        "key": "touche {key}",
+        "strength": "Intensité",
+        "brushHint": "Maintenir le bouton de la souris = continue d’agir · <b>Maj</b> inverse élever/abaisser · <b>[ ]</b> taille · <b>Ctrl+Z</b> dernier trait",
+        "quick": "Formes rapides",
+        "hillsTitle": "Collines douces",
+        "hills": "〰 Collines",
+        "mountainsTitle": "Hautes montagnes",
+        "mountains": "⛰ Montagnes",
+        "flatTitle": "Tout remettre à plat",
+        "flat": "▭ Plat",
+        "undoTitle": "Annuler le dernier coup de pinceau (Ctrl+Z)",
+        "surfaces": "Surfaces",
+        "auto": "automatique",
+        "rockFrom": "Roche à partir de",
+        "earthFrom": "Terre à partir de",
+        "slope": "{degrees}° de pente",
+        "snowFrom": "Neige à partir de",
+        "off": "désactivé",
+        "extras": "Extras",
+        "skirt": "Socle de terre (parois latérales jusque sous la vallée la plus profonde)",
+        "water": "Eau",
+        "discardTitle": "Tout abandonner",
+        "discard": "Abandonner",
+        "applyTitle": "Ajouter au modèle comme groupe (Entrée) – modifiable plus tard par clic droit",
+        "apply": "Appliquer"
+      },
+      "modes": {
+        "raise": "Élever",
+        "raiseTip": "Former des collines et des montagnes",
+        "lower": "Abaisser",
+        "lowerTip": "Creuser des vallées, des cuvettes et des lacs",
+        "smooth": "Lisser",
+        "smoothTip": "Adoucir les arêtes et les sommets",
+        "flatten": "Aplanir",
+        "flattenTip": "Niveler à la hauteur du point cliqué (terrain à bâtir, plateau)",
+        "rough": "Rendre rugueux",
+        "roughTip": "Bosses pour rochers et éboulis"
+      },
+      "layers": {
+        "grass": "Plat",
+        "earth": "Pente / vallée",
+        "rock": "Montagne / falaise",
+        "snow": "Sommet"
+      },
+      "tool": {
+        "start": "Terrain : sélectionnez un rectangle ou créez un nouveau terrain dans la fenêtre.",
+        "sculpt": "{mode} – maintenir le bouton de la souris et glisser · Maj : inverser · [ ] taille du pinceau · Ctrl+Z : annuler le trait · Entrée/Échap : appliquer",
+        "tooltip": "{mode} · Ø {size} · hauteur {height}"
+      },
+      "session": {
+        "needsFlatFace": "Le terrain ne fonctionne qu’à partir d’une face horizontale – p. ex. un rectangle au sol.",
+        "newTitle": "Nouveau terrain {width} × {depth} m",
+        "applied": "Terrain appliqué – Ctrl+Z l’annule",
+        "discarded": "Terrain abandonné"
+      },
+      "plugin": {
+        "name": "Terrain (bac à sable)",
+        "description": "Sculptez des paysages au pinceau – élever, abaisser, lisser, aplanir, rendre rugueux ; herbe, terre, roche et neige selon la hauteur et la pente, plus de l’eau. Apporte s3d.terrain() pour les scripts.",
+        "command": "Terrain (bac à sable) : façonner montagnes et vallées",
+        "editEntry": "⛰ Modifier le terrain",
+        "edit": "Modifier le terrain",
+        "toolName": "Terrain",
+        "fromFace": "Terrain depuis la face",
+        "fromFaceEntry": "⛰ Terrain depuis la face",
+        "apiTitle": "Terrain (paysage)",
+        "apiDescription": "Paysage avec collines et montagnes. Herbe sur le plat, terre sur les pentes, roche au sommet, neige et eau en option. hills = hauteur des montagnes (0 = plat). Peut ensuite être sculpté avec l’outil Terrain."
+      }
+    }
+  }
+}

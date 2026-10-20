@@ -1,0 +1,1576 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "keys": {
+      "ctrl": "Ctrl",
+      "shift": "Shift",
+      "alt": "Alt",
+      "delete": "Del",
+      "space": "Space",
+      "enter": "Enter",
+      "escape": "Esc",
+      "tab": "Tab",
+      "backspace": "Backspace"
+    },
+    "i18n": {
+      "errors": {
+        "languageExists": "The language “{code}” already exists"
+      }
+    },
+    "commands": {
+      "new": "New",
+      "open": "Open…",
+      "save": "Save (download)",
+      "saveLocal": "Save in browser",
+      "loadLocal": "Load from browser",
+      "import": "Import (DAE, FBX, 3DS, OBJ, STL, glTF …)…",
+      "export-glb": "Export: GLB",
+      "export-gltf": "Export: glTF",
+      "export-stl": "Export: STL",
+      "export-obj": "Export: OBJ",
+      "export-png": "Export: PNG image",
+      "print": "Print",
+      "undo": "Undo",
+      "redo": "Redo",
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste",
+      "pasteInPlace": "Paste in place",
+      "delete": "Delete",
+      "clearAll": "Clear workspace",
+      "deleteGuides": "Delete guides",
+      "selectAll": "Select all",
+      "selectNone": "Select none",
+      "invertSel": "Invert selection",
+      "hide": "Hide",
+      "unhideAll": "Unhide all",
+      "makeGroup": "Make group",
+      "makeComponent": "Make component…",
+      "explode": "Explode",
+      "editGroup": "Edit group",
+      "closeGroup": "Close group/component",
+      "makeUnique": "Make unique",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "reverseFaces": "Reverse faces",
+      "orientFaces": "Orient faces",
+      "soften": "Soften edges",
+      "unsoften": "Unsoften",
+      "intersect": "Intersect faces (selection)",
+      "flipX": "Flip along: red direction",
+      "flipY": "Flip along: green direction",
+      "flipZ": "Flip along: blue direction",
+      "solid-union": "Union",
+      "solid-subtract": "Subtract (first from second)",
+      "solid-intersect": "Intersect",
+      "solid-outershell": "Outer shell",
+      "solid-trim": "Trim",
+      "solid-split": "Split",
+      "themeDark": "Dark theme",
+      "themeLight": "Light theme",
+      "themeSystem": "Theme like system",
+      "sceneNight": "3D scene: night",
+      "sceneDay": "3D scene: day",
+      "sceneAuto": "3D scene like interface",
+      "tour": "Show introduction",
+      "commandPalette": "Command palette…",
+      "managePlugins": "Manage plugins…",
+      "toggleAxes": "Axes",
+      "toggleRulers": "Rulers on the axes",
+      "toggleGrid": "Ground grid",
+      "togglePeopleSize": "Size of the people",
+      "toggleGuides": "Guides",
+      "toggleShadows": "Shadows",
+      "toggleHidden": "Hidden geometry",
+      "toggleSectionPlanes": "Section planes",
+      "toggleSectionCuts": "Section cuts",
+      "xray": "X-ray",
+      "style-wireframe": "Wireframe",
+      "style-hiddenline": "Hidden line",
+      "style-shaded": "Shaded",
+      "style-textured": "Shaded with textures",
+      "style-monochrome": "Monochrome",
+      "zoomExtents": "Zoom extents",
+      "zoomSelection": "Zoom selection",
+      "persp": "Perspective",
+      "ortho": "Parallel projection",
+      "view-iso": "Iso",
+      "view-top": "Top",
+      "view-front": "Front",
+      "view-right": "Right",
+      "view-back": "Back",
+      "view-left": "Left",
+      "view-bottom": "Bottom"
+    },
+    "names": {
+      "model": "Model",
+      "component": "Component",
+      "group": "Group",
+      "solid": "Solid",
+      "untitled": "Untitled",
+      "section": "Section",
+      "defaultMaterial": "Default",
+      "sectionNumbered": "Section {number}"
+    },
+    "import": {
+      "converterUnreachable": "The local converter cannot be reached – start the app with “npm run dev” or “npm run preview”.",
+      "needsLocalServer": ".skp and .blend files only work with the local server (“npm run dev” or “npm run preview”).",
+      "conversionFailed": "Conversion failed (HTTP {status})",
+      "unsupported": "The format .{ext} is not supported – more formats (FBX, Collada, 3DS, Blender …) come with the plugin “Import formats” (Plugins › Manage plugins).",
+      "unknownJson": "Unknown JSON format",
+      "maxFile": "3ds Max files (.max) can only be read by 3ds Max itself – save them there via File › Export as FBX (or .3ds/.obj) and import that file.",
+      "detectedMillimetres": "millimetres detected",
+      "detectedCentimetres": "centimetres detected",
+      "noFaces": "The file contains no faces.",
+      "triangles": "{count} triangle | {count} triangles",
+      "groups": "{count} group | {count} groups",
+      "materials": "{count} material | {count} materials",
+      "skipped": "{count} triangle over the limit skipped | {count} triangles over the limit skipped",
+      "part": "part"
+    },
+    "units": {
+      "centimetres": "Centimetres",
+      "millimetres": "Millimetres",
+      "inches": "Inches",
+      "metres": "Metres",
+      "feetInches": "Feet/inches",
+      "symbols": {
+        "mm": "mm",
+        "cm": "cm",
+        "m": "m",
+        "km": "km"
+      }
+    },
+    "undo": {
+      "import": "Import",
+      "makeComponent": "Make component",
+      "flip": "Flip",
+      "intersect": "Intersect",
+      "clearAll": "Delete everything",
+      "paint": "Material",
+      "copyArray": "Copy (array)",
+      "copyDivide": "Copy (divide)",
+      "rotateCopy": "Rotate (copy)",
+      "rotateArray": "Rotate (array)",
+      "guide": "Guide",
+      "resize": "Resize",
+      "guideAngle": "Guide (angle)",
+      "dimension": "Dimension",
+      "addMaterial": "Add material",
+      "tagVisibility": "Tag visibility",
+      "renameTag": "Rename tag",
+      "deleteTag": "Delete tag",
+      "assignTag": "Assign tag",
+      "updateScene": "Update scene",
+      "renameScene": "Rename scene",
+      "deleteScene": "Delete scene",
+      "soften": "Soften/smooth",
+      "unsoften": "Reset softening",
+      "activeSection": "Section",
+      "flipSection": "Flip section",
+      "moveSection": "Move section",
+      "deleteSection": "Delete section",
+      "purge": "Purge",
+      "renameMaterial": "Rename material",
+      "createMaterial": "Create material",
+      "style": "Style",
+      "tag": "Tag",
+      "rename": "Rename",
+      "renameDefinition": "Rename definition",
+      "script": "Script",
+      "insertMesh": "Insert mesh",
+      "fewerPolygons": "Fewer polygons"
+    },
+    "toast": {
+      "nothingSelected": "Nothing selected",
+      "cut": "Cut",
+      "copied": "Copied",
+      "selectTwoFaces": "Select at least two faces.",
+      "selectTwoSolids": "Select two groups or components (solids).",
+      "notASolid": "“{name}” is not a solid.",
+      "solidFailed": "Solid operation failed: {error}",
+      "alreadyEmpty": "The workspace is already empty",
+      "cleared": "Workspace cleared – Ctrl+Z brings everything back",
+      "savedInBrowser": "Saved in the browser",
+      "saveFailed": "Saving failed",
+      "noSavedModel": "No saved model",
+      "loadFailed": "Loading failed",
+      "locked": "Locked",
+      "selectFirst": "Select objects first.",
+      "noValidPath": "No valid path selected."
+    },
+    "confirm": {
+      "discardChanges": "Discard unsaved changes?",
+      "resizeGroup": "Do you want to resize the group's contents? (factor {factor})",
+      "resizeModel": "Do you want to resize the model? (factor {factor})"
+    },
+    "prompt": {
+      "componentName": "Component name",
+      "enterText": "Enter text",
+      "scriptName": "Script name"
+    },
+    "groups": {
+      "file": "File",
+      "edit": "Edit",
+      "view": "View",
+      "camera": "Camera",
+      "solids": "Solids",
+      "plugins": "Plugins"
+    },
+    "tools": {
+      "select": "Select",
+      "lasso": "Lasso",
+      "eraser": "Eraser",
+      "paint": "Paint bucket",
+      "sample": "Sample material",
+      "line": "Line",
+      "freehand": "Freehand",
+      "rectangle": "Rectangle",
+      "rotrect": "Rotated rectangle",
+      "circle": "Circle",
+      "polygon": "Polygon",
+      "arc": "Arc",
+      "arc2": "2-point arc",
+      "arc3": "3-point arc",
+      "pie": "Pie",
+      "pushpull": "Push/Pull",
+      "offset": "Offset",
+      "move": "Move",
+      "rotate": "Rotate",
+      "scale": "Scale",
+      "followme": "Follow me",
+      "tape": "Tape measure",
+      "protractor": "Protractor",
+      "dimension": "Dimensions",
+      "text": "Text",
+      "section": "Section plane",
+      "orbit": "Orbit",
+      "pan": "Pan",
+      "zoom": "Zoom",
+      "zoomwindow": "Zoom window",
+      "poscam": "Position camera",
+      "lookaround": "Look around",
+      "walk": "Walk",
+      "place": "Place",
+      "status": {
+        "place": "Place “{name}”: click the target position. Arrow keys rotate by 90°.",
+        "placeNothing": "Nothing to place.",
+        "select": "Click or drag to select objects. Shift = add/remove. Ctrl = add. Shift + Ctrl = remove.",
+        "lasso": "Draw a loop around objects. Clockwise = fully inside, counter-clockwise = touching.",
+        "eraser": "Click or drag over edges to delete them. Shift = hide, Ctrl = soften.",
+        "paint": "Material “{material}”: click to paint faces. Alt = sample material, Ctrl = connected faces, Shift = all matching faces.",
+        "sample": "Click a face to pick up its material.",
+        "lineEnd": "Click to set the end point, or type a length. | Arrow keys = lock inference direction on/off. Shift = lock inference.",
+        "lineStart": "Click to set the first end point. | Arrow keys = lock inference direction on/off.",
+        "freehand": "Click and drag to draw a freehand curve.",
+        "rectangleCorner": "Click to set the opposite corner, or type length and width (e.g. 2000; 1500).",
+        "rectangleStart": "Click to set the first corner.",
+        "rotrect1": "Pick the first corner.",
+        "rotrect2": "Pick the second corner (length and direction).",
+        "rotrect3": "Pick the width and the angle.",
+        "circleRadius": "Pick or type the radius. ({count} segments; “12s” changes the number)",
+        "polygonRadius": "Pick or type the radius. ({count} sides; “12s” changes the number)",
+        "circleCenter": "Pick the centre. Type e.g. “48s” to change the segments.",
+        "polygonCenter": "Pick the centre. Type e.g. “8s” to change the sides.",
+        "arc2Start": "Pick the start point of the arc.",
+        "pickEnd": "Pick the end point.",
+        "arc2Bulge": "Pick or type the bulge.",
+        "pickCenter": "Pick the centre.",
+        "arcStart": "Pick the start point (radius).",
+        "arcEnd": "Pick the end angle.",
+        "pickStart": "Pick the start point.",
+        "arc3Second": "Pick a second point on the arc.",
+        "newFaceOff": "Ctrl = new face off.",
+        "newFaceOn": "Ctrl = new face on.",
+        "pushpullDistance": "Click to set the distance, or type it. | Snaps to corners, edges and faces. {mode}",
+        "pushpullPick": "Click the face to push or pull. | Double-click = repeat the last distance. {mode}",
+        "offsetDistance": "Move the cursor to set the offset, or type a distance.",
+        "offsetPick": "Pick a face to offset.",
+        "moveTarget": "Click to set the target point, or type a distance. | Ctrl = copy on/off. Arrow keys = lock inference direction.",
+        "moveTargetCopy": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = lock inference direction.",
+        "moveStart": "Click to set the start point. | Ctrl = copy on/off.",
+        "rotateCenter": "Pick the centre of rotation. Arrow keys align the protractor.",
+        "rotateStart": "Pick the start point of the rotation angle.",
+        "rotateAngle": "Pick or type the rotation angle. Ctrl = copy.",
+        "scaleDrag": "Drag to scale, or type a factor. Ctrl = about the centre, Shift = uniform.",
+        "scaleGrip": "Pick a grip.",
+        "scalePick": "Select the objects to scale.",
+        "followmeProfile": "Click the profile face that should follow the selected path.",
+        "followmePath": "First select edges as the path (e.g. double-clicking a face selects its edges), then this tool.",
+        "tapeEnd": "Pick the end point. Ctrl toggles creating guides.",
+        "tapeStart": "Pick the start point (point or edge).",
+        "tapeStartGuides": "Pick the start point (point or edge). Guides are created.",
+        "protractorVertex": "Pick the vertex.",
+        "protractorFirst": "Pick the first leg.",
+        "protractorAngle": "Pick the angle (creates a guide).",
+        "dimensionStart": "Pick the start point of the dimension or an edge.",
+        "dimensionPlace": "Drag the dimension to its position.",
+        "textPlace": "Pick the position of the text.",
+        "textAnchor": "Pick the point the text should point to.",
+        "section": "Click a face to place a section plane. Arrow keys align it with the axes.",
+        "orbit": "Drag to rotate the view. Shift = pan.",
+        "pan": "Drag to pan the view.",
+        "zoom": "Drag up/down to zoom. Shift = change field of view. Type a field-of-view angle (e.g. 35°).",
+        "zoomwindow": "Drag a rectangle to zoom into that area.",
+        "lookaround": "Drag to look around (the camera turns on the spot).",
+        "walk": "Drag up/down to walk, left/right to turn. Arrow keys work too.",
+        "poscam": "Click to place the camera there at eye height."
+      },
+      "hints": {
+        "square": "Square",
+        "goldenRatio": "Golden ratio",
+        "halfCircle": "Half circle",
+        "scaleUniform": "Scale uniformly",
+        "scaleTwoAxes": "Scale two axes",
+        "scaleOneAxis": "Scale one axis"
+      }
+    },
+    "editor": {
+      "undone": "Undone: {action}",
+      "redone": "Redone: {action}",
+      "invalidVcb": "Invalid input in the “Measurements” box",
+      "noSelection": "No selection",
+      "faces": "{count} face | {count} faces",
+      "edges": "{count} edge | {count} edges",
+      "instances": "{count} group/component | {count} groups/components"
+    },
+    "inference": {
+      "onRedAxis": "On red axis",
+      "onGreenAxis": "On green axis",
+      "onBlueAxis": "On blue axis",
+      "inComponent": "in component",
+      "inGroup": "in group",
+      "endpoint": "Endpoint",
+      "midpoint": "Midpoint",
+      "intersection": "Intersection",
+      "center": "Center",
+      "guidePoint": "Guide point",
+      "origin": "Origin",
+      "onEdge": "On edge",
+      "onGuide": "On guide",
+      "onFace": "On face",
+      "locked": "Locked",
+      "parallel": "Parallel to edge",
+      "perpendicular": "Perpendicular to edge",
+      "extension": "On edge extension",
+      "fromPoint": "From point"
+    },
+    "measure": {
+      "grid": "Grid"
+    },
+    "navigation": {
+      "orbit": "Orbit",
+      "pan": "Pan",
+      "zoom": "Zoom"
+    },
+    "library": {
+      "door": "Door",
+      "window": "Window",
+      "table": "Table",
+      "chair": "Chair",
+      "tree": "Tree",
+      "stairs": "Stairs"
+    },
+    "errors": {
+      "unknownFileFormat": "Unknown file format"
+    },
+    "panels": {
+      "errors": {
+        "exists": "Panel “{id}” already exists"
+      },
+      "entityinfo": "Entity info",
+      "components": "Components",
+      "instructor": "Instructor",
+      "materials": "Materials",
+      "styles": "Styles",
+      "tags": "Tags",
+      "shadows": "Shadows",
+      "scenes": "Scenes",
+      "display": "Display",
+      "soften": "Soften / smooth",
+      "mesh": "Polygons & points",
+      "modelinfo": "Model info",
+      "outliner": "Outliner",
+      "scripts": "Script editor",
+      "plugins": "Plugins"
+    },
+    "plugins": {
+      "errors": {
+        "commandExists": "Command “{id}” already exists",
+        "toolExists": "Tool “{id}” already exists",
+        "panelNeedsComponent": "Panel “{id}” needs component or mount",
+        "scriptExists": "s3d.{name} already exists",
+        "assetMissing": "File “{path}” is missing in the plugin package",
+        "importerNeedsHandler": "An importer needs import or loadScene",
+        "importerExists": "There already is a plugin import for .{ext}",
+        "noExport": "The module exports no plugin (export default { … })",
+        "badId": "Plugin id missing or invalid (only a–z, 0–9 and -)",
+        "noName": "Plugin name missing",
+        "noActivate": "activate(context) is missing",
+        "builtinReplace": "“{id}” is a built-in plugin and cannot be replaced",
+        "noPackageJson": "The folder has no package.json",
+        "noMain": "package.json needs \"shap3d\": { \"main\": \"plugin.js\" }",
+        "mainMissing": "The main file “{path}” from package.json is missing in the folder"
+      },
+      "folders": {
+        "upToDate": "“{name}” {version} is up to date.",
+        "updatedButFailed": "“{name}” updated, but failed to start: {error}",
+        "updated": "{name} updated {from} → {to}.",
+        "updatedSameVersion": "{name} {version} updated (new build from the folder).",
+        "updateFailed": "“{name}” could not be updated: {error}",
+        "newVersion": "New version {version} in the folder",
+        "newBuild": "New build in the folder"
+      },
+      "providedBy": "Provided by the plugin “{name}”.",
+      "exportAs": "Export: {format}"
+    },
+    "vcb": {
+      "length": "Length",
+      "dimensions": "Dimensions",
+      "segments": "Segments",
+      "sides": "Sides",
+      "radius": "Radius",
+      "bulge": "Bulge",
+      "angle": "Angle",
+      "distance": "Distance",
+      "scale": "Scale",
+      "fov": "Field of view",
+      "eyeHeight": "Eye height"
+    },
+    "app": {
+      "dropToImport": "Drop the file to import it",
+      "editing": "Editing:"
+    },
+    "common": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "ok": "OK",
+      "no": "No",
+      "yes": "Yes",
+      "on": "On",
+      "off": "Off"
+    },
+    "topbar": {
+      "menu": "Open model/preferences",
+      "rename": "Rename model",
+      "undo": "Undo {action}",
+      "redo": "Redo {action}",
+      "clearAll": "Clear workspace (undo with Ctrl+Z)",
+      "saved": "Saved",
+      "saveTitle": "Save (Ctrl+S)",
+      "save": "Save",
+      "export": "Export",
+      "exportModel": "Model (.shap3d.json)",
+      "exportStl": "STL (3D printing)",
+      "exportPng": "PNG image"
+    },
+    "theme": {
+      "darkOff": "Dark mode off",
+      "darkOn": "Dark mode on",
+      "more": "More theme options",
+      "darkMode": "Dark mode",
+      "interface": "Interface",
+      "scene": "3D scene",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "day": "Day",
+      "night": "Night",
+      "likeInterface": "Like interface",
+      "hintDarkMenus": "Only the menus are dark, the 3D scene stays light.",
+      "hintNightScene": "Light menus, the 3D scene shows night.",
+      "hintAllDark": "All dark: menus and the 3D scene at night.",
+      "hintAllLight": "All light."
+    },
+    "menu": {
+      "new": "New",
+      "open": "Open…",
+      "saveAs": "Save as (download)",
+      "saveLocal": "Save in browser",
+      "loadLocal": "Load from browser",
+      "import": "Import…",
+      "export": "Export",
+      "edit": "Edit",
+      "view": "View",
+      "camera": "Camera",
+      "solids": "Solids",
+      "plugins": "Plugins",
+      "print": "Print",
+      "commandPalette": "Command palette…",
+      "tour": "Introduction"
+    },
+    "statusbar": {
+      "help": "Help / keyboard shortcuts",
+      "inputDeviceTitle": "Input device: {device}",
+      "mouse": "Mouse",
+      "trackpad": "Trackpad",
+      "inputDevice": "Input device",
+      "twoFingerSwipe": "Two-finger swipe",
+      "fineTuning": "Fine tuning",
+      "invert": "invert",
+      "measurements": "Measurements",
+      "mouseWheel": "Mouse wheel",
+      "twoFingers": "Two fingers",
+      "pinch": "Pinch with two fingers",
+      "middleDrag": "Drag middle button",
+      "middleButton": "Middle button"
+    },
+    "contextMenu": {
+      "editGroup": "Edit group/component",
+      "intersect": "Intersect faces",
+      "flipRed": "Flip: red",
+      "flipGreen": "Flip: green",
+      "flipBlue": "Flip: blue",
+      "openAsCode": "Open as code",
+      "groupAsCode": "Open group as code",
+      "modelAsCode": "Open model as code",
+      "closeGroup": "Close group"
+    },
+    "palette": {
+      "title": "Command palette",
+      "search": "Search",
+      "noMatches": "No matches for “{query}”",
+      "choose": "choose",
+      "run": "run",
+      "keepOpenTitle": "Run or toggle, the palette stays open",
+      "keepOpen": "keep open",
+      "commands": "Commands",
+      "objects": "Objects",
+      "materials": "Materials",
+      "placeholder": "Search everything: tools, commands, panels, switches, materials …",
+      "recent": "Recently used",
+      "objectsInModel": "Objects in the model",
+      "allCommands": "All commands",
+      "meshView": "Polygon view",
+      "meshPoints": "Polygon view: vertices",
+      "meshTriangles": "Polygon view: face triangles",
+      "meshSoft": "Polygon view: soft edges",
+      "backEdges": "Back edges",
+      "placePerson": "Place person: {name}",
+      "insert": "Insert {name}",
+      "placeComponent": "Place component: {name}",
+      "scene": "Scene: {name}",
+      "tagVisible": "Tag visible: {name}",
+      "groups": {
+        "tool": "Tool",
+        "panel": "Panel",
+        "materialInModel": "Material in model",
+        "material": "Material",
+        "objectComponent": "Object · component",
+        "objectGroup": "Object · group"
+      }
+    },
+    "dialogs": {
+      "helpTitle": "Keyboard shortcuts & controls",
+      "help": {
+        "arc2": "2-point arc",
+        "move": "Move (Ctrl = copy, then type “5x” or “/5”)",
+        "orbitKeys": "O / middle mouse button",
+        "panKeys": "H / Shift+middle",
+        "zoomKeys": "Z / mouse wheel",
+        "zoom": "Zoom",
+        "arrowKeys": "Arrow keys",
+        "lockAxis": "Lock axis (↑ blue, → red, ← green)",
+        "shiftHold": "Shift (hold)",
+        "lockDirection": "Lock the current direction",
+        "typeNumbers": "Type numbers",
+        "vcb": "“Measurements” box (e.g. 2.5m or 3m;4m)",
+        "doubleClick": "Double-click",
+        "doubleClickAction": "Open group / select face + edges",
+        "tripleClick": "Triple-click",
+        "tripleClickAction": "All connected entities",
+        "escape": "Cancel / close group",
+        "undoRedo": "Undo / redo",
+        "deleteSelection": "Delete selection"
+      }
+    },
+    "toolbar": {
+      "searchTitle": "Command palette – search everything (Ctrl+Shift+P, F1 or Shift twice)",
+      "moreTools": "More tools",
+      "outerShell": "Outer shell",
+      "subtract": "Subtract",
+      "trim": "Trim",
+      "showAll": "Show all"
+    },
+    "textures": {
+      "holz": "Wood",
+      "ziegel": "Brick",
+      "stein": "Natural stone",
+      "gras": "Grass",
+      "fliesen": "Tiles",
+      "beton": "Concrete",
+      "metall": "Brushed metal",
+      "stoff": "Fabric",
+      "wasser": "Water",
+      "marmor": "Marble",
+      "dach": "Roof tiles",
+      "parkett": "Parquet"
+    },
+    "materials": {
+      "categories": {
+        "colors": "Colours",
+        "glassPlastic": "Glass & plastic",
+        "wood": "Wood",
+        "metal": "Metal",
+        "nature": "Nature",
+        "stone": "Stone & mineral",
+        "fabric": "Fabric & leather"
+      },
+      "hint": "Click a material, then faces (paint bucket, B).",
+      "search": "Search materials",
+      "defaultShort": "Def",
+      "edit": "Edit",
+      "name": "Name",
+      "color": "Colour",
+      "opacity": "Opacity",
+      "texture": "Texture",
+      "noTexture": "None (colour only)",
+      "size": "Size",
+      "used": "Used",
+      "delete": "Delete material",
+      "new": "New material",
+      "create": "Create"
+    },
+    "tags": {
+      "add": "Add tag",
+      "assignTitle": "Assign the selection to the highlighted tag",
+      "assign": "Assign",
+      "untagged": "Untagged",
+      "hint": "Double-click renames. Hidden tags hide every entity with that tag."
+    },
+    "scenes": {
+      "add": "Add scene",
+      "update": "Update",
+      "stop": "Stop",
+      "play": "Play",
+      "empty": "No scenes yet. Scenes store camera, style and visible tags.",
+      "defaultName": "Scene {number}"
+    },
+    "components": {
+      "inModel": "In the model",
+      "empty": "No components. Select geometry and press “G”.",
+      "clickToPlace": "Click to place: {name}",
+      "people": "People",
+      "placePerson": "Place {name} (always turns to the camera)",
+      "library": "Library",
+      "libraryHint": "Library objects are built by a script and then placed at the cursor."
+    },
+    "soften": {
+      "hint": "Softens edges between faces of the selection whose angle is smaller than the value set.",
+      "coplanar": "Soften coplanar",
+      "apply": "Apply to selection",
+      "reset": "Reset"
+    },
+    "shadows": {
+      "show": "Show shadows",
+      "time": "Time",
+      "date": "Date",
+      "hint": "The sun position is calculated for about 48° north. Even without shadows it sets the lighting of the faces."
+    },
+    "outliner": {
+      "filter": "Filter",
+      "empty": "No groups or components in the model.",
+      "show": "Unhide"
+    },
+    "display": {
+      "show": "Show",
+      "flip": "Flip plane",
+      "shift": "Move plane",
+      "noActive": "No active section",
+      "empty": "No section planes. Tool “Section plane” in the expanded tool set.",
+      "rulers": "Rulers on the axes (m · cm · mm depending on zoom)",
+      "grid": "Ground grid (mm · cm · m depending on zoom)"
+    },
+    "modelInfo": {
+      "units": "Units",
+      "format": "Format",
+      "precision": "Precision",
+      "decimals": "{count} decimal place | {count} decimal places",
+      "statistics": "Statistics",
+      "faces": "Faces",
+      "edges": "Edges",
+      "definitions": "Definitions",
+      "extent": "Extent",
+      "purge": "Purge unused",
+      "purged": "Unused definitions removed"
+    },
+    "styles": {
+      "presets": "Presets",
+      "faces": "Faces",
+      "xray": "X-ray (Alt+K)",
+      "front": "Front face",
+      "back": "Back face",
+      "edges": "Edges",
+      "showEdges": "Show edges",
+      "edgeColor": "Edge colour",
+      "background": "Background",
+      "sky": "Sky",
+      "skyColor": "Sky colour",
+      "ground": "Ground",
+      "groundColor": "Ground colour",
+      "wireframe": "Wire",
+      "hiddenline": "Hidden",
+      "shaded": "Shaded",
+      "textured": "Textures",
+      "monochrome": "Mono",
+      "preset": {
+        "standard": "Default",
+        "architecture": "Architecture",
+        "blueprint": "Blueprint",
+        "sketch": "Sketch",
+        "night": "Night",
+        "white": "White"
+      }
+    },
+    "instructor": {
+      "select": {
+        "desc": "Selects entities for other tools and commands.",
+        "step1": "Click an entity.",
+        "step2": "Drag from left to right (window) or right to left (crossing).",
+        "step3": "Double-click: face with edges or open a group. Triple-click: everything connected.",
+        "mod1": "Ctrl: add",
+        "mod2": "Shift: add/remove",
+        "mod3": "Ctrl+Shift: remove"
+      },
+      "line": {
+        "desc": "Draws edges. Closed edges in one plane form a face automatically.",
+        "step1": "Click the start point.",
+        "step2": "Click the end point or type a length.",
+        "step3": "Keep drawing or press Esc to finish.",
+        "mod1": "Arrow keys: lock axis",
+        "mod2": "Shift: lock inference",
+        "mod3": "Type [x;y;z] absolute or <x;y;z> relative"
+      },
+      "rectangle": {
+        "desc": "Draws rectangular faces on the ground or on existing faces.",
+        "step1": "Click the first corner.",
+        "step2": "Click the opposite corner.",
+        "step3": "Type e.g. “3m;4m” to set the size (also afterwards)."
+      },
+      "circle": {
+        "desc": "Draws a circle (a polygon with many segments).",
+        "step1": "Optional: type the number of segments (e.g. “48”).",
+        "step2": "Click the centre.",
+        "step3": "Click for the radius or type it."
+      },
+      "polygon": {
+        "desc": "Draws a regular polygon.",
+        "step1": "Type the number of sides (e.g. “8s”).",
+        "step2": "Click the centre.",
+        "step3": "Click or type the radius."
+      },
+      "arc2": {
+        "desc": "Draws an arc through two end points and a bulge.",
+        "step1": "Click the start point.",
+        "step2": "Click the end point.",
+        "step3": "Drag the bulge and click (a half circle snaps)."
+      },
+      "arc": {
+        "desc": "Draws an arc from centre, start point and angle.",
+        "step1": "Click the centre.",
+        "step2": "Click the start point (radius).",
+        "step3": "Click or type the end angle."
+      },
+      "arc3": {
+        "desc": "Draws an arc through three points.",
+        "step1": "Click the start point.",
+        "step2": "Click a point on the arc.",
+        "step3": "Click the end point."
+      },
+      "pie": {
+        "desc": "Draws a circle sector as a face.",
+        "step1": "Click the centre.",
+        "step2": "Click the start point.",
+        "step3": "Click the angle."
+      },
+      "freehand": {
+        "desc": "Draws irregular curves.",
+        "step1": "Press the mouse button and drag.",
+        "step2": "Releasing ends the curve; close to the start it closes."
+      },
+      "rotrect": {
+        "desc": "Rectangle in any orientation.",
+        "step1": "Click the first corner.",
+        "step2": "Click the second corner (length/direction).",
+        "step3": "Click the width/angle."
+      },
+      "pushpull": {
+        "desc": "Extrudes faces into 3D solids or moves them.",
+        "step1": "Click a face.",
+        "step2": "Move the mouse and click again or type a distance.",
+        "step3": "Double-clicking another face repeats the last distance."
+      },
+      "offset": {
+        "desc": "Creates a parallel copy of the face's edges inwards or outwards.",
+        "step1": "Click a face.",
+        "step2": "Move the cursor and click or type the distance."
+      },
+      "move": {
+        "desc": "Moves, stretches or copies entities.",
+        "step1": "Select entities (or point right at them).",
+        "step2": "Click the start point.",
+        "step3": "Click the target point or type a distance.",
+        "mod1": "Ctrl: make a copy",
+        "mod2": "After copying type “5x” (array) or “/5” (divide)",
+        "mod3": "Arrow keys: lock axis"
+      },
+      "rotate": {
+        "desc": "Rotates entities about a point.",
+        "step1": "Select entities.",
+        "step2": "Click the centre of rotation (the protractor aligns with faces).",
+        "step3": "Click the start angle, then click or type the rotation angle.",
+        "mod1": "Ctrl: copy (then “6x” for an array)",
+        "mod2": "Arrow keys: align the protractor with an axis"
+      },
+      "scale": {
+        "desc": "Scales the selection with grips.",
+        "step1": "Make a selection.",
+        "step2": "Click a grip (green).",
+        "step3": "Drag or type a factor (e.g. “2” or “1;2;1”, also a length “3m”).",
+        "mod1": "Ctrl: scale about the centre",
+        "mod2": "Shift: toggle uniform/non-uniform"
+      },
+      "tape": {
+        "desc": "Measures distances and creates guides.",
+        "step1": "Click the start point (or an edge for a parallel guide).",
+        "step2": "Click the end point – the length is in the “Measurements” box.",
+        "step3": "Type a new length to scale the model.",
+        "mod1": "Ctrl: guides on/off"
+      },
+      "protractor": {
+        "desc": "Measures angles and creates angled guides.",
+        "step1": "Click the vertex.",
+        "step2": "Click the first leg.",
+        "step3": "Click or type the angle."
+      },
+      "dimension": {
+        "desc": "Creates linear dimensions.",
+        "step1": "Click the start and end point (or an edge).",
+        "step2": "Drag the dimension to its position and click."
+      },
+      "text": {
+        "desc": "Creates labels with a leader line.",
+        "step1": "Click an entity (a face shows its area, an edge its length).",
+        "step2": "Click the text position.",
+        "step3": "Type the text."
+      },
+      "section": {
+        "desc": "Cuts the model to show the inside.",
+        "step1": "Point at a face (the plane aligns with it).",
+        "step2": "Click to place.",
+        "step3": "Switch it on/off in the “Display” panel."
+      },
+      "eraser": {
+        "desc": "Deletes edges (and the faces next to them).",
+        "step1": "Click edges or drag over them.",
+        "step2": "Coplanar faces are merged.",
+        "mod1": "Shift: hide",
+        "mod2": "Ctrl: soften",
+        "mod3": "Ctrl+Shift: unsoften"
+      },
+      "paint": {
+        "desc": "Assigns materials to faces, groups and components.",
+        "step1": "Pick a material in the “Materials” panel.",
+        "step2": "Click faces or groups.",
+        "mod1": "Alt: sample material",
+        "mod2": "Ctrl: all connected matching faces",
+        "mod3": "Shift: all matching faces in the model"
+      },
+      "orbit": {
+        "desc": "Rotates the camera around the model.",
+        "step1": "Drag to rotate.",
+        "step2": "The middle mouse button works in every tool.",
+        "mod1": "Shift: pan"
+      },
+      "pan": {
+        "desc": "Moves the view.",
+        "step1": "Drag to pan.",
+        "step2": "Shift + middle mouse button in every tool."
+      },
+      "zoom": {
+        "desc": "Zooms in and out.",
+        "step1": "Drag up/down.",
+        "step2": "The mouse wheel zooms towards the cursor.",
+        "step3": "Type a field of view (e.g. 35)."
+      },
+      "followme": {
+        "desc": "Extrudes a profile along a path (e.g. pipe, cornice, lathe shape).",
+        "step1": "Select the path edges (double-clicking a face selects its edges).",
+        "step2": "Choose the tool.",
+        "step3": "Click the profile face."
+      },
+      "shortcut": "Shortcut: {key}",
+      "usage": "How to use",
+      "modifiers": "Modifier keys"
+    },
+    "entityInfo": {
+      "model": "Model",
+      "material": "Material",
+      "assignTitle": "Assign the current material",
+      "tag": "Tag",
+      "instance": "Instance",
+      "definition": "Definition",
+      "type": "Type",
+      "componentCopies": "Component ({count} copy) | Component ({count} copies)",
+      "position": "Position",
+      "volume": "Volume",
+      "face": "Face",
+      "softened": "Softened",
+      "totalArea": "Total area",
+      "totalLength": "Total length",
+      "hidden": "Hidden",
+      "edge": "Edge",
+      "solidComponent": "Solid component",
+      "solidGroup": "Solid group",
+      "elements": "{count} entities ({summary})"
+    },
+    "shapes": {
+      "cylinder": "Cylinder",
+      "cylinderBetween": "Rod",
+      "cone": "Cone",
+      "sphere": "Sphere",
+      "dome": "Dome",
+      "ellipsoid": "Ellipsoid",
+      "tube": "Tube",
+      "torus": "Torus",
+      "prism": "Prism",
+      "pyramid": "Pyramid"
+    },
+    "mesh": {
+      "undoSides": "{shape}: {count} sides",
+      "undoSegments": "{shape}: {count} segments",
+      "noTopFaces": "The object has no faces on its top level.",
+      "tooMany": "Too many polygons ({count} triangles) – that would slow the browser down.",
+      "cannotSimplify": "The object cannot be simplified that much.",
+      "vertices": "Vertices",
+      "faceTriangles": "Face triangles",
+      "softEdges": "Soft edges",
+      "softCount": "({count} soft)",
+      "triangles": "Triangles",
+      "resolution": "{shape} – resolution",
+      "less": "Less",
+      "more": "More",
+      "change": "Change polygons",
+      "moreKeepTitle": "Every triangle becomes four – the shape stays exactly the same",
+      "moreKeep": "▲ More (keep shape)",
+      "moreRoundTitle": "Every triangle becomes four, corners and curves get smoother",
+      "moreRound": "▲ More (round off)",
+      "lessButton": "▼ Fewer polygons",
+      "to": "to",
+      "affectsComponent": "Works on the top level of the group/component – and so on all its copies. Undo with Ctrl+Z.",
+      "affectsGroup": "Works on the top level of the group/component. Undo with Ctrl+Z.",
+      "selectHint": "Select a group, component or drawn circle to change its polygon count. Combine loose geometry with “Make group” first.",
+      "selection": "Selection",
+      "wholeModel": "Whole model",
+      "exactHint": "The object is rebuilt exactly with the new resolution.",
+      "circleHint": "Works while the circle is still flat – set it before Push/Pull.",
+      "moreDone": "More polygons – Ctrl+Z undoes it",
+      "lessDone": "Fewer polygons – Ctrl+Z undoes it",
+      "noMesh": "No mesh found – expected lines like “v 1 2 3” and “f 1 2 3”.",
+      "invalidCoordinates": "Invalid coordinates in the mesh",
+      "imported": "{vertices} vertices, {faces} faces imported",
+      "fewAlready": "The object already has very few polygons."
+    },
+    "tour": {
+      "welcome": {
+        "title": "Welcome to {name}",
+        "text": "Easy 3D modelling right in the browser – with an AI that runs on your own computer. A few short steps show you the essentials."
+      },
+      "draw": {
+        "title": "Draw and pull up",
+        "text": "Draw a face on the ground and pull it up with Push/Pull – that is how walls, furniture and whole houses are made.",
+        "tip1": "<kbd>R</kbd> rectangle, <kbd>C</kbd> circle, <kbd>L</kbd> line",
+        "tip2": "<kbd>P</kbd> Push/Pull, <kbd>M</kbd> move",
+        "tip3": "Just type sizes, e.g. <kbd>2.5</kbd> <kbd>Enter</kbd>"
+      },
+      "navigate": {
+        "title": "Look around",
+        "text": "With the mouse you move freely through your model.",
+        "tip1": "Drag the middle mouse button = rotate (orbit)",
+        "tip2": "<kbd>Shift</kbd> + middle mouse button = pan",
+        "tip3": "Mouse wheel = zoom · <kbd>Shift</kbd>+<kbd>Z</kbd> = show all"
+      },
+      "ai": {
+        "title": "The AI assistant",
+        "text": "Just describe what you want – “a table with 4 chairs” or “a spider with red eyes” – and the AI builds it. It runs locally, e.g. with Ollama; a wizard helps with the setup.",
+        "action": "✦ Open AI assistant",
+        "prompt": "“A small house”"
+      },
+      "more": {
+        "title": "Terrain, scripts and import",
+        "text": "Shape mountains and valleys with the terrain tool, build objects by script (s3d.box …) or simply drag files from SketchUp, Blender, 3ds Max & co. into the window.",
+        "tip1": "Tool <b>Terrain</b> – brushes for hills, valleys and textures",
+        "tip2": "Script editor on the right – with API info and examples",
+        "tip3": "SKP · BLEND · FBX · 3DS · DAE · OBJ · STL · glTF …",
+        "terrain": "Terrain",
+        "scripts": "Scripts",
+        "import": "Import"
+      },
+      "look": {
+        "title": "Your look",
+        "text": "At the top you switch between light and dark – also just the menus or a night scene. You will find this introduction in the menu at any time.",
+        "tip1": "☾ / ☀ top left – the arrow next to it has more options",
+        "tip2": "<b>Menu › Introduction</b> opens this tour again"
+      },
+      "ariaLabel": "Introduction, step {step} of {count}",
+      "close": "Close introduction (Esc)",
+      "stepOf": "Step {step} of {count}",
+      "stepLabel": "Step {step}: {title}",
+      "skip": "Skip",
+      "back": "Back",
+      "start": "Let’s go",
+      "next": "Next",
+      "finish": "Get started"
+    },
+    "api": {
+      "returns": {
+        "gruppe": "Group",
+        "flaeche": "Face",
+        "anzahlFlaechen": "Number of faces",
+        "punkte": "Points",
+        "deckflaeche": "Top face",
+        "Place": "{ place }",
+        "namen": "Names",
+        "punkt": "Point",
+        "zahl": "Number"
+      },
+      "categories": {
+        "solids": "Solids",
+        "facesLines": "Faces & lines",
+        "editFaces": "Editing faces",
+        "groups": "Groups & components",
+        "materials": "Materials",
+        "viewScene": "View & scene",
+        "helpers": "Helpers",
+        "plugins": "Plugins"
+      },
+      "box": {
+        "title": "Box",
+        "desc": "Box from the front left bottom corner. Width = X, depth = Y, height = Z."
+      },
+      "cylinder": {
+        "title": "Cylinder",
+        "desc": "Upright cylinder standing on its centre. segments = number of sides (default 24)."
+      },
+      "cylinderBetween": {
+        "title": "Rod from A to B",
+        "desc": "Cylinder or cone between any two points – ideal for legs, branches, pipes, railings. endRadius = radius at the end (0 = point)."
+      },
+      "cone": {
+        "title": "Cone",
+        "desc": "Cone with its tip at the top. With endRadius > 0 a truncated cone (lampshade, bucket, flower pot)."
+      },
+      "pyramid": {
+        "title": "Pyramid",
+        "desc": "Pyramid with a square (sides 4) or n-sided base. kante = length of a base edge."
+      },
+      "prism": {
+        "title": "Prism",
+        "desc": "Upright prism with a regular n-sided base (default 6 = hexagon)."
+      },
+      "sphere": {
+        "title": "Sphere",
+        "desc": "Sphere around a centre with smoothed edges."
+      },
+      "dome": {
+        "title": "Dome (half sphere)",
+        "desc": "Half sphere with a flat bottom – domes, lamps, igloos."
+      },
+      "ellipsoid": {
+        "title": "Ellipsoid",
+        "desc": "Stretched sphere with three radii – bodies, heads, cushions, leaves, stones."
+      },
+      "tube": {
+        "title": "Tube / ring",
+        "desc": "Hollow cylinder – pipes, cups, rings, wells."
+      },
+      "torus": {
+        "title": "Torus (donut)",
+        "desc": "Lying ring – tyres, life buoys, donuts, handles."
+      },
+      "wedge": {
+        "title": "Wedge / ramp",
+        "desc": "Ramp rising along +X to its height – ramps, lean-to roofs, wedges."
+      },
+      "stairs": {
+        "title": "Stairs",
+        "desc": "Straight stairs along +X. Default: 10 steps, 17.5 cm high, 28 cm deep, 1 m wide."
+      },
+      "mesh": {
+        "title": "Mesh from OBJ text",
+        "desc": "Triangle mesh from “v x y z” and “f a b c” lines (e.g. LLaMA-Mesh). size = longest side."
+      },
+      "rect": {
+        "title": "Rectangle",
+        "desc": "Rectangular face. ebene 'xy' = lying, 'xz' / 'yz' = standing. Then e.g. .pushpull(höhe)."
+      },
+      "circle": {
+        "title": "Circle",
+        "desc": "Circular face. normal = direction the face points to ('z', 'x', 'y' or a vector)."
+      },
+      "polygon": {
+        "title": "Polygon",
+        "desc": "Regular polygon (triangle, hexagon, octagon …)."
+      },
+      "face": {
+        "title": "Face from points",
+        "desc": "Any flat face from at least 3 points that lie in one plane."
+      },
+      "polyhedron": {
+        "title": "Faces from a point list",
+        "desc": "Exact geometry like OpenSCAD's polyhedron: punkte = [[x,y,z], …], flächen = lists of point numbers (from 0), e.g. [0, 1, 2, 3], or { outer: [...], holes: [[...]], material: 'Holz' } for faces with holes. This is also the code “Open as code” produces."
+      },
+      "line": {
+        "title": "Line / polyline",
+        "desc": "Edges without thickness. A closed flat polyline forms a face automatically."
+      },
+      "arc": {
+        "title": "Arc",
+        "desc": "Circular arc as edges. Returns the points – handy as a path for followMe."
+      },
+      "pushpull": {
+        "title": "Push/Pull",
+        "desc": "Pulls a face into a solid. For lying faces a positive value always goes up."
+      },
+      "extrude": {
+        "title": "Extrude",
+        "desc": "Like pushpull, but in a fixed direction: 'x', 'y', 'z', '-x', '-y', '-z' or a vector."
+      },
+      "offset": {
+        "title": "Offset",
+        "desc": "Draws an inner outline into the face – for frames, windows, borders."
+      },
+      "followMe": {
+        "title": "Follow me",
+        "desc": "Sweeps a profile along a path – pipes, cornices, frames, lathe shapes."
+      },
+      "faceMaterial": {
+        "title": "Colour a face",
+        "desc": "Set the material of the front or back of a single face; reverse() flips the face."
+      },
+      "group": {
+        "title": "Group",
+        "desc": "Everything created in the callback is combined into one group."
+      },
+      "component": {
+        "title": "Component",
+        "desc": "Reusable definition – build it once, place it as often as you like. Changes affect all copies."
+      },
+      "transform": {
+        "title": "Move, rotate, scale",
+        "desc": "All solid functions return a group that can be changed like this (chainable)."
+      },
+      "copy": {
+        "title": "Copy & more",
+        "desc": "Copy with offset; material for the whole group; assign a tag; hide; explode into loose geometry."
+      },
+      "useMaterial": {
+        "title": "Use a ready-made material",
+        "desc": "All materials in the list below work directly by their name – without creating them first."
+      },
+      "material": {
+        "title": "Own material",
+        "desc": "Defines a material or changes an existing one. texture = one of the textures below, size = tile size in metres."
+      },
+      "materials": {
+        "title": "List materials",
+        "desc": "Names of the ready-made materials (optionally only one category, e.g. 'Metall') or of the textures."
+      },
+      "view": {
+        "title": "View",
+        "desc": "Pick a standard view and zoom to everything (done after the script)."
+      },
+      "camera": {
+        "title": "Camera",
+        "desc": "Put the camera at a position and point it at a target."
+      },
+      "shadows": {
+        "title": "Shadows & style",
+        "desc": "Shadows on/off with time of day; change the display – faceStyle: 'textured' | 'shaded' | 'monochrome' | 'hiddenline' | 'wireframe', xray: true = X-ray."
+      },
+      "annot": {
+        "title": "Dimension, text, guide",
+        "desc": "Dimension line between two points, label with arrow, guide line or guide point."
+      },
+      "tag": {
+        "title": "Tags",
+        "desc": "Create tags (layers), show/hide them and assign groups."
+      },
+      "clear": {
+        "title": "Delete everything",
+        "desc": "Empties the model (or the current group). Like everything in a script it can be undone with Ctrl+Z."
+      },
+      "units": {
+        "title": "Lengths & units",
+        "desc": "All numbers are metres. Wherever a length is expected, strings with a unit work too."
+      },
+      "points": {
+        "title": "Points & axes",
+        "desc": "Points are arrays. The ground is at z = 0."
+      },
+      "random": {
+        "title": "Randomness & loops",
+        "desc": "Plain JavaScript – loops, variables and maths are allowed."
+      },
+      "log": {
+        "title": "Output",
+        "desc": "Writes to the console below the editor. s3d.stats() returns the number of faces/edges."
+      }
+    },
+    "apiReference": {
+      "search": "Search: cone, glass, rotate, stairs …",
+      "counts": "{commands} commands · {materials} materials",
+      "returns": "Return value",
+      "insertTitle": "Insert the example at the cursor",
+      "tryTitle": "Build the example into the model right away (one undo step)",
+      "try": "▶ Try it",
+      "libraryMaterials": "Ready-made materials",
+      "libraryHint": "just use them by name:",
+      "tryMaterial": "Build a cube with this material",
+      "textures": "Textures",
+      "texturesHint": "for your own materials:",
+      "tile": "tile {size} m",
+      "nothingFound": "Nothing found for “{query}”.",
+      "texture": "texture {texture}",
+      "opaque": "{percent} % opaque",
+      "clickToInsert": "Click = insert the name",
+      "tabs": {
+        "all": "All",
+        "shapes": "Shapes",
+        "faces": "Faces",
+        "groups": "Groups",
+        "materials": "Materials",
+        "view": "View",
+        "helpers": "Helpers"
+      }
+    },
+    "completion": {
+      "suggestions": "Suggestions",
+      "types": {
+        "gruppe": "Group",
+        "zahl": "Number",
+        "text": "Text",
+        "deckflaeche": "Top face",
+        "flaeche": "Face",
+        "vektor": "Vector",
+        "jaNein": "yes/no"
+      },
+      "ownSuggestions": "The editor has its own suggestions for “{language}”",
+      "api": {
+        "point": "Point [x, y, z] – the same as an array.",
+        "meters": "Metres (numbers are metres anyway).",
+        "length": "Convert a length with a unit to metres.",
+        "warn": "Write a warning to the console.",
+        "pushpull": "Like fläche.pushpull(abstand).",
+        "textures": "Names of the textures for s3d.material(…, { texture }).",
+        "polyline": "Polyline; closed and flat it becomes a face.",
+        "zoomExtents": "Zoom to everything after the script."
+      },
+      "members": {
+        "group": {
+          "move": "Move by an offset.",
+          "moveTo": "Put the origin at a point.",
+          "rotate": "Rotate about an axis ('x', 'y', 'z' or a vector), by default about the group's origin.",
+          "scale": "Scale uniformly or per axis.",
+          "material": "Material for the whole group.",
+          "tag": "Assign a tag (layer) – created when needed.",
+          "hide": "Hide.",
+          "copy": "Copy with offset – returns the copy.",
+          "explode": "Explode into loose geometry. Returns the number of parts.",
+          "name": "Name of the group or component.",
+          "ref": "Reference { kind, id } to the instance.",
+          "entities": "The geometry inside the group."
+        },
+        "face": {
+          "pushpull": "Pull into a solid. For lying faces positive always goes up.",
+          "extrude": "Like pushpull, but in a fixed direction: 'x', 'y', 'z', '-x', '-y', '-z' or a vector.",
+          "offset": "Draw an inner outline into the face.",
+          "followMe": "Sweep a profile along a path.",
+          "material": "Material of the front.",
+          "backMaterial": "Material of the back.",
+          "reverse": "Flip the face.",
+          "area": "Area in m².",
+          "normal": "Normal [x, y, z].",
+          "exists": "Does the face still exist?",
+          "ref": "Reference { kind, id } to the face."
+        },
+        "component": {
+          "place": "Place a copy of the component.",
+          "def": "The component definition."
+        }
+      },
+      "math": {
+        "pi": "π = 3.14159…",
+        "function": "JavaScript maths."
+      },
+      "console": "Writes to the console below the editor.",
+      "three": "The three.js library (Vector3, Matrix4 …).",
+      "options": {
+        "material": "Material name – ready-made materials work directly by their name.",
+        "backMaterial": "Material of the back.",
+        "name": "Name of the group.",
+        "group": "false = loose geometry instead of a group.",
+        "segments": "Number of sides or segments.",
+        "sides": "Number of sides of the base.",
+        "endRadius": "Radius at the end (0 = point).",
+        "normal": "Direction the face points to ('x', 'y', 'z' or a vector).",
+        "steps": "Number of steps.",
+        "rise": "Step height.",
+        "run": "Step depth.",
+        "width": "Width.",
+        "at": "Position [x, y, z].",
+        "size": "Size.",
+        "yUp": "true = Y is up (OBJ, LLaMA-Mesh).",
+        "smooth": "Edges flatter than this angle (degrees) are smoothed.",
+        "opacity": "Opacity 0–1.",
+        "texture": "Procedural texture.",
+        "faceStyle": "Face style.",
+        "xray": "true = X-ray.",
+        "edges": "Show edges.",
+        "depth": "Extrusion depth (0 = flat).",
+        "upright": "true = standing upright.",
+        "filled": "false = outline only.",
+        "font": "Font.",
+        "type": "Object type.",
+        "radius": "Radius.",
+        "height": "Height.",
+        "children": "List of the objects in the group.",
+        "points": "Points [[x, y, z], …].",
+        "faces": "Faces as lists of point numbers (from 0).",
+        "count": "Number of copies.",
+        "offset": "Offset [dx, dy, dz].",
+        "object": "The object that is repeated.",
+        "direction": "Direction [x, y, z].",
+        "text": "Text.",
+        "from": "Start point [x, y, z].",
+        "to": "End point [x, y, z].",
+        "rotate": "Rotation { angle, axis, center }.",
+        "scale": "Scale (number or [fx, fy, fz]).",
+        "move": "Move by [dx, dy, dz].",
+        "tag": "Tag (layer).",
+        "pushpull": "Then pull by this distance.",
+        "closed": "true = closed polyline.",
+        "plane": "Plane 'xy', 'xz' or 'yz'.",
+        "angle": "Angle in degrees.",
+        "axis": "Axis 'x', 'y', 'z' or a vector.",
+        "center": "Centre of rotation [x, y, z].",
+        "clear": "true = clear the model first.",
+        "materials": "Own materials { \"Name\": \"#rrggbb\" }.",
+        "objects": "List of the objects.",
+        "view": "View after the run.",
+        "zoomExtents": "false = don't zoom to everything."
+      },
+      "axes": {
+        "x": "X – red",
+        "y": "Y – green",
+        "z": "Z – blue (up)"
+      },
+      "planes": {
+        "xy": "lying",
+        "xz": "standing, seen from the front",
+        "yz": "standing, seen from the side"
+      },
+      "views": {
+        "iso": "Isometric"
+      },
+      "faceStyles": {
+        "textured": "With textures",
+        "monochrome": "Single colour"
+      },
+      "category": "Category",
+      "tag": "Tag",
+      "tagHidden": "Tag (hidden)",
+      "inModel": "In the model",
+      "ownMaterialTexture": "Own material with texture “{texture}”.",
+      "ownMaterial": "Own material in this model.",
+      "categoryInModel": "{category} · in the model",
+      "texture": "Texture “{texture}”",
+      "opacity": "Opacity {percent} %",
+      "units": "Wherever a length is expected, strings with a unit work.",
+      "scriptApi": "Script API",
+      "s3d": "The Shap3D.ai script API – solids, faces, groups, materials, view.",
+      "mathObject": "Maths: Math.sin, Math.cos, Math.PI …",
+      "consoleObject": "console.log(…) writes to the console below the editor.",
+      "json": {
+        "box": "Box",
+        "cylinder": "Cylinder",
+        "sphere": "Sphere",
+        "rect": "Rectangle",
+        "circle": "Circle",
+        "polygon": "Polygon",
+        "face": "Face from points",
+        "line": "Polyline",
+        "polyhedron": "Faces from a point list",
+        "text3d": "3D text (plugin)",
+        "group": "Group",
+        "array": "Array of copies",
+        "guide": "Guide line / point",
+        "label": "Label",
+        "dimension": "Dimension"
+      },
+      "jsonKeys": "Keys: {keys}",
+      "kinds": {
+        "variable": "Variable",
+        "method": "Method",
+        "property": "Property",
+        "option": "Option",
+        "value": "Value",
+        "material": "Material",
+        "keyword": "Keyword",
+        "unit": "Unit",
+        "type": "Type"
+      }
+    },
+    "pluginManager": {
+      "loadFile": "Load plugin file…",
+      "loadFolderTitle": "Folder with package.json – e.g. the built dist folder of a plugin package",
+      "loadFolder": "Load plugin folder…",
+      "updateAllTitle": "Read every package installed from a folder again – e.g. after npm run build",
+      "updateAll": "Update all",
+      "updating": "Updating plugin …",
+      "installing": "Installing plugin …",
+      "warning": "Plugins are JavaScript modules and run with full access to the application. Only install plugins whose source you trust. They are stored in this browser only.",
+      "installed": "Installed",
+      "switchOff": "Switch off",
+      "switchOn": "Switch on",
+      "error": "Error: {error}",
+      "builtin": "Built in",
+      "by": "by {author}",
+      "package": "Package {name}",
+      "files": "{count} file | {count} files",
+      "license": "License {license}",
+      "updateTitle": "Read the package from its folder again – e.g. after npm run build",
+      "update": "Update",
+      "openPanel": "Open {panel}",
+      "source": "Source",
+      "remove": "Remove",
+      "none": "No plugins installed yet.",
+      "examples": "Example plugins",
+      "install": "Install",
+      "howTo": "How to write your own plugins is described in the README under “Plugins”. The examples are in",
+      "installedButFailed": "“{name}” installed, but failed to start: {error}",
+      "installedActive": "“{name}” is installed and active.",
+      "loadFailed": "The plugin could not be loaded: {error}",
+      "confirmRemove": "Remove plugin “{name}”?",
+      "removed": "“{name}” was removed."
+    },
+    "scriptEditor": {
+      "loadExample": "Load example…",
+      "myScripts": "My scripts",
+      "runTitle": "Run (Ctrl+Enter)",
+      "run": "Run",
+      "clearFirst": "Clear model first",
+      "convertTitle": "Translate the code into another format – the model stays unchanged",
+      "convertTo": "Convert to…",
+      "undoConvertTitle": "Bring back the code from before the conversion",
+      "undoConvert": "Undo conversion",
+      "newTitle": "Empty script in the chosen language – Ctrl+Z brings the previous code back",
+      "hideApiInfo": "Hide API info",
+      "apiInfo": "API info",
+      "sizeTitle": "Longest side of the object",
+      "yUpTitle": "OBJ files and LLaMA-Mesh are Y-up – turned to Z-up",
+      "yUp": "Y is up",
+      "smoothTitle": "Edges between faces flatter than this angle are smoothed (0 = all edges visible)",
+      "smooth": "Smooth",
+      "noHelp": "No help for this language.",
+      "console": "Console",
+      "clearConsole": "Clear",
+      "consoleHint": "Output of s3d.log(…) and errors appear here. Every run is a single undo step.",
+      "objHelp": "OBJ mesh: lines “v x y z” (vertex) and “f a b c …” (face, vertex numbers from 1).\nEverything else (text, # comments, vn/vt, groups) is ignored – raw LLaMA-Mesh output\ncan be pasted directly. The mesh is scaled to “Size” (longest side),\nput on the ground and placed as a component next to the model.\nIn a JS script: s3d.mesh(objText, { at: [x, y, z], size: '80cm', yUp: true, material: 'Holz' })",
+      "converted": "Converted to {format} – the model is unchanged. “Run” builds it in.",
+      "convertFailed": "Conversion failed: {error}",
+      "enterCode": "Enter code …",
+      "placeholder": "New script, e.g.\n{start}\n\nCtrl+Space shows suggestions, “Load example…” ready-made scripts.\nRun with Ctrl+Enter.",
+      "newHint": "New script – Ctrl+Z in the editor brings the previous code back.",
+      "objDetected": "OBJ mesh detected – language set to “OBJ mesh”",
+      "exampleWithDescription": "Example “{name}”: {description}",
+      "example": "Example “{name}”",
+      "running": "{language} is running …",
+      "invalidSize": "Invalid size: {size}",
+      "done": "Done – {count} face in the model. | Done – {count} faces in the model.",
+      "exampleGroup": "Example",
+      "apiExample": "API example",
+      "exampleBuilt": "✓ Example built – Ctrl+Z undoes it.",
+      "myScript": "My script",
+      "saved": "Script saved"
+    },
+    "examples": {
+      "house": {
+        "name": "House with gable roof",
+        "description": "Box + roof prism, door and windows as groups."
+      },
+      "stairs": {
+        "name": "Stairs (loop)",
+        "description": "Steps with a for loop, sizes as variables."
+      },
+      "spiral": {
+        "name": "Spiral staircase (rotate)",
+        "description": "Define a component once, then place it rotated."
+      },
+      "fence": {
+        "name": "Fence (row of components)",
+        "description": "Posts & slats as components – changes affect all copies."
+      },
+      "city": {
+        "name": "Random city",
+        "description": "Grid of high-rises with random height and colour."
+      },
+      "lathe": {
+        "name": "Vase (follow me)",
+        "description": "Turn a profile along a circle – like “Follow me”."
+      },
+      "text": {
+        "name": "3D text",
+        "description": "Extruded lettering as a group."
+      },
+      "table": {
+        "name": "Table with 4 chairs",
+        "description": "Copy and rotate groups."
+      },
+      "json-scene": {
+        "name": "JSON: simple scene",
+        "description": "Declarative: objects, materials, groups."
+      },
+      "json-shelf": {
+        "name": "JSON: shelf (array)",
+        "description": "“array” repeats an object with an offset."
+      },
+      "mesh-js": {
+        "name": "Mesh in a script (s3d.mesh)",
+        "description": "Embed OBJ text right in the script, scale it and place it several times."
+      },
+      "obj-chair": {
+        "name": "OBJ: chair (LLaMA-Mesh)",
+        "description": "Raw LLaMA-Mesh output – only v/f lines. Set size and axes above."
+      }
+    },
+    "script": {
+      "errors": {
+        "faceGone": "The face no longer exists",
+        "invalidLength": "Invalid length: {value}",
+        "unknownTexture": "Unknown texture “{texture}”. Allowed: {allowed}",
+        "noPoint": "polyhedron: point {index} does not exist",
+        "faceFailed": "The face could not be created (points not in one plane?)",
+        "tubeRadius": "tube: the inner radius must be between 0 and the outer radius",
+        "async": "Asynchronous scripts are not supported – “await” is ignored.",
+        "needsText3d": "3D text needs the plugin “3D text” (plugin manager)",
+        "unknownType": "Unknown object type: {type}",
+        "languageExists": "Script language “{id}” already exists"
+      }
+    },
+    "codeExport": {
+      "header": "Made with Shap3D.ai from {source} – sizes in metres",
+      "zUp": "Z points up",
+      "yUp": "Y points up (OBJ convention)",
+      "objSize": "Size: {size} m (longest side) – enter it as “Size” in the script editor",
+      "failed": "The code could not be run",
+      "exists": "Code format “{id}” already exists",
+      "unknown": "Unknown code format: {id}",
+      "nothing": "No faces or edges to convert",
+      "cannotConvert": "Cannot convert from “{format}”",
+      "noFaces": "The code creates no faces"
+    }
+  }
+}

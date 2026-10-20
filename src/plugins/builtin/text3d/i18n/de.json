@@ -1,0 +1,56 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "text3d": {
+      "dialog": {
+        "title": "3D-Text einfügen",
+        "placeholder": "Text eingeben",
+        "font": "Schriftart",
+        "addFontTitle": "Eine TTF-, OTF- oder WOFF-Datei als Schrift hinzufügen – bleibt im Browser gespeichert",
+        "addFont": "Eigene Schrift laden…",
+        "removeFont": "Diese Schrift entfernen",
+        "loading": "Schrift wird geladen …",
+        "freeFonts": "Freie Schriften (SIL OFL)",
+        "height": "Höhe",
+        "filled": "Gefüllt",
+        "depth": "Extrudiert",
+        "upright": "Aufrecht stehend",
+        "fontAdded": "Schrift „{name}“ hinzugefügt"
+      },
+      "componentName": "3D-Text „{text}“",
+      "plugin": {
+        "status": "3D-Text: Text und Schrift wählen, dann „Platzieren“ und in das Modell klicken.",
+        "name": "3D-Text",
+        "description": "3D-Buchstaben und -Zahlen in vielen freien Schriften (Serifenlos, Serif, Plakat, Schreibschrift, Pixel …) oder eigenen TTF/OTF/WOFF-Dateien, flach oder aufrecht, gefüllt, extrudiert oder als Umriss. Bringt s3d.text3d() für Skripte mit.",
+        "apiDescription": "3D-Buchstaben und -Zahlen. size = Schrifthöhe, depth = Extrusion (0 = flach), upright = aufrecht stehend (Standard), filled: false = nur Umriss, \"\\n\" = neue Zeile. Schriften (font): {fonts} oder eigene („eigene:name“)."
+      },
+      "errors": {
+        "unknownFont": "Unbekannte Schrift „{id}“ – verfügbar: {available}",
+        "fontNotFound": "Schrift „{name}“ nicht gefunden",
+        "stillLoading": "Die Schrift „{id}“ wird noch geladen – bitte gleich noch einmal ausführen.",
+        "wrongFile": "Bitte eine TTF-, OTF- oder WOFF-Datei wählen (WOFF2 geht nicht)"
+      },
+      "categories": {
+        "sans": "Serifenlos",
+        "serif": "Serif",
+        "display": "Plakat",
+        "script": "Schreibschrift",
+        "special": "Besonders",
+        "custom": "Eigene"
+      },
+      "fonts": {
+        "helvetiker_bold": "Helvetiker Fett",
+        "roboto_bold": "Roboto Fett",
+        "playfair_bold": "Playfair Display Fett",
+        "fredoka": "Fredoka (rund)",
+        "blackops": "Black Ops One (Schablone)",
+        "caveat": "Caveat (Handschrift)",
+        "orbitron": "Orbitron (futuristisch)",
+        "pressstart": "Press Start 2P (Pixel)",
+        "jetbrains": "JetBrains Mono (Code)"
+      }
+    }
+  }
+}

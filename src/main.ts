@@ -18,7 +18,7 @@ if (!webglAvailable()) {
   failSplash('webgl');
 } else {
   import('./startApp')
-    .then(module => {
+    .then((module) => {
       module.startApp();
       hideSplash(shot ? 0 : reduced ? 300 : 2100, shot ? 0 : 600);
     })

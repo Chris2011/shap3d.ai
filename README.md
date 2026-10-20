@@ -43,6 +43,7 @@
   - [Measuring: rulers on the axes and people with their height](#measuring-rulers-on-the-axes-and-people-with-their-height)
   - [Welcome tour](#welcome-tour)
   - [Dark mode and night scene](#dark-mode-and-night-scene)
+  - [Languages and translations](#languages-and-translations)
 - [Getting started](#getting-started)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
@@ -50,8 +51,10 @@
 - [Scripting example](#scripting-example)
 - [Writing plugins](#writing-plugins)
   - [The `context` API](#the-context-api)
+  - [Texts and languages in plugins](#texts-and-languages-in-plugins)
   - [Built-in plugins](#built-in-plugins)
   - [Plugin packages](#plugin-packages)
+- [Multilingual: language files for developers](#multilingual-language-files-for-developers)
   - [The OpenSCAD plugin](#the-openscad-plugin)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
@@ -70,7 +73,7 @@
 - **Measuring aids** – rulers on the axes that switch from metres to centimetres to millimetres as you zoom in, an infinite ground grid whose spacing follows the zoom, and reference people that show their height.
 - **Plugin system** – extend the app with plain JavaScript modules or whole plugin packages: commands, tools, panels, script commands and languages, file importers and exporters, overlay drawings. Three examples are included, plus an **OpenSCAD plugin** that runs the real OpenSCAD in the browser.
 - **Welcome tour** – six short animated steps on the first start, available again any time from the menu.
-- **Dark mode with a real night scene**, a split button for every combination, and a German user interface.
+- **Dark mode with a real night scene**, a split button for every combination, and an English or German user interface.
 
 ## Features
 
@@ -163,6 +166,24 @@ On the very first start a short tour with small animations explains the essentia
 
 The sun/moon split button switches dark mode on and off. Its menu lets you set the interface (light, dark, follow the system) and the 3D scene (day, night, same as the interface) separately. You can have dark menus with a bright model, or turn the whole viewport into a night scene with a night sky, moonlight and light edges.
 
+### Languages and translations
+
+The interface speaks **English** (the source language, always there), **German**, **French**, **Spanish** and **Arabic** (right to left); more languages can be added without touching the code. The 🌐 button next to the light/dark switch (with the current language code) picks the language, as do *Language: …* in **Menu › View** and the command palette. The choice is kept in the browser; on the very first start the browser language is used if there is a language pack for it, otherwise English. Everything switches live, without reloading.
+
+![The translation editor: areas with the app's icons, English and German side by side, progress per language](docs/screenshots/translations.png)
+
+**Translation editor** (🌐 › *Übersetzungen bearbeiten…*, or *Übersetzungen…* in the palette) – all texts grouped by area with the app's icons (tools, main menu, every panel, dialogs, status bar, script editor, …; every plugin is an area of its own), English (the source), German and the target language side by side, search over texts and keys, a *missing only* filter, a progress bar per language and a warning when a translation lacks a `{placeholder}`.
+
+- **Live preview** – while the editor is open the app shows the target language; every keystroke is visible right away. Missing texts fall back to English.
+- **Where is this text?** – the 👁 button outlines every element that currently shows the text.
+- **New language…** creates an empty language (code, name, writing direction ltr/rtl); **Import…** loads a language file, **Export** saves the target language as JSON, **Template** downloads `template.json`. Languages and changes made in the editor are kept in the browser.
+
+**Numbers and units follow the language** – the decimal separator (`2.5 m` in English and Arabic, `2,5 m` in German, French and Spanish), the unit symbols (Arabic `مم`, `سم`, `م`, `كم`), thousands separators in counts and the plural forms (Arabic has six). The *Measurements* box accepts every form: `2.5m`, `2,5 m`, Arabic-Indic digits `٢٫٥م` and the Arabic separators `٫` and `؛`. Arabic keeps Western digits on screen, as is usual in technical software.
+
+**Right to left** – with Arabic the whole interface runs right to left (menus, panels, dialogs, text). The 3D view, the tool bar and the panel rail keep their places; code, keyboard keys and the *Measurements* box stay left to right.
+
+The languages, the language switch and the editor are the built-in plugin **Sprachen** – switched off, the app is English and the language switch disappears.
+
 ## Getting started
 
 Requirements: **Node.js 20.19+ or 22.12+** and a current Chromium, Firefox or Safari.
@@ -172,7 +193,7 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:5173>. The interface is in German. On the first start the welcome tour opens.
+Open <http://localhost:5173>. The interface follows the browser language (English, German, French, Spanish or Arabic, switchable with 🌐 at the top). On the first start the welcome tour opens.
 
 The 3D view needs WebGL. If the browser has turned it off (for example after a graphics driver crash), the app shows a short help page instead of the loading screen.
 
@@ -180,6 +201,17 @@ The 3D view needs WebGL. If the browser has turned it off (for example after a g
 npm run build     # production build in dist/
 npm run preview   # serve the build locally
 ```
+
+Linting and formatting use [oxlint](https://oxc.rs/docs/guide/usage/linter) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter) from the Oxc project. They cover `src/`, `scripts/` and `plugins/openscad/src/`. The settings are in `.oxlintrc.json` and `.oxfmtrc.json`: every `if`/`else`/loop body gets braces and its own lines, with 2-space indent, single quotes, semicolons and a print width of 140.
+
+```bash
+npm run lint           # report lint problems
+npm run lint:fix       # fix what oxlint can fix automatically
+npm run format         # format all files in place
+npm run format:check   # only report files that are not formatted
+```
+
+Run `lint:fix` before `format`: the fix adds the missing braces, and the formatter then puts the bodies on their own lines. For VS Code, the recommended Oxc extension is listed in `.vscode/extensions.json`.
 
 ## Keyboard shortcuts
 
@@ -325,7 +357,8 @@ export default {
 | UI | `ui.toast(text)`, `ui.prompt(title, value?)`, `ui.confirm(title)` | Messages and simple dialogs. |
 | | `ui.addContextMenuEntry({ label, when?(editor), run(editor) })` | An entry in the viewport's context menu, shown when `when` is true. |
 | | `ui.addWindow(component)` | A floating window (Vue component, rendered once; it decides itself when to show). |
-| | `ui.addTopBarButton({ icon, title, active?(), run(editor) })` | A button in the top bar next to the model name, highlighted while `active()` is true. |
+| | `ui.addTopBarButton({ icon, title, active?(), badge?(), position?, run(editor, event) })` | A button in the top bar next to the model name (`position: 'theme'`: right of the light/dark switch), highlighted while `active()` is true; `badge()` shows a short text next to the icon. `event` lets it open a popover at its position. |
+| Languages | `i18n.t(key, params?)`, `i18n.addMessages(language, messages)`, `i18n.addLanguage({ code, name, dir? }, messages?)`, `i18n.language()`, `i18n.languages()`, `i18n.setLanguage(code)`, `i18n.onChange(listener)` | Texts by key with `{placeholders}` and fallback (current language → English → key). `addMessages` adds texts for a language (nested or flat), `addLanguage` a whole language that can be chosen. See [Texts and languages in plugins](#texts-and-languages-in-plugins). |
 | Model data | `data.get(definition)`, `data.set(definition, value)` | JSON the plugin keeps on a group/component – saved with the model and kept while the plugin is off (the terrain plugin stores its height grid here). |
 | Model | `editor`, `THREE`, `newId()` | The full editor (model, selection, viewer; `editor.commit(label, change)` makes one undo step) and three.js. |
 
@@ -339,6 +372,34 @@ The three bundled examples in [`src/plugins/examples/`](src/plugins/examples) ca
 - **Koordinaten & Hilfspunkte** (`cursor-coordinates.js`) – an overlay with the coordinates of the snapped point, a toggle command and the tool *Hilfspunkt* (key <kbd>J</kbd>) built on `PointTool`.
 - **Stückliste & Punktimport** (`parts-list.js`) – a CSV parts-list exporter and an importer for `.xyz`/`.pts` point lists.
 
+### Texts and languages in plugins
+
+A plugin brings its own texts – the app only registers them, it never keeps texts of plugins. Give the plugin a `messages` object with English (the source language and fallback – required) and as many other languages as you like; they are registered as soon as the plugin is loaded, so even its `name` and `description` in the plugin manager can be translated:
+
+```js
+export default {
+  id: 'hello',
+  name: 'hello.name',                       // labels may be message keys …
+  description: 'hello.description',
+  messages: {
+    en: { hello: { name: 'Hello world', description: 'Shows how a plugin works.', greet: 'Say hello', faces: '{count} face | {count} faces' } },
+    de: { hello: { name: 'Hallo Welt', description: 'Zeigt, wie ein Plugin funktioniert.', greet: 'Hallo sagen', faces: '{count} Fläche | {count} Flächen' } },
+  },
+  activate(context) {
+    const { t } = context.i18n;
+    context.commands.register({
+      id: 'greet', label: 'hello.greet',      // … they follow the language
+      run: editor => context.ui.toast(t('hello.faces', { count: editor.model.root.faces.size })),
+    });
+  },
+};
+```
+
+- **Keys** are `area.key`; prefix them with your plugin id so they never collide. Labels, names and titles given to commands, tools, panels, top-bar buttons, context-menu entries and exporters may be keys (or getters) – they change with the language. Plain text is shown as it is.
+- **Placeholders** `{name}` are filled from the parameters; numbers are formatted for the language. `"one | many"` (or `"zero | one | many"`) picks the form by `{count}`.
+- `context.i18n.addMessages(language, messages)` adds texts at run time (e.g. a language pack a plugin downloads); everything is removed again when the plugin is switched off.
+- In the translation editor every plugin is an area of its own (named after the plugin, with the icon of its panel or tool), so translators find its texts.
+
 ### Built-in plugins
 
 Some features of the app are written as plugins themselves, in [`src/plugins/builtin/`](src/plugins/builtin), against the same API. They are part of the app, loaded as their own chunk on demand, on by default and can be switched off (not removed) in the plugin manager:
@@ -347,6 +408,10 @@ Some features of the app are written as plugins themselves, in [`src/plugins/bui
 - **Importformate** (`src/plugins/builtin/imports/`) – FBX, Collada, KMZ, 3DS, PLY, 3MF, AMF, VRML, USD/USDZ and Blender. It only registers the file types (`files.registerImporter` with `loadScene`); the three.js loaders and the Blender reader are a separate chunk loaded on the first import. The app turns the scene into faces, guesses units and places it.
 - **Gelände (Sandkiste)** (`src/plugins/builtin/terrain/`) – the terrain tool, its floating window, the *Gelände bearbeiten / aus Fläche* context-menu entries, the command and `s3d.terrain()`. Terrains in a model stay intact while it is off; they just can't be sculpted until it is on again.
 - **3D-Text** (`src/plugins/builtin/text3d/`) – 3D letters and numbers: the *3D-Text* tool opens a dialog with a live preview in the chosen font; the text becomes a component you place with a click (flat or upright, filled, extruded or as an outline, several lines). Besides Helvetiker and Optimer it brings 13 free fonts under the SIL Open Font License – Roboto, Playfair Display, Bebas Neue, Fredoka, Black Ops One (stencil), Pacifico, Lobster, Caveat, Orbitron, Press Start 2P (pixel), JetBrains Mono – and *Eigene Schrift laden…* adds your own TTF, OTF or WOFF file (kept in the browser). Fonts and the font reader ([opentype.js](https://opentype.js.org)) load only when used. Scripts use it as `s3d.text3d('Hallo', { font: 'bebas', size: 0.5, depth: 0.1 })`; the fonts a script names are loaded before it runs.
+
+- **Sprachen** (`src/plugins/builtin/i18n/`) – German, French, Spanish and Arabic for the app (`languages/*.json`), the language switch in the top bar, a *Language: …* command per language and the translation editor (see [Languages and translations](#languages-and-translations)). Switched off, only English is left.
+
+Each built-in plugin keeps its own texts in `i18n/en.json` (source) and `i18n/de.json` in its folder – the core never holds texts of plugins.
 
 ![The 3D-text plugin: letters in Pacifico, Bebas Neue, Fredoka and Orbitron, and the dialog with the preview in Lobster](docs/screenshots/text3d.png)
 
@@ -391,6 +456,39 @@ With the plugin switched on, *OpenSCAD* also shows up when you right-click an ob
 
 ![Right-click › Als Code öffnen ▸ JavaScript (s3d), JSON, OBJ-Mesh and OpenSCAD](docs/screenshots/convert.png)
 
+## Multilingual: language files for developers
+
+Every visible text is a message key (`t('tools.select')`). English is the source and the fallback: [`src/i18n/en.json`](src/i18n/en.json) for the app, [`src/i18n/boot.en.json`](src/i18n/boot.en.json) for the loading screen, and `i18n/en.json` in each built-in plugin. The small core in [`src/i18n/index.ts`](src/i18n/index.ts) only registers texts and languages and translates (`t`, fallback current language → English → key); every other language comes from a plugin – German, French, Spanish and Arabic from **Sprachen** ([`languages/de.json`](src/plugins/builtin/i18n/languages/de.json), `fr.json`, `es.json`, `ar.json`), each plugin's own texts from the plugin itself (`i18n/<code>.json` next to its `index.ts`).
+
+**Numbers and units** – `formatNumber(value, options)` formats with `Intl.NumberFormat` for the language, `formatDecimal(value, digits)` writes lengths and angles with the language's decimal separator (no grouping, so they can be typed back), `unitSymbol('mm' | 'cm' | 'm' | 'km')` returns the symbol from the message `units.symbols.*`, and `normalizeNumberInput(text)` turns input back into Western digits, `.` and Latin unit symbols before parsing. `src/core/units.ts` uses all of them – a new language only needs its `units.symbols` texts. Arabic uses the locale `ar-u-nu-latn` (Arabic text, Western digits).
+
+**A language file** – the format of `de.json`, of *Export* / *Import* in the translation editor and of the template:
+
+```json
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "tools": { "select": "Sélectionner", "line": "Ligne" },
+    "editor": { "faces": "{count} face | {count} faces" }
+  }
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `code` | BCP 47 language code: `de`, `fr`, `es`, `pt-BR` … (`en` is the source and cannot be imported) |
+| `name` | the language's name in itself – shown in the language menu |
+| `dir` | writing direction, `ltr` (default) or `rtl` |
+| `messages` | the texts, nested by area (`{ "tools": { "select": … } }`) or flat (`{ "tools.select": … }`). Missing or empty texts fall back to English. |
+
+Placeholders like `{count}`, `{name}` or `{error}` must stay unchanged (the editor warns when they differ). Texts with `|` choose the form by `{count}` using the language's plural rules: two forms are `one | other`, three `zero | one | other`, six `zero | one | two | few | many | other` (Arabic). A form may leave out `{count}` (`"one file | {count} files"`). A few texts contain `<b>` or `<kbd>` – keep the tags. In right-to-left languages, put a right-to-left mark (U+200F) between Latin text and a closing bracket so the bracket stays in place (`"(Ctrl+S\u200F)"`).
+
+**Starting a new language** – [`src/plugins/builtin/i18n/languages/template.json`](src/plugins/builtin/i18n/languages/template.json) has every key with an empty text and the English text as a hint right below (`"select": ""`, `"select#en": "Select"`). Fill in `code`, `name` and the texts and load the file with *Import…* in the translation editor; the hint lines are ignored. The editor's **Template** button downloads the same file including the texts of the plugins that are installed right now. To ship a language with the app, put the file next to `de.json`, add it to `BUILTIN_LANGUAGES` in `src/plugins/builtin/i18n/store.ts`, and add the plugin texts as `i18n/<code>.json` to each built-in plugin's `messages`.
+
+**Checking** – `node scripts/i18n.mjs` (no dependencies) lists missing, unused and mismatched keys per language and German text that is still hard-coded in `.vue`/`.ts` files; `node scripts/i18n.mjs template` rewrites `template.json` after texts were added. Not translated on purpose: the `s3d` script API (names, signatures, examples, default names of what scripts build), material names in models and the saved file format.
+
 ## Project structure
 
 ```
@@ -401,7 +499,9 @@ src/
   scripting/   s3d API, API catalog, examples, OBJ import, resolution changes
   plugins/     plugin system – the plugin API (types), context, loader/registry, example plugins;
                builtin/ holds the plugins that ship with the app (AI assistant with providers, prompts,
-               agent, chat history and Hugging Face search; terrain sandbox; 3D text with its fonts; import formats)
+               agent, chat history and Hugging Face search; terrain sandbox; 3D text with its fonts; import formats;
+               languages – German, French, Spanish, Arabic – and the translation editor)
+  i18n/        the i18n core – t(), message and language registry, number/unit formatting, English source texts (en.json)
   components/  Vue UI – toolbars, panels, dialogs, command palette, welcome tour
                (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components)
   components/ui/  small reusable building blocks – S3dModalDialog, S3dToggleSwitch, S3dSegmentedControl, S3dProgressBar, S3dCloseButton
@@ -410,12 +510,12 @@ src/
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo and README screenshots
 plugins/       stand-alone plugin packages with their own package.json – e.g. openscad/ (not part of the app build)
-scripts/       screenshot automation (headless Chrome)
+scripts/       screenshot automation (headless Chrome), i18n.mjs (translation check and template)
 ```
 
 ## Regenerating the screenshots
 
-The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`, `openscad`, `convert`, `plugins`, `text3d`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
+The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`, `openscad`, `convert`, `plugins`, `text3d`, `translations`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
 
 ```bash
 npm run dev

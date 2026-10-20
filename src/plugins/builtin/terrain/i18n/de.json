@@ -1,0 +1,92 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "terrain": {
+      "panel": {
+        "sculpt": "Gelände formen",
+        "new": "Neues Gelände",
+        "discardClose": "Verwerfen und schließen",
+        "tip": "Tipp: Zeichne ein <b>Rechteck</b>, wähle es aus und starte dann „Gelände“ – das Gelände übernimmt Größe und Lage. Oder lege hier eines an:",
+        "width": "Breite",
+        "depth": "Tiefe",
+        "detail": "Detail",
+        "coarse": "Grob (schnell)",
+        "medium": "Mittel",
+        "fine": "Fein (mehr Flächen)",
+        "startHills": "Mit zufälligen Hügeln starten",
+        "create": "Gelände erstellen",
+        "grid": "Raster {columns}×{rows} ({cell})",
+        "height": "Höhe {low} … {high}",
+        "brush": "Pinsel",
+        "key": "Taste {key}",
+        "strength": "Stärke",
+        "brushHint": "Maustaste halten = wirkt weiter · <b>Umschalt</b> kehrt Anheben/Absenken um · <b>[ ]</b> Größe · <b>Strg+Z</b> letzter Strich",
+        "quick": "Schnell-Formen",
+        "hillsTitle": "Sanfte Hügel",
+        "hills": "〰 Hügel",
+        "mountainsTitle": "Hohe Berge",
+        "mountains": "⛰ Berge",
+        "flatTitle": "Alles wieder flach",
+        "flat": "▭ Flach",
+        "undoTitle": "Letzten Pinselstrich zurücknehmen (Strg+Z)",
+        "surfaces": "Oberflächen",
+        "auto": "automatisch",
+        "rockFrom": "Fels ab",
+        "earthFrom": "Erde ab",
+        "slope": "{degrees}° Hang",
+        "snowFrom": "Schnee ab",
+        "off": "aus",
+        "extras": "Extras",
+        "skirt": "Erdsockel (Seitenwände bis unter das tiefste Tal)",
+        "water": "Wasser",
+        "discardTitle": "Alles verwerfen",
+        "discard": "Verwerfen",
+        "applyTitle": "Als Gruppe ins Modell übernehmen (Enter) – später per Rechtsklick wieder bearbeitbar",
+        "apply": "Übernehmen"
+      },
+      "modes": {
+        "raise": "Anheben",
+        "raiseTip": "Hügel und Berge aufschütten",
+        "lower": "Absenken",
+        "lowerTip": "Täler, Mulden und Seen graben",
+        "smooth": "Glätten",
+        "smoothTip": "Kanten und Spitzen weich machen",
+        "flatten": "Ebnen",
+        "flattenTip": "Auf die Höhe des Klickpunkts einebnen (Bauplatz, Plateau)",
+        "rough": "Zerklüften",
+        "roughTip": "Unebenheiten für Felsen und Geröll"
+      },
+      "layers": {
+        "grass": "Ebene",
+        "earth": "Hang / Tal",
+        "rock": "Berg / Klippe",
+        "snow": "Gipfel"
+      },
+      "tool": {
+        "start": "Gelände: Wähle ein Rechteck aus oder lege im Fenster ein neues Gelände an.",
+        "sculpt": "{mode} – Maustaste halten und ziehen · Umschalt: umkehren · [ ] Pinselgröße · Strg+Z: Pinselstrich zurück · Enter/Esc: Übernehmen",
+        "tooltip": "{mode} · Ø {size} · Höhe {height}"
+      },
+      "session": {
+        "needsFlatFace": "Gelände geht nur aus einer waagerechten Fläche – z. B. einem Rechteck auf dem Boden.",
+        "newTitle": "Neues Gelände {width} × {depth} m",
+        "applied": "Gelände übernommen – Strg+Z macht es rückgängig",
+        "discarded": "Gelände verworfen"
+      },
+      "plugin": {
+        "name": "Gelände (Sandkiste)",
+        "description": "Landschaften mit dem Pinsel formen – Anheben, Absenken, Glätten, Ebnen, Zerklüften; Gras, Erde, Fels und Schnee nach Höhe und Neigung, dazu Wasser. Bringt s3d.terrain() für Skripte mit.",
+        "command": "Gelände (Sandkiste): Berge & Täler formen",
+        "editEntry": "⛰ Gelände bearbeiten",
+        "edit": "Gelände bearbeiten",
+        "toolName": "Gelände",
+        "fromFace": "Gelände aus Fläche",
+        "fromFaceEntry": "⛰ Gelände aus Fläche",
+        "apiTitle": "Gelände (Landschaft)",
+        "apiDescription": "Landschaft mit Hügeln und Bergen. Gras auf Ebenen, Erde an Hängen, Fels oben, optional Schnee und Wasser. hills = Berghöhe (0 = flach). Danach mit dem Gelände-Werkzeug weiter formbar."
+      }
+    }
+  }
+}

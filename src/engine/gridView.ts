@@ -10,7 +10,8 @@ import type { Units } from '../core/document';
  */
 
 const MAX_LEVELS = 8;
-const INCH = 0.0254, FOOT = 0.3048;
+const INCH = 0.0254,
+  FOOT = 0.3048;
 /** Grid spacings from fine to coarse in metres – decimal for metric models, 1/16" · 1" · 1' · 10' … for imperial ones. */
 export const gridLevels = (units: Units): number[] =>
   units === 'in' || units === 'ft'
@@ -84,24 +85,36 @@ const fragmentShader = `
 export class GroundGrid {
   material = new THREE.ShaderMaterial({
     uniforms: {
-      invProj: { value: new THREE.Matrix4() }, camWorld: { value: new THREE.Matrix4() }, viewProj: { value: new THREE.Matrix4() },
-      levels: { value: new Array(MAX_LEVELS).fill(1) }, levelCount: { value: 0 },
-      lineColor: { value: new THREE.Color() }, xColor: { value: new THREE.Color() }, yColor: { value: new THREE.Color() },
-      strength: { value: 1 }, ortho: { value: 0 },
-      fadeIn: { value: new THREE.Vector2(...GRID_FADE_IN) }, major: { value: new THREE.Vector2(...GRID_MAJOR) },
+      invProj: { value: new THREE.Matrix4() },
+      camWorld: { value: new THREE.Matrix4() },
+      viewProj: { value: new THREE.Matrix4() },
+      levels: { value: new Array(MAX_LEVELS).fill(1) },
+      levelCount: { value: 0 },
+      lineColor: { value: new THREE.Color() },
+      xColor: { value: new THREE.Color() },
+      yColor: { value: new THREE.Color() },
+      strength: { value: 1 },
+      ortho: { value: 0 },
+      fadeIn: { value: new THREE.Vector2(...GRID_FADE_IN) },
+      major: { value: new THREE.Vector2(...GRID_MAJOR) },
       distanceFade: { value: new THREE.Vector2(100, 400) },
     },
-    vertexShader, fragmentShader,
-    transparent: true, depthWrite: false, depthTest: true,
+    vertexShader,
+    fragmentShader,
+    transparent: true,
+    depthWrite: false,
+    depthTest: true,
   });
   mesh: THREE.Mesh;
   private units: Units | null = null;
 
   constructor() {
-    const triangle = new THREE.BufferGeometry(); triangle.setAttribute('position', new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
+    const triangle = new THREE.BufferGeometry();
+    triangle.setAttribute('position', new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
     this.mesh = new THREE.Mesh(triangle, this.material);
     // drawn first among the transparent objects: after opaque faces/edges, before glass, x-ray and the shadow catcher
-    this.mesh.frustumCulled = false; this.mesh.renderOrder = -2;
+    this.mesh.frustumCulled = false;
+    this.mesh.renderOrder = -2;
   }
 
   /** Per frame: camera matrices, colours for day/night and the unit system of the model. */
@@ -124,7 +137,10 @@ export class GroundGrid {
     // fade out far beyond what the camera looks at, never closer than its height above the ground;
     // parallel projection has no horizon (and its rays start far behind the eye), the zoom levels alone thin it out
     const reach = Math.max(Math.abs(camera.position.z), camera.position.distanceTo(target), 1);
-    if (isOrtho) uniforms.distanceFade.value.set(1e12, 2e12);
-    else uniforms.distanceFade.value.set(reach * 12, reach * 40);
+    if (isOrtho) {
+      uniforms.distanceFade.value.set(1e12, 2e12);
+    } else {
+      uniforms.distanceFade.value.set(reach * 12, reach * 40);
+    }
   }
 }

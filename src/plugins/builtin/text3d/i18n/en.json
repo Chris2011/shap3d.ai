@@ -1,0 +1,56 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "text3d": {
+      "dialog": {
+        "title": "Insert 3D text",
+        "placeholder": "Enter text",
+        "font": "Font",
+        "addFontTitle": "Add a TTF, OTF or WOFF file as a font – kept in the browser",
+        "addFont": "Load own font…",
+        "removeFont": "Remove this font",
+        "loading": "Loading font …",
+        "freeFonts": "Free fonts (SIL OFL)",
+        "height": "Height",
+        "filled": "Filled",
+        "depth": "Extruded",
+        "upright": "Standing upright",
+        "fontAdded": "Font “{name}” added"
+      },
+      "componentName": "3D text “{text}”",
+      "plugin": {
+        "status": "3D text: choose text and font, then “Place” and click into the model.",
+        "name": "3D text",
+        "description": "3D letters and numbers in many free fonts (sans serif, serif, display, script, pixel …) or your own TTF/OTF/WOFF files, flat or upright, filled, extruded or as an outline. Brings s3d.text3d() for scripts.",
+        "apiDescription": "3D letters and numbers. size = letter height, depth = extrusion (0 = flat), upright = standing upright (default), filled: false = outline only, \"\\n\" = new line. Fonts (font): {fonts} or your own (“eigene:name”)."
+      },
+      "errors": {
+        "unknownFont": "Unknown font “{id}” – available: {available}",
+        "fontNotFound": "Font “{name}” not found",
+        "stillLoading": "The font “{id}” is still loading – please run it again in a moment.",
+        "wrongFile": "Please choose a TTF, OTF or WOFF file (WOFF2 does not work)"
+      },
+      "categories": {
+        "sans": "Sans serif",
+        "serif": "Serif",
+        "display": "Display",
+        "script": "Script",
+        "special": "Special",
+        "custom": "Own"
+      },
+      "fonts": {
+        "helvetiker_bold": "Helvetiker Bold",
+        "roboto_bold": "Roboto Bold",
+        "playfair_bold": "Playfair Display Bold",
+        "fredoka": "Fredoka (rounded)",
+        "blackops": "Black Ops One (stencil)",
+        "caveat": "Caveat (handwriting)",
+        "orbitron": "Orbitron (futuristic)",
+        "pressstart": "Press Start 2P (pixel)",
+        "jetbrains": "JetBrains Mono (code)"
+      }
+    }
+  }
+}

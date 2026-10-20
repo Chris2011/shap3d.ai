@@ -1,0 +1,32 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "imports": {
+      "formats": {
+        "ply": "PLY (3D-Scan)",
+        "3mf": "3MF (3D-Druck)",
+        "amf": "AMF (3D-Druck)"
+      },
+      "errors": {
+        "collada": "Die Collada-Datei konnte nicht gelesen werden.",
+        "blendEmpty": "In der Blender-Datei (Version {version}) wurden keine Mesh-Objekte gefunden.",
+        "skipped": "Übersprungen: {list}",
+        "unsupported": "Nicht unterstütztes Format: {ext}",
+        "noBlend": "Keine Blender-Datei (Kopfzeile fehlt).",
+        "noDna": "Die Datei enthält keine Strukturbeschreibung (DNA1).",
+        "badDna": "Ungültige Strukturbeschreibung",
+        "linked": "{name} (verknüpfte Daten)",
+        "noVertices": "keine Eckpunkte",
+        "noCorners": "keine Flächenecken",
+        "noFaceList": "keine Flächenliste",
+        "noFaces": "keine Flächen"
+      },
+      "plugin": {
+        "name": "Importformate",
+        "description": "Öffnet FBX, Collada (.dae), KMZ, 3DS, PLY, 3MF, AMF, VRML, USD/USDZ und Blender-Dateien (.blend) – ohne die Originalprogramme. Die Leseroutinen werden erst beim ersten Import geladen."
+      }
+    }
+  }
+}

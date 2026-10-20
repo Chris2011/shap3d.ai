@@ -1,0 +1,56 @@
+{
+  "code": "ar",
+  "name": "العربية",
+  "dir": "rtl",
+  "messages": {
+    "text3d": {
+      "dialog": {
+        "title": "إدراج نص ثلاثي الأبعاد",
+        "placeholder": "أدخل النص",
+        "font": "الخط",
+        "addFontTitle": "إضافة ملف TTF أو OTF أو WOFF كخط – يُحفظ في المتصفح",
+        "addFont": "تحميل خط خاص…",
+        "removeFont": "إزالة هذا الخط",
+        "loading": "جارٍ تحميل الخط …",
+        "freeFonts": "خطوط مجانية (SIL OFL‏)",
+        "height": "الارتفاع",
+        "filled": "مملوء",
+        "depth": "مبثوق",
+        "upright": "قائم",
+        "fontAdded": "تمت إضافة الخط «{name}»"
+      },
+      "componentName": "نص ثلاثي الأبعاد «{text}»",
+      "plugin": {
+        "status": "نص ثلاثي الأبعاد: اختر النص والخط، ثم «وضع» وانقر داخل النموذج.",
+        "name": "نص ثلاثي الأبعاد",
+        "description": "حروف وأرقام ثلاثية الأبعاد بخطوط مجانية كثيرة (بلا زوائد، بزوائد، عرض، يدوي، بكسل …‏) أو بملفات TTF/OTF/WOFF خاصة بك، مسطحة أو قائمة، مملوءة أو مبثوقة أو كحد خارجي. يضيف s3d.text3d() للسكربتات.",
+        "apiDescription": "حروف وأرقام ثلاثية الأبعاد. size = ارتفاع الحروف، depth = البثق (0 = مسطح)، upright = قائم (افتراضي)، filled: false = الحد الخارجي فقط، \"\\n\" = سطر جديد. الخطوط (font‏): ‏{fonts} أو خطوطك الخاصة («eigene:الاسم»)."
+      },
+      "errors": {
+        "unknownFont": "خط غير معروف «{id}» – المتاح: {available}",
+        "fontNotFound": "لم يُعثر على الخط «{name}»",
+        "stillLoading": "الخط «{id}» ما زال قيد التحميل – نفّذ مجددًا بعد لحظة.",
+        "wrongFile": "اختر ملف TTF أو OTF أو WOFF ‏(WOFF2 لا يعمل)"
+      },
+      "categories": {
+        "sans": "بلا زوائد",
+        "serif": "بزوائد",
+        "display": "عرض",
+        "script": "يدوي",
+        "special": "خاصة",
+        "custom": "خطوطي"
+      },
+      "fonts": {
+        "helvetiker_bold": "Helvetiker Bold",
+        "roboto_bold": "Roboto Bold",
+        "playfair_bold": "Playfair Display Bold",
+        "fredoka": "Fredoka (مستدير)",
+        "blackops": "Black Ops One (استنسل)",
+        "caveat": "Caveat (خط يد)",
+        "orbitron": "Orbitron (مستقبلي)",
+        "pressstart": "Press Start 2P (بكسل)",
+        "jetbrains": "JetBrains Mono (كود)"
+      }
+    }
+  }
+}

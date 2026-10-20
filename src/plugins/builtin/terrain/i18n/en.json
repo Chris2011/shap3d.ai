@@ -1,0 +1,92 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "terrain": {
+      "panel": {
+        "sculpt": "Sculpt terrain",
+        "new": "New terrain",
+        "discardClose": "Discard and close",
+        "tip": "Tip: draw a <b>rectangle</b>, select it and then start “Terrain” – the terrain takes over its size and position. Or create one here:",
+        "width": "Width",
+        "depth": "Depth",
+        "detail": "Detail",
+        "coarse": "Coarse (fast)",
+        "medium": "Medium",
+        "fine": "Fine (more faces)",
+        "startHills": "Start with random hills",
+        "create": "Create terrain",
+        "grid": "grid {columns}×{rows} ({cell})",
+        "height": "height {low} … {high}",
+        "brush": "Brush",
+        "key": "key {key}",
+        "strength": "Strength",
+        "brushHint": "Hold the mouse button = keeps working · <b>Shift</b> swaps raise/lower · <b>[ ]</b> size · <b>Ctrl+Z</b> last stroke",
+        "quick": "Quick shapes",
+        "hillsTitle": "Gentle hills",
+        "hills": "〰 Hills",
+        "mountainsTitle": "High mountains",
+        "mountains": "⛰ Mountains",
+        "flatTitle": "Everything flat again",
+        "flat": "▭ Flat",
+        "undoTitle": "Take back the last brush stroke (Ctrl+Z)",
+        "surfaces": "Surfaces",
+        "auto": "automatic",
+        "rockFrom": "Rock from",
+        "earthFrom": "Earth from",
+        "slope": "{degrees}° slope",
+        "snowFrom": "Snow from",
+        "off": "off",
+        "extras": "Extras",
+        "skirt": "Earth base (side walls down below the deepest valley)",
+        "water": "Water",
+        "discardTitle": "Discard everything",
+        "discard": "Discard",
+        "applyTitle": "Add to the model as a group (Enter) – editable later with a right-click",
+        "apply": "Apply"
+      },
+      "modes": {
+        "raise": "Raise",
+        "raiseTip": "Pile up hills and mountains",
+        "lower": "Lower",
+        "lowerTip": "Dig valleys, hollows and lakes",
+        "smooth": "Smooth",
+        "smoothTip": "Soften edges and peaks",
+        "flatten": "Flatten",
+        "flattenTip": "Level to the height of the clicked point (building plot, plateau)",
+        "rough": "Roughen",
+        "roughTip": "Bumps for rocks and scree"
+      },
+      "layers": {
+        "grass": "Flat",
+        "earth": "Slope / valley",
+        "rock": "Mountain / cliff",
+        "snow": "Peak"
+      },
+      "tool": {
+        "start": "Terrain: select a rectangle or create a new terrain in the window.",
+        "sculpt": "{mode} – hold the mouse button and drag · Shift: invert · [ ] brush size · Ctrl+Z: undo stroke · Enter/Esc: apply",
+        "tooltip": "{mode} · Ø {size} · height {height}"
+      },
+      "session": {
+        "needsFlatFace": "Terrain only works from a horizontal face – e.g. a rectangle on the ground.",
+        "newTitle": "New terrain {width} × {depth} m",
+        "applied": "Terrain applied – Ctrl+Z undoes it",
+        "discarded": "Terrain discarded"
+      },
+      "plugin": {
+        "name": "Terrain (sandbox)",
+        "description": "Sculpt landscapes with a brush – raise, lower, smooth, flatten, roughen; grass, earth, rock and snow by height and slope, plus water. Brings s3d.terrain() for scripts.",
+        "command": "Terrain (sandbox): shape mountains & valleys",
+        "editEntry": "⛰ Edit terrain",
+        "edit": "Edit terrain",
+        "toolName": "Terrain",
+        "fromFace": "Terrain from face",
+        "fromFaceEntry": "⛰ Terrain from face",
+        "apiTitle": "Terrain (landscape)",
+        "apiDescription": "Landscape with hills and mountains. Grass on flat ground, earth on slopes, rock at the top, optional snow and water. hills = mountain height (0 = flat). Can be sculpted further with the terrain tool."
+      }
+    }
+  }
+}

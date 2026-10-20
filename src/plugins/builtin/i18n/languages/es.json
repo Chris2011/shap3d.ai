@@ -1,0 +1,1594 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "keys": {
+      "ctrl": "Ctrl",
+      "shift": "Mayús",
+      "alt": "Alt",
+      "delete": "Supr",
+      "space": "Espacio",
+      "enter": "Intro",
+      "escape": "Esc",
+      "tab": "Tab",
+      "backspace": "Retroceso"
+    },
+    "i18n": {
+      "errors": {
+        "languageExists": "El idioma «{code}» ya existe"
+      }
+    },
+    "commands": {
+      "new": "Nuevo",
+      "open": "Abrir…",
+      "save": "Guardar (descarga)",
+      "saveLocal": "Guardar en el navegador",
+      "loadLocal": "Cargar desde el navegador",
+      "import": "Importar (DAE, FBX, 3DS, OBJ, STL, glTF …)…",
+      "export-glb": "Exportar: GLB",
+      "export-gltf": "Exportar: glTF",
+      "export-stl": "Exportar: STL",
+      "export-obj": "Exportar: OBJ",
+      "export-png": "Exportar: imagen PNG",
+      "print": "Imprimir",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "cut": "Cortar",
+      "copy": "Copiar",
+      "paste": "Pegar",
+      "pasteInPlace": "Pegar en su sitio",
+      "delete": "Eliminar",
+      "clearAll": "Vaciar el área de trabajo",
+      "deleteGuides": "Eliminar guías",
+      "selectAll": "Seleccionar todo",
+      "selectNone": "Deseleccionar",
+      "invertSel": "Invertir selección",
+      "hide": "Ocultar",
+      "unhideAll": "Mostrar todo",
+      "makeGroup": "Crear grupo",
+      "makeComponent": "Crear componente…",
+      "explode": "Descomponer",
+      "editGroup": "Editar grupo",
+      "closeGroup": "Cerrar grupo/componente",
+      "makeUnique": "Hacer único",
+      "lock": "Bloquear",
+      "unlock": "Desbloquear",
+      "reverseFaces": "Invertir caras",
+      "orientFaces": "Orientar caras",
+      "soften": "Suavizar aristas",
+      "unsoften": "Quitar suavizado",
+      "intersect": "Intersecar caras (selección)",
+      "flipX": "Voltear: dirección roja",
+      "flipY": "Voltear: dirección verde",
+      "flipZ": "Voltear: dirección azul",
+      "solid-union": "Unión",
+      "solid-subtract": "Restar (el primero del segundo)",
+      "solid-intersect": "Intersección",
+      "solid-outershell": "Envoltura exterior",
+      "solid-trim": "Recortar",
+      "solid-split": "Dividir",
+      "themeDark": "Tema oscuro",
+      "themeLight": "Tema claro",
+      "themeSystem": "Tema según el sistema",
+      "sceneNight": "Escena 3D: noche",
+      "sceneDay": "Escena 3D: día",
+      "sceneAuto": "Escena 3D como la interfaz",
+      "tour": "Mostrar introducción",
+      "commandPalette": "Paleta de comandos…",
+      "managePlugins": "Administrar plugins…",
+      "toggleAxes": "Ejes",
+      "toggleRulers": "Reglas en los ejes",
+      "toggleGrid": "Cuadrícula en el suelo",
+      "togglePeopleSize": "Altura de las personas",
+      "toggleGuides": "Guías",
+      "toggleShadows": "Sombras",
+      "toggleHidden": "Geometría oculta",
+      "toggleSectionPlanes": "Planos de sección",
+      "toggleSectionCuts": "Cortes de sección",
+      "xray": "Rayos X",
+      "style-wireframe": "Estructura alámbrica",
+      "style-hiddenline": "Líneas ocultas",
+      "style-shaded": "Sombreado",
+      "style-textured": "Sombreado con texturas",
+      "style-monochrome": "Monocromo",
+      "zoomExtents": "Ver todo",
+      "zoomSelection": "Zoom a la selección",
+      "persp": "Perspectiva",
+      "ortho": "Proyección paralela",
+      "view-iso": "Iso",
+      "view-top": "Superior",
+      "view-front": "Frontal",
+      "view-right": "Derecha",
+      "view-back": "Posterior",
+      "view-left": "Izquierda",
+      "view-bottom": "Inferior"
+    },
+    "names": {
+      "model": "Modelo",
+      "component": "Componente",
+      "group": "Grupo",
+      "solid": "Sólido",
+      "untitled": "Sin título",
+      "section": "Sección",
+      "defaultMaterial": "Predeterminado",
+      "sectionNumbered": "Sección {number}"
+    },
+    "import": {
+      "converterUnreachable": "No se puede acceder al conversor local – inicia la app con «npm run dev» o «npm run preview».",
+      "needsLocalServer": "Los archivos .skp y .blend solo funcionan con el servidor local («npm run dev» o «npm run preview»).",
+      "conversionFailed": "Error de conversión (HTTP {status})",
+      "unsupported": "El formato .{ext} no es compatible – más formatos (FBX, Collada, 3DS, Blender …) los aporta el plugin «Formatos de importación» (Plugins › Administrar plugins).",
+      "unknownJson": "Formato JSON desconocido",
+      "maxFile": "Solo 3ds Max puede leer los archivos de 3ds Max (.max) – guárdalos allí con Archivo › Exportar como FBX (o .3ds/.obj) e importa ese archivo.",
+      "detectedMillimetres": "milímetros detectados",
+      "detectedCentimetres": "centímetros detectados",
+      "noFaces": "El archivo no contiene caras.",
+      "triangles": "{count} triángulo | {count} triángulos",
+      "groups": "{count} grupo | {count} grupos",
+      "materials": "{count} material | {count} materiales",
+      "skipped": "{count} triángulo por encima del límite omitido | {count} triángulos por encima del límite omitidos",
+      "part": "parte"
+    },
+    "units": {
+      "centimetres": "Centímetros",
+      "millimetres": "Milímetros",
+      "inches": "Pulgadas",
+      "metres": "Metros",
+      "feetInches": "Pies/pulgadas",
+      "symbols": {
+        "mm": "mm",
+        "cm": "cm",
+        "m": "m",
+        "km": "km"
+      }
+    },
+    "undo": {
+      "import": "Importar",
+      "makeComponent": "Crear componente",
+      "flip": "Voltear",
+      "intersect": "Intersecar",
+      "clearAll": "Eliminar todo",
+      "paint": "Material",
+      "copyArray": "Copiar (matriz)",
+      "copyDivide": "Copiar (dividir)",
+      "rotateCopy": "Rotar (copia)",
+      "rotateArray": "Rotar (matriz)",
+      "guide": "Guía",
+      "resize": "Cambiar tamaño",
+      "guideAngle": "Guía (ángulo)",
+      "dimension": "Cota",
+      "addMaterial": "Añadir material",
+      "tagVisibility": "Visibilidad de etiqueta",
+      "renameTag": "Renombrar etiqueta",
+      "deleteTag": "Eliminar etiqueta",
+      "assignTag": "Asignar etiqueta",
+      "updateScene": "Actualizar escena",
+      "renameScene": "Renombrar escena",
+      "deleteScene": "Eliminar escena",
+      "soften": "Suavizar/alisar",
+      "unsoften": "Restablecer suavizado",
+      "activeSection": "Sección",
+      "flipSection": "Voltear sección",
+      "moveSection": "Mover sección",
+      "deleteSection": "Eliminar sección",
+      "purge": "Purgar",
+      "renameMaterial": "Renombrar material",
+      "createMaterial": "Crear material",
+      "style": "Estilo",
+      "tag": "Etiqueta",
+      "rename": "Renombrar",
+      "renameDefinition": "Renombrar definición",
+      "script": "Script",
+      "insertMesh": "Insertar malla",
+      "fewerPolygons": "Menos polígonos"
+    },
+    "toast": {
+      "nothingSelected": "No hay nada seleccionado",
+      "cut": "Cortado",
+      "copied": "Copiado",
+      "selectTwoFaces": "Selecciona al menos dos caras.",
+      "selectTwoSolids": "Selecciona dos grupos o componentes (sólidos).",
+      "notASolid": "«{name}» no es un sólido.",
+      "solidFailed": "La operación con sólidos falló: {error}",
+      "alreadyEmpty": "El área de trabajo ya está vacía",
+      "cleared": "Área de trabajo vaciada – Ctrl+Z lo recupera todo",
+      "savedInBrowser": "Guardado en el navegador",
+      "saveFailed": "Error al guardar",
+      "noSavedModel": "No hay ningún modelo guardado",
+      "loadFailed": "Error al cargar",
+      "locked": "Bloqueado",
+      "selectFirst": "Selecciona primero objetos.",
+      "noValidPath": "No hay ninguna trayectoria válida seleccionada."
+    },
+    "confirm": {
+      "discardChanges": "¿Descartar los cambios no guardados?",
+      "resizeGroup": "¿Quieres cambiar el tamaño del contenido del grupo? (factor {factor})",
+      "resizeModel": "¿Quieres cambiar el tamaño del modelo? (factor {factor})"
+    },
+    "prompt": {
+      "componentName": "Nombre del componente",
+      "enterText": "Introducir texto",
+      "scriptName": "Nombre del script"
+    },
+    "groups": {
+      "file": "Archivo",
+      "edit": "Edición",
+      "view": "Ver",
+      "camera": "Cámara",
+      "solids": "Sólidos",
+      "plugins": "Plugins"
+    },
+    "tools": {
+      "select": "Seleccionar",
+      "lasso": "Lazo",
+      "eraser": "Borrador",
+      "paint": "Bote de pintura",
+      "sample": "Tomar muestra de material",
+      "line": "Línea",
+      "freehand": "Mano alzada",
+      "rectangle": "Rectángulo",
+      "rotrect": "Rectángulo girado",
+      "circle": "Círculo",
+      "polygon": "Polígono",
+      "arc": "Arco",
+      "arc2": "Arco de 2 puntos",
+      "arc3": "Arco de 3 puntos",
+      "pie": "Sector",
+      "pushpull": "Empujar/tirar",
+      "offset": "Equidistancia",
+      "move": "Mover",
+      "rotate": "Rotar",
+      "scale": "Escalar",
+      "followme": "Sígueme",
+      "tape": "Cinta métrica",
+      "protractor": "Transportador",
+      "dimension": "Cotas",
+      "text": "Texto",
+      "section": "Plano de sección",
+      "orbit": "Orbitar",
+      "pan": "Desplazar",
+      "zoom": "Zoom",
+      "zoomwindow": "Ventana de zoom",
+      "poscam": "Situar cámara",
+      "lookaround": "Mirar alrededor",
+      "walk": "Caminar",
+      "place": "Colocar",
+      "status": {
+        "place": "Colocar «{name}»: haz clic en la posición de destino. Las flechas giran 90°.",
+        "placeNothing": "Nada que colocar.",
+        "select": "Haz clic o arrastra para seleccionar objetos. Mayús = añadir/quitar. Ctrl = añadir. Mayús + Ctrl = quitar.",
+        "lasso": "Dibuja un lazo alrededor de los objetos. En sentido horario = totalmente dentro, antihorario = tocados.",
+        "eraser": "Haz clic o arrastra sobre aristas para borrarlas. Mayús = ocultar, Ctrl = suavizar.",
+        "paint": "Material «{material}»: haz clic para pintar caras. Alt = tomar muestra, Ctrl = caras conectadas, Mayús = todas las caras iguales.",
+        "sample": "Haz clic en una cara para tomar su material.",
+        "lineEnd": "Haz clic para fijar el punto final o escribe una longitud. | Flechas = bloquear la dirección de inferencia. Mayús = bloquear la inferencia.",
+        "lineStart": "Haz clic para fijar el primer punto. | Flechas = bloquear la dirección de inferencia.",
+        "freehand": "Haz clic y arrastra para dibujar una curva a mano alzada.",
+        "rectangleCorner": "Haz clic para fijar la esquina opuesta o escribe largo y ancho (p. ej. 2000; 1500).",
+        "rectangleStart": "Haz clic para fijar la primera esquina.",
+        "rotrect1": "Elige la primera esquina.",
+        "rotrect2": "Elige la segunda esquina (longitud y dirección).",
+        "rotrect3": "Elige el ancho y el ángulo.",
+        "circleRadius": "Elige o escribe el radio. ({count} segmentos; «12s» cambia el número)",
+        "polygonRadius": "Elige o escribe el radio. ({count} lados; «12s» cambia el número)",
+        "circleCenter": "Elige el centro. Escribe p. ej. «48s» para cambiar los segmentos.",
+        "polygonCenter": "Elige el centro. Escribe p. ej. «8s» para cambiar los lados.",
+        "arc2Start": "Elige el punto inicial del arco.",
+        "pickEnd": "Elige el punto final.",
+        "arc2Bulge": "Elige o escribe la flecha del arco.",
+        "pickCenter": "Elige el centro.",
+        "arcStart": "Elige el punto inicial (radio).",
+        "arcEnd": "Elige el ángulo final.",
+        "pickStart": "Elige el punto inicial.",
+        "arc3Second": "Elige un segundo punto del arco.",
+        "newFaceOff": "Ctrl = cara nueva desactivada.",
+        "newFaceOn": "Ctrl = cara nueva activada.",
+        "pushpullDistance": "Haz clic para fijar la distancia o escríbela. | Se ajusta a vértices, aristas y caras. {mode}",
+        "pushpullPick": "Haz clic en la cara que quieres empujar o tirar. | Doble clic = repetir la última distancia. {mode}",
+        "offsetDistance": "Mueve el cursor para fijar la equidistancia o escribe una distancia.",
+        "offsetPick": "Elige una cara para la equidistancia.",
+        "moveTarget": "Haz clic para fijar el punto de destino o escribe una distancia. | Ctrl = copia sí/no. Flechas = bloquear la dirección de inferencia.",
+        "moveTargetCopy": "Haz clic para fijar el punto de destino o escribe una distancia. (copia) | Ctrl = copia sí/no. Flechas = bloquear la dirección de inferencia.",
+        "moveStart": "Haz clic para fijar el punto inicial. | Ctrl = copia sí/no.",
+        "rotateCenter": "Elige el centro de rotación. Las flechas alinean el transportador.",
+        "rotateStart": "Elige el punto inicial del ángulo de rotación.",
+        "rotateAngle": "Elige o escribe el ángulo de rotación. Ctrl = copia.",
+        "scaleDrag": "Arrastra para escalar o escribe un factor. Ctrl = desde el centro, Mayús = uniforme.",
+        "scaleGrip": "Elige un tirador.",
+        "scalePick": "Selecciona los objetos que quieres escalar.",
+        "followmeProfile": "Haz clic en la cara de perfil que debe seguir la trayectoria seleccionada.",
+        "followmePath": "Selecciona primero aristas como trayectoria (p. ej. un doble clic en una cara selecciona sus aristas) y después esta herramienta.",
+        "tapeEnd": "Elige el punto final. Ctrl activa o desactiva la creación de guías.",
+        "tapeStart": "Elige el punto inicial (punto o arista).",
+        "tapeStartGuides": "Elige el punto inicial (punto o arista). Se crean guías.",
+        "protractorVertex": "Elige el vértice.",
+        "protractorFirst": "Elige el primer lado.",
+        "protractorAngle": "Elige el ángulo (crea una guía).",
+        "dimensionStart": "Elige el punto inicial de la cota o una arista.",
+        "dimensionPlace": "Arrastra la cota a su posición.",
+        "textPlace": "Elige la posición del texto.",
+        "textAnchor": "Elige el punto al que debe apuntar el texto.",
+        "section": "Haz clic en una cara para colocar un plano de sección. Las flechas lo alinean con los ejes.",
+        "orbit": "Arrastra para girar la vista. Mayús = desplazar.",
+        "pan": "Arrastra para desplazar la vista.",
+        "zoom": "Arrastra arriba/abajo para hacer zoom. Mayús = cambiar el campo de visión. Escribe un ángulo de campo de visión (p. ej. 35°).",
+        "zoomwindow": "Dibuja un rectángulo para hacer zoom en esa zona.",
+        "lookaround": "Arrastra para mirar alrededor (la cámara gira sobre sí misma).",
+        "walk": "Arrastra arriba/abajo para caminar, izquierda/derecha para girar. Las flechas también funcionan.",
+        "poscam": "Haz clic para situar allí la cámara a la altura de los ojos."
+      },
+      "hints": {
+        "square": "Cuadrado",
+        "goldenRatio": "Proporción áurea",
+        "halfCircle": "Semicírculo",
+        "scaleUniform": "Escalar uniformemente",
+        "scaleTwoAxes": "Escalar dos ejes",
+        "scaleOneAxis": "Escalar un eje"
+      }
+    },
+    "editor": {
+      "undone": "Deshecho: {action}",
+      "redone": "Rehecho: {action}",
+      "invalidVcb": "Entrada no válida en el campo «Medidas»",
+      "noSelection": "Sin selección",
+      "faces": "{count} cara | {count} caras",
+      "edges": "{count} arista | {count} aristas",
+      "instances": "{count} grupo/componente | {count} grupos/componentes"
+    },
+    "inference": {
+      "onRedAxis": "En el eje rojo",
+      "onGreenAxis": "En el eje verde",
+      "onBlueAxis": "En el eje azul",
+      "inComponent": "en el componente",
+      "inGroup": "en el grupo",
+      "endpoint": "Punto final",
+      "midpoint": "Punto medio",
+      "intersection": "Intersección",
+      "center": "Centro",
+      "guidePoint": "Punto guía",
+      "origin": "Origen",
+      "onEdge": "En arista",
+      "onGuide": "En guía",
+      "onFace": "En cara",
+      "locked": "Bloqueado",
+      "parallel": "Paralelo a la arista",
+      "perpendicular": "Perpendicular a la arista",
+      "extension": "En la prolongación de la arista",
+      "fromPoint": "Desde el punto"
+    },
+    "measure": {
+      "grid": "Cuadrícula"
+    },
+    "navigation": {
+      "orbit": "Orbitar",
+      "pan": "Desplazar",
+      "zoom": "Zoom"
+    },
+    "library": {
+      "door": "Puerta",
+      "window": "Ventana",
+      "table": "Mesa",
+      "chair": "Silla",
+      "tree": "Árbol",
+      "stairs": "Escalera"
+    },
+    "errors": {
+      "unknownFileFormat": "Formato de archivo desconocido"
+    },
+    "panels": {
+      "errors": {
+        "exists": "El panel «{id}» ya existe"
+      },
+      "entityinfo": "Info. de entidad",
+      "components": "Componentes",
+      "instructor": "Instructor",
+      "materials": "Materiales",
+      "styles": "Estilos",
+      "tags": "Etiquetas",
+      "shadows": "Sombras",
+      "scenes": "Escenas",
+      "display": "Visualización",
+      "soften": "Suavizar / alisar",
+      "mesh": "Polígonos y puntos",
+      "modelinfo": "Info. del modelo",
+      "outliner": "Esquema",
+      "scripts": "Editor de scripts",
+      "plugins": "Plugins"
+    },
+    "plugins": {
+      "errors": {
+        "commandExists": "El comando «{id}» ya existe",
+        "toolExists": "La herramienta «{id}» ya existe",
+        "panelNeedsComponent": "El panel «{id}» necesita component o mount",
+        "scriptExists": "s3d.{name} ya existe",
+        "assetMissing": "Falta el archivo «{path}» en el paquete del plugin",
+        "importerNeedsHandler": "Un importador necesita import o loadScene",
+        "importerExists": "Ya existe una importación de plugin para .{ext}",
+        "noExport": "El módulo no exporta ningún plugin (export default { … })",
+        "badId": "Falta el id del plugin o no es válido (solo a–z, 0–9 y -)",
+        "noName": "Falta el nombre del plugin",
+        "noActivate": "Falta activate(context)",
+        "builtinReplace": "«{id}» es un plugin integrado y no se puede sustituir",
+        "noPackageJson": "Falta un package.json en la carpeta",
+        "noMain": "package.json necesita \"shap3d\": { \"main\": \"plugin.js\" }",
+        "mainMissing": "Falta en la carpeta el archivo principal «{path}» de package.json"
+      },
+      "folders": {
+        "upToDate": "«{name}» {version} ya está actualizado.",
+        "updatedButFailed": "«{name}» actualizado, pero falló al iniciarse: {error}",
+        "updated": "{name} actualizado {from} → {to}.",
+        "updatedSameVersion": "{name} {version} actualizado (nueva compilación de la carpeta).",
+        "updateFailed": "No se pudo actualizar «{name}»: {error}",
+        "newVersion": "Nueva versión {version} en la carpeta",
+        "newBuild": "Nueva compilación en la carpeta"
+      },
+      "providedBy": "Proporcionado por el plugin «{name}».",
+      "exportAs": "Exportar: {format}"
+    },
+    "vcb": {
+      "length": "Longitud",
+      "dimensions": "Dimensiones",
+      "segments": "Segmentos",
+      "sides": "Lados",
+      "radius": "Radio",
+      "bulge": "Flecha",
+      "angle": "Ángulo",
+      "distance": "Distancia",
+      "scale": "Escala",
+      "fov": "Campo de visión",
+      "eyeHeight": "Altura de los ojos"
+    },
+    "app": {
+      "dropToImport": "Suelta el archivo para importarlo",
+      "editing": "Editando:"
+    },
+    "common": {
+      "close": "Cerrar",
+      "cancel": "Cancelar",
+      "ok": "Aceptar",
+      "no": "No",
+      "yes": "Sí",
+      "on": "Activado",
+      "off": "Desactivado"
+    },
+    "topbar": {
+      "menu": "Abrir modelo/preferencias",
+      "rename": "Renombrar modelo",
+      "undo": "Deshacer {action}",
+      "redo": "Rehacer {action}",
+      "clearAll": "Vaciar el área de trabajo (deshacer con Ctrl+Z)",
+      "saved": "Guardado",
+      "saveTitle": "Guardar (Ctrl+S)",
+      "save": "Guardar",
+      "export": "Exportar",
+      "exportModel": "Modelo (.shap3d.json)",
+      "exportStl": "STL (impresión 3D)",
+      "exportPng": "Imagen PNG"
+    },
+    "theme": {
+      "darkOff": "Modo oscuro desactivado",
+      "darkOn": "Modo oscuro activado",
+      "more": "Más opciones de tema",
+      "darkMode": "Modo oscuro",
+      "interface": "Interfaz",
+      "scene": "Escena 3D",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema",
+      "day": "Día",
+      "night": "Noche",
+      "likeInterface": "Como la interfaz",
+      "hintDarkMenus": "Solo los menús son oscuros, la escena 3D sigue clara.",
+      "hintNightScene": "Menús claros, la escena 3D muestra la noche.",
+      "hintAllDark": "Todo oscuro: menús y escena 3D de noche.",
+      "hintAllLight": "Todo claro."
+    },
+    "menu": {
+      "new": "Nuevo",
+      "open": "Abrir…",
+      "saveAs": "Guardar como (descarga)",
+      "saveLocal": "Guardar en el navegador",
+      "loadLocal": "Cargar desde el navegador",
+      "import": "Importar…",
+      "export": "Exportar",
+      "edit": "Edición",
+      "view": "Ver",
+      "camera": "Cámara",
+      "solids": "Sólidos",
+      "plugins": "Plugins",
+      "print": "Imprimir",
+      "commandPalette": "Paleta de comandos…",
+      "tour": "Introducción"
+    },
+    "statusbar": {
+      "help": "Ayuda / atajos de teclado",
+      "inputDeviceTitle": "Dispositivo de entrada: {device}",
+      "mouse": "Ratón",
+      "trackpad": "Panel táctil",
+      "inputDevice": "Dispositivo de entrada",
+      "twoFingerSwipe": "Deslizar con dos dedos",
+      "fineTuning": "Ajuste fino",
+      "invert": "invertir",
+      "measurements": "Medidas",
+      "mouseWheel": "Rueda del ratón",
+      "twoFingers": "Dos dedos",
+      "pinch": "Pellizcar con dos dedos",
+      "middleDrag": "Arrastrar con el botón central",
+      "middleButton": "Botón central"
+    },
+    "contextMenu": {
+      "editGroup": "Editar grupo/componente",
+      "intersect": "Intersecar caras",
+      "flipRed": "Voltear: rojo",
+      "flipGreen": "Voltear: verde",
+      "flipBlue": "Voltear: azul",
+      "openAsCode": "Abrir como código",
+      "groupAsCode": "Abrir el grupo como código",
+      "modelAsCode": "Abrir el modelo como código",
+      "closeGroup": "Cerrar grupo"
+    },
+    "palette": {
+      "title": "Paleta de comandos",
+      "search": "Buscar",
+      "noMatches": "No hay resultados para «{query}»",
+      "choose": "elegir",
+      "run": "ejecutar",
+      "keepOpenTitle": "Ejecutar o alternar, la paleta sigue abierta",
+      "keepOpen": "mantener abierta",
+      "commands": "Comandos",
+      "objects": "Objetos",
+      "materials": "Materiales",
+      "placeholder": "Buscar en todo: herramientas, comandos, paneles, interruptores, materiales …",
+      "recent": "Usados recientemente",
+      "objectsInModel": "Objetos del modelo",
+      "allCommands": "Todos los comandos",
+      "meshView": "Vista de polígonos",
+      "meshPoints": "Vista de polígonos: vértices",
+      "meshTriangles": "Vista de polígonos: triángulos de las caras",
+      "meshSoft": "Vista de polígonos: aristas suavizadas",
+      "backEdges": "Aristas posteriores",
+      "placePerson": "Colocar persona: {name}",
+      "insert": "Insertar {name}",
+      "placeComponent": "Colocar componente: {name}",
+      "scene": "Escena: {name}",
+      "tagVisible": "Etiqueta visible: {name}",
+      "groups": {
+        "tool": "Herramienta",
+        "panel": "Panel",
+        "materialInModel": "Material del modelo",
+        "material": "Material",
+        "objectComponent": "Objeto · componente",
+        "objectGroup": "Objeto · grupo"
+      }
+    },
+    "dialogs": {
+      "helpTitle": "Atajos de teclado y controles",
+      "help": {
+        "arc2": "Arco de 2 puntos",
+        "move": "Mover (Ctrl = copia, después escribe «5x» o «/5»)",
+        "orbitKeys": "O / botón central del ratón",
+        "panKeys": "H / Mayús+central",
+        "zoomKeys": "Z / rueda del ratón",
+        "zoom": "Zoom",
+        "arrowKeys": "Flechas",
+        "lockAxis": "Bloquear eje (↑ azul, → rojo, ← verde)",
+        "shiftHold": "Mayús (mantener)",
+        "lockDirection": "Bloquear la dirección actual",
+        "typeNumbers": "Escribir números",
+        "vcb": "Campo «Medidas» (p. ej. 2,5m o 3m;4m)",
+        "doubleClick": "Doble clic",
+        "doubleClickAction": "Abrir grupo / seleccionar cara + aristas",
+        "tripleClick": "Triple clic",
+        "tripleClickAction": "Todas las entidades conectadas",
+        "escape": "Cancelar / cerrar grupo",
+        "undoRedo": "Deshacer / rehacer",
+        "deleteSelection": "Eliminar selección"
+      }
+    },
+    "toolbar": {
+      "searchTitle": "Paleta de comandos – buscar en todo (Ctrl+Mayús+P, F1 o dos veces Mayús)",
+      "moreTools": "Más herramientas",
+      "outerShell": "Envoltura exterior",
+      "subtract": "Restar",
+      "trim": "Recortar",
+      "showAll": "Ver todo"
+    },
+    "textures": {
+      "holz": "Madera",
+      "ziegel": "Ladrillo",
+      "stein": "Piedra natural",
+      "gras": "Césped",
+      "fliesen": "Azulejos",
+      "beton": "Hormigón",
+      "metall": "Metal cepillado",
+      "stoff": "Tela",
+      "wasser": "Agua",
+      "marmor": "Mármol",
+      "dach": "Tejas",
+      "parkett": "Parqué"
+    },
+    "materials": {
+      "categories": {
+        "colors": "Colores",
+        "glassPlastic": "Vidrio y plástico",
+        "wood": "Madera",
+        "metal": "Metal",
+        "nature": "Naturaleza",
+        "stone": "Piedra y mineral",
+        "fabric": "Tela y cuero"
+      },
+      "hint": "Haz clic en un material y después en caras (bote de pintura, B).",
+      "search": "Buscar materiales",
+      "defaultShort": "Pred",
+      "edit": "Editar",
+      "name": "Nombre",
+      "color": "Color",
+      "opacity": "Opacidad",
+      "texture": "Textura",
+      "noTexture": "Ninguna (solo color)",
+      "size": "Tamaño",
+      "used": "Usado",
+      "delete": "Eliminar material",
+      "new": "Nuevo material",
+      "create": "Crear"
+    },
+    "tags": {
+      "add": "Añadir etiqueta",
+      "assignTitle": "Asignar la selección a la etiqueta resaltada",
+      "assign": "Asignar",
+      "untagged": "Sin etiqueta",
+      "hint": "Doble clic para renombrar. Las etiquetas ocultas esconden todas las entidades con esa etiqueta."
+    },
+    "scenes": {
+      "add": "Añadir escena",
+      "update": "Actualizar",
+      "stop": "Detener",
+      "play": "Reproducir",
+      "empty": "Todavía no hay escenas. Las escenas guardan cámara, estilo y etiquetas visibles.",
+      "defaultName": "Escena {number}"
+    },
+    "components": {
+      "inModel": "En el modelo",
+      "empty": "No hay componentes. Selecciona geometría y pulsa «G».",
+      "clickToPlace": "Haz clic para colocar: {name}",
+      "people": "Personas",
+      "placePerson": "Colocar a {name} (siempre mira a la cámara)",
+      "library": "Biblioteca",
+      "libraryHint": "Los objetos de la biblioteca se crean con un script y luego se colocan en el cursor."
+    },
+    "soften": {
+      "hint": "Suaviza las aristas entre caras de la selección cuyo ángulo sea menor que el valor ajustado.",
+      "coplanar": "Suavizar coplanares",
+      "apply": "Aplicar a la selección",
+      "reset": "Restablecer"
+    },
+    "shadows": {
+      "show": "Mostrar sombras",
+      "time": "Hora",
+      "date": "Fecha",
+      "hint": "La posición del sol se calcula para unos 48° de latitud norte. Incluso sin sombras determina la iluminación de las caras."
+    },
+    "outliner": {
+      "filter": "Filtrar",
+      "empty": "No hay grupos ni componentes en el modelo.",
+      "show": "Mostrar"
+    },
+    "display": {
+      "show": "Mostrar",
+      "flip": "Voltear plano",
+      "shift": "Mover plano",
+      "noActive": "Ninguna sección activa",
+      "empty": "No hay planos de sección. Herramienta «Plano de sección» en el conjunto ampliado de herramientas.",
+      "rulers": "Reglas en los ejes (m · cm · mm según el zoom)",
+      "grid": "Cuadrícula en el suelo (mm · cm · m según el zoom)"
+    },
+    "modelInfo": {
+      "units": "Unidades",
+      "format": "Formato",
+      "precision": "Precisión",
+      "decimals": "{count} decimal | {count} decimales",
+      "statistics": "Estadísticas",
+      "faces": "Caras",
+      "edges": "Aristas",
+      "definitions": "Definiciones",
+      "extent": "Extensión",
+      "purge": "Purgar elementos no usados",
+      "purged": "Definiciones no usadas eliminadas"
+    },
+    "styles": {
+      "presets": "Ajustes predefinidos",
+      "faces": "Caras",
+      "xray": "Rayos X (Alt+K)",
+      "front": "Cara frontal",
+      "back": "Cara posterior",
+      "edges": "Aristas",
+      "showEdges": "Mostrar aristas",
+      "edgeColor": "Color de aristas",
+      "background": "Fondo",
+      "sky": "Cielo",
+      "skyColor": "Color del cielo",
+      "ground": "Suelo",
+      "groundColor": "Color del suelo",
+      "wireframe": "Alámbrico",
+      "hiddenline": "Oculto",
+      "shaded": "Sombreado",
+      "textured": "Texturas",
+      "monochrome": "Mono",
+      "preset": {
+        "standard": "Predeterminado",
+        "architecture": "Arquitectura",
+        "blueprint": "Plano",
+        "sketch": "Boceto",
+        "night": "Noche",
+        "white": "Blanco"
+      }
+    },
+    "instructor": {
+      "select": {
+        "desc": "Selecciona entidades para otras herramientas y comandos.",
+        "step1": "Haz clic en una entidad.",
+        "step2": "Arrastra de izquierda a derecha (ventana) o de derecha a izquierda (captura).",
+        "step3": "Doble clic: cara con aristas o abrir un grupo. Triple clic: todo lo conectado.",
+        "mod1": "Ctrl: añadir",
+        "mod2": "Mayús: añadir/quitar",
+        "mod3": "Ctrl+Mayús: quitar"
+      },
+      "line": {
+        "desc": "Dibuja aristas. Las aristas cerradas en un plano forman automáticamente una cara.",
+        "step1": "Haz clic en el punto inicial.",
+        "step2": "Haz clic en el punto final o escribe una longitud.",
+        "step3": "Sigue dibujando o pulsa Esc para terminar.",
+        "mod1": "Flechas: bloquear eje",
+        "mod2": "Mayús: bloquear inferencia",
+        "mod3": "Escribe [x;y;z] absoluto o <x;y;z> relativo"
+      },
+      "rectangle": {
+        "desc": "Dibuja caras rectangulares en el suelo o sobre caras existentes.",
+        "step1": "Haz clic en la primera esquina.",
+        "step2": "Haz clic en la esquina opuesta.",
+        "step3": "Escribe p. ej. «3m;4m» para fijar el tamaño (también después)."
+      },
+      "circle": {
+        "desc": "Dibuja un círculo (un polígono con muchos segmentos).",
+        "step1": "Opcional: escribe el número de segmentos (p. ej. «48»).",
+        "step2": "Haz clic en el centro.",
+        "step3": "Haz clic para el radio o escríbelo."
+      },
+      "polygon": {
+        "desc": "Dibuja un polígono regular.",
+        "step1": "Escribe el número de lados (p. ej. «8s»).",
+        "step2": "Haz clic en el centro.",
+        "step3": "Haz clic o escribe el radio."
+      },
+      "arc2": {
+        "desc": "Dibuja un arco por dos puntos finales y una flecha.",
+        "step1": "Haz clic en el punto inicial.",
+        "step2": "Haz clic en el punto final.",
+        "step3": "Arrastra la flecha y haz clic (el semicírculo se ajusta)."
+      },
+      "arc": {
+        "desc": "Dibuja un arco a partir del centro, el punto inicial y el ángulo.",
+        "step1": "Haz clic en el centro.",
+        "step2": "Haz clic en el punto inicial (radio).",
+        "step3": "Haz clic o escribe el ángulo final."
+      },
+      "arc3": {
+        "desc": "Dibuja un arco que pasa por tres puntos.",
+        "step1": "Haz clic en el punto inicial.",
+        "step2": "Haz clic en un punto del arco.",
+        "step3": "Haz clic en el punto final."
+      },
+      "pie": {
+        "desc": "Dibuja un sector circular como cara.",
+        "step1": "Haz clic en el centro.",
+        "step2": "Haz clic en el punto inicial.",
+        "step3": "Haz clic en el ángulo."
+      },
+      "freehand": {
+        "desc": "Dibuja curvas irregulares.",
+        "step1": "Pulsa el botón del ratón y arrastra.",
+        "step2": "Al soltar termina la curva; cerca del inicio se cierra."
+      },
+      "rotrect": {
+        "desc": "Rectángulo con cualquier orientación.",
+        "step1": "Haz clic en la primera esquina.",
+        "step2": "Haz clic en la segunda esquina (longitud/dirección).",
+        "step3": "Haz clic en el ancho/ángulo."
+      },
+      "pushpull": {
+        "desc": "Extruye caras para crear sólidos 3D o las mueve.",
+        "step1": "Haz clic en una cara.",
+        "step2": "Mueve el ratón y haz clic de nuevo o escribe una distancia.",
+        "step3": "Un doble clic en otra cara repite la última distancia."
+      },
+      "offset": {
+        "desc": "Crea una copia paralela de las aristas de la cara hacia dentro o hacia fuera.",
+        "step1": "Haz clic en una cara.",
+        "step2": "Mueve el cursor y haz clic o escribe la distancia."
+      },
+      "move": {
+        "desc": "Mueve, estira o copia entidades.",
+        "step1": "Selecciona entidades (o señálalas directamente).",
+        "step2": "Haz clic en el punto inicial.",
+        "step3": "Haz clic en el punto de destino o escribe una distancia.",
+        "mod1": "Ctrl: crear una copia",
+        "mod2": "Tras copiar escribe «5x» (matriz) o «/5» (dividir)",
+        "mod3": "Flechas: bloquear eje"
+      },
+      "rotate": {
+        "desc": "Gira entidades alrededor de un punto.",
+        "step1": "Selecciona entidades.",
+        "step2": "Haz clic en el centro de rotación (el transportador se alinea con las caras).",
+        "step3": "Haz clic en el ángulo inicial y después haz clic o escribe el ángulo de rotación.",
+        "mod1": "Ctrl: copia (después «6x» para una matriz)",
+        "mod2": "Flechas: alinear el transportador con un eje"
+      },
+      "scale": {
+        "desc": "Escala la selección con tiradores.",
+        "step1": "Haz una selección.",
+        "step2": "Haz clic en un tirador (verde).",
+        "step3": "Arrastra o escribe un factor (p. ej. «2» o «1;2;1», también una longitud «3m»).",
+        "mod1": "Ctrl: escalar desde el centro",
+        "mod2": "Mayús: alternar uniforme/no uniforme"
+      },
+      "tape": {
+        "desc": "Mide distancias y crea guías.",
+        "step1": "Haz clic en el punto inicial (o en una arista para una guía paralela).",
+        "step2": "Haz clic en el punto final – la longitud aparece en el campo «Medidas».",
+        "step3": "Escribe una nueva longitud para escalar el modelo.",
+        "mod1": "Ctrl: guías sí/no"
+      },
+      "protractor": {
+        "desc": "Mide ángulos y crea guías inclinadas.",
+        "step1": "Haz clic en el vértice.",
+        "step2": "Haz clic en el primer lado.",
+        "step3": "Haz clic o escribe el ángulo."
+      },
+      "dimension": {
+        "desc": "Crea cotas lineales.",
+        "step1": "Haz clic en el punto inicial y final (o en una arista).",
+        "step2": "Arrastra la cota a su posición y haz clic."
+      },
+      "text": {
+        "desc": "Crea etiquetas con línea guía.",
+        "step1": "Haz clic en una entidad (una cara muestra su área, una arista su longitud).",
+        "step2": "Haz clic en la posición del texto.",
+        "step3": "Escribe el texto."
+      },
+      "section": {
+        "desc": "Corta el modelo para mostrar su interior.",
+        "step1": "Señala una cara (el plano se alinea con ella).",
+        "step2": "Haz clic para colocar.",
+        "step3": "Actívalo o desactívalo en el panel «Visualización»."
+      },
+      "eraser": {
+        "desc": "Borra aristas (y las caras contiguas).",
+        "step1": "Haz clic en aristas o arrastra sobre ellas.",
+        "step2": "Las caras coplanares se fusionan.",
+        "mod1": "Mayús: ocultar",
+        "mod2": "Ctrl: suavizar",
+        "mod3": "Ctrl+Mayús: quitar suavizado"
+      },
+      "paint": {
+        "desc": "Asigna materiales a caras, grupos y componentes.",
+        "step1": "Elige un material en el panel «Materiales».",
+        "step2": "Haz clic en caras o grupos.",
+        "mod1": "Alt: tomar muestra de material",
+        "mod2": "Ctrl: todas las caras iguales conectadas",
+        "mod3": "Mayús: todas las caras iguales del modelo"
+      },
+      "orbit": {
+        "desc": "Gira la cámara alrededor del modelo.",
+        "step1": "Arrastra para girar.",
+        "step2": "El botón central del ratón funciona en todas las herramientas.",
+        "mod1": "Mayús: desplazar"
+      },
+      "pan": {
+        "desc": "Desplaza la vista.",
+        "step1": "Arrastra para desplazar.",
+        "step2": "Mayús + botón central en todas las herramientas."
+      },
+      "zoom": {
+        "desc": "Acerca y aleja.",
+        "step1": "Arrastra arriba/abajo.",
+        "step2": "La rueda del ratón hace zoom hacia el cursor.",
+        "step3": "Escribe un campo de visión (p. ej. 35)."
+      },
+      "followme": {
+        "desc": "Extruye un perfil a lo largo de una trayectoria (p. ej. tubo, cornisa, pieza de revolución).",
+        "step1": "Selecciona las aristas de la trayectoria (un doble clic en una cara selecciona sus aristas).",
+        "step2": "Elige la herramienta.",
+        "step3": "Haz clic en la cara de perfil."
+      },
+      "shortcut": "Atajo: {key}",
+      "usage": "Uso",
+      "modifiers": "Teclas modificadoras"
+    },
+    "entityInfo": {
+      "model": "Modelo",
+      "material": "Material",
+      "assignTitle": "Asignar el material actual",
+      "tag": "Etiqueta",
+      "instance": "Instancia",
+      "definition": "Definición",
+      "type": "Tipo",
+      "componentCopies": "Componente ({count} copia) | Componente ({count} copias)",
+      "position": "Posición",
+      "volume": "Volumen",
+      "face": "Cara",
+      "softened": "Suavizada",
+      "totalArea": "Área total",
+      "totalLength": "Longitud total",
+      "hidden": "Oculto",
+      "edge": "Arista",
+      "solidComponent": "Componente sólido",
+      "solidGroup": "Grupo sólido",
+      "elements": "{count} entidades ({summary})"
+    },
+    "shapes": {
+      "cylinder": "Cilindro",
+      "cylinderBetween": "Barra",
+      "cone": "Cono",
+      "sphere": "Esfera",
+      "dome": "Cúpula",
+      "ellipsoid": "Elipsoide",
+      "tube": "Tubo",
+      "torus": "Toroide",
+      "prism": "Prisma",
+      "pyramid": "Pirámide"
+    },
+    "mesh": {
+      "undoSides": "{shape}: {count} lados",
+      "undoSegments": "{shape}: {count} segmentos",
+      "noTopFaces": "El objeto no tiene caras en su nivel superior.",
+      "tooMany": "Demasiados polígonos ({count} triángulos) – eso ralentizaría el navegador.",
+      "cannotSimplify": "El objeto no se puede simplificar tanto.",
+      "vertices": "Vértices",
+      "faceTriangles": "Triángulos de las caras",
+      "softEdges": "Aristas suavizadas",
+      "softCount": "({count} suavizadas)",
+      "triangles": "Triángulos",
+      "resolution": "{shape} – resolución",
+      "less": "Menos",
+      "more": "Más",
+      "change": "Cambiar polígonos",
+      "moreKeepTitle": "Cada triángulo se convierte en cuatro – la forma queda exactamente igual",
+      "moreKeep": "▲ Más (mantener forma)",
+      "moreRoundTitle": "Cada triángulo se convierte en cuatro, esquinas y curvas se suavizan",
+      "moreRound": "▲ Más (redondear)",
+      "lessButton": "▼ Menos polígonos",
+      "to": "a",
+      "affectsComponent": "Actúa sobre el nivel superior del grupo/componente – y por tanto sobre todas sus copias. Deshacer con Ctrl+Z.",
+      "affectsGroup": "Actúa sobre el nivel superior del grupo/componente. Deshacer con Ctrl+Z.",
+      "selectHint": "Selecciona un grupo, un componente o un círculo dibujado para cambiar su número de polígonos. Agrupa antes la geometría suelta con «Crear grupo».",
+      "selection": "Selección",
+      "wholeModel": "Todo el modelo",
+      "exactHint": "El objeto se reconstruye exactamente con la nueva resolución.",
+      "circleHint": "Funciona mientras el círculo siga plano – ajústalo antes de Empujar/tirar.",
+      "moreDone": "Más polígonos – Ctrl+Z lo deshace",
+      "lessDone": "Menos polígonos – Ctrl+Z lo deshace",
+      "noMesh": "No se encontró ninguna malla – se esperan líneas como «v 1 2 3» y «f 1 2 3».",
+      "invalidCoordinates": "Coordenadas no válidas en la malla",
+      "imported": "{vertices} vértices, {faces} caras importados",
+      "fewAlready": "El objeto ya tiene muy pocos polígonos."
+    },
+    "tour": {
+      "welcome": {
+        "title": "Te damos la bienvenida a {name}",
+        "text": "Modelado 3D fácil directamente en el navegador – con una IA que funciona en tu propio ordenador. En unos pocos pasos te mostramos lo esencial."
+      },
+      "draw": {
+        "title": "Dibujar y levantar",
+        "text": "Dibuja una cara en el suelo y levántala con Empujar/tirar – así nacen paredes, muebles y casas enteras.",
+        "tip1": "<kbd>R</kbd> rectángulo, <kbd>C</kbd> círculo, <kbd>L</kbd> línea",
+        "tip2": "<kbd>P</kbd> Empujar/tirar, <kbd>M</kbd> mover",
+        "tip3": "Escribe las medidas sin más, p. ej. <kbd>2,5</kbd> <kbd>Intro</kbd>"
+      },
+      "navigate": {
+        "title": "Mirar alrededor",
+        "text": "Con el ratón te mueves libremente por tu modelo.",
+        "tip1": "Arrastrar con el botón central = girar (orbitar)",
+        "tip2": "<kbd>Mayús</kbd> + botón central = desplazar",
+        "tip3": "Rueda = zoom · <kbd>Mayús</kbd>+<kbd>Z</kbd> = ver todo"
+      },
+      "ai": {
+        "title": "El asistente de IA",
+        "text": "Describe lo que quieres – «una mesa con 4 sillas» o «una araña con ojos rojos» – y la IA lo construye. Funciona en local, p. ej. con Ollama; un asistente te ayuda a configurarla.",
+        "action": "✦ Abrir el asistente de IA",
+        "prompt": "«Una casa pequeña»"
+      },
+      "more": {
+        "title": "Terreno, scripts e importación",
+        "text": "Modela montañas y valles con la herramienta de terreno, construye objetos con scripts (s3d.box …) o arrastra archivos de SketchUp, Blender, 3ds Max y otros a la ventana.",
+        "tip1": "Herramienta <b>Terreno</b> – pinceles para colinas, valles y texturas",
+        "tip2": "Editor de scripts a la derecha – con información de la API y ejemplos",
+        "tip3": "SKP · BLEND · FBX · 3DS · DAE · OBJ · STL · glTF …",
+        "terrain": "Terreno",
+        "scripts": "Scripts",
+        "import": "Importación"
+      },
+      "look": {
+        "title": "Tu aspecto",
+        "text": "Arriba cambias entre claro y oscuro – también solo los menús o una escena nocturna. Esta introducción está siempre disponible en el menú.",
+        "tip1": "☾ / ☀ arriba a la izquierda – la flecha de al lado tiene más opciones",
+        "tip2": "<b>Menú › Introducción</b> vuelve a abrir este recorrido"
+      },
+      "ariaLabel": "Introducción, paso {step} de {count}",
+      "close": "Cerrar la introducción (Esc)",
+      "stepOf": "Paso {step} de {count}",
+      "stepLabel": "Paso {step}: {title}",
+      "skip": "Omitir",
+      "back": "Atrás",
+      "start": "Vamos",
+      "next": "Siguiente",
+      "finish": "Empezar"
+    },
+    "api": {
+      "returns": {
+        "gruppe": "Grupo",
+        "flaeche": "Cara",
+        "anzahlFlaechen": "Número de caras",
+        "punkte": "Puntos",
+        "deckflaeche": "Cara superior",
+        "Place": "{ place }",
+        "namen": "Nombres",
+        "punkt": "Punto",
+        "zahl": "Número"
+      },
+      "categories": {
+        "solids": "Sólidos",
+        "facesLines": "Caras y líneas",
+        "editFaces": "Editar caras",
+        "groups": "Grupos y componentes",
+        "materials": "Materiales",
+        "viewScene": "Vista y escena",
+        "helpers": "Ayudas",
+        "plugins": "Plugins"
+      },
+      "box": {
+        "title": "Caja",
+        "desc": "Caja desde la esquina inferior delantera izquierda. Ancho = X, fondo = Y, alto = Z."
+      },
+      "cylinder": {
+        "title": "Cilindro",
+        "desc": "Cilindro vertical apoyado en su centro. segments = número de lados (24 por defecto)."
+      },
+      "cylinderBetween": {
+        "title": "Barra de A a B",
+        "desc": "Cilindro o cono entre dos puntos cualesquiera – ideal para patas, ramas, tubos, barandillas. endRadius = radio en el extremo (0 = punta)."
+      },
+      "cone": {
+        "title": "Cono",
+        "desc": "Cono con la punta arriba. Con endRadius > 0, un cono truncado (pantalla de lámpara, cubo, maceta)."
+      },
+      "pyramid": {
+        "title": "Pirámide",
+        "desc": "Pirámide de base cuadrada (sides 4) o de n lados. kante = longitud de una arista de la base."
+      },
+      "prism": {
+        "title": "Prisma",
+        "desc": "Prisma vertical con base regular de n lados (6 por defecto = hexágono)."
+      },
+      "sphere": {
+        "title": "Esfera",
+        "desc": "Esfera alrededor de un centro con aristas suavizadas."
+      },
+      "dome": {
+        "title": "Cúpula (semiesfera)",
+        "desc": "Semiesfera de base plana – cúpulas, lámparas, iglús."
+      },
+      "ellipsoid": {
+        "title": "Elipsoide",
+        "desc": "Esfera estirada con tres radios – cuerpos, cabezas, cojines, hojas, piedras."
+      },
+      "tube": {
+        "title": "Tubo / anillo",
+        "desc": "Cilindro hueco – tubos, tazas, anillos, pozos."
+      },
+      "torus": {
+        "title": "Toroide (dónut)",
+        "desc": "Anillo tumbado – neumáticos, flotadores, dónuts, asas."
+      },
+      "wedge": {
+        "title": "Cuña / rampa",
+        "desc": "Rampa que sube a lo largo de +X hasta su altura – rampas, tejados a un agua, cuñas."
+      },
+      "stairs": {
+        "title": "Escalera",
+        "desc": "Escalera recta a lo largo de +X. Por defecto: 10 escalones, 17,5 cm de alto, 28 cm de fondo, 1 m de ancho."
+      },
+      "mesh": {
+        "title": "Malla desde texto OBJ",
+        "desc": "Malla de triángulos a partir de líneas «v x y z» y «f a b c» (p. ej. LLaMA-Mesh). size = lado más largo."
+      },
+      "rect": {
+        "title": "Rectángulo",
+        "desc": "Cara rectangular. ebene 'xy' = tumbada, 'xz' / 'yz' = de pie. Después p. ej. .pushpull(höhe)."
+      },
+      "circle": {
+        "title": "Círculo",
+        "desc": "Cara circular. normal = dirección a la que apunta la cara ('z', 'x', 'y' o un vector)."
+      },
+      "polygon": {
+        "title": "Polígono",
+        "desc": "Polígono regular (triángulo, hexágono, octógono …)."
+      },
+      "face": {
+        "title": "Cara a partir de puntos",
+        "desc": "Cualquier cara plana de al menos 3 puntos situados en un mismo plano."
+      },
+      "polyhedron": {
+        "title": "Caras a partir de una lista de puntos",
+        "desc": "Geometría exacta como el polyhedron de OpenSCAD: punkte = [[x,y,z], …], flächen = listas de números de puntos (desde 0), p. ej. [0, 1, 2, 3], o { outer: [...], holes: [[...]], material: 'Holz' } para caras con agujeros. Es también el código que genera «Abrir como código»."
+      },
+      "line": {
+        "title": "Línea / polilínea",
+        "desc": "Aristas sin grosor. Una polilínea cerrada y plana forma automáticamente una cara."
+      },
+      "arc": {
+        "title": "Arco",
+        "desc": "Arco de círculo como aristas. Devuelve los puntos – práctico como trayectoria para followMe."
+      },
+      "pushpull": {
+        "title": "Empujar/tirar",
+        "desc": "Convierte una cara en sólido. En caras tumbadas, un valor positivo siempre va hacia arriba."
+      },
+      "extrude": {
+        "title": "Extruir",
+        "desc": "Como pushpull, pero en una dirección fija: 'x', 'y', 'z', '-x', '-y', '-z' o un vector."
+      },
+      "offset": {
+        "title": "Equidistancia",
+        "desc": "Dibuja un contorno interior en la cara – para marcos, ventanas, bordes."
+      },
+      "followMe": {
+        "title": "Sígueme",
+        "desc": "Lleva un perfil a lo largo de una trayectoria – tubos, cornisas, marcos, piezas de revolución."
+      },
+      "faceMaterial": {
+        "title": "Colorear una cara",
+        "desc": "Define el material del anverso o reverso de una sola cara; reverse() voltea la cara."
+      },
+      "group": {
+        "title": "Grupo",
+        "desc": "Todo lo que se crea en el callback se reúne en un grupo."
+      },
+      "component": {
+        "title": "Componente",
+        "desc": "Definición reutilizable – se construye una vez y se coloca tantas veces como quieras. Los cambios afectan a todas las copias."
+      },
+      "transform": {
+        "title": "Mover, rotar, escalar",
+        "desc": "Todas las funciones de sólidos devuelven un grupo que se puede modificar así (encadenable)."
+      },
+      "copy": {
+        "title": "Copiar y más",
+        "desc": "Copia con desplazamiento; material para todo el grupo; asignar etiqueta; ocultar; descomponer en geometría suelta."
+      },
+      "useMaterial": {
+        "title": "Usar un material ya hecho",
+        "desc": "Todos los materiales de la lista inferior funcionan directamente por su nombre – sin crearlos antes."
+      },
+      "material": {
+        "title": "Material propio",
+        "desc": "Define un material o cambia uno existente. texture = una de las texturas de abajo, size = tamaño de la baldosa en metros."
+      },
+      "materials": {
+        "title": "Listar materiales",
+        "desc": "Nombres de los materiales ya hechos (opcionalmente de una sola categoría, p. ej. 'Metall') o de las texturas."
+      },
+      "view": {
+        "title": "Vista",
+        "desc": "Elegir una vista estándar y hacer zoom a todo (se ejecuta tras el script)."
+      },
+      "camera": {
+        "title": "Cámara",
+        "desc": "Situar la cámara en una posición y orientarla hacia un objetivo."
+      },
+      "shadows": {
+        "title": "Sombras y estilo",
+        "desc": "Sombras sí/no con hora del día; cambiar la visualización – faceStyle: 'textured' | 'shaded' | 'monochrome' | 'hiddenline' | 'wireframe', xray: true = rayos X."
+      },
+      "annot": {
+        "title": "Cota, texto, guía",
+        "desc": "Línea de cota entre dos puntos, etiqueta con flecha, línea o punto guía."
+      },
+      "tag": {
+        "title": "Etiquetas",
+        "desc": "Crear etiquetas (capas), mostrarlas/ocultarlas y asignarles grupos."
+      },
+      "clear": {
+        "title": "Eliminar todo",
+        "desc": "Vacía el modelo (o el grupo actual). Como todo en un script, se puede deshacer con Ctrl+Z."
+      },
+      "units": {
+        "title": "Longitudes y unidades",
+        "desc": "Todos los números son metros. Donde se espera una longitud también funcionan textos con unidad."
+      },
+      "points": {
+        "title": "Puntos y ejes",
+        "desc": "Los puntos son arrays. El suelo está en z = 0."
+      },
+      "random": {
+        "title": "Azar y bucles",
+        "desc": "JavaScript normal – se permiten bucles, variables y matemáticas."
+      },
+      "log": {
+        "title": "Salida",
+        "desc": "Escribe en la consola bajo el editor. s3d.stats() devuelve el número de caras/aristas."
+      }
+    },
+    "apiReference": {
+      "search": "Buscar: cono, vidrio, rotar, escalera …",
+      "counts": "{commands} comandos · {materials} materiales",
+      "returns": "Valor devuelto",
+      "insertTitle": "Insertar el ejemplo en el cursor",
+      "tryTitle": "Construir el ejemplo en el modelo ahora mismo (un paso de deshacer)",
+      "try": "▶ Probar",
+      "libraryMaterials": "Materiales ya hechos",
+      "libraryHint": "úsalos simplemente por su nombre:",
+      "tryMaterial": "Construir un cubo con este material",
+      "textures": "Texturas",
+      "texturesHint": "para tus propios materiales:",
+      "tile": "baldosa {size} m",
+      "nothingFound": "No se encontró nada para «{query}».",
+      "texture": "textura {texture}",
+      "opaque": "{percent} % opaco",
+      "clickToInsert": "Clic = insertar el nombre",
+      "tabs": {
+        "all": "Todo",
+        "shapes": "Formas",
+        "faces": "Caras",
+        "groups": "Grupos",
+        "materials": "Materiales",
+        "view": "Vista",
+        "helpers": "Ayudas"
+      }
+    },
+    "completion": {
+      "suggestions": "Sugerencias",
+      "types": {
+        "gruppe": "Grupo",
+        "zahl": "Número",
+        "text": "Texto",
+        "deckflaeche": "Cara superior",
+        "flaeche": "Cara",
+        "vektor": "Vector",
+        "jaNein": "sí/no"
+      },
+      "ownSuggestions": "El editor tiene sus propias sugerencias para «{language}»",
+      "api": {
+        "point": "Punto [x, y, z] – lo mismo que un array.",
+        "meters": "Metros (los números ya son metros).",
+        "length": "Convertir una longitud con unidad a metros.",
+        "warn": "Escribir una advertencia en la consola.",
+        "pushpull": "Como fläche.pushpull(abstand).",
+        "textures": "Nombres de las texturas para s3d.material(…, { texture }).",
+        "polyline": "Polilínea; cerrada y plana se convierte en cara.",
+        "zoomExtents": "Hacer zoom a todo tras el script."
+      },
+      "members": {
+        "group": {
+          "move": "Mover con un desplazamiento.",
+          "moveTo": "Poner el origen en un punto.",
+          "rotate": "Rotar alrededor de un eje ('x', 'y', 'z' o un vector), por defecto alrededor del origen del grupo.",
+          "scale": "Escalar uniformemente o por eje.",
+          "material": "Material para todo el grupo.",
+          "tag": "Asignar una etiqueta (capa) – se crea si hace falta.",
+          "hide": "Ocultar.",
+          "copy": "Copia con desplazamiento – devuelve la copia.",
+          "explode": "Descomponer en geometría suelta. Devuelve el número de partes.",
+          "name": "Nombre del grupo o componente.",
+          "ref": "Referencia { kind, id } a la instancia.",
+          "entities": "La geometría dentro del grupo."
+        },
+        "face": {
+          "pushpull": "Convertir en sólido. En caras tumbadas, positivo siempre va hacia arriba.",
+          "extrude": "Como pushpull, pero en una dirección fija: 'x', 'y', 'z', '-x', '-y', '-z' o un vector.",
+          "offset": "Dibujar un contorno interior en la cara.",
+          "followMe": "Llevar un perfil a lo largo de una trayectoria.",
+          "material": "Material del anverso.",
+          "backMaterial": "Material del reverso.",
+          "reverse": "Voltear la cara.",
+          "area": "Área en m².",
+          "normal": "Normal [x, y, z].",
+          "exists": "¿Sigue existiendo la cara?",
+          "ref": "Referencia { kind, id } a la cara."
+        },
+        "component": {
+          "place": "Colocar una copia del componente.",
+          "def": "La definición del componente."
+        }
+      },
+      "math": {
+        "pi": "π = 3,14159…",
+        "function": "Matemáticas de JavaScript."
+      },
+      "console": "Escribe en la consola bajo el editor.",
+      "three": "La biblioteca three.js (Vector3, Matrix4 …).",
+      "options": {
+        "material": "Nombre del material – los materiales ya hechos funcionan directamente por su nombre.",
+        "backMaterial": "Material del reverso.",
+        "name": "Nombre del grupo.",
+        "group": "false = geometría suelta en lugar de un grupo.",
+        "segments": "Número de lados o segmentos.",
+        "sides": "Número de lados de la base.",
+        "endRadius": "Radio en el extremo (0 = punta).",
+        "normal": "Dirección a la que apunta la cara ('x', 'y', 'z' o un vector).",
+        "steps": "Número de escalones.",
+        "rise": "Altura del escalón.",
+        "run": "Profundidad del escalón.",
+        "width": "Ancho.",
+        "at": "Posición [x, y, z].",
+        "size": "Tamaño.",
+        "yUp": "true = Y hacia arriba (OBJ, LLaMA-Mesh).",
+        "smooth": "Las aristas más planas que este ángulo (grados) se suavizan.",
+        "opacity": "Opacidad 0–1.",
+        "texture": "Textura procedural.",
+        "faceStyle": "Estilo de las caras.",
+        "xray": "true = rayos X.",
+        "edges": "Mostrar aristas.",
+        "depth": "Profundidad de extrusión (0 = plano).",
+        "upright": "true = de pie.",
+        "filled": "false = solo el contorno.",
+        "font": "Fuente.",
+        "type": "Tipo de objeto.",
+        "radius": "Radio.",
+        "height": "Altura.",
+        "children": "Lista de los objetos del grupo.",
+        "points": "Puntos [[x, y, z], …].",
+        "faces": "Caras como listas de números de puntos (desde 0).",
+        "count": "Número de copias.",
+        "offset": "Desplazamiento [dx, dy, dz].",
+        "object": "El objeto que se repite.",
+        "direction": "Dirección [x, y, z].",
+        "text": "Texto.",
+        "from": "Punto inicial [x, y, z].",
+        "to": "Punto final [x, y, z].",
+        "rotate": "Rotación { angle, axis, center }.",
+        "scale": "Escala (número o [fx, fy, fz]).",
+        "move": "Mover [dx, dy, dz].",
+        "tag": "Etiqueta (capa).",
+        "pushpull": "Después, tirar esta distancia.",
+        "closed": "true = polilínea cerrada.",
+        "plane": "Plano 'xy', 'xz' o 'yz'.",
+        "angle": "Ángulo en grados.",
+        "axis": "Eje 'x', 'y', 'z' o un vector.",
+        "center": "Centro de rotación [x, y, z].",
+        "clear": "true = vaciar el modelo antes.",
+        "materials": "Materiales propios { \"Name\": \"#rrggbb\" }.",
+        "objects": "Lista de los objetos.",
+        "view": "Vista tras la ejecución.",
+        "zoomExtents": "false = no hacer zoom a todo."
+      },
+      "axes": {
+        "x": "X – rojo",
+        "y": "Y – verde",
+        "z": "Z – azul (arriba)"
+      },
+      "planes": {
+        "xy": "tumbado",
+        "xz": "de pie, visto de frente",
+        "yz": "de pie, visto de lado"
+      },
+      "views": {
+        "iso": "Isométrica"
+      },
+      "faceStyles": {
+        "textured": "Con texturas",
+        "monochrome": "Un solo color"
+      },
+      "category": "Categoría",
+      "tag": "Etiqueta",
+      "tagHidden": "Etiqueta (oculta)",
+      "inModel": "En el modelo",
+      "ownMaterialTexture": "Material propio con textura «{texture}».",
+      "ownMaterial": "Material propio de este modelo.",
+      "categoryInModel": "{category} · en el modelo",
+      "texture": "Textura «{texture}»",
+      "opacity": "Opacidad {percent} %",
+      "units": "Donde se espera una longitud funcionan textos con unidad.",
+      "scriptApi": "API de scripts",
+      "s3d": "La API de scripts de Shap3D.ai – sólidos, caras, grupos, materiales, vista.",
+      "mathObject": "Matemáticas: Math.sin, Math.cos, Math.PI …",
+      "consoleObject": "console.log(…) escribe en la consola bajo el editor.",
+      "json": {
+        "box": "Caja",
+        "cylinder": "Cilindro",
+        "sphere": "Esfera",
+        "rect": "Rectángulo",
+        "circle": "Círculo",
+        "polygon": "Polígono",
+        "face": "Cara a partir de puntos",
+        "line": "Polilínea",
+        "polyhedron": "Caras a partir de una lista de puntos",
+        "text3d": "Texto 3D (plugin)",
+        "group": "Grupo",
+        "array": "Matriz de copias",
+        "guide": "Línea / punto guía",
+        "label": "Etiqueta",
+        "dimension": "Cota"
+      },
+      "jsonKeys": "Claves: {keys}",
+      "kinds": {
+        "variable": "Variable",
+        "method": "Método",
+        "property": "Propiedad",
+        "option": "Opción",
+        "value": "Valor",
+        "material": "Material",
+        "keyword": "Palabra clave",
+        "unit": "Unidad",
+        "type": "Tipo"
+      }
+    },
+    "pluginManager": {
+      "loadFile": "Cargar archivo de plugin…",
+      "loadFolderTitle": "Carpeta con package.json – p. ej. la carpeta dist compilada de un paquete de plugin",
+      "loadFolder": "Cargar carpeta de plugin…",
+      "updateAllTitle": "Volver a leer todos los paquetes instalados desde una carpeta – p. ej. tras npm run build",
+      "updateAll": "Actualizar todo",
+      "updating": "Actualizando el plugin …",
+      "installing": "Instalando el plugin …",
+      "warning": "Los plugins son módulos de JavaScript y tienen acceso completo a la aplicación. Instala solo plugins de fuentes en las que confíes. Solo se guardan en este navegador.",
+      "installed": "Instalados",
+      "switchOff": "Desactivar",
+      "switchOn": "Activar",
+      "error": "Error: {error}",
+      "builtin": "Integrado",
+      "by": "de {author}",
+      "package": "Paquete {name}",
+      "files": "{count} archivo | {count} archivos",
+      "license": "Licencia {license}",
+      "updateTitle": "Volver a leer el paquete desde su carpeta – p. ej. tras npm run build",
+      "update": "Actualizar",
+      "openPanel": "Abrir {panel}",
+      "source": "Código fuente",
+      "remove": "Quitar",
+      "none": "Todavía no hay plugins instalados.",
+      "examples": "Plugins de ejemplo",
+      "install": "Instalar",
+      "howTo": "Cómo escribir tus propios plugins se explica en el README, en «Plugins». Los ejemplos están en",
+      "installedButFailed": "«{name}» instalado, pero falló al iniciarse: {error}",
+      "installedActive": "«{name}» está instalado y activo.",
+      "loadFailed": "No se pudo cargar el plugin: {error}",
+      "confirmRemove": "¿Quitar el plugin «{name}»?",
+      "removed": "Se ha quitado «{name}»."
+    },
+    "scriptEditor": {
+      "loadExample": "Cargar ejemplo…",
+      "myScripts": "Mis scripts",
+      "runTitle": "Ejecutar (Ctrl+Intro)",
+      "run": "Ejecutar",
+      "clearFirst": "Vaciar el modelo antes",
+      "convertTitle": "Traducir el código a otro formato – el modelo no cambia",
+      "convertTo": "Convertir a…",
+      "undoConvertTitle": "Recuperar el código de antes de la conversión",
+      "undoConvert": "Deshacer conversión",
+      "newTitle": "Script vacío en el lenguaje elegido – Ctrl+Z recupera el código anterior",
+      "hideApiInfo": "Ocultar info. de la API",
+      "apiInfo": "Info. de la API",
+      "sizeTitle": "Lado más largo del objeto",
+      "yUpTitle": "Los archivos OBJ y LLaMA-Mesh tienen Y hacia arriba – se gira a Z hacia arriba",
+      "yUp": "Y hacia arriba",
+      "smoothTitle": "Las aristas entre caras más planas que este ángulo se suavizan (0 = todas las aristas visibles)",
+      "smooth": "Suavizar",
+      "noHelp": "No hay ayuda para este lenguaje.",
+      "console": "Consola",
+      "clearConsole": "Vaciar",
+      "consoleHint": "Aquí aparecen la salida de s3d.log(…) y los errores. Cada ejecución es un único paso de deshacer.",
+      "objHelp": "Malla OBJ: líneas «v x y z» (vértice) y «f a b c …» (cara, números de vértice desde 1).\nTodo lo demás (texto, # comentarios, vn/vt, grupos) se ignora – la salida bruta de LLaMA-Mesh\nse puede pegar directamente. La malla se escala a «Tamaño» (lado más largo),\nse apoya en el suelo y se coloca como componente junto al modelo.\nEn un script JS: s3d.mesh(objText, { at: [x, y, z], size: '80cm', yUp: true, material: 'Holz' })",
+      "converted": "Convertido a {format} – el modelo no ha cambiado. «Ejecutar» lo construye.",
+      "convertFailed": "Error de conversión: {error}",
+      "enterCode": "Escribe código …",
+      "placeholder": "Script nuevo, p. ej.\n{start}\n\nCtrl+Espacio muestra sugerencias, «Cargar ejemplo…» scripts ya hechos.\nEjecutar con Ctrl+Intro.",
+      "newHint": "Script nuevo – Ctrl+Z en el editor recupera el código anterior.",
+      "objDetected": "Malla OBJ detectada – lenguaje cambiado a «Malla OBJ»",
+      "exampleWithDescription": "Ejemplo «{name}»: {description}",
+      "example": "Ejemplo «{name}»",
+      "running": "{language} en ejecución …",
+      "invalidSize": "Tamaño no válido: {size}",
+      "done": "Listo – {count} cara en el modelo. | Listo – {count} caras en el modelo.",
+      "exampleGroup": "Ejemplo",
+      "apiExample": "Ejemplo de API",
+      "exampleBuilt": "✓ Ejemplo construido – Ctrl+Z lo deshace.",
+      "myScript": "Mi script",
+      "saved": "Script guardado"
+    },
+    "examples": {
+      "house": {
+        "name": "Casa con tejado a dos aguas",
+        "description": "Caja + prisma de tejado, puerta y ventanas como grupos."
+      },
+      "stairs": {
+        "name": "Escalera (bucle)",
+        "description": "Escalones con un bucle for, medidas como variables."
+      },
+      "spiral": {
+        "name": "Escalera de caracol (rotar)",
+        "description": "Definir un componente una vez y colocarlo girado."
+      },
+      "fence": {
+        "name": "Valla (fila de componentes)",
+        "description": "Postes y listones como componentes – los cambios afectan a todas las copias."
+      },
+      "city": {
+        "name": "Ciudad aleatoria",
+        "description": "Cuadrícula de rascacielos con altura y color aleatorios."
+      },
+      "lathe": {
+        "name": "Jarrón (sígueme)",
+        "description": "Girar un perfil a lo largo de un círculo – como «Sígueme»."
+      },
+      "text": {
+        "name": "Texto 3D",
+        "description": "Rótulo extruido como grupo."
+      },
+      "table": {
+        "name": "Mesa con 4 sillas",
+        "description": "Copiar y rotar grupos."
+      },
+      "json-scene": {
+        "name": "JSON: escena sencilla",
+        "description": "Declarativo: objetos, materiales, grupos."
+      },
+      "json-shelf": {
+        "name": "JSON: estantería (array)",
+        "description": "«array» repite un objeto con un desplazamiento."
+      },
+      "mesh-js": {
+        "name": "Malla en un script (s3d.mesh)",
+        "description": "Incrustar texto OBJ en el script, escalarlo y colocarlo varias veces."
+      },
+      "obj-chair": {
+        "name": "OBJ: silla (LLaMA-Mesh)",
+        "description": "Salida bruta de LLaMA-Mesh – solo líneas v/f. Ajusta tamaño y ejes arriba."
+      }
+    },
+    "script": {
+      "errors": {
+        "faceGone": "La cara ya no existe",
+        "invalidLength": "Longitud no válida: {value}",
+        "unknownTexture": "Textura desconocida «{texture}». Permitidas: {allowed}",
+        "noPoint": "polyhedron: el punto {index} no existe",
+        "faceFailed": "No se pudo crear la cara (¿los puntos no están en un plano?)",
+        "tubeRadius": "tube: el radio interior debe estar entre 0 y el radio exterior",
+        "async": "Los scripts asíncronos no se admiten – «await» se ignora.",
+        "needsText3d": "El texto 3D necesita el plugin «Texto 3D» (administrador de plugins)",
+        "unknownType": "Tipo de objeto desconocido: {type}",
+        "languageExists": "El lenguaje de script «{id}» ya existe"
+      }
+    },
+    "codeExport": {
+      "header": "Creado con Shap3D.ai a partir de {source} – medidas en metros",
+      "zUp": "Z apunta hacia arriba",
+      "yUp": "Y apunta hacia arriba (convención OBJ)",
+      "objSize": "Tamaño: {size} m (lado más largo) – escríbelo como «Tamaño» en el editor de scripts",
+      "failed": "No se pudo ejecutar el código",
+      "exists": "El formato de código «{id}» ya existe",
+      "unknown": "Formato de código desconocido: {id}",
+      "nothing": "No hay caras ni aristas que convertir",
+      "cannotConvert": "No se puede convertir desde «{format}»",
+      "noFaces": "El código no crea caras"
+    },
+    "brand": {
+      "tagline": "Modelado 3D fácil con IA",
+      "pronounce": "se pronuncia «{name}»"
+    },
+    "splash": {
+      "loading": "Cargando {name}",
+      "webglTitle": "Los gráficos 3D (WebGL) están desactivados en el navegador",
+      "webglText": "{name} necesita WebGL para dibujar la vista 3D. El navegador indica que no puede crear un contexto WebGL – normalmente porque la tarjeta gráfica se bloqueó para esta sesión tras un fallo del controlador.",
+      "webglRestart": "Cierra el navegador por completo y vuelve a abrirlo",
+      "webglRestartHint": "(todas las ventanas) – casi siempre lo soluciona.",
+      "webglAcceleration": "Activa la aceleración por hardware:",
+      "webglAccelerationPath": "Configuración › Sistema › Usar aceleración gráfica",
+      "webglStatus": "Comprueba el estado en {chrome} o {edge} – debe indicar «WebGL: Hardware accelerated».",
+      "webglDrivers": "Actualiza el controlador gráfico; con muchas pestañas 3D abiertas, cierra algunas.",
+      "failedTitle": "{name} no se pudo iniciar",
+      "failedText": "Se produjo un error al iniciar. Los detalles están en la consola del navegador (F12).",
+      "reload": "Recargar"
+    }
+  }
+}

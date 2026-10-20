@@ -1,0 +1,38 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "vue"],
+  "env": {
+    "browser": true,
+    "es2024": true
+  },
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    // Always use braces, even for one-line bodies; the formatter then puts the body on its own lines
+    "curly": ["error", "all"],
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "no-var": "error",
+    "prefer-const": "error",
+    "typescript/consistent-type-imports": "warn",
+    // Side-effect imports in main.ts (migration, theme, styles) are intentional
+    "import/no-unassigned-import": ["warn", { "allow": ["./migrate", "./theme", "**/*.css"] }],
+    // `for (const id of [...map.keys()])` copies on purpose, so the loop body can delete from the map
+    "unicorn/no-useless-spread": "off",
+    // toSorted()/toReversed() need ES2023, tsconfig lib is ES2021
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-array-reverse": "off",
+    // Helpers inside composables and setup() read better next to their callers
+    "unicorn/consistent-function-scoping": "off",
+    // `new Array(n).fill(0)` is clear and fast for typed buffers
+    "unicorn/no-new-array": "off",
+    // IndexedDB requests, FileReader and window.onload are set once; addEventListener adds nothing
+    "unicorn/prefer-add-event-listener": "off",
+    // Leading underscores mark internal fields and dev-only globals (e.g. __s3dStopPlugins)
+    "no-underscore-dangle": "off",
+    // The new Error(message, { cause }) fix needs ES2022 lib types, tsconfig lib is ES2021
+    "preserve-caught-error": "off"
+  },
+  "ignorePatterns": ["**/node_modules/**", "**/dist/**", "tools/sketchup-sdk/**", "**/*.typeface.json"]
+}

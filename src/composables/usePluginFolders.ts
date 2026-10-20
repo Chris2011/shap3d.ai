@@ -1,19 +1,35 @@
-import { reactive, ref } from 'vue';
+import { reactive, ref, shallowRef } from 'vue';
 import { plugins, installPluginPackage, installedPackage, readPluginPackage, type PluginPackage } from '../plugins/registry';
 import { saveFolderHandle, loadFolderHandle, listFolderHandles } from '../plugins/assetStore';
-import { supportsFolderHandles, pickPackageFolder, queryReadPermission, requestReadPermission, readFolderFiles } from '../plugins/packageFolder';
+import {
+  supportsFolderHandles,
+  pickPackageFolder,
+  queryReadPermission,
+  requestReadPermission,
+  readFolderFiles,
+} from '../plugins/packageFolder';
+import { t, localize } from '../i18n';
 
-export interface FolderResult { text: string; error: boolean }
+export interface FolderResult {
+  text: string;
+  error: boolean;
+}
 
 /** true when the folder holds something other than the installed copy */
 const differs = (id: string, candidate: PluginPackage) => {
   const installed = installedPackage(id);
-  if (!installed) return true;
-  return installed.code !== candidate.code || installed.info.version !== candidate.info.version
-    || installed.info.files !== candidate.info.files || installed.info.bytes !== candidate.info.bytes;
+  if (!installed) {
+    return true;
+  }
+  return (
+    installed.code !== candidate.code ||
+    installed.info.version !== candidate.info.version ||
+    installed.info.files !== candidate.info.files ||
+    installed.info.bytes !== candidate.info.bytes
+  );
 };
 
-const nameOf = (id: string) => plugins.find(entry => entry.id === id)?.name ?? id;
+const nameOf = (id: string) => plugins.find((entry) => entry.id === id)?.name ?? id;
 
 /**
  * Plugin packages installed from a folder: remembers the folder (Chromium) and updates the
@@ -21,20 +37,31 @@ const nameOf = (id: string) => plugins.find(entry => entry.id === id)?.name ?? i
  */
 export const usePluginFolders = () => {
   /** plugin ids with a remembered folder */
-  const folderIds = ref(new Set<string>());
+  const folderIds = shallowRef(new Set<string>());
   /** plugin id → hint about a newer package in its folder (silent check) */
   const updateHints = reactive<Record<string, string>>({});
   /** plugin id currently being updated */
   const updating = ref<string | null>(null);
 
   const refreshFolderIds = async () => {
-    if (!supportsFolderHandles) return;
-    try { folderIds.value = new Set(await listFolderHandles()); } catch (error) { console.error(error); }
+    if (!supportsFolderHandles) {
+      return;
+    }
+    try {
+      folderIds.value = new Set(await listFolderHandles());
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  /** Drops the remembered folder of a removed plugin from the list. */
+  const forgetFolder = (id: string) => {
+    folderIds.value = new Set([...folderIds.value].filter((folderId) => folderId !== id));
   };
 
   /** Installs (or replaces) a package from a folder handle and remembers the folder. */
   const installFromHandle = async (handle: FileSystemDirectoryHandle, pluginPackage?: PluginPackage) => {
-    const plugin = await installPluginPackage(pluginPackage ?? await readFolderFiles(handle));
+    const plugin = await installPluginPackage(pluginPackage ?? (await readFolderFiles(handle)));
     await saveFolderHandle(plugin.id, handle);
     delete updateHints[plugin.id];
     await refreshFolderIds();
@@ -43,7 +70,10 @@ export const usePluginFolders = () => {
 
   /** "Plugin-Ordner laden…" in Chromium: folder picker instead of the file input; null if cancelled */
   const installFromPicker = async () => {
-    const handle = await pickPackageFolder(); if (!handle) return null;
+    const handle = await pickPackageFolder();
+    if (!handle) {
+      return null;
+    }
     return installFromHandle(handle);
   };
 
@@ -55,42 +85,59 @@ export const usePluginFolders = () => {
     try {
       let handle = await loadFolderHandle(id);
       let pluginPackage: PluginPackage | null = null;
-      if (handle && await requestReadPermission(handle)) {
-        try { pluginPackage = await readPluginPackage(await readFolderFiles(handle)); }
-        catch (error: any) { if (error?.name !== 'NotFoundError') throw error; } // folder moved or deleted
+      if (handle && (await requestReadPermission(handle))) {
+        try {
+          pluginPackage = await readPluginPackage(await readFolderFiles(handle));
+        } catch (error: any) {
+          if (error?.name !== 'NotFoundError') {
+            throw error;
+          }
+        } // folder moved or deleted
       }
       if (!pluginPackage) {
         // no access to the remembered folder: let the user pick it again, starting next to the old one
-        handle = await pickPackageFolder(handle) ?? undefined;
-        if (!handle) return null;
+        handle = (await pickPackageFolder(handle)) ?? undefined;
+        if (!handle) {
+          return null;
+        }
         pluginPackage = await readPluginPackage(await readFolderFiles(handle));
       }
       const newVersion = pluginPackage.info.version;
       if (!differs(id, pluginPackage)) {
         await saveFolderHandle(id, handle!); // the user may have picked a new place for the same package
         delete updateHints[id];
-        return { text: `„${name}“ ${newVersion} ist schon aktuell.`, error: false };
+        return { text: t('plugins.folders.upToDate', { name: localize(name), version: newVersion }), error: false };
       }
       const plugin = await installFromHandle(handle!, pluginPackage);
-      const failed = plugins.find(entry => entry.id === plugin.id)?.error;
-      if (failed) return { text: `„${plugin.name}“ aktualisiert, aber beim Start fehlgeschlagen: ${failed}`, error: true };
+      const failed = plugins.find((entry) => entry.id === plugin.id)?.error;
+      if (failed) {
+        return { text: t('plugins.folders.updatedButFailed', { name: localize(plugin.name), error: failed }), error: true };
+      }
       return {
-        text: oldVersion && newVersion && oldVersion !== newVersion
-          ? `${plugin.name} ${oldVersion} → ${newVersion} aktualisiert.`
-          : `${plugin.name} ${newVersion} aktualisiert (neue Fassung aus dem Ordner).`,
+        text:
+          oldVersion && newVersion && oldVersion !== newVersion
+            ? t('plugins.folders.updated', { name: localize(plugin.name), from: oldVersion, to: newVersion })
+            : t('plugins.folders.updatedSameVersion', { name: localize(plugin.name), version: newVersion }),
         error: false,
       };
     } catch (error: any) {
-      return { text: `„${name}“ konnte nicht aktualisiert werden: ${error?.message ?? error}`, error: true };
-    } finally { updating.value = null; }
+      return { text: t('plugins.folders.updateFailed', { name: localize(name), error: error?.message ?? error }), error: true };
+    } finally {
+      updating.value = null;
+    }
   };
 
   /** Updates every plugin with a remembered folder; returns one line per plugin. */
   const updateAll = async () => {
     const results: FolderResult[] = [];
     for (const id of folderIds.value) {
-      if (!plugins.some(entry => entry.id === id)) continue;
-      const result = await updateFromFolder(id); if (result) results.push(result);
+      if (!plugins.some((entry) => entry.id === id)) {
+        continue;
+      }
+      const result = await updateFromFolder(id);
+      if (result) {
+        results.push(result);
+      }
     }
     return results;
   };
@@ -101,14 +148,35 @@ export const usePluginFolders = () => {
     for (const id of folderIds.value) {
       try {
         const handle = await loadFolderHandle(id);
-        if (!handle || (await queryReadPermission(handle)) !== 'granted') continue;
+        if (!handle || (await queryReadPermission(handle)) !== 'granted') {
+          continue;
+        }
         const pluginPackage = await readPluginPackage(await readFolderFiles(handle));
-        if (!differs(id, pluginPackage)) { delete updateHints[id]; continue; }
+        if (!differs(id, pluginPackage)) {
+          delete updateHints[id];
+          continue;
+        }
         const version = pluginPackage.info.version;
-        updateHints[id] = version && version !== installedPackage(id)?.info.version ? `Neue Version ${version} im Ordner` : 'Neue Fassung im Ordner';
-      } catch (error) { console.warn(`Plugin-Ordner von „${id}“ nicht lesbar:`, error); }
+        updateHints[id] =
+          version && version !== installedPackage(id)?.info.version
+            ? t('plugins.folders.newVersion', { version })
+            : t('plugins.folders.newBuild');
+      } catch (error) {
+        console.warn(`Plugin-Ordner von „${id}“ nicht lesbar:`, error);
+      }
     }
   };
 
-  return { supported: supportsFolderHandles, folderIds, updateHints, updating, installFromPicker, updateFromFolder, updateAll, checkSilently, refreshFolderIds };
+  return {
+    supported: supportsFolderHandles,
+    folderIds,
+    updateHints,
+    updating,
+    installFromPicker,
+    updateFromFolder,
+    updateAll,
+    checkSilently,
+    refreshFolderIds,
+    forgetFolder,
+  };
 };

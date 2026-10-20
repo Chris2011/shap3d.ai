@@ -3,6 +3,7 @@ import { useStorage } from '@vueuse/core';
 import type { Editor } from '../engine/editor';
 import { createPluginContext } from './context';
 import type { Disposer, S3dPlugin } from './types';
+import { t, addMessages } from '../i18n';
 import { saveAssets, loadAssets, deleteAssets, clearPluginFiles, deleteFolderHandle, type PluginAssets } from './assetStore';
 import gridExample from './examples/grid-generator.js?raw';
 import coordinatesExample from './examples/cursor-coordinates.js?raw';
@@ -24,12 +25,24 @@ const BUILTIN_PLUGINS: { id: string; load: () => Promise<{ default: S3dPlugin }>
   { id: 'terrain', load: () => import('./builtin/terrain') },
   { id: 'text3d', load: () => import('./builtin/text3d') },
   { id: 'imports', load: () => import('./builtin/imports') },
+  { id: 'i18n', load: () => import('./builtin/i18n') },
 ];
 
 /** what a plugin package's package.json says about itself */
-export interface PackageInfo { name: string; version: string; license: string; files: number; bytes: number }
+export interface PackageInfo {
+  name: string;
+  version: string;
+  license: string;
+  files: number;
+  bytes: number;
+}
 
-interface StoredPlugin { id: string; code: string; enabled: boolean; package?: PackageInfo }
+interface StoredPlugin {
+  id: string;
+  code: string;
+  enabled: boolean;
+  package?: PackageInfo;
+}
 
 export interface PluginEntry {
   id: string;
@@ -62,84 +75,171 @@ const evaluate = async (code: string): Promise<S3dPlugin> => {
   try {
     const module = await import(/* @vite-ignore */ url);
     const plugin = (module.default ?? module.plugin) as S3dPlugin | undefined;
-    if (!plugin || typeof plugin !== 'object') throw new Error('Das Modul exportiert kein Plugin (export default { … })');
-    if (!plugin.id || !/^[a-z0-9][a-z0-9-]*$/.test(plugin.id)) throw new Error('Plugin-id fehlt oder ist ungültig (nur a–z, 0–9 und -)');
-    if (!plugin.name) throw new Error('Plugin-name fehlt');
-    if (typeof plugin.activate !== 'function') throw new Error('activate(context) fehlt');
+    if (!plugin || typeof plugin !== 'object') {
+      throw new Error(t('plugins.errors.noExport'));
+    }
+    if (!plugin.id || !/^[a-z0-9][a-z0-9-]*$/.test(plugin.id)) {
+      throw new Error(t('plugins.errors.badId'));
+    }
+    if (!plugin.name) {
+      throw new Error(t('plugins.errors.noName'));
+    }
+    if (typeof plugin.activate !== 'function') {
+      throw new Error(t('plugins.errors.noActivate'));
+    }
     return plugin;
-  } finally { URL.revokeObjectURL(url); }
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 };
 
-const entryOf = (id: string) => plugins.find(entry => entry.id === id);
+const entryOf = (id: string) => plugins.find((entry) => entry.id === id);
 
-const describe = (plugin: S3dPlugin, enabled: boolean, packageInfo?: PackageInfo, builtin = false): PluginEntry => ({
-  id: plugin.id, name: plugin.name, version: plugin.version ?? packageInfo?.version ?? '', description: plugin.description ?? '', author: plugin.author ?? '',
-  enabled, active: false, error: null, package: packageInfo, builtin,
-});
+/** texts a plugin ships (S3dPlugin.messages) – kept while it is installed, also when it is switched off */
+const pluginMessages = new Map<string, Disposer[]>();
+const registerMessages = (plugin: S3dPlugin) => {
+  pluginMessages.get(plugin.id)?.forEach((dispose) => dispose());
+  pluginMessages.set(
+    plugin.id,
+    Object.entries(plugin.messages ?? {}).map(([language, messages]) => addMessages(language, messages, plugin.id)),
+  );
+};
+const dropMessages = (id: string) => {
+  pluginMessages.get(id)?.forEach((dispose) => dispose());
+  pluginMessages.delete(id);
+};
 
-const isBuiltin = (id: string) => BUILTIN_PLUGINS.some(candidate => candidate.id === id);
-const loadBuiltin = async (id: string) => (await BUILTIN_PLUGINS.find(candidate => candidate.id === id)!.load()).default;
+const describe = (plugin: S3dPlugin, enabled: boolean, packageInfo?: PackageInfo, builtin = false): PluginEntry => {
+  registerMessages(plugin);
+  return {
+    id: plugin.id,
+    name: plugin.name,
+    version: plugin.version ?? packageInfo?.version ?? '',
+    description: plugin.description ?? '',
+    author: plugin.author ?? '',
+    enabled,
+    active: false,
+    error: null,
+    package: packageInfo,
+    builtin,
+  };
+};
+
+const isBuiltin = (id: string) => BUILTIN_PLUGINS.some((candidate) => candidate.id === id);
+const loadBuiltin = async (id: string) => (await BUILTIN_PLUGINS.find((candidate) => candidate.id === id)!.load()).default;
 
 const runDisposers = (disposers: Disposer[]) => {
-  for (const disposer of disposers.reverse()) { try { disposer(); } catch (error) { console.error(error); } }
+  for (const disposer of disposers.reverse()) {
+    try {
+      disposer();
+    } catch (error) {
+      console.error(error);
+    }
+  }
   disposers.length = 0;
 };
 
 const activate = async (plugin: S3dPlugin) => {
   const entry = entryOf(plugin.id)!;
+  registerMessages(plugin); // a re-evaluated plugin may bring new texts
   const disposers: Disposer[] = [];
   try {
-    const assets = stored.value.find(item => item.id === plugin.id)?.package ? await loadAssets(plugin.id) : {};
+    const assets = stored.value.find((item) => item.id === plugin.id)?.package ? await loadAssets(plugin.id) : {};
     await plugin.activate(createPluginContext(editorRef!, plugin, disposers, assets));
     loaded.set(plugin.id, { plugin, disposers });
-    entry.active = true; entry.error = null;
+    entry.active = true;
+    entry.error = null;
   } catch (error: any) {
     runDisposers(disposers); // undo what was registered before the failure
-    entry.active = false; entry.error = error?.message ?? String(error);
+    entry.active = false;
+    entry.error = error?.message ?? String(error);
     console.error(`Plugin „${plugin.id}“:`, error);
   }
   editorRef?.invalidate();
 };
 
 const deactivate = (id: string) => {
-  const running = loaded.get(id); if (!running) return;
-  try { running.plugin.deactivate?.(); } catch (error) { console.error(error); }
+  const running = loaded.get(id);
+  if (!running) {
+    return;
+  }
+  try {
+    running.plugin.deactivate?.();
+  } catch (error) {
+    console.error(error);
+  }
   runDisposers(running.disposers);
   loaded.delete(id);
-  const entry = entryOf(id); if (entry) entry.active = false;
+  const entry = entryOf(id);
+  if (entry) {
+    entry.active = false;
+  }
   editorRef?.invalidate();
 };
 
 let markReady: () => void = () => {};
 /** resolves once the plugins from the last session are running (e.g. for the screenshot mode) */
-export const pluginsReady = new Promise<void>(resolve => { markReady = resolve; });
+export const pluginsReady = new Promise<void>((resolve) => {
+  markReady = resolve;
+});
 
 /** Loads all installed plugins (call once after the editor exists). */
 export const initPlugins = async (editor: Editor) => {
-  if (editorRef) return; // already started (e.g. the app component was hot-reloaded)
+  if (editorRef) {
+    return;
+  } // already started (e.g. the app component was hot-reloaded)
   editorRef = editor;
-  try { await startPlugins(); } finally { markReady(); }
+  try {
+    await startPlugins();
+  } finally {
+    markReady();
+  }
 };
 
 const startPlugins = async () => {
   for (const builtin of BUILTIN_PLUGINS) {
     const enabled = builtinEnabled.value[builtin.id] !== false;
     try {
-      const plugin = await builtin.load().then(module => module.default);
+      const plugin = await builtin.load().then((module) => module.default);
       plugins.push(describe(plugin, enabled, undefined, true));
-      if (enabled) await activate(plugin);
+      if (enabled) {
+        await activate(plugin);
+      }
     } catch (error: any) {
-      plugins.push({ id: builtin.id, name: builtin.id, version: '', description: '', author: '', enabled, active: false, error: error?.message ?? String(error), builtin: true });
+      plugins.push({
+        id: builtin.id,
+        name: builtin.id,
+        version: '',
+        description: '',
+        author: '',
+        enabled,
+        active: false,
+        error: error?.message ?? String(error),
+        builtin: true,
+      });
     }
   }
   for (const item of stored.value) {
-    if (isBuiltin(item.id)) continue; // an installed copy never replaces a built-in plugin
+    if (isBuiltin(item.id)) {
+      continue;
+    } // an installed copy never replaces a built-in plugin
     try {
       const plugin = await evaluate(item.code);
       plugins.push(describe(plugin, item.enabled, item.package));
-      if (item.enabled) await activate(plugin);
+      if (item.enabled) {
+        await activate(plugin);
+      }
     } catch (error: any) {
-      plugins.push({ id: item.id, name: item.id, version: '', description: '', author: '', enabled: item.enabled, active: false, error: error?.message ?? String(error) });
+      plugins.push({
+        id: item.id,
+        name: item.id,
+        version: '',
+        description: '',
+        author: '',
+        enabled: item.enabled,
+        active: false,
+        error: error?.message ?? String(error),
+      });
     }
   }
 };
@@ -147,21 +247,36 @@ const startPlugins = async () => {
 /** Installs (or updates) a plugin from its source code and switches it on. */
 export const installPlugin = async (code: string, packageFiles?: { info: PackageInfo; assets: PluginAssets }) => {
   const plugin = await evaluate(code);
-  if (isBuiltin(plugin.id)) throw new Error(`„${plugin.id}“ ist ein eingebautes Plugin und kann nicht ersetzt werden`);
-  const existing = stored.value.find(item => item.id === plugin.id);
-  if (existing) deactivate(plugin.id);
-  if (packageFiles) await saveAssets(plugin.id, packageFiles.assets);
-  else if (existing?.package) await deleteAssets(plugin.id);
+  if (isBuiltin(plugin.id)) {
+    throw new Error(t('plugins.errors.builtinReplace', { id: plugin.id }));
+  }
+  const existing = stored.value.find((item) => item.id === plugin.id);
+  if (existing) {
+    deactivate(plugin.id);
+  }
+  if (packageFiles) {
+    await saveAssets(plugin.id, packageFiles.assets);
+  } else if (existing?.package) {
+    await deleteAssets(plugin.id);
+  }
   const item: StoredPlugin = { id: plugin.id, code, enabled: true, package: packageFiles?.info };
-  stored.value = existing ? stored.value.map(other => (other.id === plugin.id ? item : other)) : [...stored.value, item];
+  stored.value = existing ? stored.value.map((other) => (other.id === plugin.id ? item : other)) : [...stored.value, item];
   const entry = entryOf(plugin.id);
-  if (entry) Object.assign(entry, describe(plugin, true, item.package)); else plugins.push(describe(plugin, true, item.package));
+  if (entry) {
+    Object.assign(entry, describe(plugin, true, item.package));
+  } else {
+    plugins.push(describe(plugin, true, item.package));
+  }
   await activate(plugin);
   return plugin;
 };
 
 /** a plugin package read from a folder, not yet installed */
-export interface PluginPackage { code: string; info: PackageInfo; assets: PluginAssets }
+export interface PluginPackage {
+  code: string;
+  info: PackageInfo;
+  assets: PluginAssets;
+}
 
 /**
  * Reads a plugin package from the files of a folder (input with webkitdirectory or a directory
@@ -170,24 +285,46 @@ export interface PluginPackage { code: string; info: PackageInfo; assets: Plugin
  */
 export const readPluginPackage = async (files: File[]): Promise<PluginPackage> => {
   const pathOf = (file: File) => (file.webkitRelativePath || file.name).replace(/\\/g, '/');
-  const manifests = files.filter(file => pathOf(file).split('/').pop() === 'package.json' && !pathOf(file).includes('/node_modules/'));
+  const manifests = files.filter((file) => pathOf(file).split('/').pop() === 'package.json' && !pathOf(file).includes('/node_modules/'));
   const manifestFile = manifests.sort((a, b) => pathOf(a).split('/').length - pathOf(b).split('/').length)[0];
-  if (!manifestFile) throw new Error('Im Ordner fehlt eine package.json');
+  if (!manifestFile) {
+    throw new Error(t('plugins.errors.noPackageJson'));
+  }
   const manifest = JSON.parse(await manifestFile.text());
   const base = pathOf(manifestFile).slice(0, -'package.json'.length);
   const mainPath = String(manifest.shap3d?.main ?? manifest.main ?? '').replace(/^\.?\//, '');
-  if (!mainPath) throw new Error('package.json braucht "shap3d": { "main": "plugin.js" }');
-  const assets: PluginAssets = {}; let mainCode: string | null = null; let bytes = 0;
+  if (!mainPath) {
+    throw new Error(t('plugins.errors.noMain'));
+  }
+  const assets: PluginAssets = {};
+  let mainCode: string | null = null;
+  let bytes = 0;
   for (const file of files) {
     const path = pathOf(file);
-    if (!path.startsWith(base)) continue;
+    if (!path.startsWith(base)) {
+      continue;
+    }
     const relative = path.slice(base.length);
-    if (relative === 'package.json' || relative.startsWith('node_modules/') || relative.includes('/node_modules/')) continue;
-    if (relative === mainPath) { mainCode = await file.text(); continue; }
-    assets[relative] = file; bytes += file.size;
+    if (relative === 'package.json' || relative.startsWith('node_modules/') || relative.includes('/node_modules/')) {
+      continue;
+    }
+    if (relative === mainPath) {
+      mainCode = await file.text();
+      continue;
+    }
+    assets[relative] = file;
+    bytes += file.size;
   }
-  if (mainCode == null) throw new Error(`Die Hauptdatei „${mainPath}“ aus package.json fehlt im Ordner`);
-  const info: PackageInfo = { name: manifest.name ?? '', version: manifest.version ?? '', license: manifest.license ?? '', files: Object.keys(assets).length, bytes };
+  if (mainCode == null) {
+    throw new Error(t('plugins.errors.mainMissing', { path: mainPath }));
+  }
+  const info: PackageInfo = {
+    name: manifest.name ?? '',
+    version: manifest.version ?? '',
+    license: manifest.license ?? '',
+    files: Object.keys(assets).length,
+    bytes,
+  };
   return { code: mainCode, info, assets };
 };
 
@@ -199,34 +336,74 @@ export const installPluginPackage = async (files: File[] | PluginPackage) => {
 
 /** Code and package info of an installed package plugin (to compare with a newer folder). */
 export const installedPackage = (id: string) => {
-  const item = stored.value.find(candidate => candidate.id === id);
+  const item = stored.value.find((candidate) => candidate.id === id);
   return item?.package ? { code: item.code, info: item.package } : undefined;
 };
 
 export const setPluginEnabled = async (id: string, enabled: boolean) => {
   if (isBuiltin(id)) {
     builtinEnabled.value = { ...builtinEnabled.value, [id]: enabled };
-    const entry = entryOf(id); if (entry) entry.enabled = enabled;
-    if (!enabled) { deactivate(id); return; }
-    try { await activate(await loadBuiltin(id)); } catch (error: any) { if (entry) entry.error = error?.message ?? String(error); }
+    const entry = entryOf(id);
+    if (entry) {
+      entry.enabled = enabled;
+    }
+    if (!enabled) {
+      deactivate(id);
+      return;
+    }
+    try {
+      await activate(await loadBuiltin(id));
+    } catch (error: any) {
+      if (entry) {
+        entry.error = error?.message ?? String(error);
+      }
+    }
     return;
   }
-  const item = stored.value.find(candidate => candidate.id === id); if (!item) return;
-  item.enabled = enabled; stored.value = [...stored.value];
-  const entry = entryOf(id); if (entry) entry.enabled = enabled;
-  if (!enabled) { deactivate(id); return; }
-  try { await activate(await evaluate(item.code)); } catch (error: any) { if (entry) entry.error = error?.message ?? String(error); }
+  const item = stored.value.find((candidate) => candidate.id === id);
+  if (!item) {
+    return;
+  }
+  item.enabled = enabled;
+  stored.value = [...stored.value];
+  const entry = entryOf(id);
+  if (entry) {
+    entry.enabled = enabled;
+  }
+  if (!enabled) {
+    deactivate(id);
+    return;
+  }
+  try {
+    await activate(await evaluate(item.code));
+  } catch (error: any) {
+    if (entry) {
+      entry.error = error?.message ?? String(error);
+    }
+  }
 };
 
 export const removePlugin = (id: string) => {
-  if (isBuiltin(id)) return; // built-in plugins can only be switched off
+  if (isBuiltin(id)) {
+    return;
+  } // built-in plugins can only be switched off
   deactivate(id);
-  if (stored.value.find(item => item.id === id)?.package) deleteAssets(id).catch(error => console.error(error));
-  clearPluginFiles(id).catch(error => console.error(error));
-  deleteFolderHandle(id).catch(error => console.error(error));
-  stored.value = stored.value.filter(item => item.id !== id);
-  const index = plugins.findIndex(entry => entry.id === id); if (index >= 0) plugins.splice(index, 1);
-  for (const key of Object.keys(localStorage)) if (key.startsWith(`s3d:plugin:${id}:`)) localStorage.removeItem(key);
+  dropMessages(id);
+  if (stored.value.find((item) => item.id === id)?.package) {
+    deleteAssets(id).catch((error) => console.error(error));
+  }
+  clearPluginFiles(id).catch((error) => console.error(error));
+  deleteFolderHandle(id).catch((error) => console.error(error));
+  stored.value = stored.value.filter((item) => item.id !== id);
+  const index = plugins.findIndex((entry) => entry.id === id);
+  if (index >= 0) {
+    plugins.splice(index, 1);
+  }
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith(`s3d:plugin:${id}:`)) {
+      localStorage.removeItem(key);
+    }
+  }
 };
 
 // development: a hot-reloaded copy of this module first stops the plugins the previous copy started
@@ -234,8 +411,15 @@ export const removePlugin = (id: string) => {
 if (import.meta.hot) {
   const runtime = globalThis as { __s3dStopPlugins?: () => void };
   runtime.__s3dStopPlugins?.();
-  runtime.__s3dStopPlugins = () => { for (const id of [...loaded.keys()]) deactivate(id); };
+  runtime.__s3dStopPlugins = () => {
+    for (const id of [...loaded.keys()]) {
+      deactivate(id);
+    }
+    for (const id of [...pluginMessages.keys()]) {
+      dropMessages(id);
+    }
+  };
 }
 
 /** Source of an installed plugin (for download / inspection). */
-export const pluginSource = (id: string) => stored.value.find(item => item.id === id)?.code ?? '';
+export const pluginSource = (id: string) => stored.value.find((item) => item.id === id)?.code ?? '';

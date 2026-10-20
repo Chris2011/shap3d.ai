@@ -5,5 +5,7 @@ export const extraIcons = reactive<Record<string, string>>({});
 
 export const registerIcon = (name: string, svgContent: string) => {
   extraIcons[name] = svgContent;
-  return () => { delete extraIcons[name]; };
+  return () => {
+    delete extraIcons[name];
+  };
 };

@@ -2,6 +2,7 @@ import { shallowReactive } from 'vue';
 import type { Editor } from '../engine/editor';
 import type { RunResult } from './api';
 import type { CodeLang } from './highlight';
+import { t } from '../i18n';
 
 export type CompletionKind = 'method' | 'property' | 'option' | 'value' | 'material' | 'keyword' | 'variable' | 'unit' | 'type';
 
@@ -22,7 +23,11 @@ export interface ScriptCompletion {
 }
 
 /** What a language's `completions` receives: the code, the cursor offset and the word before the cursor. */
-export interface CompletionRequest { code: string; offset: number; word: string }
+export interface CompletionRequest {
+  code: string;
+  offset: number;
+  word: string;
+}
 
 /** An extra language for the script editor (contributed by a plugin, e.g. OpenSCAD). */
 export interface ScriptLanguage {
@@ -47,18 +52,38 @@ const beforeRunHooks: ((code: string) => void | Promise<void>)[] = [];
 
 export const registerBeforeRun = (prepare: (code: string) => void | Promise<void>) => {
   beforeRunHooks.push(prepare);
-  return () => { const index = beforeRunHooks.indexOf(prepare); if (index >= 0) beforeRunHooks.splice(index, 1); };
+  return () => {
+    const index = beforeRunHooks.indexOf(prepare);
+    if (index >= 0) {
+      beforeRunHooks.splice(index, 1);
+    }
+  };
 };
 
 /** Awaits every hook; a failing hook is logged and does not stop the script. */
 export const prepareScript = async (code: string) => {
-  await Promise.all(beforeRunHooks.map(async prepare => { try { await prepare(code); } catch (error) { console.error(error); } }));
+  await Promise.all(
+    beforeRunHooks.map(async (prepare) => {
+      try {
+        await prepare(code);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+  );
 };
 
-export const findScriptLanguage = (id: string) => SCRIPT_LANGUAGES.find(language => language.id === id);
+export const findScriptLanguage = (id: string) => SCRIPT_LANGUAGES.find((language) => language.id === id);
 
 export const registerScriptLanguage = (language: ScriptLanguage) => {
-  if (['js', 'json', 'obj'].includes(language.id) || findScriptLanguage(language.id)) throw new Error(`Skriptsprache „${language.id}“ gibt es schon`);
+  if (['js', 'json', 'obj'].includes(language.id) || findScriptLanguage(language.id)) {
+    throw new Error(t('script.errors.languageExists', { id: language.id }));
+  }
   SCRIPT_LANGUAGES.push(language);
-  return () => { const index = SCRIPT_LANGUAGES.indexOf(language); if (index >= 0) SCRIPT_LANGUAGES.splice(index, 1); };
+  return () => {
+    const index = SCRIPT_LANGUAGES.indexOf(language);
+    if (index >= 0) {
+      SCRIPT_LANGUAGES.splice(index, 1);
+    }
+  };
 };

@@ -14,9 +14,11 @@ export default {
     let visible = context.storage.get('visible', true);
 
     // coordinates of the point the current tool snaps to
-    context.overlay.draw(overlay => {
+    context.overlay.draw((overlay) => {
       const point = visible && editor.mouse.inside ? editor.tool.inference?.point : null;
-      if (!point) return;
+      if (!point) {
+        return;
+      }
       const text = `X ${editor.fmt(point.x)}   Y ${editor.fmt(point.y)}   Z ${editor.fmt(point.z)}`;
       const ctx = overlay.context;
       ctx.font = '600 12px system-ui, sans-serif';
@@ -34,26 +36,45 @@ export default {
       group: 'Ansicht',
       keywords: 'koordinaten position xyz cursor',
       checked: () => visible,
-      run: () => { visible = !visible; context.storage.set('visible', visible); editor.redraw(); },
+      run: () => {
+        visible = !visible;
+        context.storage.set('visible', visible);
+        editor.redraw();
+      },
     });
 
-    context.icons.register('guide-point', '<path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="2.6" fill="#d0312d"/>');
+    context.icons.register(
+      'guide-point',
+      '<path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="2.6" fill="#d0312d"/>',
+    );
 
     // a tool: click to drop a guide point (one undo step per point)
     class GuidePointTool extends context.classes.PointTool {
       id = 'guide-point';
       name = 'Hilfspunkt';
       cursor = 'crosshair';
-      status() { return 'Klicken, um einen Hilfspunkt zu setzen (rastet an Punkten, Kanten und Flächen ein).'; }
-      onMove(pointer) { this.pick(pointer, null); }
+      status() {
+        return 'Klicken, um einen Hilfspunkt zu setzen (rastet an Punkten, Kanten und Flächen ein).';
+      }
+      onMove(pointer) {
+        this.pick(pointer, null);
+      }
       onDown(pointer) {
         const point = this.pick(pointer, null).point.clone();
         editor.commit('Hilfspunkt', () => editor.model.guides.push({ id: context.newId(), kind: 'point', point }));
         editor.toast(`Hilfspunkt bei ${editor.fmt(point.x)}; ${editor.fmt(point.y)}; ${editor.fmt(point.z)}`);
       }
-      draw(overlay) { this.drawInference(overlay); }
+      draw(overlay) {
+        this.drawInference(overlay);
+      }
     }
-    context.tools.register({ id: 'guide-point', name: 'Hilfspunkt', icon: 'guide-point', key: 'j', create: target => new GuidePointTool(target) });
+    context.tools.register({
+      id: 'guide-point',
+      name: 'Hilfspunkt',
+      icon: 'guide-point',
+      key: 'j',
+      create: (target) => new GuidePointTool(target),
+    });
 
     context.events.onNewModel(() => context.ui.toast('Neues Modell – Hilfspunkte setzen mit Taste J'));
   },

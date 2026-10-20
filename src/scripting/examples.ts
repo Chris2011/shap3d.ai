@@ -1,8 +1,20 @@
-export interface ScriptExample { id: string; name: string; lang: 'js' | 'json' | 'obj'; description: string; code: string }
+import { copyLocalized } from '../i18n';
 
-export const EXAMPLES: ScriptExample[] = [
+export interface ScriptExample {
+  id: string;
+  name: string;
+  lang: 'js' | 'json' | 'obj';
+  description: string;
+  code: string;
+}
+
+/** name and description are message keys (`examples.<id>.name`) – EXAMPLES reads them in the current language; the code stays as it is */
+const LIST: ScriptExample[] = [
   {
-    id: 'house', name: 'Haus mit Satteldach', lang: 'js', description: 'Quader + Dachprisma, Tür und Fenster als Gruppen.',
+    id: 'house',
+    name: 'examples.house.name',
+    lang: 'js',
+    description: 'examples.house.description',
     code: `// Einfaches Haus: 8 m × 6 m, 3 m Wandhöhe, Satteldach
 s3d.material('Putz', '#efe9dc');
 s3d.material('Dachziegel', '#9c3b2a');
@@ -31,7 +43,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'stairs', name: 'Treppe (Schleife)', lang: 'js', description: 'Stufen per for-Schleife, Maße als Variablen.',
+    id: 'stairs',
+    name: 'examples.stairs.name',
+    lang: 'js',
+    description: 'examples.stairs.description',
     code: `// Gerade Treppe: Profil per Schleife berechnen, dann seitlich extrudieren
 const stufen = 12;
 const steigung = s3d.centimeters(17.5);   // Höhe je Stufe
@@ -55,7 +70,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'spiral', name: 'Wendeltreppe (Drehen)', lang: 'js', description: 'Komponente einmal definieren, dann gedreht platzieren.',
+    id: 'spiral',
+    name: 'examples.spiral.name',
+    lang: 'js',
+    description: 'examples.spiral.description',
     code: `// Wendeltreppe aus einer Stufen-Komponente
 const n = 20, h = 0.18, winkel = 18;
 
@@ -70,7 +88,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'fence', name: 'Zaun (Komponenten-Reihe)', lang: 'js', description: 'Pfosten & Latten als Komponenten – Änderungen wirken auf alle Kopien.',
+    id: 'fence',
+    name: 'examples.fence.name',
+    lang: 'js',
+    description: 'examples.fence.description',
     code: `// Zaun: Pfosten-Komponente wird 10× platziert
 s3d.material('Holz grau', '#9a8f7e');
 const pfosten = s3d.component('Pfosten', () => {
@@ -85,7 +106,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'city', name: 'Zufällige Stadt', lang: 'js', description: 'Raster aus Hochhäusern mit zufälliger Höhe und Farbe.',
+    id: 'city',
+    name: 'examples.city.name',
+    lang: 'js',
+    description: 'examples.city.description',
     code: `// 8 × 8 Blöcke mit zufälligen Hochhäusern
 const farben = ['#d9d4c7', '#b8c4cc', '#c9b29b', '#9fb1a3', '#e0c9a6'];
 farben.forEach((c, i) => s3d.material('Fassade ' + (i + 1), c));
@@ -102,7 +126,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'lathe', name: 'Vase (Folge mir)', lang: 'js', description: 'Profil entlang eines Kreises drehen – wie „Folge mir“.',
+    id: 'lathe',
+    name: 'examples.lathe.name',
+    lang: 'js',
+    description: 'examples.lathe.description',
     code: `// Vase: Profil in der XZ-Ebene wird entlang eines Kreises um die Z-Achse geführt
 s3d.material('Keramik', '#4f86c6');
 s3d.group('Vase', () => {
@@ -122,7 +149,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'text', name: '3D-Text', lang: 'js', description: 'Extrudierter Schriftzug als Gruppe.',
+    id: 'text',
+    name: 'examples.text.name',
+    lang: 'js',
+    description: 'examples.text.description',
     code: `s3d.material('Gold', '#d4a017');
 s3d.text3d('Shap3D', { at: [0, 0, 0], size: 1, depth: 0.25, upright: true, material: 'Gold' });
 s3d.text3d('Vue + three.js', { at: [0, -1.2, 0], size: 0.4, depth: 0.05, upright: false });
@@ -131,7 +161,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'table', name: 'Tisch mit 4 Stühlen', lang: 'js', description: 'Gruppen kopieren und drehen.',
+    id: 'table',
+    name: 'examples.table.name',
+    lang: 'js',
+    description: 'examples.table.description',
     code: `s3d.material('Nussbaum', '#6b4226');
 s3d.material('Stoff', '#3a6ea5');
 
@@ -153,7 +186,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'json-scene', name: 'JSON: Einfache Szene', lang: 'json', description: 'Deklarativ: Objekte, Materialien, Gruppen.',
+    id: 'json-scene',
+    name: 'examples.json-scene.name',
+    lang: 'json',
+    description: 'examples.json-scene.description',
     code: `{
   "materials": { "Rasen": "#6aa84f", "Stein": "#9e9e9e", "Rot": "#d32f2f" },
   "objects": [
@@ -168,7 +204,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'json-shelf', name: 'JSON: Regal (Array)', lang: 'json', description: '„array“ wiederholt ein Objekt mit Versatz.',
+    id: 'json-shelf',
+    name: 'examples.json-shelf.name',
+    lang: 'json',
+    description: 'examples.json-shelf.description',
     code: `{
   "materials": { "Birke": "#e3c89a" },
   "objects": [
@@ -182,7 +221,10 @@ s3d.zoomExtents();
 `,
   },
   {
-    id: 'mesh-js', name: 'Mesh im Skript (s3d.mesh)', lang: 'js', description: 'OBJ-Text direkt im Skript einbetten, skalieren und mehrfach platzieren.',
+    id: 'mesh-js',
+    name: 'examples.mesh-js.name',
+    lang: 'js',
+    description: 'examples.mesh-js.description',
     code: `// Eine Pyramide als OBJ-Text (Y-oben, so wie LLaMA-Mesh sie liefert)
 const pyramid = \`
 v 0 0 0
@@ -203,7 +245,10 @@ for (let i = 0; i < 3; i++) {
 s3d.zoomExtents();`,
   },
   {
-    id: 'obj-chair', name: 'OBJ: Stuhl (LLaMA-Mesh)', lang: 'obj', description: 'Rohe LLaMA-Mesh-Ausgabe – nur v/f-Zeilen. Größe und Achsen oben einstellen.',
+    id: 'obj-chair',
+    name: 'examples.obj-chair.name',
+    lang: 'obj',
+    description: 'examples.obj-chair.description',
     code: `# Stuhl – erzeugt von LLaMA-Mesh („a wooden chair“)
 v 15 59 17
 v 15 59 20
@@ -544,5 +589,6 @@ f 104 106 107`,
   },
 ];
 
-/** Plain-text API overview – generated from the catalog (src/scripting/catalog.ts). */
+export const EXAMPLES: ScriptExample[] = LIST.map((example) => copyLocalized(example, example, ['name', 'description']));
 
+/** Plain-text API overview – generated from the catalog (src/scripting/catalog.ts). */

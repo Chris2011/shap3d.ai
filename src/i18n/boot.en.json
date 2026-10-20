@@ -1,0 +1,25 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "brand": {
+      "tagline": "Easy 3D modelling with AI",
+      "pronounce": "say “{name}”"
+    },
+    "splash": {
+      "loading": "{name} is loading",
+      "webglTitle": "3D graphics (WebGL) are switched off in the browser right now",
+      "webglText": "{name} needs WebGL to draw the 3D view. The browser reports that it cannot create a WebGL context – usually because the graphics card was blocked for this session after a driver crash.",
+      "webglRestart": "Close the browser completely and start it again",
+      "webglRestartHint": "(all windows) – that almost always solves it.",
+      "webglAcceleration": "Switch on hardware acceleration:",
+      "webglAccelerationPath": "Settings › System › Use graphics acceleration",
+      "webglStatus": "Check the status at {chrome} or {edge} – it should say “WebGL: Hardware accelerated”.",
+      "webglDrivers": "Update the graphics driver; with many open 3D tabs close some of them.",
+      "failedTitle": "{name} could not start",
+      "failedText": "An error occurred while starting. Details are in the browser console (F12).",
+      "reload": "Reload"
+    }
+  }
+}

@@ -1,5 +1,14 @@
 <template>
-  <svg :width="size" :height="size" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" v-html="svg" aria-hidden="true"></svg>
+  <svg
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    v-html="svg"
+    aria-hidden="true"
+  ></svg>
 </template>
 
 <script setup lang="ts">

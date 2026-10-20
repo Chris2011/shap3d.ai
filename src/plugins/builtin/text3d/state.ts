@@ -1,5 +1,6 @@
 import { reactive } from 'vue';
 import { FONTS, forgetFont, type TextFont } from './fonts';
+import { t } from '../../../i18n';
 
 /** id of the tool (plugin id + tool id) – opening it shows the dialog */
 export const TEXT_TOOL = 'text3d.text';
@@ -23,37 +24,59 @@ const FONT_FILE = /\.(ttf|otf|woff)$/i;
 
 const customFont = (path: string, file: Blob): TextFont => {
   const name = path.slice(FONT_DIR.length).replace(FONT_FILE, '');
-  return { id: `eigene:${name.toLowerCase().replace(/\s+/g, '-')}`, label: name, category: 'Eigene', file };
+  return { id: `eigene:${name.toLowerCase().replace(/\s+/g, '-')}`, label: name, category: 'custom', file };
 };
 
 /** Loads the user's fonts from the plugin storage into the font list. */
 export const initCustomFonts = async (fileStorage: FontStorage) => {
   storage = fileStorage;
   for (const { path } of await fileStorage.list()) {
-    if (!path.startsWith(FONT_DIR) || !FONT_FILE.test(path)) continue;
+    if (!path.startsWith(FONT_DIR) || !FONT_FILE.test(path)) {
+      continue;
+    }
     const file = await fileStorage.get(path);
-    if (file) FONTS.push(customFont(path, file));
+    if (file) {
+      FONTS.push(customFont(path, file));
+    }
   }
 };
 
 /** Removes the user's fonts from the list again (plugin switched off). */
 export const dropCustomFonts = () => {
-  for (const font of FONTS.filter(candidate => candidate.category === 'Eigene')) { forgetFont(font.id); FONTS.splice(FONTS.indexOf(font), 1); }
+  for (const font of FONTS.filter((candidate) => candidate.category === 'custom')) {
+    forgetFont(font.id);
+    FONTS.splice(FONTS.indexOf(font), 1);
+  }
 };
 
 /** Adds a TTF/OTF/WOFF file as a font (kept in the browser) and returns its id. */
 export const addCustomFont = async (file: File) => {
-  if (!FONT_FILE.test(file.name)) throw new Error('Bitte eine TTF-, OTF- oder WOFF-Datei wählen (WOFF2 geht nicht)');
+  if (!FONT_FILE.test(file.name)) {
+    throw new Error(t('text3d.errors.wrongFile'));
+  }
   const path = FONT_DIR + file.name;
   await storage?.put(path, file);
   const font = customFont(path, file);
-  const existing = FONTS.findIndex(candidate => candidate.id === font.id);
-  if (existing >= 0) { forgetFont(font.id); FONTS.splice(existing, 1, font); } else FONTS.push(font);
+  const existing = FONTS.findIndex((candidate) => candidate.id === font.id);
+  if (existing >= 0) {
+    forgetFont(font.id);
+    FONTS.splice(existing, 1, font);
+  } else {
+    FONTS.push(font);
+  }
   return font.id;
 };
 
 export const removeCustomFont = async (id: string) => {
-  const font = FONTS.find(candidate => candidate.id === id && candidate.category === 'Eigene'); if (!font) return;
-  for (const { path } of (await storage?.list()) ?? []) if (customFont(path, font.file!).id === id) await storage?.remove(path);
-  forgetFont(id); FONTS.splice(FONTS.indexOf(font), 1);
+  const font = FONTS.find((candidate) => candidate.id === id && candidate.category === 'custom');
+  if (!font) {
+    return;
+  }
+  for (const { path } of (await storage?.list()) ?? []) {
+    if (customFont(path, font.file!).id === id) {
+      await storage?.remove(path);
+    }
+  }
+  forgetFont(id);
+  FONTS.splice(FONTS.indexOf(font), 1);
 };
