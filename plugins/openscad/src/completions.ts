@@ -1,0 +1,83 @@
+import type { ScriptCompletion } from '../../../src/plugins/types';
+import { t } from './i18n';
+
+type Category = '3d' | '2d' | 'boolean' | 'transform' | 'extrusion' | 'file' | 'keyword' | 'function' | 'math' | 'constant' | 'variable';
+
+/** OpenSCAD's modules, functions and keywords: name, signature (code) and category; the description is `openscad.words.<name>` */
+const WORDS: [string, string, Category][] = [
+  ['cube', 'cube(size, center = false)', '3d'],
+  ['sphere', 'sphere(r = 1)', '3d'],
+  ['cylinder', 'cylinder(h, r, center = false)', '3d'],
+  ['polyhedron', 'polyhedron(points, faces)', '3d'],
+  ['square', 'square(size, center = false)', '2d'],
+  ['circle', 'circle(r = 1)', '2d'],
+  ['polygon', 'polygon(points, paths)', '2d'],
+  ['text', 'text(text, size = 10, font = "Liberation Sans")', '2d'],
+  ['union', 'union() { … }', 'boolean'],
+  ['difference', 'difference() { … }', 'boolean'],
+  ['intersection', 'intersection() { … }', 'boolean'],
+  ['hull', 'hull() { … }', 'boolean'],
+  ['minkowski', 'minkowski() { … }', 'boolean'],
+  ['translate', 'translate([x, y, z])', 'transform'],
+  ['rotate', 'rotate([x, y, z])', 'transform'],
+  ['scale', 'scale([x, y, z])', 'transform'],
+  ['resize', 'resize([x, y, z])', 'transform'],
+  ['mirror', 'mirror([x, y, z])', 'transform'],
+  ['multmatrix', 'multmatrix(m)', 'transform'],
+  ['color', 'color("name" | [r, g, b, a])', 'transform'],
+  ['offset', 'offset(r | delta)', '2d'],
+  ['linear_extrude', 'linear_extrude(height, twist, scale)', 'extrusion'],
+  ['rotate_extrude', 'rotate_extrude(angle = 360)', 'extrusion'],
+  ['projection', 'projection(cut = false)', '2d'],
+  ['import', 'import("file.stl")', 'file'],
+  ['surface', 'surface("height.png")', 'file'],
+  ['module', 'module name(params) { … }', 'keyword'],
+  ['function', 'function name(params) = …;', 'keyword'],
+  ['for', 'for (i = [0 : n]) { … }', 'keyword'],
+  ['intersection_for', 'intersection_for (i = [0 : n]) { … }', 'keyword'],
+  ['if', 'if (condition) { … } else { … }', 'keyword'],
+  ['let', 'let (a = 1) …', 'keyword'],
+  ['each', 'each list', 'keyword'],
+  ['include', 'include <file.scad>', 'keyword'],
+  ['use', 'use <file.scad>', 'keyword'],
+  ['echo', 'echo(…)', 'function'],
+  ['assert', 'assert(condition, message)', 'function'],
+  ['children', 'children()', 'function'],
+  ['len', 'len(list)', 'function'],
+  ['concat', 'concat(a, b, …)', 'function'],
+  ['str', 'str(…)', 'function'],
+  ['sin', 'sin(degrees)', 'math'],
+  ['cos', 'cos(degrees)', 'math'],
+  ['tan', 'tan(degrees)', 'math'],
+  ['sqrt', 'sqrt(x)', 'math'],
+  ['pow', 'pow(x, y)', 'math'],
+  ['abs', 'abs(x)', 'math'],
+  ['min', 'min(…)', 'math'],
+  ['max', 'max(…)', 'math'],
+  ['round', 'round(x)', 'math'],
+  ['floor', 'floor(x)', 'math'],
+  ['ceil', 'ceil(x)', 'math'],
+  ['norm', 'norm(v)', 'math'],
+  ['cross', 'cross(a, b)', 'math'],
+  ['rands', 'rands(min, max, count, seed)', 'math'],
+  ['PI', 'PI', 'constant'],
+  ['true', 'true', 'constant'],
+  ['false', 'false', 'constant'],
+  ['undef', 'undef', 'constant'],
+  ['$fn', '$fn = 64', 'variable'],
+  ['$fa', '$fa = 12', 'variable'],
+  ['$fs', '$fs = 2', 'variable'],
+  ['$t', '$t', 'variable'],
+];
+
+const KEYWORDS = /^(module|function|for|intersection_for|if|let|each|include|use|true|false|undef)$/;
+
+/** the suggestions in the current language – asked each time the list opens */
+export const scadCompletions = (): ScriptCompletion[] =>
+  WORDS.map(([label, signature, category]) => ({
+    label,
+    signature,
+    detail: t(`openscad.categories.${category}`),
+    description: t(`openscad.words.${label.replace(/^\$/, '')}`),
+    kind: KEYWORDS.test(label) ? 'keyword' : label.startsWith('$') ? 'variable' : 'method',
+  }));

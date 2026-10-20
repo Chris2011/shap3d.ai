@@ -1,0 +1,180 @@
+{
+  "code": "ar",
+  "name": "العربية",
+  "dir": "rtl",
+  "messages": {
+    "openscad": {
+      "plugin": {
+        "name": "OpenSCAD",
+        "description": "يفتح ملفات ‎.scad، ويضيف OpenSCAD كلغة إلى محرر السكربتات، وs3d.scad()‎ لـ JavaScript، والتصدير بصيغة ‎.scad و«فتح ككود ▸ OpenSCAD» – مع OpenSCAD الحقيقي كـ WebAssembly."
+      },
+      "units": {
+        "mm": "مليمترات",
+        "cm": "سنتيمترات",
+        "m": "أمتار"
+      },
+      "examples": {
+        "difference": {
+          "name": "مكعب بتجويف كروي",
+          "description": "difference()‎ لمكعب وكرة – المثال الكلاسيكي."
+        },
+        "vase": {
+          "name": "مزهرية (rotate_extrude)",
+          "description": "يُدار مقطع حول المحور Z."
+        },
+        "modules": {
+          "name": "وحدات وحلقات ومعاملات",
+          "description": "رف مبني من وحدة خاصة مع حلقة for."
+        },
+        "hull": {
+          "name": "hull()‎ – لوح مستدير الحواف",
+          "description": "الغلاف المحدب لأربع أسطوانات."
+        }
+      },
+      "help": "OpenSCAD – يعمل OpenSCAD الرسمي كـ WebAssembly مباشرة في المتصفح.\n• المقاسات: وحدات OpenSCAD تُحسب بالمليمترات (يمكن تغييرها إلى سم أو م في لوحة «OpenSCAD»).\n• المحاور كما في OpenSCAD: ‏Z يشير للأعلى. النتيجة مجموعة بأوجه حقيقية.\n• مخرجات echo()‎ والتحذيرات تظهر في وحدة التحكم بالأسفل.\n• color()‎ يصبح مادة (مثلًا color(\"red\") ← «OpenSCAD red» مع الشفافية) – فقط مع نواة الهندسة Manifold.\n\nمكتبة الملفات (لوحة «OpenSCAD» › الملفات):\n• أضف ملفات ومجلدات كاملة – تُحفظ في المتصفح.\n• include <…> و use <…> تجدان كل شيء في المكتبة، مثلًا include <BOSL2/std.scad>.\n• import(\"part.stl\") و import(\"outline.svg\") و surface(\"height.png\") – المسارات نسبة إلى المكتبة.\n• لـ text()‎ خطوط مدمجة: Liberation Sans (افتراضي) و Liberation Serif و Liberation Mono،\n  كل منها عادي وعريض ومائل – مثلًا text(\"مرحبا\", font = \"Liberation Serif:style=Bold\").\n• خطوطك الخاصة (.ttf و .otf) في المكتبة تُضاف إليها: text(\"مرحبا\", font = \"اسم الخط\").\n  ويمكن أيضًا سحب ملفات ‎.ttf/.otf إلى النافذة مباشرة.\n\nفي سكربتات JavaScript:\n  s3d.scad('cube([20, 20, 5]);', { at: [1, 0, 0], name: 'Plate' })\n  ← مجموعة، والوحدة حسب اللوحة. أي عدد من الاستدعاءات: قبل التنفيذ يُجهَّز عدد كافٍ\n    من نسخ OpenSCAD (في الحلقات تتعلم الإضافة العدد في أول تنفيذ).\n\nفتح ملفات ‎.scad: ملف › استيراد…، أو بالسحب والإفلات، أو من مكتبة الملفات.\nالتصدير: ملف › تصدير › OpenSCAD (.scad) – النموذج كـ polyhedron()‎.",
+      "categories": {
+        "3d": "ثلاثي الأبعاد",
+        "2d": "ثنائي الأبعاد",
+        "boolean": "منطقي",
+        "transform": "تحويل",
+        "extrusion": "بثق",
+        "file": "ملف",
+        "keyword": "كلمة مفتاحية",
+        "function": "دالة",
+        "math": "رياضيات",
+        "constant": "ثابت",
+        "variable": "متغير"
+      },
+      "words": {
+        "cube": "متوازي مستطيلات – size عدد أو [x, y, z].",
+        "sphere": "كرة بنصف قطر r (أو d = القطر).",
+        "cylinder": "أسطوانة؛ ومع r1/r2 مخروط (ناقص).",
+        "polyhedron": "مجسم من نقاط وأوجه (أرقام النقاط من 0).",
+        "square": "مستطيل.",
+        "circle": "دائرة.",
+        "polygon": "مضلع من نقاط.",
+        "text": "نص كشكل ثنائي الأبعاد.",
+        "union": "اتحاد كل الأبناء.",
+        "difference": "الابن الأول ناقص كل الآخرين.",
+        "intersection": "فقط ما يشترك فيه كل الأبناء.",
+        "hull": "الغلاف المحدب للأبناء.",
+        "minkowski": "مجموع منكوفسكي (مثلًا حواف مستديرة).",
+        "translate": "نقل.",
+        "rotate": "تدوير بالدرجات حول X و Y و Z (أو rotate(a, v)‎).",
+        "scale": "تحجيم.",
+        "resize": "ضبط إلى حجم معين.",
+        "mirror": "انعكاس على المستوى ذي هذا العمودي.",
+        "multmatrix": "أي مصفوفة 4×4.",
+        "color": "لون – يصبح مادة.",
+        "offset": "إزاحة حد ثنائي الأبعاد.",
+        "linear_extrude": "بثق شكل ثنائي الأبعاد إلى مجسم.",
+        "rotate_extrude": "تدوير شكل ثنائي الأبعاد حول المحور Z.",
+        "projection": "إسقاط مجسم ثلاثي الأبعاد على المستوى XY.",
+        "import": "STL و OFF و 3MF و SVG و DXF من مكتبة الملفات.",
+        "surface": "حقل ارتفاعات من صورة أو ملف.",
+        "module": "تعريف وحدة خاصة.",
+        "function": "تعريف دالة خاصة.",
+        "for": "حلقة.",
+        "intersection_for": "تقاطع كل الدورات.",
+        "if": "شرط.",
+        "let": "متغيرات محلية.",
+        "each": "نشر قائمة داخل قائمة.",
+        "include": "تضمين ملف (مع كوده).",
+        "use": "استخدام وحدات ودوال ملف.",
+        "echo": "الكتابة في وحدة التحكم.",
+        "assert": "الإيقاف إذا لم يتحقق الشرط.",
+        "children": "أبناء الوحدة.",
+        "len": "طول قائمة أو نص.",
+        "concat": "دمج القوائم.",
+        "str": "تركيب نص.",
+        "sin": "الجيب (درجات).",
+        "cos": "جيب التمام (درجات).",
+        "tan": "الظل (درجات).",
+        "sqrt": "الجذر التربيعي.",
+        "pow": "الأس.",
+        "abs": "القيمة المطلقة.",
+        "min": "أصغر قيمة.",
+        "max": "أكبر قيمة.",
+        "round": "تقريب.",
+        "floor": "تقريب للأسفل.",
+        "ceil": "تقريب للأعلى.",
+        "norm": "طول متجه.",
+        "cross": "الضرب الاتجاهي.",
+        "rands": "أعداد عشوائية.",
+        "PI": "π = 3.14159…",
+        "true": "صحيح",
+        "false": "خطأ",
+        "undef": "بلا قيمة",
+        "fn": "عدد المقاطع للدوائر والكرات والأسطوانات.",
+        "fa": "أصغر زاوية لمقطع.",
+        "fs": "أصغر طول لمقطع.",
+        "t": "زمن الحركة 0–1."
+      },
+      "result": "لا أوجه، الوحدة: {unit} | وجه واحد، الوحدة: {unit} | وجهان، الوحدة: {unit} | {count} أوجه، الوحدة: {unit} | {count} وجهًا، الوحدة: {unit} | {count} وجه، الوحدة: {unit}",
+      "errors": {
+        "noOff": "لم يُرجع OpenSCAD ملف OFF",
+        "aborted": "توقف OpenSCAD ‏({error})",
+        "topLevel2d": "الكائن الأعلى ثنائي الأبعاد – حوّله إلى كائن ثلاثي الأبعاد بـ linear_extrude()‎ أو rotate_extrude()‎.",
+        "empty": "النتيجة فارغة – لم يُنشأ أي كائن.",
+        "no3d": "لم ينشئ OpenSCAD أي كائن ثلاثي الأبعاد (رمز الخروج {code})",
+        "emptyMaybe2d": "النتيجة فارغة – هل الكائن الأعلى ثنائي الأبعاد؟ استخدم إذن linear_extrude()‎.",
+        "loadFailed": "تعذّر تحميل OpenSCAD: ‏{error}",
+        "stillLoading": "OpenSCAD ما زال قيد التحميل – نفّذ مجددًا بعد لحظة.",
+        "tooManyCalls": "أكثر من {max} استدعاءً لـ s3d.scad()‎ في تنفيذ واحد – اجمع كود OpenSCAD في استدعاءات أقل.",
+        "morePrepared": "يحتاج هذا السكربت إلى نسخ OpenSCAD أكثر مما جُهّز – يجري الآن تجهيز {count}. نفّذ مجددًا بعد لحظة.",
+        "noFaces": "لا يحتوي النموذج على أوجه"
+      },
+      "extension": "ينفّذ كود OpenSCAD (‏OpenSCAD الحقيقي) ويدرج النتيجة كمجموعة. الوحدة حسب لوحة «OpenSCAD» (الافتراضي: مم).",
+      "fontImporter": "خط لـ OpenSCAD",
+      "toast": {
+        "imported": "تم استيراد «{name}» – لا أوجه | تم استيراد «{name}» – وجه واحد | تم استيراد «{name}» – وجهان | تم استيراد «{name}» – {count} أوجه | تم استيراد «{name}» – {count} وجهًا | تم استيراد «{name}» – {count} وجه",
+        "importedWarnings": "تم استيراد «{name}» – {facets} أوجه، بلا تحذيرات | تم استيراد «{name}» – {facets} أوجه، تحذير واحد | تم استيراد «{name}» – {facets} أوجه، تحذيران | تم استيراد «{name}» – {facets} أوجه، {count} تحذيرات | تم استيراد «{name}» – {facets} أوجه، {count} تحذيرًا | تم استيراد «{name}» – {facets} أوجه، {count} تحذير",
+        "opened": "تم فتح «{name}» – لا أوجه | تم فتح «{name}» – وجه واحد | تم فتح «{name}» – وجهان | تم فتح «{name}» – {count} أوجه | تم فتح «{name}» – {count} وجهًا | تم فتح «{name}» – {count} وجه",
+        "openedWarnings": "تم فتح «{name}» – {facets} أوجه، بلا تحذيرات | تم فتح «{name}» – {facets} أوجه، تحذير واحد | تم فتح «{name}» – {facets} أوجه، تحذيران | تم فتح «{name}» – {facets} أوجه، {count} تحذيرات | تم فتح «{name}» – {facets} أوجه، {count} تحذيرًا | تم فتح «{name}» – {facets} أوجه، {count} تحذير",
+        "failed": "«{name}»: ‏{error}",
+        "fontAdded": "تمت إضافة الخط «{name}» لـ text()‎ في OpenSCAD",
+        "filesAdded": "لم يُضف أي ملف | تمت إضافة ملف واحد إلى مكتبة OpenSCAD | تمت إضافة ملفين إلى مكتبة OpenSCAD | تمت إضافة {count} ملفات إلى مكتبة OpenSCAD | تمت إضافة {count} ملفًا إلى مكتبة OpenSCAD | تمت إضافة {count} ملف إلى مكتبة OpenSCAD"
+      },
+      "export": {
+        "untitled": "نموذج",
+        "header": "{name} – مُصدَّر من Shap3D.ai، الوحدة: {unit}"
+      },
+      "code": {
+        "header": "أُنشئ باستخدام Shap3D.ai من {source} – الوحدة: {unit}، و Z يشير للأعلى",
+        "material": "المادة: {name}",
+        "group": "المجموعة «{name}»",
+        "skippedEdges": "لم تُحذف أي حافة | حُذفت حافة واحدة بلا وجه – لا يعرف OpenSCAD الخطوط المفردة | حُذفت حافتان بلا وجه – لا يعرف OpenSCAD الخطوط المفردة | حُذفت {count} حواف بلا وجه – لا يعرف OpenSCAD الخطوط المفردة | حُذفت {count} حافةً بلا وجه – لا يعرف OpenSCAD الخطوط المفردة | حُذفت {count} حافة بلا وجه – لا يعرف OpenSCAD الخطوط المفردة"
+      },
+      "command": "كتابة كود OpenSCAD…",
+      "panel": {
+        "intro": "يعمل OpenSCAD الرسمي كـ WebAssembly محليًا في المتصفح – دون تثبيت ودون خادم.",
+        "status": "الحالة:",
+        "unit": "وحدة OpenSCAD",
+        "backend": "نواة الهندسة",
+        "manifold": "Manifold (سريعة)",
+        "cgal": "CGAL (كلاسيكية)",
+        "colorsHint": "الألوان من color()‎ تصبح مواد (مثلًا «OpenSCAD red») – فقط مع نواة Manifold؛ أما CGAL فلا يعطي ألوانًا.",
+        "load": "التحميل الآن",
+        "openEditor": "فتح في محرر السكربتات",
+        "files": "الملفات",
+        "filesHint": "لـ include و use و import()‎ وخطوط text()‎. تُحفظ في المتصفح. المسارات كما في المجلد، مثلًا {example}.",
+        "addFiles": "إضافة ملفات…",
+        "addFolder": "إضافة مجلد…",
+        "license": "OpenSCAD برنامج حر بترخيص GPL ‏(openscad.org و github.com/openscad/openscad). نسخة WebAssembly مأخوذة من حزمة npm «openscad-wasm» وترافق حزمة الإضافة هذه؛ والتطبيق نفسه لا يحتويها.",
+        "noFiles": "لا توجد ملفات بعد.",
+        "open": "فتح",
+        "edit": "المحرر",
+        "remove": "إزالة",
+        "clearAll": "إزالة الكل",
+        "summary": "لا ملفات، {size} | ملف واحد، {size} | ملفان، {size} | {count} ملفات، {size} | {count} ملفًا، {size} | {count} ملف، {size}",
+        "confirmClear": "إزالة كل الملفات من مكتبة OpenSCAD؟"
+      },
+      "state": {
+        "idle": "غير محمَّل",
+        "loading": "جارٍ التحميل … (نحو 14 ميغابايت، مرة واحدة)",
+        "ready": "جاهز",
+        "failed": "فشل التحميل"
+      }
+    }
+  }
+}

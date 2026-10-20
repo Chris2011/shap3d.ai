@@ -3,12 +3,13 @@
  * Translation helper for developers (no dependencies):
  *
  *   node scripts/i18n.mjs check      – missing / unused keys per language file, then `scan`
- *   node scripts/i18n.mjs scan [dir] – German-looking text still hard-coded in .vue/.ts/.js files
+ *   node scripts/i18n.mjs scan [dir] – German-looking text still hard-coded in .vue/.ts/.js files (src/ and plugins/<name>/src/)
  *   node scripts/i18n.mjs template   – writes src/plugins/builtin/i18n/languages/template.json
  *
  * Source texts (English): src/i18n/en.json and boot.en.json (the app) plus the en.json of every built-in
- * plugin (src/plugins/builtin/<id>/i18n/en.json). Translations: src/plugins/builtin/i18n/languages/<code>.json
- * (the app) and src/plugins/builtin/<id>/i18n/<code>.json (the plugins' own texts).
+ * plugin (src/plugins/builtin/<id>/i18n/en.json) and of every plugin package (plugins/<name>/src/i18n/en.json).
+ * Translations: src/plugins/builtin/i18n/languages/<code>.json (the app) and <code>.json next to each en.json
+ * (the plugins' own texts). The template only covers the app and the built-in plugins.
  */
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
@@ -34,35 +35,46 @@ const flatten = (messages, prefix = '', out = {}) => {
   return out;
 };
 
-/** every English source file: the app's and the built-in plugins' */
-const sourceFiles = () => {
-  const files = [join(root, 'src/i18n/en.json'), join(root, 'src/i18n/boot.en.json')];
+/** folders with a plugin's language files: built-in plugins (src/plugins/builtin/<id>/i18n) and, unless `builtinOnly`, plugin packages (plugins/<name>/src/i18n) */
+const pluginLanguageDirs = (builtinOnly = false) => {
   const builtin = join(root, 'src/plugins/builtin');
-  for (const id of readdirSync(builtin)) {
-    const file = join(builtin, id, 'i18n/en.json');
-    if (existsSync(file)) {
-      files.push(file);
-    }
+  const dirs = readdirSync(builtin).map((id) => join(builtin, id, 'i18n'));
+  const packages = join(root, 'plugins');
+  if (!builtinOnly && existsSync(packages)) {
+    dirs.push(...readdirSync(packages).map((name) => join(packages, name, 'src/i18n')));
   }
-  return files;
+  return dirs.filter((dir) => existsSync(join(dir, 'en.json')));
 };
+/** source folders scanned for t() keys and hard-coded text: the app and the plugin packages */
+const codeRoots = () => {
+  const packages = join(root, 'plugins');
+  const roots = [join(root, 'src')];
+  if (existsSync(packages)) {
+    roots.push(
+      ...readdirSync(packages)
+        .map((name) => join(packages, name, 'src'))
+        .filter(existsSync),
+    );
+  }
+  return roots;
+};
+
+/** every English source file: the app's and the plugins' */
+const sourceFiles = (builtinOnly = false) => [
+  join(root, 'src/i18n/en.json'),
+  join(root, 'src/i18n/boot.en.json'),
+  ...pluginLanguageDirs(builtinOnly).map((dir) => join(dir, 'en.json')),
+];
 const sourceMessages = () => Object.assign({}, ...sourceFiles().map((file) => flatten(readJson(file).messages)));
 
-/** translations: languages/<code>.json and src/plugins/builtin/<id>/i18n/<code>.json */
+/** translations: languages/<code>.json and <code>.json in every plugin's language folder */
 const languageCodes = () =>
   readdirSync(languagesDir)
     .filter((name) => name.endsWith('.json') && name !== 'template.json')
     .map((name) => name.slice(0, -5))
     .filter((code) => code !== 'en');
 const languageMessages = (code) => {
-  const files = [join(languagesDir, `${code}.json`)];
-  const builtin = join(root, 'src/plugins/builtin');
-  for (const id of readdirSync(builtin)) {
-    const file = join(builtin, id, `i18n/${code}.json`);
-    if (existsSync(file)) {
-      files.push(file);
-    }
-  }
+  const files = [join(languagesDir, `${code}.json`), ...pluginLanguageDirs().map((dir) => join(dir, `${code}.json`))];
   return Object.assign({}, ...files.filter(existsSync).map((file) => flatten(readJson(file).messages)));
 };
 
@@ -96,7 +108,7 @@ const check = () => {
   }
   // keys used in code but missing in en.json
   const used = new Set();
-  for (const file of codeFiles(join(root, 'src'))) {
+  for (const file of codeRoots().flatMap((dir) => codeFiles(dir))) {
     const code = readFileSync(file, 'utf8')
       .split('\n')
       .filter((line) => !/^\s*(\*|\/\/|\/\*)/.test(line))
@@ -137,7 +149,7 @@ const template = () => {
       }
     }
   };
-  for (const file of sourceFiles()) {
+  for (const file of sourceFiles(true)) {
     mergeInto(merged, readJson(file).messages);
   }
   const result = {
@@ -260,11 +272,14 @@ const ENGLISH = new Set([
   'Attribute',
   'Blender',
   'Bearer',
+  'Sans',
+  'Serif',
+  'Mono',
 ]);
 
-const scan = (dir = join(root, 'src')) => {
+const scan = (dir) => {
   let hits = 0;
-  for (const file of codeFiles(dir)) {
+  for (const file of (dir ? [dir] : codeRoots()).flatMap((folder) => codeFiles(folder))) {
     if (IGNORED.some((pattern) => pattern.test(file))) {
       continue;
     }

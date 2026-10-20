@@ -440,7 +440,7 @@ Type definitions for the whole API are in [`src/plugins/types.ts`](src/plugins/t
 
 <img src="plugins/openscad/docs/openscad-logo.png" alt="OpenSCAD logo" width="96" align="right">
 
-The example package in [`plugins/openscad/`](plugins/openscad) runs the official [OpenSCAD](https://openscad.org) as WebAssembly: it opens `.scad` files (with `color()` turned into materials), adds *OpenSCAD* as a language to the script editor (with examples), keeps a file library in the browser so `include`, `use`, `import()` and `text()` fonts work, provides `s3d.scad(code)` for JavaScript scripts, exports the model as an OpenSCAD `polyhedron()` and registers *OpenSCAD* as a code format (*Als Code öffnen ▸ OpenSCAD*, *Umwandeln in…*). Because OpenSCAD is GPL-licensed, it is a package of its own (GPL-2.0-or-later) and never bundled with the app:
+The example package in [`plugins/openscad/`](plugins/openscad) runs the official [OpenSCAD](https://openscad.org) as WebAssembly: it opens `.scad` files (with `color()` turned into materials), adds *OpenSCAD* as a language to the script editor (with examples), keeps a file library in the browser so `include`, `use`, `import()` and `text()` fonts work, provides `s3d.scad(code)` for JavaScript scripts, exports the model as an OpenSCAD `polyhedron()` and registers *OpenSCAD* as a code format (*Open as code ▸ OpenSCAD*, *Convert to…*). It is written in TypeScript, split into modules, built with a plain `vite build` (library mode) and brings its texts in five languages as `messages` – a good template for plugin packages of your own. Because OpenSCAD is GPL-licensed, it is a package of its own (GPL-2.0-or-later) and never bundled with the app:
 
 ```bash
 cd plugins/openscad
@@ -448,7 +448,7 @@ npm install
 npm run build
 ```
 
-Then *Plugins › Plugin-Ordner laden…* and pick `plugins/openscad/dist`. Details in [its README](plugins/openscad/README.md).
+Then *Plugins › Load plugin folder…* and pick `plugins/openscad/dist`. Details in [its README](plugins/openscad/README.md).
 
 ![OpenSCAD code in the script editor – the OpenSCAD logo modelled with difference() and hull(), colours turned into materials](docs/screenshots/openscad.png)
 
@@ -487,7 +487,7 @@ Placeholders like `{count}`, `{name}` or `{error}` must stay unchanged (the edit
 
 **Starting a new language** – [`src/plugins/builtin/i18n/languages/template.json`](src/plugins/builtin/i18n/languages/template.json) has every key with an empty text and the English text as a hint right below (`"select": ""`, `"select#en": "Select"`). Fill in `code`, `name` and the texts and load the file with *Import…* in the translation editor; the hint lines are ignored. The editor's **Template** button downloads the same file including the texts of the plugins that are installed right now. To ship a language with the app, put the file next to `de.json`, add it to `BUILTIN_LANGUAGES` in `src/plugins/builtin/i18n/store.ts`, and add the plugin texts as `i18n/<code>.json` to each built-in plugin's `messages`.
 
-**Checking** – `node scripts/i18n.mjs` (no dependencies) lists missing, unused and mismatched keys per language and German text that is still hard-coded in `.vue`/`.ts` files; `node scripts/i18n.mjs template` rewrites `template.json` after texts were added. Not translated on purpose: the `s3d` script API (names, signatures, examples, default names of what scripts build), material names in models and the saved file format.
+**Checking** – `node scripts/i18n.mjs` (no dependencies) lists missing, unused and mismatched keys per language and German text that is still hard-coded in `.vue`/`.ts` files – for the app, the built-in plugins and the plugin packages in `plugins/<name>/` (their texts in `src/i18n/<code>.json`); `node scripts/i18n.mjs template` rewrites `template.json` after texts were added. Not translated on purpose: the `s3d` script API (names, signatures, examples, default names of what scripts build), material names in models and the saved file format.
 
 ## Project structure
 

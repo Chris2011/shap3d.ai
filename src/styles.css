@@ -212,6 +212,11 @@
     direction: ltr;
     unicode-bidi: isolate;
   }
+  /* mixed output (script console): every line takes the direction of its own text */
+  .s3d-plaintext {
+    direction: inherit;
+    unicode-bidi: plaintext;
+  }
 
   html,
   body,

@@ -1,0 +1,180 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "openscad": {
+      "plugin": {
+        "name": "OpenSCAD",
+        "description": "Abre archivos .scad, añade OpenSCAD como lenguaje al editor de scripts, s3d.scad() para JavaScript, la exportación como .scad y «Abrir como código ▸ OpenSCAD» – con el OpenSCAD real como WebAssembly."
+      },
+      "units": {
+        "mm": "Milímetros",
+        "cm": "Centímetros",
+        "m": "Metros"
+      },
+      "examples": {
+        "difference": {
+          "name": "Cubo con hueco esférico",
+          "description": "difference() de un cubo y una esfera – el clásico."
+        },
+        "vase": {
+          "name": "Jarrón (rotate_extrude)",
+          "description": "Un perfil gira alrededor del eje Z."
+        },
+        "modules": {
+          "name": "Módulos, bucles y parámetros",
+          "description": "Una estantería hecha con un módulo propio y un bucle for."
+        },
+        "hull": {
+          "name": "hull() – placa redondeada",
+          "description": "La envolvente convexa de cuatro cilindros."
+        }
+      },
+      "help": "OpenSCAD – el OpenSCAD oficial funciona como WebAssembly directamente en el navegador.\n• Medidas: las unidades de OpenSCAD cuentan como milímetros (se puede cambiar a cm o m en el panel «OpenSCAD»).\n• Ejes como en OpenSCAD: Z apunta hacia arriba. El resultado es un grupo con caras reales.\n• La salida de echo() y las advertencias aparecen en la consola de abajo.\n• color() se convierte en material (p. ej. color(\"red\") → «OpenSCAD red», con transparencia) – solo con el núcleo geométrico Manifold.\n\nBiblioteca de archivos (panel «OpenSCAD» › Archivos):\n• Añade archivos y carpetas enteras – se guardan en el navegador.\n• include <…> y use <…> encuentran todo en la biblioteca, p. ej. include <BOSL2/std.scad>.\n• import(\"pieza.stl\"), import(\"contorno.svg\"), surface(\"altura.png\") – rutas relativas a la biblioteca.\n• text() tiene fuentes integradas: Liberation Sans (por defecto), Liberation Serif y Liberation Mono,\n  cada una normal, negrita y cursiva – p. ej. text(\"Hola\", font = \"Liberation Serif:style=Bold\").\n• Tus propias fuentes (.ttf, .otf) de la biblioteca se suman: text(\"Hola\", font = \"Nombre de la fuente\").\n  Los archivos .ttf/.otf también se pueden arrastrar a la ventana.\n\nEn scripts de JavaScript:\n  s3d.scad('cube([20, 20, 5]);', { at: [1, 0, 0], name: 'Placa' })\n  → un grupo, unidad según el panel. Cualquier número de llamadas: antes de ejecutar se preparan suficientes\n    instancias de OpenSCAD (en bucles el plugin aprende la cantidad en la primera ejecución).\n\nAbrir archivos .scad: Archivo › Importar…, arrastrando y soltando o desde la biblioteca de archivos.\nExportar: Archivo › Exportar › OpenSCAD (.scad) – el modelo como polyhedron().",
+      "categories": {
+        "3d": "3D",
+        "2d": "2D",
+        "boolean": "Booleano",
+        "transform": "Transformación",
+        "extrusion": "Extrusión",
+        "file": "Archivo",
+        "keyword": "Palabra clave",
+        "function": "Función",
+        "math": "Matemáticas",
+        "constant": "Constante",
+        "variable": "Variable"
+      },
+      "words": {
+        "cube": "Caja – size es un número o [x, y, z].",
+        "sphere": "Esfera de radio r (o d = diámetro).",
+        "cylinder": "Cilindro; con r1/r2 un cono (truncado).",
+        "polyhedron": "Sólido a partir de puntos y caras (números de punto desde 0).",
+        "square": "Rectángulo.",
+        "circle": "Círculo.",
+        "polygon": "Polígono a partir de puntos.",
+        "text": "Texto como forma 2D.",
+        "union": "Unión de todos los hijos.",
+        "difference": "El primer hijo menos todos los demás.",
+        "intersection": "Solo lo que todos los hijos tienen en común.",
+        "hull": "Envolvente convexa de los hijos.",
+        "minkowski": "Suma de Minkowski (p. ej. aristas redondeadas).",
+        "translate": "Mover.",
+        "rotate": "Rotar en grados alrededor de X, Y, Z (o rotate(a, v)).",
+        "scale": "Escalar.",
+        "resize": "Llevar a un tamaño.",
+        "mirror": "Reflejar en el plano con esta normal.",
+        "multmatrix": "Cualquier matriz 4×4.",
+        "color": "Color – se convierte en material.",
+        "offset": "Desplazar un contorno 2D.",
+        "linear_extrude": "Extruir una forma 2D en un sólido.",
+        "rotate_extrude": "Girar una forma 2D alrededor del eje Z.",
+        "projection": "Proyectar un sólido 3D sobre el plano XY.",
+        "import": "STL, OFF, 3MF, SVG, DXF de la biblioteca de archivos.",
+        "surface": "Campo de alturas a partir de una imagen o archivo.",
+        "module": "Definir un módulo propio.",
+        "function": "Definir una función propia.",
+        "for": "Bucle.",
+        "intersection_for": "Intersección de todas las pasadas.",
+        "if": "Condición.",
+        "let": "Variables locales.",
+        "each": "Expandir una lista dentro de una lista.",
+        "include": "Incluir un archivo (con su código).",
+        "use": "Usar los módulos y funciones de un archivo.",
+        "echo": "Escribir en la consola.",
+        "assert": "Detener si la condición no se cumple.",
+        "children": "Los hijos de un módulo.",
+        "len": "Longitud de una lista o de un texto.",
+        "concat": "Unir listas.",
+        "str": "Componer un texto.",
+        "sin": "Seno (grados).",
+        "cos": "Coseno (grados).",
+        "tan": "Tangente (grados).",
+        "sqrt": "Raíz cuadrada.",
+        "pow": "Potencia.",
+        "abs": "Valor absoluto.",
+        "min": "Valor más pequeño.",
+        "max": "Valor más grande.",
+        "round": "Redondear.",
+        "floor": "Redondear hacia abajo.",
+        "ceil": "Redondear hacia arriba.",
+        "norm": "Longitud de un vector.",
+        "cross": "Producto vectorial.",
+        "rands": "Números aleatorios.",
+        "PI": "π = 3,14159…",
+        "true": "verdadero",
+        "false": "falso",
+        "undef": "sin valor",
+        "fn": "Número de segmentos para círculos, esferas y cilindros.",
+        "fa": "Ángulo mínimo de un segmento.",
+        "fs": "Longitud mínima de un segmento.",
+        "t": "Tiempo de animación 0–1."
+      },
+      "result": "{count} faceta, unidad: {unit} | {count} facetas, unidad: {unit}",
+      "errors": {
+        "noOff": "OpenSCAD no devolvió ningún archivo OFF",
+        "aborted": "OpenSCAD se detuvo ({error})",
+        "topLevel2d": "El objeto de nivel superior es 2D – conviértelo en un objeto 3D con linear_extrude() o rotate_extrude().",
+        "empty": "El resultado está vacío – no se creó ningún objeto.",
+        "no3d": "OpenSCAD no creó ningún objeto 3D (código de salida {code})",
+        "emptyMaybe2d": "El resultado está vacío – ¿el objeto de nivel superior es 2D? Entonces usa linear_extrude().",
+        "loadFailed": "No se pudo cargar OpenSCAD: {error}",
+        "stillLoading": "OpenSCAD todavía se está cargando – vuelve a ejecutarlo en un momento.",
+        "tooManyCalls": "Más de {max} llamadas a s3d.scad() en una ejecución – agrupa el código OpenSCAD en menos llamadas.",
+        "morePrepared": "Este script necesita más instancias de OpenSCAD de las preparadas – ahora se preparan {count}. Vuelve a ejecutarlo en un momento.",
+        "noFaces": "El modelo no tiene caras"
+      },
+      "extension": "Ejecuta código OpenSCAD (el OpenSCAD real) e inserta el resultado como grupo. Unidad según el panel «OpenSCAD» (por defecto: mm).",
+      "fontImporter": "Fuente para OpenSCAD",
+      "toast": {
+        "imported": "«{name}» importado – {count} faceta | «{name}» importado – {count} facetas",
+        "importedWarnings": "«{name}» importado – {facets} facetas, {count} advertencia | «{name}» importado – {facets} facetas, {count} advertencias",
+        "opened": "«{name}» abierto – {count} faceta | «{name}» abierto – {count} facetas",
+        "openedWarnings": "«{name}» abierto – {facets} facetas, {count} advertencia | «{name}» abierto – {facets} facetas, {count} advertencias",
+        "failed": "«{name}»: {error}",
+        "fontAdded": "Fuente «{name}» añadida para text() de OpenSCAD",
+        "filesAdded": "{count} archivo añadido a la biblioteca de OpenSCAD | {count} archivos añadidos a la biblioteca de OpenSCAD"
+      },
+      "export": {
+        "untitled": "Modelo",
+        "header": "{name} – exportado desde Shap3D.ai, unidad: {unit}"
+      },
+      "code": {
+        "header": "Creado con Shap3D.ai a partir de {source} – unidad: {unit}, Z apunta hacia arriba",
+        "material": "Material: {name}",
+        "group": "Grupo «{name}»",
+        "skippedEdges": "{count} arista sin cara omitida – OpenSCAD no conoce líneas sueltas | {count} aristas sin cara omitidas – OpenSCAD no conoce líneas sueltas"
+      },
+      "command": "Escribir código OpenSCAD…",
+      "panel": {
+        "intro": "El OpenSCAD oficial funciona como WebAssembly localmente en el navegador – sin instalación y sin servidor.",
+        "status": "Estado:",
+        "unit": "Unidad de OpenSCAD",
+        "backend": "Núcleo geométrico",
+        "manifold": "Manifold (rápido)",
+        "cgal": "CGAL (clásico)",
+        "colorsHint": "Los colores de color() se convierten en materiales (p. ej. «OpenSCAD red») – solo con el núcleo Manifold; CGAL no da colores.",
+        "load": "Cargar ahora",
+        "openEditor": "Abrir en el editor de scripts",
+        "files": "Archivos",
+        "filesHint": "Para include, use, import() y las fuentes de text(). Se guardan en el navegador. Rutas como en la carpeta, p. ej. {example}.",
+        "addFiles": "Añadir archivos…",
+        "addFolder": "Añadir carpeta…",
+        "license": "OpenSCAD es software libre bajo la GPL (openscad.org, github.com/openscad/openscad). La versión WebAssembly procede del paquete npm «openscad-wasm» y viene con este paquete de plugin; la aplicación en sí no la contiene.",
+        "noFiles": "Todavía no hay archivos.",
+        "open": "Abrir",
+        "edit": "Editor",
+        "remove": "Quitar",
+        "clearAll": "Quitar todo",
+        "summary": "{count} archivo, {size} | {count} archivos, {size}",
+        "confirmClear": "¿Quitar todos los archivos de la biblioteca de OpenSCAD?"
+      },
+      "state": {
+        "idle": "sin cargar",
+        "loading": "cargando … (unos 14 MB, una sola vez)",
+        "ready": "listo",
+        "failed": "error al cargar"
+      }
+    }
+  }
+}

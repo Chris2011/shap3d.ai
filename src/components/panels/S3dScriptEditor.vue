@@ -136,15 +136,22 @@
         />
       </div>
     </div>
-    <div ref="cons" class="h-37.5 flex-none overflow-auto px-2.5 pb-2 font-mono text-xs/normal select-text">
-      <div class="sticky top-0 flex items-center gap-2.5 bg-surface py-1.5 font-sans text-xs font-semibold">
+    <div ref="cons" class="h-37.5 flex-none overflow-auto px-2.5 pb-2 text-xs/normal select-text">
+      <div class="sticky top-0 flex items-center gap-2.5 bg-surface py-1.5 text-xs font-semibold">
         {{ t('scriptEditor.console') }} <span v-if="lastMs != null" class="ms-auto font-normal text-ink-2">{{ lastMs.toFixed(0) }} ms</span
         ><button class="s3d-link" @click="out = []">{{ t('scriptEditor.clearConsole') }}</button>
       </div>
-      <div v-for="(line, i) in out" :key="i" class="whitespace-pre-wrap break-words" :class="LOG_LINE_CLASS[line.kind]">
+      <div
+        v-for="(line, i) in out"
+        :key="i"
+        class="s3d-plaintext whitespace-pre-wrap break-words font-mono"
+        :class="LOG_LINE_CLASS[line.kind]"
+      >
         {{ line.text }}
       </div>
-      <div v-if="!out.length" class="whitespace-pre-wrap break-words text-ink-2">{{ t('scriptEditor.consoleHint') }}</div>
+      <div v-if="!out.length" class="s3d-plaintext whitespace-pre-wrap break-words font-mono text-ink-2">
+        {{ t('scriptEditor.consoleHint') }}
+      </div>
     </div>
   </div>
 </template>
