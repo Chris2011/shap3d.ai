@@ -20,7 +20,11 @@ const LOOP_GUESS = 12;
 const LOOP = /\b(for|while)\s*\(|\.(forEach|map|flatMap|reduce)\s*\(|Array\.from\s*\(/;
 
 /** an error for the script console – without the stack trace of the plugin code */
-const scriptError = message => { const error = new Error(message); error.stack = message; return error; };
+const scriptError = (message) => {
+  const error = new Error(message);
+  error.stack = message;
+  return error;
+};
 /** the file library is written here in every instance; it is also OpenSCAD's library path (OPENSCADPATH) */
 const LIBRARY_DIR = '/library';
 /** fonts for text(): the bundled Liberation fonts and the library's .ttf/.otf files */
@@ -34,14 +38,14 @@ const FONTS_CONF = `<?xml version="1.0"?>
 <fontconfig>
   <dir>${FONT_DIR}</dir>
   <cachedir>/tmp/fontconfig</cachedir>
-${['Sans', 'Serif', 'Mono'].map(kind => `  <alias binding="same"><family>Liberation ${kind}</family><prefer><family>TypoPRO Liberation ${kind}</family></prefer></alias>`).join('\n')}
+${['Sans', 'Serif', 'Mono'].map((kind) => `  <alias binding="same"><family>Liberation ${kind}</family><prefer><family>TypoPRO Liberation ${kind}</family></prefer></alias>`).join('\n')}
   <alias><family>sans-serif</family><prefer><family>TypoPRO Liberation Sans</family></prefer></alias>
   <alias><family>serif</family><prefer><family>TypoPRO Liberation Serif</family></prefer></alias>
   <alias><family>monospace</family><prefer><family>TypoPRO Liberation Mono</family></prefer></alias>
 </fontconfig>
 `;
-const isFont = path => /\.(ttf|otf)$/i.test(path);
-const isScad = path => /\.scad$/i.test(path);
+const isFont = (path) => /\.(ttf|otf)$/i.test(path);
+const isScad = (path) => /\.scad$/i.test(path);
 /** s3d.scad( / su.scad( / fw.scad( in a script */
 const SCAD_CALL = /\b(?:s3d|su|fw)\s*\.\s*scad\s*\(/g;
 
@@ -165,33 +169,62 @@ const SCAD_WORDS = [
   ['len', 'len(liste)', 'Funktion', 'Länge einer Liste oder eines Textes.'],
   ['concat', 'concat(a, b, …)', 'Funktion', 'Listen verbinden.'],
   ['str', 'str(…)', 'Funktion', 'Text zusammensetzen.'],
-  ['sin', 'sin(grad)', 'Mathe', 'Sinus (Grad).'], ['cos', 'cos(grad)', 'Mathe', 'Kosinus (Grad).'], ['tan', 'tan(grad)', 'Mathe', 'Tangens (Grad).'],
-  ['sqrt', 'sqrt(x)', 'Mathe', 'Wurzel.'], ['pow', 'pow(x, y)', 'Mathe', 'Potenz.'], ['abs', 'abs(x)', 'Mathe', 'Betrag.'],
-  ['min', 'min(…)', 'Mathe', 'Kleinster Wert.'], ['max', 'max(…)', 'Mathe', 'Größter Wert.'], ['round', 'round(x)', 'Mathe', 'Runden.'],
-  ['floor', 'floor(x)', 'Mathe', 'Abrunden.'], ['ceil', 'ceil(x)', 'Mathe', 'Aufrunden.'], ['norm', 'norm(v)', 'Mathe', 'Länge eines Vektors.'],
-  ['cross', 'cross(a, b)', 'Mathe', 'Kreuzprodukt.'], ['rands', 'rands(min, max, anzahl, seed)', 'Mathe', 'Zufallszahlen.'],
-  ['PI', 'PI', 'Konstante', 'π = 3,14159…'], ['true', 'true', 'Konstante', 'wahr'], ['false', 'false', 'Konstante', 'falsch'], ['undef', 'undef', 'Konstante', 'kein Wert'],
+  ['sin', 'sin(grad)', 'Mathe', 'Sinus (Grad).'],
+  ['cos', 'cos(grad)', 'Mathe', 'Kosinus (Grad).'],
+  ['tan', 'tan(grad)', 'Mathe', 'Tangens (Grad).'],
+  ['sqrt', 'sqrt(x)', 'Mathe', 'Wurzel.'],
+  ['pow', 'pow(x, y)', 'Mathe', 'Potenz.'],
+  ['abs', 'abs(x)', 'Mathe', 'Betrag.'],
+  ['min', 'min(…)', 'Mathe', 'Kleinster Wert.'],
+  ['max', 'max(…)', 'Mathe', 'Größter Wert.'],
+  ['round', 'round(x)', 'Mathe', 'Runden.'],
+  ['floor', 'floor(x)', 'Mathe', 'Abrunden.'],
+  ['ceil', 'ceil(x)', 'Mathe', 'Aufrunden.'],
+  ['norm', 'norm(v)', 'Mathe', 'Länge eines Vektors.'],
+  ['cross', 'cross(a, b)', 'Mathe', 'Kreuzprodukt.'],
+  ['rands', 'rands(min, max, anzahl, seed)', 'Mathe', 'Zufallszahlen.'],
+  ['PI', 'PI', 'Konstante', 'π = 3,14159…'],
+  ['true', 'true', 'Konstante', 'wahr'],
+  ['false', 'false', 'Konstante', 'falsch'],
+  ['undef', 'undef', 'Konstante', 'kein Wert'],
   ['$fn', '$fn = 64', 'Variable', 'Anzahl der Segmente für Kreise, Kugeln und Zylinder.'],
   ['$fa', '$fa = 12', 'Variable', 'Kleinster Winkel eines Segments.'],
   ['$fs', '$fs = 2', 'Variable', 'Kleinste Länge eines Segments.'],
   ['$t', '$t', 'Variable', 'Animationszeit 0–1.'],
-].map(([label, signature, detail, description]) => ({ label, signature, detail, description, kind: /^(module|function|for|intersection_for|if|let|each|include|use|true|false|undef)$/.test(label) ? 'keyword' : label.startsWith('$') ? 'variable' : 'method' }));
+].map(([label, signature, detail, description]) => ({
+  label,
+  signature,
+  detail,
+  description,
+  kind: /^(module|function|for|intersection_for|if|let|each|include|use|true|false|undef)$/.test(label)
+    ? 'keyword'
+    : label.startsWith('$')
+      ? 'variable'
+      : 'method',
+}));
 
 /**
  * Parses OFF text (OpenSCAD's export) into vertices and faces. Line based, because OpenSCAD
  * appends a colour to every face ("3 0 7 23 249 215 44" = triangle 0-7-23 in RGB 249/215/44).
  */
-const parseOff = text => {
-  const rows = text.split('\n').map(line => line.replace(/#.*/, '').trim()).filter(Boolean).map(line => line.split(/\s+/));
+const parseOff = (text) => {
+  const rows = text
+    .split('\n')
+    .map((line) => line.replace(/#.*/, '').trim())
+    .filter(Boolean)
+    .map((line) => line.split(/\s+/));
   const header = rows.shift();
-  if (!header || !/^C?OFF$/.test(header[0])) throw new Error('OpenSCAD hat keine OFF-Datei geliefert');
+  if (!header || !/^C?OFF$/.test(header[0])) {
+    throw new Error('OpenSCAD hat keine OFF-Datei geliefert');
+  }
   const counts = header.length > 1 ? header.slice(1) : rows.shift(); // "OFF 8 6 0" or "OFF" + "8 6 0"
-  const vertexCount = +counts[0], faceCount = +counts[1];
-  const vertices = rows.slice(0, vertexCount).map(row => [+row[0], +row[1], +row[2]]);
+  const vertexCount = +counts[0],
+    faceCount = +counts[1];
+  const vertices = rows.slice(0, vertexCount).map((row) => [+row[0], +row[1], +row[2]]);
   const faceRows = rows.slice(vertexCount, vertexCount + faceCount);
-  const faces = faceRows.map(row => row.slice(1, 1 + +row[0]).map(Number));
+  const faces = faceRows.map((row) => row.slice(1, 1 + +row[0]).map(Number));
   // colour after the indices: "r g b" or "r g b a", 0–255 (OpenSCAD writes it with the Manifold kernel only)
-  const colors = faceRows.map(row => {
+  const colors = faceRows.map((row) => {
     const values = row.slice(1 + +row[0]).map(Number);
     return values.length >= 3 ? { red: values[0], green: values[1], blue: values[2], alpha: values[3] ?? 255 } : null;
   });
@@ -209,10 +242,18 @@ const COLOR_NAMES = new Map();
  * material (they follow the group's or the default material). Same colour = same material.
  */
 const materialsFromColors = (colors, THREE) => {
-  if (!COLOR_NAMES.size) for (const [name, hex] of Object.entries(THREE.Color.NAMES)) if (!COLOR_NAMES.has(hex)) COLOR_NAMES.set(hex, name);
+  if (!COLOR_NAMES.size) {
+    for (const [name, hex] of Object.entries(THREE.Color.NAMES)) {
+      if (!COLOR_NAMES.has(hex)) {
+        COLOR_NAMES.set(hex, name);
+      }
+    }
+  }
   const materials = {};
-  const faceMaterials = colors.map(color => {
-    if (!color || `${color.red},${color.green},${color.blue}` === DEFAULT_COLOR) return null;
+  const faceMaterials = colors.map((color) => {
+    if (!color || `${color.red},${color.green},${color.blue}` === DEFAULT_COLOR) {
+      return null;
+    }
     const hexValue = (color.red << 16) | (color.green << 8) | color.blue;
     const hex = '#' + hexValue.toString(16).padStart(6, '0');
     const opacity = Math.round((color.alpha / 255) * 100) / 100;
@@ -224,13 +265,20 @@ const materialsFromColors = (colors, THREE) => {
 };
 
 /** OpenSCAD's stderr → script console lines (statistics are left out). */
-const consoleLines = lines => lines.flatMap(line => {
-  const text = line.trim();
-  if (/^ECHO:/.test(text)) return [{ kind: 'log', text: text.replace(/^ECHO:\s*/, '') }];
-  if (/^(WARNING|DEPRECATED):/.test(text)) return [{ kind: 'warn', text }];
-  if (/^(ERROR|TRACE):/.test(text) || /^Can't parse/.test(text)) return [{ kind: 'error', text }];
-  return [];
-});
+const consoleLines = (lines) =>
+  lines.flatMap((line) => {
+    const text = line.trim();
+    if (text.startsWith('ECHO:')) {
+      return [{ kind: 'log', text: text.replace(/^ECHO:\s*/, '') }];
+    }
+    if (/^(WARNING|DEPRECATED):/.test(text)) {
+      return [{ kind: 'warn', text }];
+    }
+    if (/^(ERROR|TRACE):/.test(text) || text.startsWith("Can't parse")) {
+      return [{ kind: 'error', text }];
+    }
+    return [];
+  });
 
 /** @type {import('../../../src/plugins/types').S3dPlugin} */
 export default {
@@ -238,7 +286,8 @@ export default {
   name: 'OpenSCAD',
   version: '1.3.0',
   author: 'Shap3D.ai (OpenSCAD: openscad.org)',
-  description: 'Öffnet .scad-Dateien, bringt OpenSCAD als Sprache in den Skript-Editor, s3d.scad() für JavaScript, den Export als .scad und „Als Code öffnen ▸ OpenSCAD“ – mit dem echten OpenSCAD als WebAssembly.',
+  description:
+    'Öffnet .scad-Dateien, bringt OpenSCAD als Sprache in den Skript-Editor, s3d.scad() für JavaScript, den Export als .scad und „Als Code öffnen ▸ OpenSCAD“ – mit dem echten OpenSCAD als WebAssembly.',
 
   activate(context) {
     const { editor } = context;
@@ -253,30 +302,51 @@ export default {
       library.clear();
       for (const { path } of await context.storage.files.list()) {
         const blob = await context.storage.files.get(path);
-        if (blob) library.set(path, new Uint8Array(await blob.arrayBuffer()));
+        if (blob) {
+          library.set(path, new Uint8Array(await blob.arrayBuffer()));
+        }
       }
       refreshPanel();
     };
     // read from IndexedDB right away – every instance waits for it, so none misses library files
-    const libraryReady = loadLibrary().catch(error => console.error('OpenSCAD-Bibliothek:', error));
+    const libraryReady = loadLibrary().catch((error) => console.error('OpenSCAD-Bibliothek:', error));
     /** fonts shipped in the plugin package (fonts/*.ttf): name → bytes */
     const bundledFonts = new Map();
-    const fontsReady = Promise.all(context.assets.list().filter(path => /^fonts\/.+\.(ttf|otf)$/i.test(path)).map(async path => {
-      bundledFonts.set(path.split('/').pop(), new Uint8Array(await context.assets.blob(path).arrayBuffer()));
-    })).catch(error => console.error('OpenSCAD-Schriften:', error));
+    const fontsReady = Promise.all(
+      context.assets
+        .list()
+        .filter((path) => /^fonts\/.+\.(ttf|otf)$/i.test(path))
+        .map(async (path) => {
+          bundledFonts.set(path.split('/').pop(), new Uint8Array(await context.assets.blob(path).arrayBuffer()));
+        }),
+    ).catch((error) => console.error('OpenSCAD-Schriften:', error));
 
     // ---------------------------------------------------------------- OpenSCAD instances
     let modulePromise = null;
     const loadModule = () => (modulePromise ??= import(context.assets.url('openscad.js')));
     const status = { state: 'idle', error: '' }; // idle | loading | ready | failed
-    const setStatus = (state, error = '') => { status.state = state; status.error = error; refreshPanel(); };
+    const setStatus = (state, error = '') => {
+      status.state = state;
+      status.error = error;
+      refreshPanel();
+    };
 
     /** mkdir -p inside the instance's file system */
     const makeDirectories = (FS, path) => {
       let current = '';
-      for (const part of path.split('/').filter(Boolean)) { current += '/' + part; try { FS.mkdir(current); } catch { /* exists */ } }
+      for (const part of path.split('/').filter(Boolean)) {
+        current += '/' + part;
+        try {
+          FS.mkdir(current);
+        } catch {
+          /* exists */
+        }
+      }
     };
-    const writeFile = (FS, path, data) => { makeDirectories(FS, path.slice(0, path.lastIndexOf('/'))); FS.writeFile(path, data); };
+    const writeFile = (FS, path, data) => {
+      makeDirectories(FS, path.slice(0, path.lastIndexOf('/')));
+      FS.writeFile(path, data);
+    };
 
     const createInstance = async () => {
       await Promise.all([libraryReady, fontsReady]);
@@ -284,17 +354,27 @@ export default {
       const log = [];
       const openscad = await module.createOpenSCAD({
         noInitialRun: true,
-        print: line => log.push(line),
-        printErr: line => log.push(line),
-        preRun: [instanceModule => { instanceModule.ENV.OPENSCADPATH = LIBRARY_DIR; instanceModule.ENV.FONTCONFIG_FILE = `${FONT_DIR}/fonts.conf`; }],
+        print: (line) => log.push(line),
+        printErr: (line) => log.push(line),
+        preRun: [
+          (instanceModule) => {
+            instanceModule.ENV.OPENSCADPATH = LIBRARY_DIR;
+            instanceModule.ENV.FONTCONFIG_FILE = `${FONT_DIR}/fonts.conf`;
+          },
+        ],
       });
       const instance = openscad.getInstance();
-      makeDirectories(instance.FS, LIBRARY_DIR); makeDirectories(instance.FS, FONT_DIR);
+      makeDirectories(instance.FS, LIBRARY_DIR);
+      makeDirectories(instance.FS, FONT_DIR);
       instance.FS.writeFile(`${FONT_DIR}/fonts.conf`, FONTS_CONF);
-      for (const [name, data] of bundledFonts) instance.FS.writeFile(`${FONT_DIR}/${name}`, data);
+      for (const [name, data] of bundledFonts) {
+        instance.FS.writeFile(`${FONT_DIR}/${name}`, data);
+      }
       for (const [path, data] of library) {
         writeFile(instance.FS, `${LIBRARY_DIR}/${path}`, data);
-        if (isFont(path)) instance.FS.writeFile(`${FONT_DIR}/${path.split('/').pop()}`, data);
+        if (isFont(path)) {
+          instance.FS.writeFile(`${FONT_DIR}/${path.split('/').pop()}`, data);
+        }
       }
       return { instance, log, generation };
     };
@@ -305,26 +385,50 @@ export default {
     let poolTarget = Math.min(POOL_MAX, Math.max(POOL_MIN, context.storage.get('poolTarget', POOL_MIN)));
     let warming = null;
     const warm = (target = poolTarget) => {
-      if (spares.length >= target) return warming ?? Promise.resolve();
-      if (warming) return warming.then(() => warm(target));
-      if (status.state !== 'ready') setStatus('loading'); // refilling after a run keeps "ready"
+      if (spares.length >= target) {
+        return warming ?? Promise.resolve();
+      }
+      if (warming) {
+        return warming.then(() => warm(target));
+      }
+      if (status.state !== 'ready') {
+        setStatus('loading');
+      } // refilling after a run keeps "ready"
       warming = (async () => {
         try {
-          while (spares.length < target) { const ready = await createInstance(); if (ready.generation === generation) spares.push(ready); }
+          while (spares.length < target) {
+            const ready = await createInstance();
+            if (ready.generation === generation) {
+              spares.push(ready);
+            }
+          }
           setStatus('ready');
-        } catch (error) { modulePromise = null; setStatus('failed', error?.message ?? String(error)); throw error; }
-        finally { warming = null; }
+        } catch (error) {
+          modulePromise = null;
+          setStatus('failed', error?.message ?? String(error));
+          throw error;
+        } finally {
+          warming = null;
+        }
       })();
       return warming;
     };
-    const takeSpare = () => { const ready = spares.shift() ?? null; warm().catch(() => {}); return ready; };
+    const takeSpare = () => {
+      const ready = spares.shift() ?? null;
+      warm().catch(() => {});
+      return ready;
+    };
     const instanceAsync = async () => takeSpare() ?? (await warm(), takeSpare()) ?? createInstance();
 
     const libraryChanged = () => {
-      generation++; spares.length = 0; refreshPanel();
-      if (status.state !== 'idle') warm().catch(() => {});
+      generation++;
+      spares.length = 0;
+      refreshPanel();
+      if (status.state !== 'idle') {
+        warm().catch(() => {});
+      }
     };
-    const addToLibrary = async files => {
+    const addToLibrary = async (files) => {
       for (const file of files) {
         const path = (file.webkitRelativePath || file.name).replace(/\\/g, '/');
         await context.storage.files.put(path, file);
@@ -332,17 +436,22 @@ export default {
       }
       libraryChanged();
     };
-    const removeFromLibrary = async paths => {
-      for (const path of paths) { await context.storage.files.remove(path); library.delete(path); }
+    const removeFromLibrary = async (paths) => {
+      for (const path of paths) {
+        await context.storage.files.remove(path);
+        library.delete(path);
+      }
       libraryChanged();
     };
 
     /** s3d.scad() calls since the last script started (to learn how many instances a script needs) */
     let callsThisRun = 0;
-    context.script.beforeRun(async code => {
+    context.script.beforeRun(async (code) => {
       callsThisRun = 0;
       const written = (code.match(SCAD_CALL) ?? []).length;
-      if (!written) return;
+      if (!written) {
+        return;
+      }
       // calls in loops are only known after running: guess generously, the learned target covers the rest
       const target = Math.min(POOL_MAX, Math.max(written, poolTarget, LOOP.test(code) ? LOOP_GUESS : 0));
       await warm(target).catch(() => {});
@@ -354,22 +463,39 @@ export default {
       const inputPath = `${LIBRARY_DIR}/${fileName}`;
       writeFile(instance.FS, inputPath, code);
       let exitCode;
-      try { exitCode = instance.callMain([inputPath, '-o', '/output.off', `--backend=${settings.backend}`]); }
-      catch (error) { exitCode = -1; log.push(`ERROR: OpenSCAD ist abgebrochen (${error?.message ?? error})`); }
+      try {
+        exitCode = instance.callMain([inputPath, '-o', '/output.off', `--backend=${settings.backend}`]);
+      } catch (error) {
+        exitCode = -1;
+        log.push(`ERROR: OpenSCAD ist abgebrochen (${error?.message ?? error})`);
+      }
       let off = null;
-      try { off = instance.FS.readFile('/output.off', { encoding: 'utf8' }); } catch { /* no output */ }
+      try {
+        off = instance.FS.readFile('/output.off', { encoding: 'utf8' });
+      } catch {
+        /* no output */
+      }
       const lines = consoleLines(log);
       if (exitCode !== 0 || !off) {
-        const firstError = lines.find(line => line.kind === 'error')?.text
-          ?? (log.some(line => /top level object is not a 3D/i.test(line)) ? 'Das oberste Objekt ist 2D – mit linear_extrude() oder rotate_extrude() in ein 3D-Objekt umwandeln.' : null)
-          ?? (log.some(line => /top level object is empty/i.test(line)) ? 'Das Ergebnis ist leer – es wurde kein Objekt erzeugt.' : null)
-          ?? `OpenSCAD hat kein 3D-Objekt erzeugt (Exit-Code ${exitCode})`;
-        const error = scriptError(firstError); error.lines = lines; throw error;
+        const firstError =
+          lines.find((line) => line.kind === 'error')?.text ??
+          (log.some((line) => /top level object is not a 3D/i.test(line))
+            ? 'Das oberste Objekt ist 2D – mit linear_extrude() oder rotate_extrude() in ein 3D-Objekt umwandeln.'
+            : null) ??
+          (log.some((line) => /top level object is empty/i.test(line)) ? 'Das Ergebnis ist leer – es wurde kein Objekt erzeugt.' : null) ??
+          `OpenSCAD hat kein 3D-Objekt erzeugt (Exit-Code ${exitCode})`;
+        const error = scriptError(firstError);
+        error.lines = lines;
+        throw error;
       }
       const { vertices, faces, colors } = parseOff(off);
       const { faceMaterials, materials } = materialsFromColors(colors, context.THREE);
       const mesh = { vertices, faces, faceMaterials, materials };
-      if (!mesh.faces.length) { const error = scriptError('Das Ergebnis ist leer – ist das oberste Objekt 2D? Dann linear_extrude() verwenden.'); error.lines = lines; throw error; }
+      if (!mesh.faces.length) {
+        const error = scriptError('Das Ergebnis ist leer – ist das oberste Objekt 2D? Dann linear_extrude() verwenden.');
+        error.lines = lines;
+        throw error;
+      }
       return { mesh, lines };
     };
 
@@ -379,7 +505,10 @@ export default {
 
     // load in the background shortly after start – the WebAssembly file is about 14 MB
     const preload = setTimeout(() => warm().catch(() => {}), 1500);
-    context.onDispose(() => { clearTimeout(preload); spares.length = 0; });
+    context.onDispose(() => {
+      clearTimeout(preload);
+      spares.length = 0;
+    });
 
     // ---------------------------------------------------------------- script editor language
     context.script.registerLanguage({
@@ -388,15 +517,24 @@ export default {
       highlight: 'js',
       help: HELP,
       examples: EXAMPLES,
-      run: async code => {
+      run: async (code) => {
         const startedAt = performance.now();
         try {
           const { mesh, lines } = compile(await instanceAsync(), code);
           addToModel(mesh, 'OpenSCAD');
-          return { ok: true, logs: [...lines, { kind: 'result', text: `${mesh.faces.length} Facetten, Einheit ${UNIT_LABEL[settings.unit]}` }], durationMs: performance.now() - startedAt };
+          return {
+            ok: true,
+            logs: [...lines, { kind: 'result', text: `${mesh.faces.length} Facetten, Einheit ${UNIT_LABEL[settings.unit]}` }],
+            durationMs: performance.now() - startedAt,
+          };
         } catch (error) {
           const message = error?.message ?? String(error);
-          return { ok: false, logs: (error.lines ?? []).filter(line => line.text !== message), error: message, durationMs: performance.now() - startedAt };
+          return {
+            ok: false,
+            logs: (error.lines ?? []).filter((line) => line.text !== message),
+            error: message,
+            durationMs: performance.now() - startedAt,
+          };
         }
       },
     });
@@ -404,44 +542,69 @@ export default {
     context.script.registerCompletions?.('openscad', () => SCAD_WORDS);
 
     // ---------------------------------------------------------------- s3d.scad() for JavaScript scripts
-    context.script.extend('scad', (api, code, options = {}) => {
-      callsThisRun++;
-      const ready = takeSpare();
-      if (!ready) {
-        if (status.state === 'failed') throw scriptError(`OpenSCAD konnte nicht geladen werden: ${status.error}`);
-        if (status.state !== 'ready') throw scriptError('OpenSCAD wird noch geladen – bitte gleich noch einmal ausführen.');
-        // more calls than prepared: the script stopped at this call, so the real need is unknown – grow generously
-        poolTarget = Math.min(POOL_MAX, Math.max(poolTarget * 2, callsThisRun * 3, LOOP_GUESS));
-        context.storage.set('poolTarget', poolTarget);
-        warm().catch(() => {});
-        throw scriptError(callsThisRun > POOL_MAX
-          ? `Mehr als ${POOL_MAX} s3d.scad()-Aufrufe in einem Lauf – bitte den OpenSCAD-Code in weniger Aufrufen zusammenfassen.`
-          : `Dieses Skript braucht mehr OpenSCAD-Instanzen als vorbereitet waren – jetzt werden ${poolTarget} vorbereitet. Bitte gleich noch einmal ausführen.`);
-      }
-      let result;
-      try { result = compile(ready, String(code)); }
-      catch (error) { for (const line of error.lines ?? []) api.warn(line.text); throw error; }
-      for (const line of result.lines) (line.kind === 'log' ? api.log : api.warn).call(api, line.text);
-      // the script run is one undo step – materials created here are part of it
-      for (const [name, material] of Object.entries(result.mesh.materials)) api.ensureMaterial(name, material.color, material.opacity);
-      const group = api.group(options.name ?? 'OpenSCAD', inner => { context.meshes.build(inner.ents, result.mesh, { scale: scaleOf(), smooth: 25 }); });
-      if (options.at) group.move(options.at);
-      return group;
-    }, {
-      signature: "s3d.scad(openscadCode, { at, name })",
-      description: 'Führt OpenSCAD-Code aus (echtes OpenSCAD) und setzt das Ergebnis als Gruppe ein. Einheit wie im Panel „OpenSCAD“ (Standard: mm).',
-      example: "s3d.scad('difference() { cube(30, center = true); sphere(20, $fn = 48); }', { at: [0, 0, 0.015] });",
-    });
+    context.script.extend(
+      'scad',
+      (api, code, options = {}) => {
+        callsThisRun++;
+        const ready = takeSpare();
+        if (!ready) {
+          if (status.state === 'failed') {
+            throw scriptError(`OpenSCAD konnte nicht geladen werden: ${status.error}`);
+          }
+          if (status.state !== 'ready') {
+            throw scriptError('OpenSCAD wird noch geladen – bitte gleich noch einmal ausführen.');
+          }
+          // more calls than prepared: the script stopped at this call, so the real need is unknown – grow generously
+          poolTarget = Math.min(POOL_MAX, Math.max(poolTarget * 2, callsThisRun * 3, LOOP_GUESS));
+          context.storage.set('poolTarget', poolTarget);
+          warm().catch(() => {});
+          throw scriptError(
+            callsThisRun > POOL_MAX
+              ? `Mehr als ${POOL_MAX} s3d.scad()-Aufrufe in einem Lauf – bitte den OpenSCAD-Code in weniger Aufrufen zusammenfassen.`
+              : `Dieses Skript braucht mehr OpenSCAD-Instanzen als vorbereitet waren – jetzt werden ${poolTarget} vorbereitet. Bitte gleich noch einmal ausführen.`,
+          );
+        }
+        let result;
+        try {
+          result = compile(ready, String(code));
+        } catch (error) {
+          for (const line of error.lines ?? []) {
+            api.warn(line.text);
+          }
+          throw error;
+        }
+        for (const line of result.lines) {
+          (line.kind === 'log' ? api.log : api.warn).call(api, line.text);
+        }
+        // the script run is one undo step – materials created here are part of it
+        for (const [name, material] of Object.entries(result.mesh.materials)) {
+          api.ensureMaterial(name, material.color, material.opacity);
+        }
+        const group = api.group(options.name ?? 'OpenSCAD', (inner) => {
+          context.meshes.build(inner.ents, result.mesh, { scale: scaleOf(), smooth: 25 });
+        });
+        if (options.at) {
+          group.move(options.at);
+        }
+        return group;
+      },
+      {
+        signature: 's3d.scad(openscadCode, { at, name })',
+        description:
+          'Führt OpenSCAD-Code aus (echtes OpenSCAD) und setzt das Ergebnis als Gruppe ein. Einheit wie im Panel „OpenSCAD“ (Standard: mm).',
+        example: "s3d.scad('difference() { cube(30, center = true); sphere(20, $fn = 48); }', { at: [0, 0, 0.015] });",
+      },
+    );
 
     // ---------------------------------------------------------------- .scad files
     context.files.registerImporter({
       extensions: ['scad'],
       label: 'OpenSCAD',
-      import: async file => {
+      import: async (file) => {
         const { mesh, lines } = compile(await instanceAsync(), await file.text(), file.name);
         addToModel(mesh, file.name.replace(/\.scad$/i, ''));
         editor.zoomExtents();
-        const warnings = lines.filter(line => line.kind !== 'log').length;
+        const warnings = lines.filter((line) => line.kind !== 'log').length;
         context.ui.toast(`„${file.name}“ importiert – ${mesh.faces.length} Facetten${warnings ? `, ${warnings} Warnung(en)` : ''}`);
       },
     });
@@ -449,56 +612,88 @@ export default {
     context.files.registerImporter({
       extensions: ['ttf', 'otf'],
       label: 'Schrift für OpenSCAD',
-      import: async file => {
+      import: async (file) => {
         await addToLibrary([file]);
         context.ui.toast(`Schrift „${file.name}“ für OpenSCADs text() hinzugefügt`);
       },
     });
 
     /** opens a .scad file from the library as a model (relative include/use/import from its folder work) */
-    const openFromLibrary = async path => {
+    const openFromLibrary = async (path) => {
       try {
         const code = new TextDecoder().decode(library.get(path));
         const { mesh, lines } = compile(await instanceAsync(), code, path);
-        addToModel(mesh, path.split('/').pop().replace(/\.scad$/i, ''));
+        addToModel(
+          mesh,
+          path
+            .split('/')
+            .pop()
+            .replace(/\.scad$/i, ''),
+        );
         editor.zoomExtents();
-        const problems = lines.filter(line => line.kind !== 'log').length;
+        const problems = lines.filter((line) => line.kind !== 'log').length;
         context.ui.toast(`„${path}“ geöffnet – ${mesh.faces.length} Facetten${problems ? `, ${problems} Warnung(en)` : ''}`);
-      } catch (error) { context.ui.toast(`„${path}“: ${error?.message ?? error}`); }
+      } catch (error) {
+        context.ui.toast(`„${path}“: ${error?.message ?? error}`);
+      }
     };
 
     context.files.registerExporter({
       id: 'scad',
       label: 'OpenSCAD (.scad)',
       mimeType: 'text/plain;charset=utf-8',
-      fileName: target => `${target.model.name || 'Modell'}.scad`,
-      export: target => {
+      fileName: (target) => `${target.model.name || 'Modell'}.scad`,
+      export: (target) => {
         const { THREE } = context;
         const scale = scaleOf();
-        const points = []; const pointIndex = new Map(); const faces = [];
-        const indexOf = point => {
-          const coordinates = [point.x, point.y, point.z].map(value => +(value / scale).toFixed(4));
+        const points = [];
+        const pointIndex = new Map();
+        const faces = [];
+        const indexOf = (point) => {
+          const coordinates = [point.x, point.y, point.z].map((value) => +(value / scale).toFixed(4));
           const key = coordinates.join(',');
-          if (!pointIndex.has(key)) { pointIndex.set(key, points.length); points.push(coordinates); }
+          if (!pointIndex.has(key)) {
+            pointIndex.set(key, points.length);
+            points.push(coordinates);
+          }
           return pointIndex.get(key);
         };
         const walk = (entities, matrix) => {
           for (const face of entities.faces.values()) {
-            if (face.hidden) continue;
+            if (face.hidden) {
+              continue;
+            }
             const ids = [...face.outer, ...face.holes.flat()];
             const triangles = entities.faceTriangles(face);
             for (let i = 0; i < triangles.length; i += 3) {
-              const corners = [0, 1, 2].map(k => indexOf(entities.positionOf(ids[triangles[i + k]]).clone().applyMatrix4(matrix)));
-              if (new Set(corners).size === 3) faces.push(corners.reverse()); // OpenSCAD wants clockwise seen from outside
+              const corners = [0, 1, 2].map((k) =>
+                indexOf(
+                  entities
+                    .positionOf(ids[triangles[i + k]])
+                    .clone()
+                    .applyMatrix4(matrix),
+                ),
+              );
+              if (new Set(corners).size === 3) {
+                faces.push(corners.reverse());
+              } // OpenSCAD wants clockwise seen from outside
             }
           }
-          for (const instance of entities.instances.values()) if (!instance.hidden) walk(instance.definition.entities, matrix.clone().multiply(instance.matrix));
+          for (const instance of entities.instances.values()) {
+            if (!instance.hidden) {
+              walk(instance.definition.entities, matrix.clone().multiply(instance.matrix));
+            }
+          }
         };
         walk(target.model.root, new THREE.Matrix4());
-        if (!faces.length) throw new Error('Das Modell hat keine Flächen');
-        return `// ${target.model.name || 'Modell'} – exportiert aus Shap3D.ai, Einheit: ${UNIT_LABEL[settings.unit]}\n`
-          + `polyhedron(\n  points = [\n    ${points.map(point => `[${point.join(', ')}]`).join(',\n    ')}\n  ],\n`
-          + `  faces = [\n    ${faces.map(face => `[${face.join(', ')}]`).join(',\n    ')}\n  ]\n);\n`;
+        if (!faces.length) {
+          throw new Error('Das Modell hat keine Flächen');
+        }
+        return (
+          `// ${target.model.name || 'Modell'} – exportiert aus Shap3D.ai, Einheit: ${UNIT_LABEL[settings.unit]}\n` +
+          `polyhedron(\n  points = [\n    ${points.map((point) => `[${point.join(', ')}]`).join(',\n    ')}\n  ],\n` +
+          `  faces = [\n    ${faces.map((face) => `[${face.join(', ')}]`).join(',\n    ')}\n  ]\n);\n`
+        );
       },
     });
 
@@ -506,12 +701,12 @@ export default {
     /** '#d8b07a' + opacity → OpenSCAD's color([r, g, b, a]) */
     const scadColor = ({ color, opacity }) => {
       const hex = new context.THREE.Color(color).getHex(); // sRGB, as written in the material
-      return `[${[hex >> 16, (hex >> 8) & 255, hex & 255].map(channel => +(channel / 255).toFixed(3)).join(', ')}${opacity < 1 ? `, ${opacity}` : ''}]`;
+      return `[${[hex >> 16, (hex >> 8) & 255, hex & 255].map((channel) => +(channel / 255).toFixed(3)).join(', ')}${opacity < 1 ? `, ${opacity}` : ''}]`;
     };
     context.code.registerFormat({
       id: 'openscad',
       label: 'OpenSCAD',
-      generate: scene => {
+      generate: (scene) => {
         const scale = scaleOf();
         const out = [`// Erzeugt mit Shap3D.ai aus ${scene.title} – Einheit: ${UNIT_LABEL[settings.unit]}, Z zeigt nach oben`];
         let skippedLines = 0;
@@ -520,23 +715,47 @@ export default {
           const buckets = new Map();
           for (const face of group.faces) {
             const material = face.material ?? group.material ?? inherited;
-            if (!buckets.has(material)) buckets.set(material, []);
+            if (!buckets.has(material)) {
+              buckets.set(material, []);
+            }
             buckets.get(material).push(face);
           }
           for (const [material, faces] of buckets) {
-            const points = []; const pointIndex = new Map();
-            const indexOf = index => {
-              if (!pointIndex.has(index)) { pointIndex.set(index, points.length); points.push(group.points[index].map(value => +(value / scale).toFixed(4))); }
+            const points = [];
+            const pointIndex = new Map();
+            const indexOf = (index) => {
+              if (!pointIndex.has(index)) {
+                pointIndex.set(index, points.length);
+                points.push(group.points[index].map((value) => +(value / scale).toFixed(4)));
+              }
               return pointIndex.get(index);
             };
             // OpenSCAD wants the corners clockwise seen from outside; faces with holes go in as triangles
-            const polygons = faces.flatMap(face => (face.holes.length ? face.triangles : [face.outer]).map(polygon => polygon.map(indexOf).reverse()));
+            const polygons = faces.flatMap((face) =>
+              (face.holes.length ? face.triangles : [face.outer]).map((polygon) => polygon.map(indexOf).reverse()),
+            );
             const color = material && scene.materials[material] ? `color(${scadColor(scene.materials[material])}) ` : '';
-            if (material) out.push(`${indent}// Material: ${material}`);
+            if (material) {
+              out.push(`${indent}// Material: ${material}`);
+            }
             out.push(`${indent}${color}polyhedron(`, `${indent}  points = [`);
-            for (let i = 0; i < points.length; i += 4) out.push(`${indent}    ${points.slice(i, i + 4).map(point => `[${point.join(', ')}]`).join(', ')}${i + 4 < points.length ? ',' : ''}`);
+            for (let i = 0; i < points.length; i += 4) {
+              out.push(
+                `${indent}    ${points
+                  .slice(i, i + 4)
+                  .map((point) => `[${point.join(', ')}]`)
+                  .join(', ')}${i + 4 < points.length ? ',' : ''}`,
+              );
+            }
             out.push(`${indent}  ],`, `${indent}  faces = [`);
-            for (let i = 0; i < polygons.length; i += 6) out.push(`${indent}    ${polygons.slice(i, i + 6).map(polygon => `[${polygon.join(', ')}]`).join(', ')}${i + 6 < polygons.length ? ',' : ''}`);
+            for (let i = 0; i < polygons.length; i += 6) {
+              out.push(
+                `${indent}    ${polygons
+                  .slice(i, i + 6)
+                  .map((polygon) => `[${polygon.join(', ')}]`)
+                  .join(', ')}${i + 6 < polygons.length ? ',' : ''}`,
+              );
+            }
             out.push(`${indent}  ]`, `${indent});`);
           }
           skippedLines += group.lines.length;
@@ -547,20 +766,30 @@ export default {
           }
         };
         write(scene.root, undefined, '');
-        if (skippedLines) out.push('', `// ${skippedLines} ${skippedLines === 1 ? 'Kante' : 'Kanten'} ohne Fläche weggelassen – OpenSCAD kennt keine einzelnen Linien`);
+        if (skippedLines) {
+          out.push(
+            '',
+            `// ${skippedLines} ${skippedLines === 1 ? 'Kante' : 'Kanten'} ohne Fläche weggelassen – OpenSCAD kennt keine einzelnen Linien`,
+          );
+        }
         return out.join('\n') + '\n';
       },
       evaluate: async (code, sandbox) => {
         const { mesh } = compile(await instanceAsync(), code);
         for (const [name, material] of Object.entries(mesh.materials)) {
-          if (!sandbox.model.materials.some(existing => existing.name === name)) sandbox.model.materials.push({ name, color: material.color, opacity: material.opacity ?? 1 });
+          if (!sandbox.model.materials.some((existing) => existing.name === name)) {
+            sandbox.model.materials.push({ name, color: material.color, opacity: material.opacity ?? 1 });
+          }
         }
         context.meshes.build(sandbox.entities, mesh, { scale: scaleOf(), smooth: 25 });
       },
     });
 
     // ---------------------------------------------------------------- commands and panel
-    context.icons.register('openscad', '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v17M5 8h14M5 16h14" fill="none" stroke="#e8a33d" stroke-width="1.6"/>');
+    context.icons.register(
+      'openscad',
+      '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v17M5 8h14M5 16h14" fill="none" stroke="#e8a33d" stroke-width="1.6"/>',
+    );
 
     context.commands.register({
       id: 'editor',
@@ -576,14 +805,21 @@ export default {
       icon: 'openscad',
       width: 320,
       mount(element) {
-        const STATE_TEXT = { idle: 'nicht geladen', loading: 'wird geladen … (ca. 14 MB, einmalig)', ready: 'bereit', failed: 'Fehler beim Laden' };
+        const STATE_TEXT = {
+          idle: 'nicht geladen',
+          loading: 'wird geladen … (ca. 14 MB, einmalig)',
+          ready: 'bereit',
+          failed: 'Fehler beim Laden',
+        };
         element.innerHTML = `
           <p style="margin:0 0 .5rem;font-size:.75rem;opacity:.8">Das offizielle OpenSCAD läuft als WebAssembly lokal im Browser – ohne Installation und ohne Server.</p>
           <p style="margin:.25rem 0;font-size:.8125rem">Status: <b data-status></b></p>
           <p data-error style="margin:.25rem 0;font-size:.75rem;color:var(--s3d-danger)"></p>
           <label style="display:flex;align-items:center;gap:.5rem;margin:.5rem 0">
             <span style="flex:1">OpenSCAD-Einheit</span>
-            <select class="s3d-input" data-setting="unit" style="width:9rem">${Object.entries(UNIT_LABEL).map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}</select>
+            <select class="s3d-input" data-setting="unit" style="width:9rem">${Object.entries(UNIT_LABEL)
+              .map(([value, label]) => `<option value="${value}">${label}</option>`)
+              .join('')}</select>
           </label>
           <label style="display:flex;align-items:center;gap:.5rem;margin:.5rem 0">
             <span style="flex:1">Geometrie-Kern</span>
@@ -606,42 +842,71 @@ export default {
           <p style="margin:.75rem 0 0;font-size:.6875rem;opacity:.75">OpenSCAD ist freie Software unter der GPL (openscad.org, github.com/openscad/openscad). Die WebAssembly-Fassung stammt aus dem npm-Paket „openscad-wasm“ und liegt diesem Plugin-Paket bei; die Anwendung selbst enthält sie nicht.</p>`;
         for (const select of element.querySelectorAll('select')) {
           select.value = settings[select.dataset.setting];
-          select.addEventListener('change', () => { settings[select.dataset.setting] = select.value; context.storage.set('settings', settings); });
+          select.addEventListener('change', () => {
+            settings[select.dataset.setting] = select.value;
+            context.storage.set('settings', settings);
+          });
         }
         element.querySelector('[data-action="load"]').addEventListener('click', () => warm().catch(() => {}));
-        element.querySelector('[data-action="editor"]').addEventListener('click', () => context.script.openInEditor('openscad', EXAMPLES[0].code));
-        const filesInput = element.querySelector('[data-input="files"]'), folderInput = element.querySelector('[data-input="folder"]');
+        element
+          .querySelector('[data-action="editor"]')
+          .addEventListener('click', () => context.script.openInEditor('openscad', EXAMPLES[0].code));
+        const filesInput = element.querySelector('[data-input="files"]'),
+          folderInput = element.querySelector('[data-input="folder"]');
         element.querySelector('[data-action="add-files"]').addEventListener('click', () => filesInput.click());
         element.querySelector('[data-action="add-folder"]').addEventListener('click', () => folderInput.click());
         for (const input of [filesInput, folderInput]) {
           input.addEventListener('change', async () => {
-            const files = [...input.files].filter(file => !/(^|\/)(node_modules|\.git)\//.test(file.webkitRelativePath)); input.value = '';
-            if (files.length) { await addToLibrary(files); context.ui.toast(`${files.length} ${files.length === 1 ? 'Datei' : 'Dateien'} zur OpenSCAD-Bibliothek hinzugefügt`); }
+            const files = [...input.files].filter((file) => !/(^|\/)(node_modules|\.git)\//.test(file.webkitRelativePath));
+            input.value = '';
+            if (files.length) {
+              await addToLibrary(files);
+              context.ui.toast(`${files.length} ${files.length === 1 ? 'Datei' : 'Dateien'} zur OpenSCAD-Bibliothek hinzugefügt`);
+            }
           });
         }
-        const escapeHtml = value => value.replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]);
-        const kilobytes = bytes => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1).replace('.', ',')} MB`);
+        const escapeHtml = (value) => value.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]);
+        const kilobytes = (bytes) =>
+          bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1).replace('.', ',')} MB`;
         const libraryList = element.querySelector('[data-library]');
-        libraryList.addEventListener('click', event => {
-          const button = event.target.closest('button[data-path]'); if (!button) return;
+        libraryList.addEventListener('click', (event) => {
+          const button = event.target.closest('button[data-path]');
+          if (!button) {
+            return;
+          }
           const path = button.dataset.path;
-          if (button.dataset.do === 'open') openFromLibrary(path);
-          else if (button.dataset.do === 'edit') context.script.openInEditor('openscad', new TextDecoder().decode(library.get(path)));
-          else if (button.dataset.do === 'remove') removeFromLibrary([path]);
-          else if (button.dataset.do === 'clear') context.ui.confirm('Alle Dateien aus der OpenSCAD-Bibliothek entfernen?').then(yes => yes && removeFromLibrary([...library.keys()]));
+          if (button.dataset.do === 'open') {
+            openFromLibrary(path);
+          } else if (button.dataset.do === 'edit') {
+            context.script.openInEditor('openscad', new TextDecoder().decode(library.get(path)));
+          } else if (button.dataset.do === 'remove') {
+            removeFromLibrary([path]);
+          } else if (button.dataset.do === 'clear') {
+            context.ui
+              .confirm('Alle Dateien aus der OpenSCAD-Bibliothek entfernen?')
+              .then((yes) => yes && removeFromLibrary([...library.keys()]));
+          }
         });
         const renderLibrary = () => {
           const paths = [...library.keys()].sort();
-          if (!paths.length) { libraryList.innerHTML = '<p style="opacity:.7;margin:.25rem 0">Noch keine Dateien.</p>'; return; }
+          if (!paths.length) {
+            libraryList.innerHTML = '<p style="opacity:.7;margin:.25rem 0">Noch keine Dateien.</p>';
+            return;
+          }
           const total = paths.reduce((sum, path) => sum + library.get(path).length, 0);
-          libraryList.innerHTML = paths.map(path => `
+          libraryList.innerHTML =
+            paths
+              .map(
+                (path) => `
             <div style="display:flex;align-items:center;gap:.375rem;padding:.1875rem 0;border-bottom:1px solid var(--s3d-line)">
               <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(path)}">${isFont(path) ? '🔤 ' : ''}${escapeHtml(path)}</span>
               <span style="opacity:.6">${kilobytes(library.get(path).length)}</span>
               ${isScad(path) ? `<button class="s3d-link" data-do="open" data-path="${escapeHtml(path)}">Öffnen</button><button class="s3d-link" data-do="edit" data-path="${escapeHtml(path)}">Editor</button>` : ''}
               <button class="s3d-link" data-do="remove" data-path="${escapeHtml(path)}" title="Entfernen">✕</button>
-            </div>`).join('')
-            + `<div style="display:flex;align-items:center;margin-top:.375rem"><span style="flex:1;opacity:.7">${paths.length} ${paths.length === 1 ? 'Datei' : 'Dateien'}, ${kilobytes(total)}</span><button class="s3d-link" data-do="clear" data-path="">Alle entfernen</button></div>`;
+            </div>`,
+              )
+              .join('') +
+            `<div style="display:flex;align-items:center;margin-top:.375rem"><span style="flex:1;opacity:.7">${paths.length} ${paths.length === 1 ? 'Datei' : 'Dateien'}, ${kilobytes(total)}</span><button class="s3d-link" data-do="clear" data-path="">Alle entfernen</button></div>`;
         };
         refreshPanel = () => {
           element.querySelector('[data-status]').textContent = STATE_TEXT[status.state];
@@ -650,7 +915,9 @@ export default {
           renderLibrary();
         };
         refreshPanel();
-        return () => { refreshPanel = () => {}; };
+        return () => {
+          refreshPanel = () => {};
+        };
       },
     });
   },
