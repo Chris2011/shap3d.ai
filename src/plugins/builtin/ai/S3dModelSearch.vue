@@ -61,6 +61,9 @@
                 >{{ formatNumber(model.params) }}B<template v-if="model.active"> · A{{ formatNumber(model.active) }}B</template></span
               ><span class="font-bold text-navy">{{ model.id.split('/')[1] }}</span
               ><span class="ms-1 text-muted">{{ t('pluginManager.by', { author: model.author }) }}</span
+              ><span v-if="model.official" class="ms-2 text-[0.6875rem] font-semibold text-ok" :title="t('ai.search.officialTitle')">{{
+                t('ai.search.official')
+              }}</span
               ><span v-if="!model.chat" class="ms-2 text-[0.6875rem] text-danger" :title="t('ai.search.notChatTitle')">{{
                 t('ai.search.notChat')
               }}</span

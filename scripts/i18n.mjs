@@ -9,7 +9,8 @@
  * Source texts (English): src/i18n/en.json and boot.en.json (the app) plus the en.json of every built-in
  * plugin (src/plugins/builtin/<id>/i18n/en.json) and of every plugin package (plugins/<name>/src/i18n/en.json).
  * Translations: src/plugins/builtin/i18n/languages/<code>.json (the app) and <code>.json next to each en.json
- * (the plugins' own texts). The template only covers the app and the built-in plugins.
+ * (the plugins' own texts). The template only covers the core and the i18n plugin itself: the core knows no plugins – every
+ * other plugin brings its own language files, merged at runtime.
  */
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
@@ -35,12 +36,12 @@ const flatten = (messages, prefix = '', out = {}) => {
   return out;
 };
 
-/** folders with a plugin's language files: built-in plugins (src/plugins/builtin/<id>/i18n) and, unless `builtinOnly`, plugin packages (plugins/<name>/src/i18n) */
-const pluginLanguageDirs = (builtinOnly = false) => {
+/** folders with a plugin's language files: built-in plugins (src/plugins/builtin/<id>/i18n) and plugin packages (plugins/<name>/src/i18n) */
+const pluginLanguageDirs = () => {
   const builtin = join(root, 'src/plugins/builtin');
   const dirs = readdirSync(builtin).map((id) => join(builtin, id, 'i18n'));
   const packages = join(root, 'plugins');
-  if (!builtinOnly && existsSync(packages)) {
+  if (existsSync(packages)) {
     dirs.push(...readdirSync(packages).map((name) => join(packages, name, 'src/i18n')));
   }
   return dirs.filter((dir) => existsSync(join(dir, 'en.json')));
@@ -59,12 +60,12 @@ const codeRoots = () => {
   return roots;
 };
 
+/** the app's own English source files (no plugin texts) */
+const coreSourceFiles = () => [join(root, 'src/i18n/en.json'), join(root, 'src/i18n/boot.en.json')];
+/** what the template covers: the core and the i18n plugin, which ships the template */
+const templateSourceFiles = () => [...coreSourceFiles(), join(root, 'src/plugins/builtin/i18n/i18n/en.json')];
 /** every English source file: the app's and the plugins' */
-const sourceFiles = (builtinOnly = false) => [
-  join(root, 'src/i18n/en.json'),
-  join(root, 'src/i18n/boot.en.json'),
-  ...pluginLanguageDirs(builtinOnly).map((dir) => join(dir, 'en.json')),
-];
+const sourceFiles = () => [...coreSourceFiles(), ...pluginLanguageDirs().map((dir) => join(dir, 'en.json'))];
 const sourceMessages = () => Object.assign({}, ...sourceFiles().map((file) => flatten(readJson(file).messages)));
 
 /** translations: languages/<code>.json and <code>.json in every plugin's language folder */
@@ -149,7 +150,7 @@ const template = () => {
       }
     }
   };
-  for (const file of sourceFiles(true)) {
+  for (const file of templateSourceFiles()) {
     mergeInto(merged, readJson(file).messages);
   }
   const result = {

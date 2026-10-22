@@ -1,5 +1,6 @@
 import { reactive, watch } from 'vue';
 import { t, formatNumber } from '../../../i18n';
+import { RECOMMENDED_QUANT } from './hfsearch';
 
 export type ProviderId = 'ollama' | 'lmstudio' | 'litellm' | 'custom';
 
@@ -155,6 +156,39 @@ export const listModels = async (cfg: AiConfig): Promise<string[]> => {
     .filter(Boolean)
     .sort();
 };
+
+/** "Qwen3-4B-GGUF:Q4_K_M" → "Q4_K_M", "qwen2.5-coder:7b-instruct-q8_0" → "Q8_0", "…-fp16" → "F16" */
+export const quantFromName = (name: string): string | null => {
+  const match = name.match(/[:-](i?q\d[a-z0-9_]*|bf16|fp16|f16|f32)$/i);
+  return match ? match[1].toUpperCase().replace(/^FP16$/, 'F16') : null;
+};
+
+/**
+ * Quantization of every installed model (lower-case name without ":latest" → "Q4_K_M"). Only Ollama tells it
+ * (/api/tags); models pulled from Hugging Face report "unknown" there, so their name is used instead.
+ */
+export const listQuants = async (cfg: AiConfig): Promise<Record<string, string>> => {
+  if (cfg.provider !== 'ollama') {
+    return {};
+  }
+  try {
+    const tags = await (await aiFetch(ollamaRoot(cfg) + '/api/tags', {})).json();
+    const quants: Record<string, string> = {};
+    for (const model of tags.models ?? []) {
+      const level: string | undefined = model.details?.quantization_level;
+      const quant = level && level !== 'unknown' ? level.toUpperCase() : quantFromName(model.name);
+      if (quant) {
+        quants[normModel(model.name)] = quant;
+      }
+    }
+    return quants;
+  } catch {
+    return {};
+  }
+};
+
+/** Model names as Ollama compares them: case-insensitive, ":latest" is the default tag. */
+export const normModel = (name: string) => name.toLowerCase().replace(/:latest$/, '');
 
 /** Stream a chat completion; calls onText for every text delta and resolves with the full answer. */
 export interface ChatOptions {
@@ -319,11 +353,21 @@ export interface ModelPreset {
   id: string;
   label: string;
   mode: ModelMode;
-  /** download size in GB */ size: number;
+  /** download size in GB (of the Q4_K_M variant) */ size: number;
   note: string;
   pull?: string;
   fast?: boolean;
+  /** quantizations to choose from in the wizard (Q4_K_M = id / pull) and the name to pull for one of them */
+  quants?: { list: string[]; tag: (quant: string) => string };
 }
+
+/** Rough bits per weight – estimates the download size of a quantization from the Q4_K_M one. */
+const QUANT_BITS: Record<string, number> = { Q3_K_M: 3.9, Q4_K_M: 4.85, Q5_K_M: 5.7, Q6_K: 6.6, Q8_0: 8.5, F16: 16 };
+const QUANTS = Object.keys(QUANT_BITS);
+
+/** Ollama library tags spell quants in lower case ("…-instruct-q5_K_M", "…-fp16"). */
+const ollamaTag = (prefix: string) => (quant: string) => prefix + (quant === 'F16' ? 'fp16' : 'q' + quant.slice(1));
+const hfTag = (repo: string) => (quant: string) => `hf.co/${repo}:${quant}`;
 
 /** Free local models that work well (Ollama names). */
 /** label (text or key) and note (key) are read with localize/t; size in GB */
@@ -335,13 +379,70 @@ export const MODEL_PRESETS: ModelPreset[] = [
     mode: 'mesh',
     size: 4.9,
     note: 'ai.presets.llamaMesh',
+    quants: { list: QUANTS.slice(0, -1), tag: hfTag('bartowski/LLaMA-Mesh-GGUF') },
   },
-  { id: 'qwen2.5-coder:3b', label: 'ai.presets.qwen3bLabel', mode: 'code', size: 1.9, fast: true, note: 'ai.presets.qwen3b' },
-  { id: 'qwen2.5-coder:7b', label: 'Qwen2.5-Coder 7B', mode: 'code', size: 4.7, note: 'ai.presets.qwen7b' },
-  { id: 'qwen2.5-coder:14b', label: 'Qwen2.5-Coder 14B', mode: 'code', size: 9.0, note: 'ai.presets.qwen14b' },
-  { id: 'qwen3:8b', label: 'Qwen3 8B', mode: 'code', size: 5.2, note: 'ai.presets.qwen3' },
-  { id: 'llama3.1:8b', label: 'Llama 3.1 8B', mode: 'code', size: 4.9, note: 'ai.presets.llama31' },
+  {
+    id: 'qwen2.5-coder:3b',
+    label: 'ai.presets.qwen3bLabel',
+    mode: 'code',
+    size: 1.9,
+    fast: true,
+    note: 'ai.presets.qwen3b',
+    quants: { list: QUANTS, tag: ollamaTag('qwen2.5-coder:3b-instruct-') },
+  },
+  {
+    id: 'qwen2.5-coder:7b',
+    label: 'Qwen2.5-Coder 7B',
+    mode: 'code',
+    size: 4.7,
+    note: 'ai.presets.qwen7b',
+    quants: { list: QUANTS, tag: ollamaTag('qwen2.5-coder:7b-instruct-') },
+  },
+  {
+    id: 'qwen2.5-coder:14b',
+    label: 'Qwen2.5-Coder 14B',
+    mode: 'code',
+    size: 9.0,
+    note: 'ai.presets.qwen14b',
+    quants: { list: QUANTS, tag: ollamaTag('qwen2.5-coder:14b-instruct-') },
+  },
+  {
+    id: 'qwen3:8b',
+    label: 'Qwen3 8B',
+    mode: 'code',
+    size: 5.2,
+    note: 'ai.presets.qwen3',
+    quants: { list: ['Q4_K_M', 'Q8_0', 'F16'], tag: ollamaTag('qwen3:8b-') },
+  },
+  {
+    id: 'llama3.1:8b',
+    label: 'Llama 3.1 8B',
+    mode: 'code',
+    size: 4.9,
+    note: 'ai.presets.llama31',
+    quants: { list: QUANTS, tag: ollamaTag('llama3.1:8b-instruct-') },
+  },
 ];
+
+/** One quantization of a preset: `pull` is downloaded, `name` is the model the chat uses (LLaMA-Mesh: always its alias). */
+export interface PresetVariant {
+  quant: string;
+  pull: string;
+  name: string;
+  /** download size in GB – estimated for all but Q4_K_M */
+  size: number;
+  estimated: boolean;
+}
+
+export const presetVariants = (preset: ModelPreset): PresetVariant[] =>
+  (preset.quants?.list ?? [RECOMMENDED_QUANT]).map((quant) => {
+    if (quant === RECOMMENDED_QUANT) {
+      return { quant, pull: preset.pull ?? preset.id, name: preset.id, size: preset.size, estimated: false };
+    }
+    const pull = preset.quants!.tag(quant);
+    const size = Math.round(((preset.size * QUANT_BITS[quant]) / QUANT_BITS[RECOMMENDED_QUANT]) * 10) / 10;
+    return { quant, pull, name: preset.mode === 'mesh' ? MESH_ALIAS : pull, size, estimated: true };
+  });
 
 /** Small models (≤ 3B) are only worth it for speed – switching to one turns fast mode on. */
 export const isSmallModel = (model: string) =>
@@ -564,14 +665,17 @@ const LLAMA3_TEMPLATE = `{{- range .Messages }}<|start_header_id|>{{ .Role }}<|e
 
 `;
 
-/** Make sure the "llama-mesh" alias with the correct template exists (no download – reuses the weights). */
-export const ensureMeshModel = async (cfg: AiConfig): Promise<string> => {
+/**
+ * Make sure the "llama-mesh" alias with the correct template exists (no download – reuses the weights).
+ * `from` (re)points it at that download – how the wizard switches the quantization.
+ */
+export const ensureMeshModel = async (cfg: AiConfig, from?: string): Promise<string> => {
   const tags = await (await aiFetch(ollamaRoot(cfg) + '/api/tags', {})).json();
   const names: string[] = (tags.models ?? []).map((model: any) => model.name);
-  if (names.some((candidate) => candidate === MESH_ALIAS || candidate === MESH_ALIAS + ':latest')) {
+  if (!from && names.some((candidate) => candidate === MESH_ALIAS || candidate === MESH_ALIAS + ':latest')) {
     return MESH_ALIAS;
   }
-  const src = names.find((candidate) => /llama-mesh/i.test(candidate) && candidate !== MESH_ALIAS);
+  const src = from ?? names.find((candidate) => /llama-mesh/i.test(candidate) && normModel(candidate) !== MESH_ALIAS);
   if (!src) {
     throw new Error(t('ai.errors.noMeshModel'));
   }

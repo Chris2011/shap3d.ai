@@ -4,6 +4,14 @@
 
 Nothing yet.
 
+## [1.3.0] – 2026-10-22 · Shap3D.ai 0.7.0
+
+### Added
+
+- Setup wizard: each suggested model can be installed in another quantization (Q3_K_M … Q8_0, F16) with its estimated size; installed models show their quantization.
+- Setup wizard: once the assistant is set up, every step can be clicked directly, and *Apply* saves a change (e.g. just another model) without going through to the end.
+- Model search: repos published by the model's maker itself are marked *official* and listed first.
+
 ## [1.2.0] – 2026-10-22 · Shap3D.ai 0.7.0
 
 ### Added

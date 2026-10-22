@@ -172,7 +172,9 @@
         "ggufInfo": "GGUF ist ein Dateiformat für komprimierte Sprachmodelle. Ollama führt es direkt auf deinem Rechner aus – dasselbe Modell gibt es in mehreren „Quants“ (Q4_K_M, Q8_0 …): kleiner = schneller und weniger RAM, größer = genauer.",
         "moeTitle": "Mixture of Experts: großes Modell, aber pro Token rechnen nur {active} Milliarden Parameter – schnell für seine Größe, braucht aber die volle Dateigröße als RAM",
         "notChat": "🚫 nicht für Ollama",
-        "notChatTitle": "Das ist kein Sprachmodell (z. B. Bild → 3D wie TRELLIS oder Hunyuan3D). Es liegt zwar als GGUF vor, Ollama kann es aber nicht ausführen und es kann keinen Modellier-Code schreiben."
+        "notChatTitle": "Das ist kein Sprachmodell (z. B. Bild → 3D wie TRELLIS oder Hunyuan3D). Es liegt zwar als GGUF vor, Ollama kann es aber nicht ausführen und es kann keinen Modellier-Code schreiben.",
+        "official": "✓ offiziell",
+        "officialTitle": "Vom Hersteller des Modells selbst veröffentlicht – offizielle Quellen stehen oben"
       },
       "wizard": {
         "title": "KI-Assistent einrichten",
@@ -207,7 +209,9 @@
         "stepConnect": "Verbinden",
         "stepModel": "Modell",
         "stepDone": "Fertig",
-        "noModels": "Verbunden, aber keine Modelle gefunden."
+        "noModels": "Verbunden, aber keine Modelle gefunden.",
+        "quantTitle": "Quantisierung: kleiner = schneller und weniger RAM, größer = genauer. Q4_K_M (★) ist meist der beste Kompromiss, ✓ = installiert.",
+        "save": "Übernehmen"
       },
       "plugin": {
         "name": "KI-Assistent",

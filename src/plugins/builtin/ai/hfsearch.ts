@@ -22,6 +22,8 @@ export interface HfModel {
   active: number | null;
   /** false for image-to-3D, image generation … – GGUF too, but nothing Ollama can chat with */
   chat: boolean;
+  /** published by the maker of the model itself (not a re-upload by the community) */
+  official: boolean;
 }
 
 /** Hugging Face pipelines Ollama can run as a chat model (no tag = unknown, give it a try). */
@@ -32,6 +34,40 @@ const NOT_CHAT_NAME = /trellis|hunyuan-?3d|triposr|instantmesh|stable-?diffusion
 
 const isChatModel = (id: string, pipeline: string | undefined, tags: string[]) =>
   (!pipeline || CHAT_PIPELINES.includes(pipeline)) && !tags.some((tag) => NOT_CHAT_TAGS.includes(tag)) && !NOT_CHAT_NAME.test(id);
+/**
+ * Makers that publish GGUF files of their own models (ggml-org: the llama.cpp team). A fixed list on purpose: the
+ * base_model tag would also turn every community fine-tune "official" that names its own repo as base.
+ */
+const OFFICIAL_AUTHORS = new Set(
+  [
+    'Qwen',
+    'google',
+    'microsoft',
+    'meta-llama',
+    'mistralai',
+    'deepseek-ai',
+    'ibm-granite',
+    'nvidia',
+    'HuggingFaceTB',
+    'allenai',
+    'LiquidAI',
+    'openai',
+    'zai-org',
+    'THUDM',
+    'tiiuae',
+    'CohereLabs',
+    'internlm',
+    'openbmb',
+    'tencent',
+    'baidu',
+    'MiniMaxAI',
+    'moonshotai',
+    'ggml-org',
+  ].map((author) => author.toLowerCase()),
+);
+
+const isOfficial = (author: string) => OFFICIAL_AUTHORS.has(author.toLowerCase());
+
 export interface HfQuant {
   quant: string;
   file: string;
@@ -65,20 +101,28 @@ export const searchModels = async (query: string, sort: HfSort = 'downloads', si
     throw new Error(t('ai.search.httpError', { status: response.status }));
   }
   const list: any[] = await response.json();
-  return list.map((model) => ({
-    id: model.id ?? model.modelId,
-    author: model.author ?? String(model.id).split('/')[0],
-    downloads: model.downloads ?? 0,
-    likes: model.likes ?? 0,
-    updated: Date.parse(model.lastModified ?? model.createdAt ?? '') || 0,
-    gated: !!model.gated,
-    tags: model.tags ?? [],
-    pipeline: model.pipeline_tag,
-    license: (model.tags ?? []).find((tag: string) => tag.startsWith('license:'))?.slice(8),
-    params: bestParams(model.id ?? model.modelId, model.gguf?.total),
-    active: activeParams(model.id ?? model.modelId),
-    chat: isChatModel(model.id ?? model.modelId, model.pipeline_tag, model.tags ?? []),
-  }));
+  const models: HfModel[] = list.map((model) => {
+    const id = model.id ?? model.modelId;
+    const author = model.author ?? String(id).split('/')[0];
+    const tags: string[] = model.tags ?? [];
+    return {
+      id,
+      author,
+      downloads: model.downloads ?? 0,
+      likes: model.likes ?? 0,
+      updated: Date.parse(model.lastModified ?? model.createdAt ?? '') || 0,
+      gated: !!model.gated,
+      tags,
+      pipeline: model.pipeline_tag,
+      license: tags.find((tag) => tag.startsWith('license:'))?.slice(8),
+      params: bestParams(id, model.gguf?.total),
+      active: activeParams(id),
+      chat: isChatModel(id, model.pipeline_tag, tags),
+      official: isOfficial(author),
+    };
+  });
+  // official sources first – within both groups the order Hugging Face sorted by stays
+  return [...models.filter((model) => model.official), ...models.filter((model) => !model.official)];
 };
 
 /** "Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf" → "Q4_K_M"; split files ("-00001-of-00002") are skipped (Ollama can't pull them). */

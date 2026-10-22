@@ -172,7 +172,9 @@
         "ggufInfo": "GGUF is a file format for compressed language models. Ollama runs it directly on your computer – the same model comes in several “quants” (Q4_K_M, Q8_0 …): smaller = faster and less RAM, larger = more accurate.",
         "moeTitle": "Mixture of experts: big model, but only {active} billion parameters work per token – fast for its size, still needs the full file size in RAM",
         "notChat": "🚫 not for Ollama",
-        "notChatTitle": "This is no language model (e.g. image → 3D like TRELLIS or Hunyuan3D). It is published as GGUF, but Ollama cannot run it and it cannot write modelling code."
+        "notChatTitle": "This is no language model (e.g. image → 3D like TRELLIS or Hunyuan3D). It is published as GGUF, but Ollama cannot run it and it cannot write modelling code.",
+        "official": "✓ official",
+        "officialTitle": "Published by the maker of the model itself – official sources are listed first"
       },
       "wizard": {
         "title": "Set up the AI assistant",
@@ -207,7 +209,9 @@
         "stepConnect": "Connect",
         "stepModel": "Model",
         "stepDone": "Done",
-        "noModels": "Connected, but no models found."
+        "noModels": "Connected, but no models found.",
+        "quantTitle": "Quantization: smaller = faster and less RAM, larger = more accurate. Q4_K_M (★) is usually the best trade-off, ✓ = installed.",
+        "save": "Apply"
       },
       "plugin": {
         "name": "AI assistant",

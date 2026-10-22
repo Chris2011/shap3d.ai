@@ -38,6 +38,8 @@ export const overrides = reactive<Record<string, FlatMessages>>({});
 
 /** source name of the editor's own message layers */
 const EDITOR_SOURCE = 'i18n-editor';
+/** message layers in the template: the core ("app") and this plugin – every other plugin brings its own language files */
+const TEMPLATE_SOURCES = ['app', 'i18n'];
 let storage: Storage | null = null;
 const languageDisposers = new Map<string, Disposer>();
 const layerDisposers = new Map<string, Disposer>();
@@ -215,13 +217,24 @@ export const languageFile = (code: string): LanguageFile => {
   return { code: info.code, name: info.name, dir: info.dir ?? 'ltr', messages: nestMessages(sorted(messages)) };
 };
 
-/** All keys with empty texts and the English text as "<key>#en" hint – the start of a new language. */
+/** The English texts of the core and of this plugin (no other plugin's). */
+const templateMessages = (): FlatMessages => {
+  const messages: FlatMessages = {};
+  for (const layer of messageLayers()) {
+    if (layer.language === SOURCE_LANGUAGE && TEMPLATE_SOURCES.includes(layer.source)) {
+      Object.assign(messages, layer.messages);
+    }
+  }
+  return messages;
+};
+
+/** All keys of the core and this plugin with empty texts and the English text as "<key>#en" hint – the start of a new language. */
 export const templateFile = () => ({
   $schema: t('i18n.templateHint'),
   code: '',
   name: '',
   dir: 'ltr',
-  messages: hintTree(nestMessages(sorted(messagesOf(SOURCE_LANGUAGE)))),
+  messages: hintTree(nestMessages(sorted(templateMessages()))),
 });
 
 /** Reads a language file; returns its code. Built-in languages take it as changes, others become (or replace) a language. */

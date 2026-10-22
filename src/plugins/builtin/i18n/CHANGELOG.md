@@ -4,6 +4,12 @@
 
 Nothing yet.
 
+## [1.0.2] – 2026-10-22 · Shap3D.ai (unreleased)
+
+### Fixed
+
+- The template for new languages (`template.json` and the editor's *Template* button) only holds the texts of the core and of this plugin – other plugins, built-in or not, bring their own language files.
+
 ## [1.0.1] – 2026-10-22 · Shap3D.ai 0.7.0
 
 ### Added
