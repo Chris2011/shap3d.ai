@@ -1,0 +1,37 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "remote": {
+      "plugin": {
+        "name": "API distante",
+        "description": "D’autres programmes et agents IA pilotent l’éditeur tant que le serveur de développement tourne : API REST avec Swagger UI (/api/docs) et un serveur MCP (/mcp).",
+        "connected": "API distante : un programme externe pilote l’éditeur"
+      },
+      "undo": {
+        "create": "Créer un objet (distant)",
+        "change": "Modifier un objet (distant)",
+        "delete": "Supprimer un objet (distant)",
+        "material": "Matériau (distant)",
+        "script": "Script (distant)"
+      },
+      "panel": {
+        "server": "Serveur de développement : {url}",
+        "disconnected": "Pas de connexion au serveur de développement – lancez « npm run dev » et rechargez la page.",
+        "active": "Cet onglet reçoit les requêtes",
+        "otherTab": "Un autre onglet reçoit les requêtes ({count} onglets ouverts)",
+        "useThisTab": "Utiliser cet onglet",
+        "docs": "Documentation",
+        "swagger": "Swagger UI",
+        "endpoints": "Points d’accès et outils MCP",
+        "endpointsFailed": "Impossible de charger la liste : {error}",
+        "mcpSetup": "Configurer MCP",
+        "mcpHint": "Connectez un client MCP comme Claude Code à cette application – laissez le serveur de développement et cet onglet ouverts.",
+        "activity": "Activité",
+        "clear": "Effacer",
+        "noActivity": "Aucune requête pour l’instant. Tout ce que les clients REST et les agents IA font dans le modèle apparaît ici."
+      }
+    }
+  }
+}

@@ -26,6 +26,8 @@ const BUILTIN_PLUGINS: { id: string; load: () => Promise<{ default: S3dPlugin }>
   { id: 'text3d', load: () => import('./builtin/text3d') },
   { id: 'imports', load: () => import('./builtin/imports') },
   { id: 'i18n', load: () => import('./builtin/i18n') },
+  // REST, Swagger UI and MCP need the dev server (builtin/remote/server) – not part of a production build
+  ...(import.meta.env.DEV ? [{ id: 'remote', load: () => import('./builtin/remote') }] : []),
 ];
 
 /** what a plugin package's package.json says about itself */

@@ -19,12 +19,17 @@ const load = (): { sessions: AiSession[]; currentId: string } => {
   try {
     const stored = JSON.parse(localStorage.getItem(KEY) ?? 'null');
     if (stored && Array.isArray(stored.sessions)) {
-      // interrupted turns from a previous page load can't continue
       for (const session of stored.sessions) {
         for (const turn of session.turns) {
+          // interrupted turns from a previous page load can't continue
           if (turn.status === 'streaming' || turn.status === 'running') {
             turn.status = 'stopped';
           }
+          // older versions saved the timestamps as ts / endTs
+          turn.createdAt ??= turn.ts ?? session.created;
+          turn.endedAt ??= turn.endTs;
+          delete turn.ts;
+          delete turn.endTs;
         }
       }
       return { sessions: stored.sessions, currentId: stored.currentId ?? '' };

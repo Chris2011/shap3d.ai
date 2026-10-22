@@ -80,6 +80,8 @@
       "toggleAxes": "Ejes",
       "toggleRulers": "Reglas en los ejes",
       "toggleGrid": "Cuadrícula en el suelo",
+      "toggleGridAxes": "Ejes en la cuadrícula del suelo",
+      "toggleGridLabels": "Etiquetas de ejes y cuadrícula",
       "togglePeopleSize": "Altura de las personas",
       "toggleGuides": "Guías",
       "toggleShadows": "Sombras",
@@ -681,7 +683,8 @@
       "noActive": "Ninguna sección activa",
       "empty": "No hay planos de sección. Herramienta «Plano de sección» en el conjunto ampliado de herramientas.",
       "rulers": "Reglas en los ejes (m · cm · mm según el zoom)",
-      "grid": "Cuadrícula en el suelo (mm · cm · m según el zoom)"
+      "grid": "Cuadrícula en el suelo (mm · cm · m según el zoom)",
+      "labels": "Etiquetas a lo largo de los ejes y leyenda de la cuadrícula (5 m · Cuadrícula 1 m · 10 m)"
     },
     "modelInfo": {
       "units": "Unidades",

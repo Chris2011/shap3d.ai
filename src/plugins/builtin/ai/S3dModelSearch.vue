@@ -1,7 +1,9 @@
 <template>
-  <S3dModalDialog :title="t('ai.search.title')" panel-class="h-[min(42.5rem,90vh)] w-[min(45rem,94vw)]" @close="$emit('close')">
+  <S3dModalDialog :title="t('ai.search.title')" panel-class="h-[min(42.5rem,90vh)] w-[min(52rem,94vw)]" @close="$emit('close')">
     <template #header
-      ><span class="text-[0.6875rem] text-muted">{{ t('ai.search.subtitle') }}</span></template
+      ><span class="cursor-help text-[0.6875rem] text-muted underline decoration-dotted" :title="t('ai.search.ggufInfo')">{{
+        t('ai.search.subtitle')
+      }}</span></template
     >
 
     <div class="flex gap-2 px-4 pt-3 pb-1.5">
@@ -54,11 +56,14 @@
               <span
                 v-if="model.params"
                 class="me-1.5 inline-block min-w-7.5 rounded-[3px] px-1 text-center text-[0.65625rem] font-bold"
-                :class="PARAM_BADGE[paramClass(model.params)]"
-                :title="t('ai.search.paramsTitle')"
-                >{{ formatNumber(model.params) }}B</span
+                :class="PARAM_BADGE[paramClass(model.active ?? model.params)]"
+                :title="model.active ? t('ai.search.moeTitle', { active: formatNumber(model.active) }) : t('ai.search.paramsTitle')"
+                >{{ formatNumber(model.params) }}B<template v-if="model.active"> · A{{ formatNumber(model.active) }}B</template></span
               ><span class="font-bold text-navy">{{ model.id.split('/')[1] }}</span
-              ><span class="text-muted"> {{ t('pluginManager.by', { author: model.author }) }}</span
+              ><span class="ms-1 text-muted">{{ t('pluginManager.by', { author: model.author }) }}</span
+              ><span v-if="!model.chat" class="ms-2 text-[0.6875rem] text-danger" :title="t('ai.search.notChatTitle')">{{
+                t('ai.search.notChat')
+              }}</span
               ><span v-if="model.gated" class="ms-2 text-[0.6875rem] text-warn" :title="t('ai.search.gatedTitle')">{{
                 t('ai.search.gated')
               }}</span>
@@ -86,6 +91,7 @@
               <span v-if="detail.context">{{ t('ai.search.context', { tokens: fmtCount(detail.context) }) }}</span>
               <a :href="'https://huggingface.co/' + model.id" target="_blank" rel="noopener noreferrer">{{ t('ai.search.viewOnHf') }}</a>
             </div>
+            <p v-if="!model.chat" class="mb-1.5 bg-warn-bg px-2.5 py-1.5 text-xs text-warn">{{ t('ai.search.notChatTitle') }}</p>
             <p v-if="!detail.quants.length" class="flex items-center gap-2 px-4 py-3.5 text-[0.8125rem] text-ink-2">
               {{ detail.split ? t('ai.search.onlySplit') : t('ai.search.noFiles') }}
             </p>
@@ -95,7 +101,7 @@
             <div
               v-for="quant in detail.quants"
               :key="quant.quant"
-              class="grid grid-cols-[9.375rem_5rem_9.375rem_1fr] items-center gap-2 border-t border-line px-1.5 py-1 text-xs"
+              class="grid grid-cols-[minmax(11rem,auto)_5rem_minmax(7rem,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-t border-line px-1.5 py-1 text-xs"
               :class="{ 'bg-ok-bg': quant.quant === RECOMMENDED_QUANT }"
             >
               <span class="font-mono font-bold"
@@ -105,19 +111,19 @@
                 ></span
               >
               <span class="text-end tabular-nums">{{ quant.size ? fmtBytes(quant.size) : '?' }}</span>
-              <span :class="SPEED[speedClass(quant.size).cls]">{{ speedClass(quant.size).label }}</span>
+              <span :class="SPEED[speedClass(quant.size, share(model)).cls]">{{ speedClass(quant.size, share(model)).label }}</span>
               <span class="flex items-center justify-end gap-2">
-                <template v-if="downloads[quant.ollamaName] && !downloads[quant.ollamaName].error">
-                  <span class="flex items-center gap-1.5 whitespace-nowrap text-ink tabular-nums">
-                    <S3dProgressBar class="w-17.5" :value="downloads[quant.ollamaName].frac" />
-                    {{ formatNumber(Math.round(downloads[quant.ollamaName].frac * 100)) }} % ·
-                    {{ fmtDuration(downloads[quant.ollamaName].eta) }}
-                  </span>
-                  <button class="s3d-link" @click="cancelDownload(quant.ollamaName)">{{ t('common.cancel') }}</button>
-                </template>
+                <button
+                  v-if="downloads[quant.ollamaName] && !downloads[quant.ollamaName].error"
+                  class="s3d-btn small"
+                  @click="cancelDownload(quant.ollamaName)"
+                >
+                  {{ t('common.cancel') }}
+                </button>
                 <button
                   v-else-if="installed.has(quant.ollamaName.toLowerCase())"
                   class="s3d-btn small primary"
+                  :disabled="!model.chat"
                   @click="use(quant.ollamaName)"
                 >
                   {{ t('ai.search.use') }}
@@ -125,16 +131,20 @@
                 <button
                   v-else
                   class="s3d-btn small"
-                  :disabled="!isOllama || model.gated"
-                  :title="model.gated ? t('ai.search.needsLogin') : t('ai.search.downloadTitle', { size: fmtBytes(quant.size) })"
+                  :disabled="!isOllama || model.gated || !model.chat"
+                  :title="
+                    !model.chat
+                      ? t('ai.search.notChatTitle')
+                      : model.gated
+                        ? t('ai.search.needsLogin')
+                        : t('ai.search.downloadTitle', { size: fmtBytes(quant.size) })
+                  "
                   @click="download(quant)"
                 >
                   {{ t('ai.search.download') }}
                 </button>
               </span>
-              <span v-if="downloads[quant.ollamaName]?.error" class="col-span-full text-danger"
-                >✗ {{ downloads[quant.ollamaName].error }}</span
-              >
+              <S3dPullProgress v-if="downloads[quant.ollamaName]" class="col-span-full pb-1" :progress="downloads[quant.ollamaName]" />
             </div>
           </template>
         </div>
@@ -145,11 +155,11 @@
 </template>
 
 <script setup lang="ts">
-import S3dProgressBar from '../../../components/ui/S3dProgressBar.vue';
 import S3dModalDialog from '../../../components/ui/S3dModalDialog.vue';
+import S3dPullProgress from './S3dPullProgress.vue';
 import { ref, shallowRef, computed, watch, onMounted } from 'vue';
 import S3dIcon from '../../../components/S3dIcon.vue';
-import { aiConfig, listModels, downloads, startDownload, cancelDownload, fmtBytes, fmtDuration } from './providers';
+import { aiConfig, listModels, downloads, startDownload, cancelDownload, fmtBytes } from './providers';
 import {
   searchModels,
   modelDetail,
@@ -189,9 +199,7 @@ const detailError = ref('');
 const installed = shallowRef(new Set<string>());
 const inp = shallowRef<HTMLInputElement | null>(null);
 /** Unknown sizes stay visible – only names that clearly say > 4B are hidden. */
-const shown = computed(() =>
-  smallOnly.value ? results.value.filter((model) => model.params == null || model.params <= 4) : results.value,
-);
+const shown = computed(() => (smallOnly.value ? results.value.filter((model) => (model.active ?? model.params ?? 0) <= 4) : results.value));
 const pick = (chip: { q: string; small?: boolean }) => {
   query.value = chip.q;
   smallOnly.value = !!chip.small;
@@ -270,6 +278,8 @@ const use = (name: string) => {
 };
 
 /** ≤ 4B fast, ≤ 9B okay, bigger is slow on a CPU */
+/** mixture-of-experts: only the active part is computed per token */
+const share = (model: HfModel) => (model.active && model.params ? model.active / model.params : 1);
 const paramClass = (billions: number) => (billions <= 4 ? 'fast' : billions <= 9 ? 'mid' : 'slow');
 const PARAM_BADGE = { fast: 'bg-warn-bg text-warn', mid: 'bg-surface-2 text-ink-2', slow: 'bg-warn-bg text-danger' };
 const SPEED = { fast: 'font-bold text-warn', mid: 'text-ink-2', slow: 'text-danger' };

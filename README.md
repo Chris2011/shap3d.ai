@@ -49,6 +49,7 @@
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
 - [Connecting a local AI model](#connecting-a-local-ai-model)
 - [Scripting example](#scripting-example)
+- [Remote control: REST API, Swagger UI and MCP](#remote-control-rest-api-swagger-ui-and-mcp)
 - [Writing plugins](#writing-plugins)
   - [The `context` API](#the-context-api)
   - [Texts and languages in plugins](#texts-and-languages-in-plugins)
@@ -301,6 +302,59 @@ s3d.zoomExtents();
 
 Older scripts written with `su.` or `fw.` keep working – both are aliases of `s3d`.
 
+## Remote control: REST API, Swagger UI and MCP
+
+While the dev server runs, other programs and AI agents can control the open editor – over a REST API (with an OpenAPI definition and Swagger UI) or as an MCP server, e.g. for Claude Code.
+
+```bash
+npm run dev
+```
+
+Then open the app in a browser (http://localhost:5173) and keep the tab open – the model lives in the browser. The dev server passes every request over its WebSocket to the tab that was active last; the built-in plugin **Remote-API** answers it there (it can be switched off in the plugin manager). A toast in the app shows when an external program starts controlling it. The **Remote-API** tile in the right-hand bar opens a panel with the connection status (which tab receives the requests, with *Use this tab* when several are open), an activity log of every REST and MCP call with its parameters, result and duration, links to Swagger UI and the OpenAPI definition, the list of endpoints and MCP tools, and the MCP set-up (Claude Code command, `.mcp.json`, stdio) to copy.
+
+| URL | What |
+| --- | --- |
+| http://localhost:5173/api/docs | Swagger UI – every endpoint with “Try it out” |
+| http://localhost:5173/api/openapi.json | OpenAPI 3.1 definition |
+| http://localhost:5173/api/… | REST endpoints |
+| http://localhost:5173/mcp | MCP server (Streamable HTTP) |
+
+The most common actions (units are metres, Z is up; lengths may also be strings like `"75cm"`):
+
+| REST | MCP tool | |
+| --- | --- | --- |
+| `GET /api/status` | `app_status` | is a tab connected? |
+| `GET /api/scene` | `get_scene` | name, units, bounds, objects, materials, tags, selection, undo state |
+| `GET /api/objects`, `GET /api/objects/{id}` | `list_objects`, `get_object` | groups and components with position and world bounds |
+| `POST /api/objects` | `create_object` | box, cylinder, sphere, cone, pyramid, prism, tube, torus, wedge, dome |
+| `PATCH /api/objects/{id}` | `transform_object` | move, rotate, scale, rename, material, hide |
+| `DELETE /api/objects/{id}` | `delete_object` | |
+| `GET/POST /api/materials` | `list_materials`, `create_material` | |
+| `POST /api/script`, `GET /api/script/reference` | `run_script`, `get_script_reference` | run an `s3d` script (JavaScript or JSON) |
+| `POST /api/undo`, `POST /api/redo` | `undo`, `redo` | |
+| `POST /api/model/clear`, `GET/PUT /api/model` | `clear_model` | clear, save or load the `.shap3d.json` model |
+| `GET /api/export/{glb\|gltf\|obj\|stl\|json}` | `export_model` | the MCP tool writes the file (default `exports/`) |
+| `GET /api/screenshot?width=&height=` | `screenshot` | PNG; the MCP tool returns it as an image |
+| `GET/PUT /api/camera`, `POST /api/camera/zoom-extents` | `get_camera`, `set_camera`, `zoom_extents` | standard views, position/target, zoom extents |
+| `GET /api/commands`, `POST /api/commands/{id}` | `list_commands`, `run_command` | every menu/palette command |
+
+Every change is a normal undo step in the app. A few examples:
+
+```bash
+curl -X POST http://localhost:5173/api/objects -H "content-type: application/json" -d "{\"shape\":\"box\",\"width\":2,\"depth\":1,\"height\":\"75cm\",\"material\":\"Holz hell\"}"
+curl -X PATCH http://localhost:5173/api/objects/42 -H "content-type: application/json" -d "{\"move\":[0,2,0],\"rotate\":{\"degrees\":90}}"
+curl -X POST http://localhost:5173/api/script -H "content-type: application/json" -d "{\"code\":\"s3d.torus([0,0,0.3], 1, 0.2)\"}"
+curl -o model.glb http://localhost:5173/api/export/glb
+```
+
+**MCP in Claude Code:** the project brings a [`.mcp.json`](.mcp.json) that points to `http://localhost:5173/mcp` – start `npm run dev`, open the app, then start Claude Code in this folder and allow the server `shap3d` (or add it by hand with `claude mcp add --transport http shap3d http://localhost:5173/mcp`). For MCP clients that only speak stdio there is a small bridge that forwards to the same endpoint:
+
+```json
+{ "mcpServers": { "shap3d": { "command": "node", "args": ["src/plugins/builtin/remote/server/mcpStdio.mjs"], "env": { "S3D_URL": "http://localhost:5173" } } } }
+```
+
+Only requests from this computer are accepted: programs without a browser origin (curl, MCP clients) and pages on `localhost` – other websites cannot drive the app. The remote API exists only on the dev server (`npm run dev`), not in a production build. Everything lives in the built-in plugin [`src/plugins/builtin/remote/`](src/plugins/builtin/remote): the app side (handlers, connection, panel) and in [`server/`](src/plugins/builtin/remote/server) the dev-server side – a Vite plugin registered in `vite.config.ts` with the action list, OpenAPI, MCP and the WebSocket bridge. The server side runs in Node and has its own `tsconfig.json` (`npx tsc -p src/plugins/builtin/remote/server`).
+
 ## Writing plugins
 
 A plugin is a plain JavaScript **ES module** whose default export describes the plugin and has an `activate(context)` function. No build step and no server are needed. You load the `.js` file in the **Plugins** panel (*Plugin-Datei laden…*); it is stored in your browser and started again with every app start. Everything a plugin registers through `context` is removed automatically when it is switched off or removed.
@@ -409,6 +463,7 @@ Some features of the app are written as plugins themselves, in [`src/plugins/bui
 - **Gelände (Sandkiste)** (`src/plugins/builtin/terrain/`) – the terrain tool, its floating window, the *Gelände bearbeiten / aus Fläche* context-menu entries, the command and `s3d.terrain()`. Terrains in a model stay intact while it is off; they just can't be sculpted until it is on again.
 - **3D-Text** (`src/plugins/builtin/text3d/`) – 3D letters and numbers: the *3D-Text* tool opens a dialog with a live preview in the chosen font; the text becomes a component you place with a click (flat or upright, filled, extruded or as an outline, several lines). Besides Helvetiker and Optimer it brings 13 free fonts under the SIL Open Font License – Roboto, Playfair Display, Bebas Neue, Fredoka, Black Ops One (stencil), Pacifico, Lobster, Caveat, Orbitron, Press Start 2P (pixel), JetBrains Mono – and *Eigene Schrift laden…* adds your own TTF, OTF or WOFF file (kept in the browser). Fonts and the font reader ([opentype.js](https://opentype.js.org)) load only when used. Scripts use it as `s3d.text3d('Hallo', { font: 'bebas', size: 0.5, depth: 0.1 })`; the fonts a script names are loaded before it runs.
 
+- **Remote-API** (`src/plugins/builtin/remote/`, dev server only) – the REST API, Swagger UI and MCP server: `server/` is the Vite plugin that takes the requests, the rest answers them against the editor; its panel shows the connection, an activity log and the MCP set-up (see [Remote control](#remote-control-rest-api-swagger-ui-and-mcp)).
 - **Sprachen** (`src/plugins/builtin/i18n/`) – German, French, Spanish and Arabic for the app (`languages/*.json`), the language switch in the top bar, a *Language: …* command per language and the translation editor (see [Languages and translations](#languages-and-translations)). Switched off, only English is left.
 
 Each built-in plugin keeps its own texts in `i18n/en.json` (source) and `i18n/de.json` in its folder – the core never holds texts of plugins.
@@ -500,7 +555,8 @@ src/
   plugins/     plugin system – the plugin API (types), context, loader/registry, example plugins;
                builtin/ holds the plugins that ship with the app (AI assistant with providers, prompts,
                agent, chat history and Hugging Face search; terrain sandbox; 3D text with its fonts; import formats;
-               languages – German, French, Spanish, Arabic – and the translation editor)
+               languages – German, French, Spanish, Arabic – and the translation editor; the remote API with
+               REST, Swagger UI and MCP, its dev-server half in remote/server)
   i18n/        the i18n core – t(), message and language registry, number/unit formatting, English source texts (en.json)
   components/  Vue UI – toolbars, panels, dialogs, command palette, welcome tour
                (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components)
@@ -511,6 +567,7 @@ src/
 docs/          logo and README screenshots
 plugins/       stand-alone plugin packages with their own package.json – e.g. openscad/ (not part of the app build)
 scripts/       screenshot automation (headless Chrome), i18n.mjs (translation check and template)
+tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
 ```
 
 ## Regenerating the screenshots

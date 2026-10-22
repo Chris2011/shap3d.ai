@@ -7,3 +7,6 @@ __pycache__/
 
 # Trimble's SketchUp SDK – licensed separately, every user downloads it themselves
 tools/sketchup-sdk/
+
+# files the MCP tool export_model writes by default
+exports/

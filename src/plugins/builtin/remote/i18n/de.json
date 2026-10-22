@@ -1,0 +1,37 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "remote": {
+      "plugin": {
+        "name": "Remote-API",
+        "description": "Andere Programme und KI-Agenten steuern den Editor, solange der Dev-Server läuft: REST-API mit Swagger UI (/api/docs) und ein MCP-Server (/mcp).",
+        "connected": "Remote-API: Ein externes Programm steuert den Editor"
+      },
+      "undo": {
+        "create": "Objekt anlegen (remote)",
+        "change": "Objekt ändern (remote)",
+        "delete": "Objekt löschen (remote)",
+        "material": "Material (remote)",
+        "script": "Skript (remote)"
+      },
+      "panel": {
+        "server": "Dev-Server: {url}",
+        "disconnected": "Keine Verbindung zum Dev-Server – „npm run dev“ starten und die Seite neu laden.",
+        "active": "Dieser Tab empfängt die Anfragen",
+        "otherTab": "Ein anderer Tab empfängt die Anfragen ({count} Tabs offen)",
+        "useThisTab": "Diesen Tab verwenden",
+        "docs": "Dokumentation",
+        "swagger": "Swagger UI",
+        "endpoints": "Endpunkte und MCP-Tools",
+        "endpointsFailed": "Liste konnte nicht geladen werden: {error}",
+        "mcpSetup": "MCP einrichten",
+        "mcpHint": "Einen MCP-Client wie Claude Code mit dieser App verbinden – Dev-Server und diesen Tab offen lassen.",
+        "activity": "Aktivität",
+        "clear": "Leeren",
+        "noActivity": "Noch keine Anfragen. Alles, was REST-Clients und KI-Agenten im Modell tun, erscheint hier."
+      }
+    }
+  }
+}

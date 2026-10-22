@@ -35,7 +35,7 @@ const SIZES = `Tisch: 0,75 m hoch, Platte 1,6 × 0,9 m · Stuhl: Sitz 0,45 m hoc
 
 const example = (id: string, prompt: string): string => {
   const entry = EXAMPLES.find((candidate) => candidate.id === id);
-  return entry ? `### Nutzer: „${prompt}“\nAntwort:\n${entry.description}\n\`\`\`js\n${entry.code.trim()}\n\`\`\`` : '';
+  return entry ? `### Nutzer: „${prompt}“\nAntwort:\n\`\`\`js\n${entry.code.trim()}\n\`\`\`` : '';
 };
 
 /**
@@ -44,7 +44,7 @@ const example = (id: string, prompt: string): string => {
  */
 export const buildFastPrompt = (scene: string): string => {
   return `Du bist der 3D-Assistent von Shap3D.ai. Du baust Objekte mit einem JavaScript-Skript für die API „s3d“.
-Antworte mit EINEM kurzen Satz und danach GENAU EINEM Codeblock \`\`\`js … \`\`\`. Halte das Skript kurz (unter 40 Zeilen).
+Antworte NUR mit GENAU EINEM Codeblock \`\`\`js … \`\`\` – kein Text davor oder danach, keine Erklärung. Halte das Skript kurz (unter 40 Zeilen).
 
 Regeln: Maße in Metern. Punkte sind [x, y, z], Z ist oben, Boden z = 0. Jedes Objekt in s3d.group('Name', () => { … }). Ende mit s3d.zoomExtents().
 Typische Maße: Stuhl/Hocker Sitz 0,45 m hoch · Tisch 0,75 m hoch · Tür 0,9 × 2,1 m · Haus 8 × 10 m, 6 m hoch · Baum 5 m · Auto 4,5 × 1,8 × 1,5 m.
@@ -63,7 +63,6 @@ Fertige Materialien: Holz, Eiche hell, Nussbaum, Ziegel, Beton, Naturstein, Marm
 s3d.group(name, () => { … }) → .move([dx,dy,dz]) .rotate(grad) .copy([dx,dy,dz])
 
 Beispiel – Nutzer: „eine grüne Laterne“:
-Eine grüne Laterne mit Mast, Lampenkopf und gelbem Licht.
 \`\`\`js
 s3d.material('Grün', '#2f6b3a');
 s3d.material('Licht', '#ffe680');
@@ -84,11 +83,11 @@ export const buildSystemPrompt = (scene: string): string => {
 
 # So arbeitest du
 1. Überlege kurz, aus welchen einfachen Teilen das Objekt besteht (Quader, Zylinder, Kugeln, extrudierte Profile) und welche echten Maße es hat.
-2. Antworte auf Deutsch mit ein bis zwei Sätzen, was du baust – danach GENAU EIN Codeblock \`\`\`js … \`\`\`. Kein weiterer Text nach dem Codeblock.
+2. Antworte NUR mit GENAU EINEM Codeblock \`\`\`js … \`\`\` – kein Text davor oder danach, keine Erklärung, keine Rückfragen. Die App baut und zeigt das Modell selbst.
 3. Jedes Objekt kommt in eine eigene s3d.group(…) mit sprechendem deutschem Namen. Wiederholte Teile (Stühle, Pfosten, Fenster) als s3d.component(…) und mit .place() mehrfach setzen.
 4. Gib allen Teilen passende Materialien mit realistischen Farben; nutze Texturen (Holz, Ziegel, Stein …), wo sie Sinn ergeben.
 5. Nutze Schleifen, Math.sin/cos und Variablen für Maße – keine Magie-Zahlen, wenn sich etwas wiederholt.
-6. Baue auf dem auf, was schon im Modell steht (siehe „Aktuelle Szene“). Neue Objekte stellst du auf eine freie Fläche daneben, nicht ineinander. Wenn der Nutzer ein vorhandenes Objekt ändern will, baue die neue Version und erkläre das.
+6. Baue auf dem auf, was schon im Modell steht (siehe „Aktuelle Szene“). Neue Objekte stellst du auf eine freie Fläche daneben, nicht ineinander. Wenn der Nutzer ein vorhandenes Objekt ändern will, baue die neue Version.
 7. Lösche nie etwas ohne ausdrückliche Aufforderung.
 8. Ende jedes Skript mit s3d.zoomExtents().
 9. Wenn dir ein Ausführungsfehler gemeldet wird: Ursache verstehen, das GESAMTE korrigierte Skript erneut ausgeben.

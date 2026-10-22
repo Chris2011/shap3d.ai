@@ -118,11 +118,22 @@ const aiFetch = async (url: string, init: RequestInit): Promise<Response> => {
     if (!import.meta.env.DEV || init.signal?.aborted) {
       throw error;
     }
-    const headers = new Headers(init.headers);
-    headers.set('x-ai-target', url);
-    return fetch('/__ai_proxy', { ...init, headers });
+    return proxyFetch(url, init);
   }
 };
+
+const proxyFetch = (url: string, init: RequestInit) => {
+  const headers = new Headers(init.headers);
+  headers.set('x-ai-target', url);
+  return fetch('/__ai_proxy', { ...init, headers });
+};
+
+/**
+ * For Ollama's native streams (application/x-ndjson): web filters such as Sophos hold those back until the
+ * response is complete, so no progress or text shows up. In dev the proxy re-labels them as text/event-stream,
+ * which these filters pass through.
+ */
+const ndjsonFetch = (url: string, init: RequestInit) => (import.meta.env.DEV ? proxyFetch(url, init) : aiFetch(url, init));
 
 const openaiHeaders = (cfg: AiConfig): Record<string, string> => {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -150,6 +161,10 @@ export interface ChatOptions {
   numCtx?: number;
   numPredict?: number;
   temperature?: number;
+  /** keep a cut-off answer instead of failing (LLaMA-Mesh: a partial mesh is still usable) */
+  allowTruncated?: boolean;
+  /** start of the answer the model continues from (Ollama only) – not part of the returned text */
+  prefill?: string;
 }
 
 /** Ollama's native chat API – the only way to set a larger context window (default is just 2048 tokens). */
@@ -168,8 +183,12 @@ const chatOllama = async (
   if (chatOptions.numPredict != null) {
     options.num_predict = chatOptions.numPredict;
   }
-  const msgs = system ? [{ role: 'system', content: system }, ...messages] : messages;
-  const response = await aiFetch(ollamaRoot(cfg) + '/api/chat', {
+  const msgs = [
+    ...(system ? [{ role: 'system', content: system }] : []),
+    ...messages,
+    ...(chatOptions.prefill ? [{ role: 'assistant', content: chatOptions.prefill }] : []),
+  ];
+  const response = await ndjsonFetch(ollamaRoot(cfg) + '/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal,
@@ -190,7 +209,10 @@ const chatOllama = async (
     buf += dec.decode(value, { stream: true });
     let i: number;
     while ((i = buf.indexOf('\n')) >= 0) {
-      const line = buf.slice(0, i).trim();
+      const line = buf
+        .slice(0, i)
+        .trim()
+        .replace(/^data: ?/, ''); // dev proxy sends ndjson as SSE
       buf = buf.slice(i + 1);
       if (!line) {
         continue;
@@ -203,6 +225,9 @@ const chatOllama = async (
       if (text) {
         full += text;
         onText(text);
+      }
+      if (data.done && data.done_reason === 'length' && !chatOptions.allowTruncated) {
+        throw new Error(t('ai.errors.truncated'));
       }
     }
   }
@@ -256,14 +281,19 @@ export const chat = async (
       if (data === '[DONE]') {
         continue;
       }
+      let choice;
       try {
-        const text = JSON.parse(data).choices?.[0]?.delta?.content;
-        if (text) {
-          full += text;
-          onText(text);
-        }
+        choice = JSON.parse(data).choices?.[0];
       } catch {
-        /* partial line */
+        continue; // partial line
+      }
+      const text = choice?.delta?.content;
+      if (text) {
+        full += text;
+        onText(text);
+      }
+      if (choice?.finish_reason === 'length' && !opts.allowTruncated) {
+        throw new Error(t('ai.errors.truncated'));
       }
     }
   }
@@ -378,22 +408,47 @@ const PULL_STATUS: [RegExp, string, PullProgress['phase']][] = [
   [/^success/, 'ai.pull.done', 'done'],
 ];
 
+/**
+ * Ollama reports at least every few seconds. Silence for this long means something between Ollama and the
+ * browser (virus scanner / web filter such as Sophos) holds the stream back – Ollama keeps downloading anyway.
+ */
+const PULL_SILENT_MS = 15_000;
+
 /** Download a model through Ollama (POST /api/pull) – sums all layers and estimates speed and remaining time. */
 export const pullModel = async (cfg: AiConfig, name: string, onProgress: (progress: PullProgress) => void, signal?: AbortSignal) => {
-  const response = await aiFetch(ollamaRoot(cfg) + '/api/pull', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: name, stream: true }),
-    signal,
-  });
-  if (!response.ok || !response.body) {
-    throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200)}`);
+  let last: PullProgress = { status: t('ai.pull.start'), phase: 'start', completed: 0, total: 0, frac: 0, speed: 0, eta: null };
+  const report = (progress: PullProgress) => {
+    last = progress;
+    onProgress(progress);
+    watchSilence();
+  };
+  let silenceTimer = 0;
+  const watchSilence = () => {
+    clearTimeout(silenceTimer);
+    silenceTimer = window.setTimeout(() => onProgress({ ...last, status: t('ai.pull.buffered'), speed: 0, eta: null }), PULL_SILENT_MS);
+  };
+  watchSilence();
+  try {
+    const response = await ndjsonFetch(ollamaRoot(cfg) + '/api/pull', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: name, stream: true }),
+      signal,
+    });
+    if (!response.ok || !response.body) {
+      throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200)}`);
+    }
+    await readPullStream(response.body.getReader(), report);
+  } finally {
+    clearTimeout(silenceTimer);
   }
+};
+
+const readPullStream = async (reader: ReadableStreamDefaultReader<Uint8Array>, onProgress: (progress: PullProgress) => void) => {
   const layers = new Map<string, { completed: number; total: number }>();
   let speed = 0,
     lastT = performance.now(),
     lastBytes = 0;
-  const reader = response.body.getReader();
   const dec = new TextDecoder();
   let buf = '';
   for (;;) {
@@ -404,7 +459,10 @@ export const pullModel = async (cfg: AiConfig, name: string, onProgress: (progre
     buf += dec.decode(value, { stream: true });
     let i: number;
     while ((i = buf.indexOf('\n')) >= 0) {
-      const line = buf.slice(0, i).trim();
+      const line = buf
+        .slice(0, i)
+        .trim()
+        .replace(/^data: ?/, ''); // dev proxy sends ndjson as SSE
       buf = buf.slice(i + 1);
       if (!line) {
         continue;

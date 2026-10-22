@@ -14,6 +14,7 @@ export interface AiTurn {
   id: number;
   role: 'user' | 'assistant';
   text: string;
+  thinking?: string; // reasoning of thinking models (<think>…</think>), shown collapsed
   createdAt: number; // created (ms since epoch)
   endedAt?: number; // finished (assistant turns)
   model?: string;
@@ -86,6 +87,29 @@ const sceneSummary = (editor: Editor, maxObjects = 40, skipPeople = false): stri
 };
 // i18n-ignore-end
 
+/**
+ * Thinking models (Qwen3, DeepSeek-R1 …) write their reasoning as <think>…</think> before the answer.
+ * Qwen3 templates put the opening tag into the prompt, so the output starts with the bare reasoning –
+ * `stillThinking` treats text without a closing tag as reasoning (while a thinking model streams).
+ */
+export const splitThinking = (raw: string, stillThinking = false): { thinking: string; text: string } => {
+  const start = raw.indexOf('<think>'),
+    end = raw.indexOf('</think>');
+  if (end >= 0) {
+    return { thinking: raw.slice(start >= 0 && start < end ? start + 7 : 0, end).trim(), text: raw.slice(end + 8).trimStart() };
+  }
+  if (start >= 0 && !raw.slice(0, start).trim()) {
+    return { thinking: raw.slice(start + 7).trim(), text: '' };
+  }
+  return stillThinking ? { thinking: raw.trim(), text: '' } : { thinking: '', text: raw };
+};
+
+/** Prefilled start of the answer: an empty reasoning block makes Qwen3 answer right away. */
+const SKIP_THINKING = '<think>\n\n</think>\n\n';
+
+/** Models that think before answering – the thinking counts against the token limit. */
+const isThinkingModel = (model: string) => /qwen3(?!-coder)|deepseek-r1|qwq|think|reason|magistral/i.test(model);
+
 /** Extract the first ```js / ```json code block. */
 export const extractCode = (text: string): { code: string; lang: 'js' | 'json' | 'obj' } | null => {
   const match = text.match(/```(js|javascript|ts|json)?\s*\n([\s\S]*?)```/i);
@@ -146,7 +170,7 @@ const sendMesh = async (editor: Editor, prompt: string) => {
         turn.text = vertexCount || faceCount ? t('ai.agent.meshProgress', { vertices: vertexCount, faces: faceCount }) : raw.slice(-400);
       },
       controller!.signal,
-      { numCtx: 8192, numPredict: 7000, temperature: 0.9 },
+      { numCtx: 8192, numPredict: 7000, temperature: 0.9, allowTruncated: true },
     );
   } catch (error) {
     if (controller?.signal.aborted) {
@@ -194,23 +218,35 @@ export const send = async (editor: Editor, prompt: string) => {
     }
     // fast mode: ~700-token prompt, small context window, capped answer, one auto-fix at most
     const fast = aiConfig.fast;
+    const thinker = isThinkingModel(aiConfig.model);
     const attempts = fast ? 2 : 3;
     for (let attempt = 0; attempt < attempts; attempt++) {
       const turn = push({ role: 'assistant', text: '', status: 'streaming', model: aiConfig.model });
       const system = fast ? buildFastPrompt(sceneSummary(editor, 8, true)) : buildSystemPrompt(sceneSummary(editor));
-      const opts = fast ? { numCtx: 4096, numPredict: 900, temperature: 0.2 } : { numCtx: 16384, temperature: 0.2 };
+      // fast mode: skip the reasoning (minutes on a CPU – and it would use up the 900-token cap on its own)
+      const opts = fast
+        ? { numCtx: 4096, numPredict: 900, temperature: 0.2, prefill: thinker ? SKIP_THINKING : undefined }
+        : { numCtx: 16384, temperature: 0.2 };
+      const thinks = thinker && !fast;
+      let raw = '';
+      const show = (streaming = true) => {
+        const parts = splitThinking(raw, thinks && streaming);
+        turn.thinking = parts.thinking || undefined;
+        turn.text = parts.text;
+      };
       try {
-        const full = await chat(
+        raw = await chat(
           aiConfig,
           system,
           history(fast ? 4 : 12),
           (chunk) => {
-            turn.text += chunk;
+            raw += chunk;
+            show();
           },
           controller.signal,
           opts,
         );
-        turn.text = full;
+        show(false);
       } catch (error) {
         if (controller.signal.aborted) {
           finish(turn, 'stopped');

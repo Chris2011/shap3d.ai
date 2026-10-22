@@ -107,32 +107,25 @@
               >
                 {{ t('common.cancel') }}
               </button>
-              <button v-else class="s3d-btn small" :disabled="anyPulling" @click.stop="install(preset.id)">
+              <button v-else class="s3d-btn small" @click.stop="install(preset.id)">
                 {{ downloads[preset.id]?.error ? t('ai.wizard.retry') : t('pluginManager.install') }}
               </button>
             </template>
           </div>
           <div class="mt-0.75 text-xs text-ink-2">{{ t(preset.note) }}</div>
-          <div v-if="downloads[preset.id]" class="mt-2" @click.stop>
-            <template v-if="downloads[preset.id].error"
-              ><span class="text-xs text-danger">{{ t('pluginManager.error', { error: downloads[preset.id].error }) }}</span></template
-            >
-            <template v-else>
-              <S3dProgressBar :value="downloads[preset.id].frac" labeled />
-              <div class="mt-1 flex flex-wrap gap-x-3.5 gap-y-1 text-xs text-[#374151] tabular-nums dark:text-ink-2">
-                <span>{{ downloads[preset.id].status }}</span>
-                <span v-if="downloads[preset.id].total">{{
-                  t('ai.chat.progress', { done: fmtBytes(downloads[preset.id].completed), total: fmtBytes(downloads[preset.id].total) })
-                }}</span>
-                <span v-if="downloads[preset.id].speed > 0 && downloads[preset.id].phase === 'download'"
-                  >{{ fmtBytes(downloads[preset.id].speed) }}/s</span
-                >
-                <span v-if="downloads[preset.id].phase === 'download'">{{ fmtDuration(downloads[preset.id].eta) }}</span>
-              </div>
-            </template>
-          </div>
+          <S3dPullProgress v-if="downloads[preset.id]" class="mt-2" :progress="downloads[preset.id]" @click.stop />
         </div>
       </div>
+      <template v-if="otherDownloads.length">
+        <label class="mt-2.5 mb-1 block text-xs font-semibold">{{ t('ai.wizard.runningDownloads') }}</label>
+        <div v-for="name in otherDownloads" :key="name" class="mb-1.5 border border-line-2 bg-surface px-2.5 py-2">
+          <div class="mb-1.5 flex items-center gap-2">
+            <span class="min-w-0 flex-1 truncate font-mono text-xs" :title="name">{{ name }}</span>
+            <button v-if="!downloads[name].error" class="s3d-btn small" @click="cancelDownload(name)">{{ t('common.cancel') }}</button>
+          </div>
+          <S3dPullProgress :progress="downloads[name]" />
+        </div>
+      </template>
       <template v-if="otherModels.length">
         <label class="mt-2.5 mb-1 block text-xs font-semibold">{{ t('ai.wizard.otherModels') }}</label>
         <div class="mb-1.5 flex max-h-55 flex-wrap gap-1.5 overflow-auto">
@@ -180,8 +173,8 @@
 </template>
 
 <script setup lang="ts">
-import S3dProgressBar from '../../../components/ui/S3dProgressBar.vue';
 import S3dModalDialog from '../../../components/ui/S3dModalDialog.vue';
+import S3dPullProgress from './S3dPullProgress.vue';
 import { reactive, ref, shallowRef, computed } from 'vue';
 import S3dIcon from '../../../components/S3dIcon.vue';
 import {
@@ -194,8 +187,6 @@ import {
   downloads,
   startDownload,
   cancelDownload,
-  fmtBytes,
-  fmtDuration,
   ensureMeshModel,
   type ProviderId,
   type AiConfig,
@@ -213,7 +204,8 @@ const testing = ref(false);
 const norm = (modelName: string) => modelName.toLowerCase().replace(/:latest$/, '');
 const installed = (id: string) => models.value.some((model) => norm(model) === norm(id));
 const otherModels = computed(() => models.value.filter((model) => !MODEL_PRESETS.some((preset) => norm(preset.id) === norm(model))));
-const anyPulling = computed(() => Object.values(downloads).some((download) => !download.error));
+/** Downloads started elsewhere (model search) – shown so a running pull is never invisible here. */
+const otherDownloads = computed(() => Object.keys(downloads).filter((name) => !MODEL_PRESETS.some((preset) => preset.id === name)));
 const install = async (id: string) => {
   delete downloads[id];
   const preset = MODEL_PRESETS.find((entry) => entry.id === id);

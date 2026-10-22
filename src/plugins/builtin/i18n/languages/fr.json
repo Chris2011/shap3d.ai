@@ -80,6 +80,8 @@
       "toggleAxes": "Axes",
       "toggleRulers": "Règles sur les axes",
       "toggleGrid": "Grille au sol",
+      "toggleGridAxes": "Axes dans la grille au sol",
+      "toggleGridLabels": "Étiquettes des axes et de la grille",
       "togglePeopleSize": "Taille des personnes",
       "toggleGuides": "Guides",
       "toggleShadows": "Ombres",
@@ -681,7 +683,8 @@
       "noActive": "Aucune coupe active",
       "empty": "Aucun plan de coupe. Outil « Plan de coupe » dans la boîte à outils étendue.",
       "rulers": "Règles sur les axes (m · cm · mm selon le zoom)",
-      "grid": "Grille au sol (mm · cm · m selon le zoom)"
+      "grid": "Grille au sol (mm · cm · m selon le zoom)",
+      "labels": "Étiquettes le long des axes et légende de la grille (5 m · Grille 1 m · 10 m)"
     },
     "modelInfo": {
       "units": "Unités",

@@ -43,7 +43,8 @@
         "quick4": "Table avec 4 chaises",
         "quick5": "Arbre",
         "quick6": "Mur de pierre de 5 m de long",
-        "undone": "annulé"
+        "undone": "annulé",
+        "thoughts": "Raisonnement ({count} mots)"
       },
       "code": {
         "expand": "Déplier",
@@ -81,7 +82,8 @@
         "notFound": "Modèle introuvable. Installez-le avec Ollama : ollama pull <model>",
         "unreachable": "Serveur injoignable. Est-il démarré ? Pour les serveurs locaux, il peut falloir autoriser CORS (Ollama : OLLAMA_ORIGINS=\"*\").",
         "noMeshModel": "LLaMA-Mesh n’est pas installé. Installez-le dans l’assistant de configuration.",
-        "createMesh": "Impossible de créer llama-mesh : {error}"
+        "createMesh": "Impossible de créer llama-mesh : {error}",
+        "truncated": "La réponse a été tronquée – le modèle a atteint sa limite de jetons. Réessayez sans le mode rapide ou avec une demande plus courte."
       },
       "presets": {
         "llamaMesh": "Conçu pour la 3D : crée des maillages de triangles directement à partir de texte (NVIDIA, licence Llama 3.1). Bien pour des objets isolés.",
@@ -98,7 +100,8 @@
         "verify": "Vérification du fichier téléchargé …",
         "write": "Enregistrement du modèle …",
         "done": "Terminé",
-        "start": "Démarrage du téléchargement …"
+        "start": "Démarrage du téléchargement …",
+        "buffered": "Aucune progression reçue d’Ollama – un antivirus ou un filtre web (p. ex. Sophos) retient probablement la réponse. Le téléchargement continue en arrière-plan ; la progression n’apparaît qu’à la fin."
       },
       "eta": {
         "unknown": "Calcul du temps restant …",
@@ -133,7 +136,7 @@
         "sortTrending": "Tendances",
         "sortLikes": "Plus aimés",
         "sortNewest": "Plus récents",
-        "smallTitle": "Masque les modèles de plus de 4 milliards de paramètres – ils répondent lentement sans carte graphique",
+        "smallTitle": "Masque les modèles de plus de 4 milliards de paramètres – sans carte graphique, ils répondent lentement. Les modèles mixture-of-experts (…-A3B) comptent avec leurs paramètres actifs.",
         "smallOnly": "petits uniquement (≤ 4B)",
         "ollamaOnly": "Le téléchargement ne fonctionne qu’avec Ollama comme fournisseur – mais vous pouvez rechercher et consulter les modèles.",
         "searching": "Recherche …",
@@ -165,7 +168,11 @@
         "chipMeshHint": "Modèles qui créent directement des maillages 3D",
         "offline": "Pas de connexion Internet – la recherche a besoin d’Internet.",
         "billions": "{count} Md",
-        "millions": "{count} M"
+        "millions": "{count} M",
+        "ggufInfo": "GGUF est un format de fichier pour les modèles de langage compressés. Ollama l’exécute directement sur votre ordinateur – un même modèle existe en plusieurs « quants » (Q4_K_M, Q8_0 …) : plus petit = plus rapide et moins de RAM, plus grand = plus précis.",
+        "moeTitle": "Mixture of experts : gros modèle, mais seuls {active} milliards de paramètres calculent par token – rapide pour sa taille, mais il faut toute la taille du fichier en RAM",
+        "notChat": "🚫 pas pour Ollama",
+        "notChatTitle": "Ce n’est pas un modèle de langage (p. ex. image → 3D comme TRELLIS ou Hunyuan3D). Il est publié en GGUF, mais Ollama ne peut pas l’exécuter et il ne sait pas écrire de code de modélisation."
       },
       "wizard": {
         "title": "Configurer l’assistant IA",
@@ -187,6 +194,7 @@
         "installed": "✓ installé",
         "retry": "Réessayer",
         "otherModels": "Autres modèles installés",
+        "runningDownloads": "Téléchargements en cours",
         "enterModel": "ou saisissez un nom de modèle",
         "modelPlaceholder": "p. ex. qwen2.5-coder:7b",
         "installHint": "L’installation télécharge le modèle une fois via Ollama (plusieurs Go). Ensuite tout fonctionne hors ligne sur votre ordinateur.",

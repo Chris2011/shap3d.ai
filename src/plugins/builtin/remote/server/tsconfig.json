@@ -1,0 +1,15 @@
+{
+  // the dev-server half of the remote API runs in Node (loaded by vite.config.ts) – check it with:
+  //   npx tsc -p src/plugins/builtin/remote/server
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["*.ts"]
+}

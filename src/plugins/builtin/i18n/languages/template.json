@@ -41,7 +41,7 @@
         "name": "",
         "name#en": "Languages",
         "description": "",
-        "description#en": "German and more languages for the interface: language switch at the top next to light/dark, translation editor with areas, search, progress, live preview and “where is this text?”, import and export of language files (JSON) and a template for new languages."
+        "description#en": "German, French, Spanish, Arabic and more languages for the interface: language switch at the top next to light/dark, translation editor with areas, search, progress, live preview and “where is this text?”, import and export of language files (JSON) and a template for new languages."
       },
       "switcher": {
         "title": "",
@@ -109,7 +109,7 @@
         "placeholders": "",
         "placeholders#en": "Placeholders: {names}",
         "placeholdersTitle": "",
-        "placeholdersTitle#en": "The translation must contain the same placeholders as the German text",
+        "placeholdersTitle#en": "The translation must contain the same placeholders as the English text",
         "changed": "",
         "changed#en": "changed",
         "where": "",
@@ -327,6 +327,10 @@
       "toggleRulers#en": "Rulers on the axes",
       "toggleGrid": "",
       "toggleGrid#en": "Ground grid",
+      "toggleGridAxes": "",
+      "toggleGridAxes#en": "Axes in the ground grid",
+      "toggleGridLabels": "",
+      "toggleGridLabels#en": "Labels on the axes and grid",
       "togglePeopleSize": "",
       "togglePeopleSize#en": "Size of the people",
       "toggleGuides": "",
@@ -432,7 +436,17 @@
       "metres": "",
       "metres#en": "Metres",
       "feetInches": "",
-      "feetInches#en": "Feet/inches"
+      "feetInches#en": "Feet/inches",
+      "symbols": {
+        "mm": "",
+        "mm#en": "mm",
+        "cm": "",
+        "cm#en": "cm",
+        "m": "",
+        "m#en": "m",
+        "km": "",
+        "km#en": "km"
+      }
     },
     "undo": {
       "import": "",
@@ -1428,7 +1442,9 @@
       "rulers": "",
       "rulers#en": "Rulers on the axes (m · cm · mm depending on zoom)",
       "grid": "",
-      "grid#en": "Ground grid (mm · cm · m depending on zoom)"
+      "grid#en": "Ground grid (mm · cm · m depending on zoom)",
+      "labels": "",
+      "labels#en": "Labels along the axes and grid legend (5 m · Grid 1 m · 10 m)"
     },
     "modelInfo": {
       "units": "",
@@ -3075,7 +3091,9 @@
         "quick6": "",
         "quick6#en": "Stone wall 5 m long",
         "undone": "",
-        "undone#en": "undone"
+        "undone#en": "undone",
+        "thoughts": "",
+        "thoughts#en": "Thought process ({count} words)"
       },
       "code": {
         "expand": "",
@@ -3137,7 +3155,9 @@
         "noMeshModel": "",
         "noMeshModel#en": "LLaMA-Mesh is not installed. Please install it in the setup wizard.",
         "createMesh": "",
-        "createMesh#en": "Could not create llama-mesh: {error}"
+        "createMesh#en": "Could not create llama-mesh: {error}",
+        "truncated": "",
+        "truncated#en": "The answer was cut off – the model hit its token limit. Try again without fast mode or with a shorter request."
       },
       "presets": {
         "llamaMesh": "",
@@ -3167,7 +3187,9 @@
         "done": "",
         "done#en": "Done",
         "start": "",
-        "start#en": "Starting download …"
+        "start#en": "Starting download …",
+        "buffered": "",
+        "buffered#en": "No progress from Ollama – a virus scanner or web filter (e.g. Sophos) is probably holding the response back. The download keeps running in the background; progress only shows up at the end."
       },
       "eta": {
         "unknown": "",
@@ -3229,7 +3251,7 @@
         "sortNewest": "",
         "sortNewest#en": "Newest",
         "smallTitle": "",
-        "smallTitle#en": "Hides models with more than 4 billion parameters – they answer slowly without a graphics card",
+        "smallTitle#en": "Hides models with more than 4 billion parameters – they answer slowly without a graphics card. Mixture-of-experts models (…-A3B) count with their active parameters.",
         "smallOnly": "",
         "smallOnly#en": "small only (≤ 4B)",
         "ollamaOnly": "",
@@ -3293,7 +3315,15 @@
         "billions": "",
         "billions#en": "{count} bn",
         "millions": "",
-        "millions#en": "{count} m"
+        "millions#en": "{count} m",
+        "ggufInfo": "",
+        "ggufInfo#en": "GGUF is a file format for compressed language models. Ollama runs it directly on your computer – the same model comes in several “quants” (Q4_K_M, Q8_0 …): smaller = faster and less RAM, larger = more accurate.",
+        "moeTitle": "",
+        "moeTitle#en": "Mixture of experts: big model, but only {active} billion parameters work per token – fast for its size, still needs the full file size in RAM",
+        "notChat": "",
+        "notChat#en": "🚫 not for Ollama",
+        "notChatTitle": "",
+        "notChatTitle#en": "This is no language model (e.g. image → 3D like TRELLIS or Hunyuan3D). It is published as GGUF, but Ollama cannot run it and it cannot write modelling code."
       },
       "wizard": {
         "title": "",
@@ -3334,6 +3364,8 @@
         "retry#en": "Try again",
         "otherModels": "",
         "otherModels#en": "Other installed models",
+        "runningDownloads": "",
+        "runningDownloads#en": "Running downloads",
         "enterModel": "",
         "enterModel#en": "or enter a model name",
         "modelPlaceholder": "",
@@ -3412,6 +3444,58 @@
         "name#en": "Import formats",
         "description": "",
         "description#en": "Opens FBX, Collada (.dae), KMZ, 3DS, PLY, 3MF, AMF, VRML, USD/USDZ and Blender files (.blend) – without the original programs. The readers are loaded on the first import."
+      }
+    },
+    "remote": {
+      "plugin": {
+        "name": "",
+        "name#en": "Remote API",
+        "description": "",
+        "description#en": "Lets other programs and AI agents control the editor while the dev server runs: REST API with Swagger UI (/api/docs) and an MCP server (/mcp).",
+        "connected": "",
+        "connected#en": "Remote API: an external program is controlling the editor"
+      },
+      "undo": {
+        "create": "",
+        "create#en": "Create object (remote)",
+        "change": "",
+        "change#en": "Change object (remote)",
+        "delete": "",
+        "delete#en": "Delete object (remote)",
+        "material": "",
+        "material#en": "Material (remote)",
+        "script": "",
+        "script#en": "Script (remote)"
+      },
+      "panel": {
+        "server": "",
+        "server#en": "Dev server: {url}",
+        "disconnected": "",
+        "disconnected#en": "No connection to the dev server – start “npm run dev” and reload the page.",
+        "active": "",
+        "active#en": "This tab receives the requests",
+        "otherTab": "",
+        "otherTab#en": "Another tab receives the requests ({count} tabs open)",
+        "useThisTab": "",
+        "useThisTab#en": "Use this tab",
+        "docs": "",
+        "docs#en": "Documentation",
+        "swagger": "",
+        "swagger#en": "Swagger UI",
+        "endpoints": "",
+        "endpoints#en": "Endpoints and MCP tools",
+        "endpointsFailed": "",
+        "endpointsFailed#en": "Could not load the list: {error}",
+        "mcpSetup": "",
+        "mcpSetup#en": "Set up MCP",
+        "mcpHint": "",
+        "mcpHint#en": "Connect an MCP client such as Claude Code to this app – keep the dev server and this tab open.",
+        "activity": "",
+        "activity#en": "Activity",
+        "clear": "",
+        "clear#en": "Clear",
+        "noActivity": "",
+        "noActivity#en": "No requests yet. Everything that REST clients and AI agents do in the model shows up here."
       }
     },
     "terrain": {

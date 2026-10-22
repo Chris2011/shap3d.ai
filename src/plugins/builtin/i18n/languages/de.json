@@ -80,6 +80,8 @@
       "toggleAxes": "Achsen",
       "toggleRulers": "Maßstab an den Achsen",
       "toggleGrid": "Raster am Boden",
+      "toggleGridAxes": "Achsen im Raster",
+      "toggleGridLabels": "Beschriftung an Achsen und Raster",
       "togglePeopleSize": "Größe der Personen",
       "toggleGuides": "Hilfslinien",
       "toggleShadows": "Schatten",
@@ -681,7 +683,8 @@
       "noActive": "Kein aktiver Schnitt",
       "empty": "Keine Schnittebenen. Werkzeug „Schnittebene“ im erweiterten Werkzeugsatz.",
       "rulers": "Maßstab an den Achsen (m · cm · mm je nach Zoom)",
-      "grid": "Raster am Boden (mm · cm · m je nach Zoom)"
+      "grid": "Raster am Boden (mm · cm · m je nach Zoom)",
+      "labels": "Beschriftung an den Achsen und Rasterangabe (5 m · Raster 1 m · 10 m)"
     },
     "modelInfo": {
       "units": "Einheiten",

@@ -1,0 +1,37 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "remote": {
+      "plugin": {
+        "name": "API remota",
+        "description": "Otros programas y agentes de IA controlan el editor mientras se ejecuta el servidor de desarrollo: API REST con Swagger UI (/api/docs) y un servidor MCP (/mcp).",
+        "connected": "API remota: un programa externo está controlando el editor"
+      },
+      "undo": {
+        "create": "Crear objeto (remoto)",
+        "change": "Cambiar objeto (remoto)",
+        "delete": "Eliminar objeto (remoto)",
+        "material": "Material (remoto)",
+        "script": "Script (remoto)"
+      },
+      "panel": {
+        "server": "Servidor de desarrollo: {url}",
+        "disconnected": "Sin conexión con el servidor de desarrollo: inicia «npm run dev» y recarga la página.",
+        "active": "Esta pestaña recibe las solicitudes",
+        "otherTab": "Otra pestaña recibe las solicitudes ({count} pestañas abiertas)",
+        "useThisTab": "Usar esta pestaña",
+        "docs": "Documentación",
+        "swagger": "Swagger UI",
+        "endpoints": "Endpoints y herramientas MCP",
+        "endpointsFailed": "No se pudo cargar la lista: {error}",
+        "mcpSetup": "Configurar MCP",
+        "mcpHint": "Conecta un cliente MCP como Claude Code con esta aplicación; deja abiertos el servidor de desarrollo y esta pestaña.",
+        "activity": "Actividad",
+        "clear": "Vaciar",
+        "noActivity": "Aún no hay solicitudes. Todo lo que hagan los clientes REST y los agentes de IA en el modelo aparece aquí."
+      }
+    }
+  }
+}

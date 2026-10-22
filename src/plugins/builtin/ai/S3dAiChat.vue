@@ -71,26 +71,6 @@
       </button>
     </div>
 
-    <div v-for="(download, name) in downloads" :key="name" class="border-b border-line bg-surface-2 px-3 py-1.5 text-xs">
-      <div class="flex items-center gap-2">
-        <b class="flex-1 truncate text-navy">{{ String(name).replace(/^hf\.co\/[^/]+\//, '') }}</b
-        ><span v-if="!download.error"
-          >{{ formatNumber(download.frac * 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }} %</span
-        ><button v-if="!download.error" class="s3d-link" @click="cancelDownload(String(name))">{{ t('common.cancel') }}</button>
-      </div>
-      <div v-if="download.error" class="mt-1 text-xs text-danger">{{ t('pluginManager.error', { error: download.error }) }}</div>
-      <template v-else>
-        <S3dProgressBar class="my-1" :value="download.frac" />
-        <div class="text-ink-2 tabular-nums">
-          {{ download.status
-          }}<template v-if="download.total">
-            · {{ t('ai.chat.progress', { done: fmtBytes(download.completed), total: fmtBytes(download.total) }) }}</template
-          ><template v-if="download.speed > 0 && download.phase === 'download'">
-            · {{ fmtBytes(download.speed) }}/s · {{ fmtDuration(download.eta) }}</template
-          >
-        </div>
-      </template>
-    </div>
     <div v-show="view === 'chat'" ref="list" class="flex flex-1 flex-col gap-2 overflow-auto px-3 py-2.5 select-text">
       <div v-if="!aiConfig.configured" class="flex flex-col items-center gap-2 px-2.5 py-5 text-center text-ink">
         <S3dIcon name="sparkle" :size="40" />
@@ -139,6 +119,14 @@
               >⏱ {{ elapsed(turn.endedAt - turn.createdAt) }}</span
             >
           </div>
+          <details v-if="turn.thinking" class="mb-1 text-xs text-ink-2">
+            <summary class="cursor-pointer select-none hover:text-ink">
+              {{ t('ai.chat.thoughts', { count: turn.thinking.split(/\s+/).length }) }}
+            </summary>
+            <div class="mt-1 max-h-60 overflow-auto border-s-2 border-line ps-2 text-[0.6875rem]/[1.45] text-muted">
+              {{ turn.thinking }}
+            </div>
+          </details>
           <template v-if="turn.text">
             <template v-for="(part, partIndex) in splitFences(turn.text)" :key="partIndex">
               <div v-if="part.kind === 'text'">{{ part.text.trim() }}</div>
@@ -213,7 +201,6 @@
 </template>
 
 <script setup lang="ts">
-import S3dProgressBar from '../../../components/ui/S3dProgressBar.vue';
 import { useScripts } from '../../../composables/useScripts';
 import { ref, shallowRef, computed, watch, nextTick } from 'vue';
 import S3dIcon from '../../../components/S3dIcon.vue';
@@ -222,7 +209,7 @@ import S3dModelSearch from './S3dModelSearch.vue';
 import S3dCodeBlock from './S3dCodeBlock.vue';
 import { splitFences } from '../../../scripting/highlight';
 import { useEditor } from '../../../components/keys';
-import { aiConfig, providerInfo, modeFor, downloads, cancelDownload, fmtBytes, fmtDuration } from './providers';
+import { aiConfig, providerInfo, modeFor } from './providers';
 import { aiState, send, stop, clearChat, execute, type AiTurn } from './agent';
 import {
   aiHistory,
@@ -238,7 +225,7 @@ import {
 } from './history';
 import { useIntervalFn } from '@vueuse/core';
 import { showPanel } from '../../../components/panelState';
-import { t, localize, formatNumber } from '../../../i18n';
+import { t, localize } from '../../../i18n';
 
 const editor = useEditor();
 const scripts = useScripts();

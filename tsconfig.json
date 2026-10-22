@@ -12,5 +12,7 @@
     "lib": ["ES2021", "DOM", "ESNext.Temporal"],
     "types": ["vite/client", "three", "web-bluetooth"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  // the dev-server half of the remote API runs in Node – it has its own tsconfig
+  "exclude": ["src/plugins/builtin/remote/server"]
 }

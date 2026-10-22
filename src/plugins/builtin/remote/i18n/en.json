@@ -1,0 +1,37 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "remote": {
+      "plugin": {
+        "name": "Remote API",
+        "description": "Lets other programs and AI agents control the editor while the dev server runs: REST API with Swagger UI (/api/docs) and an MCP server (/mcp).",
+        "connected": "Remote API: an external program is controlling the editor"
+      },
+      "undo": {
+        "create": "Create object (remote)",
+        "change": "Change object (remote)",
+        "delete": "Delete object (remote)",
+        "material": "Material (remote)",
+        "script": "Script (remote)"
+      },
+      "panel": {
+        "server": "Dev server: {url}",
+        "disconnected": "No connection to the dev server – start “npm run dev” and reload the page.",
+        "active": "This tab receives the requests",
+        "otherTab": "Another tab receives the requests ({count} tabs open)",
+        "useThisTab": "Use this tab",
+        "docs": "Documentation",
+        "swagger": "Swagger UI",
+        "endpoints": "Endpoints and MCP tools",
+        "endpointsFailed": "Could not load the list: {error}",
+        "mcpSetup": "Set up MCP",
+        "mcpHint": "Connect an MCP client such as Claude Code to this app – keep the dev server and this tab open.",
+        "activity": "Activity",
+        "clear": "Clear",
+        "noActivity": "No requests yet. Everything that REST clients and AI agents do in the model shows up here."
+      }
+    }
+  }
+}
