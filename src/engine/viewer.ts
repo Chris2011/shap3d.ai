@@ -1042,7 +1042,7 @@ export class Viewer {
     }
     this.grid.mesh.visible = measureView.grid && !!this.model;
     if (this.grid.mesh.visible) {
-      this.grid.update(cam, this.rig.isOrtho, this.rig.target, this.model.settings.units, theme.night);
+      this.grid.update(cam, this.rig.isOrtho, this.rig.target, this.model.settings.units, theme.night, measureView.gridAxes);
     }
     this.renderer.clear();
     this.renderer.render(this.bgScene, this.bgCam);

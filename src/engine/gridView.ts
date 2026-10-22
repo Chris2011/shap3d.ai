@@ -26,7 +26,7 @@ const vertexShader = `varying vec2 vNdc; void main(){ vNdc = position.xy; gl_Pos
 const fragmentShader = `
   uniform mat4 invProj; uniform mat4 camWorld; uniform mat4 viewProj;
   uniform float levels[${MAX_LEVELS}]; uniform int levelCount;
-  uniform vec3 lineColor; uniform vec3 xColor; uniform vec3 yColor; uniform float strength; uniform float ortho;
+  uniform vec3 lineColor; uniform vec3 xColor; uniform vec3 yColor; uniform float strength; uniform float ortho; uniform float axes;
   uniform vec2 fadeIn; uniform vec2 major; uniform vec2 distanceFade;
   varying vec2 vNdc;
 
@@ -62,9 +62,9 @@ const fragmentShader = `
       alpha = max(alpha, lines(point.xy, footprint, levels[i], mix(1.0, 1.6, weight)) * visible * mix(0.32, 1.0, weight));
     }
 
-    // the two lines through the origin are tinted like the axes
+    // the two lines through the origin are tinted like the axes (unless switched off)
     vec2 axisPx = abs(point.xy) / max(footprint, vec2(1e-9));
-    float onX = 1.0 - clamp(axisPx.y - 0.5, 0.0, 1.0), onY = 1.0 - clamp(axisPx.x - 0.5, 0.0, 1.0);
+    float onX = (1.0 - clamp(axisPx.y - 0.5, 0.0, 1.0)) * axes, onY = (1.0 - clamp(axisPx.x - 0.5, 0.0, 1.0)) * axes;
     vec3 color = mix(mix(lineColor, xColor, onX), yColor, onY * (1.0 - onX));
     alpha = max(alpha, max(onX, onY) * 0.9);
 
@@ -95,6 +95,7 @@ export class GroundGrid {
       yColor: { value: new THREE.Color() },
       strength: { value: 1 },
       ortho: { value: 0 },
+      axes: { value: 1 },
       fadeIn: { value: new THREE.Vector2(...GRID_FADE_IN) },
       major: { value: new THREE.Vector2(...GRID_MAJOR) },
       distanceFade: { value: new THREE.Vector2(100, 400) },
@@ -117,9 +118,10 @@ export class GroundGrid {
     this.mesh.renderOrder = -2;
   }
 
-  /** Per frame: camera matrices, colours for day/night and the unit system of the model. */
-  update(camera: THREE.Camera, isOrtho: boolean, target: THREE.Vector3, units: Units, night: boolean) {
+  /** Per frame: camera matrices, colours for day/night, the unit system of the model and whether the axis lines are tinted. */
+  update(camera: THREE.Camera, isOrtho: boolean, target: THREE.Vector3, units: Units, night: boolean, axes: boolean) {
     const uniforms = this.material.uniforms;
+    uniforms.axes.value = axes ? 1 : 0;
     uniforms.invProj.value.copy(camera.projectionMatrixInverse);
     uniforms.camWorld.value.copy(camera.matrixWorld);
     uniforms.viewProj.value.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);

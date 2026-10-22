@@ -24,16 +24,13 @@
         <span v-if="item.cmd && shortcut(item.cmd)" class="sc">{{ shortcut(item.cmd) }}</span>
         <S3dIcon v-if="item.sub" name="chevron" :size="14" class="ms-auto" />
         <div v-if="item.sub && sub === i" class="s3d-menu -top-1 left-full ms-0.5 max-h-[80vh] overflow-auto">
-          <div
-            v-for="command in subItems(item.sub)"
-            :key="command.id"
-            class="s3d-menu-item"
-            :class="{ disabled: command.enabled && !command.enabled(editor) }"
-            @click.stop="runIt(command.id)"
-          >
-            <span class="inline-block w-3.5 font-bold text-blue">{{ command.checked && command.checked(editor) ? '✓' : '' }}</span
-            >{{ command.label }}<span v-if="command.shortcut" class="sc">{{ command.shortcut }}</span>
-          </div>
+          <template v-for="command in subItems(item.sub)" :key="command.id">
+            <div v-if="command.separator" class="s3d-menu-sep"></div>
+            <div class="s3d-menu-item" :class="{ disabled: command.enabled && !command.enabled(editor) }" @click.stop="runIt(command.id)">
+              <span class="inline-block w-3.5 font-bold text-blue">{{ command.checked && command.checked(editor) ? '✓' : '' }}</span
+              >{{ command.label }}<span v-if="command.shortcut" class="sc">{{ command.shortcut }}</span>
+            </div>
+          </template>
         </div>
       </div>
     </template>

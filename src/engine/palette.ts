@@ -51,6 +51,8 @@ const SYNONYMS: Record<string, string> = {
   import: 'import einlesen datei',
   toggleRulers: 'lineal ruler maße mm cm',
   toggleGrid: 'raster grid gitter boden ebene unendlich mm cm',
+  toggleGridAxes: 'raster grid achsen axes linien ursprung',
+  toggleGridLabels: 'beschriftung labels zahlen maße raster grid achsen',
   togglePeopleSize: 'höhe figur person maß',
   toggleAxes: 'achsen axes',
   toggleShadows: 'schatten shadows sonne',

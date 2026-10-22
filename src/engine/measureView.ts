@@ -14,12 +14,15 @@ import { t, unitSymbol, formatDecimal } from '../i18n';
  *  - rulers: tick marks along the axes that get finer while zooming in (m → 10 cm → cm → mm)
  *  - people: height dimension next to every reference person
  *  - grid: labels and a legend for the infinite ground grid (the grid itself is drawn by gridView)
+ *  - gridAxes: red and green lines through the origin of the ground grid
+ *  - labels: numbers along the axes and the grid legend (the ticks stay with the rulers)
  */
 // README screenshots start without them and don't touch the stored setting
 const shotMode = new URLSearchParams(location.search).has('shot');
-export const measureView: { rulers: boolean; people: boolean; grid: boolean } = shotMode
-  ? reactive({ rulers: false, people: false, grid: false })
-  : useStorage('s3d:measure', { rulers: true, people: true, grid: true }, undefined, { mergeDefaults: true }).value;
+export const measureView: { rulers: boolean; people: boolean; grid: boolean; gridAxes: boolean; labels: boolean } = shotMode
+  ? reactive({ rulers: false, people: false, grid: false, gridAxes: true, labels: true })
+  : useStorage('s3d:measure', { rulers: true, people: true, grid: true, gridAxes: true, labels: true }, undefined, { mergeDefaults: true })
+      .value;
 
 const INCH = 0.0254,
   FOOT = 0.3048;
@@ -99,8 +102,8 @@ const label = (context: CanvasRenderingContext2D, text: string, x: number, y: nu
   context.fillText(text, x, y);
 };
 
-/** Ticks and labels along the axes; without ticks only the labels are drawn (grid labels along X and Y). */
-const drawRulers = (overlay: Overlay, units: Units, axes = AXES, ticks = true) => {
+/** Ticks and labels along the axes; without ticks only the labels are drawn (grid labels along X and Y), without labels only the ticks. */
+const drawRulers = (overlay: Overlay, units: Units, axes = AXES, ticks = true, labels = true) => {
   const viewer = overlay.viewer,
     context = overlay.context,
     viewWidth = viewer.width,
@@ -153,7 +156,7 @@ const drawRulers = (overlay: Overlay, units: Units, axes = AXES, ticks = true) =
             context.stroke();
             context.globalAlpha = 1;
           }
-          if (len >= MIN_LABEL) {
+          if (labels && len >= MIN_LABEL) {
             // keep the whole text clear of the axis, also where the axis runs steeply across the screen
             const text = tickLabel(start, steps[level], units);
             context.font = '600 11px "Open Sans", "Segoe UI", sans-serif';
@@ -289,10 +292,11 @@ const drawPeople = (overlay: Overlay) => {
 export const drawMeasure = (overlay: Overlay, editor: Editor) => {
   const units = editor.model.settings.units;
   const rulers = measureView.rulers && editor.model.settings.axes;
+  // the labels switch belongs to the grid: without the grid the rulers keep their numbers
   if (rulers) {
-    drawRulers(overlay, units);
+    drawRulers(overlay, units, AXES, true, measureView.labels || !measureView.grid);
   }
-  if (measureView.grid) {
+  if (measureView.grid && measureView.labels) {
     // the rulers already label the axes; otherwise the grid labels its lines along X and Y
     if (!rulers) {
       drawRulers(overlay, units, AXES.slice(0, 2), false);

@@ -1,7 +1,12 @@
 <template>
   <div class="s3d-section-title">{{ t('display.show') }}</div>
-  <label v-for="option in OPTS" :key="option.id" class="s3d-check"
-    ><input type="checkbox" :checked="check(option.id)" @change="toggle(option.id)" /> {{ t(option.label) }}</label
+  <label
+    v-for="option in OPTS"
+    :key="option.id"
+    class="s3d-check"
+    :class="{ 'ms-5': option.parent, 'cursor-default opacity-50': option.parent && !check(option.parent) }"
+    ><input type="checkbox" :checked="check(option.id)" :disabled="!!option.parent && !check(option.parent)" @change="toggle(option.id)" />
+    {{ t(option.label) }}</label
   >
   <div class="s3d-section-title">{{ t('commands.toggleSectionPlanes') }}</div>
   <div v-for="section in sections" :key="section.id" class="flex items-center gap-1 [&_.s3d-btn]:px-1.75">
@@ -27,11 +32,13 @@ import { useModel } from '../../composables/useModel';
 import { t } from '../../i18n';
 
 const editor = useEditor();
-/** command ids with the message key of their label here */
-const OPTS = [
+/** command ids with the message key of their label here; options with a parent only take effect while the parent is on */
+const OPTS: { id: string; label: string; parent?: string }[] = [
   { id: 'toggleAxes', label: 'commands.toggleAxes' },
-  { id: 'toggleRulers', label: 'display.rulers' },
+  { id: 'toggleRulers', label: 'display.rulers', parent: 'toggleAxes' },
   { id: 'toggleGrid', label: 'display.grid' },
+  { id: 'toggleGridAxes', label: 'commands.toggleGridAxes', parent: 'toggleGrid' },
+  { id: 'toggleGridLabels', label: 'display.labels', parent: 'toggleGrid' },
   { id: 'togglePeopleSize', label: 'commands.togglePeopleSize' },
   { id: 'toggleGuides', label: 'commands.toggleGuides' },
   { id: 'toggleSectionPlanes', label: 'commands.toggleSectionPlanes' },

@@ -148,7 +148,7 @@ export class CameraRig {
     this.applyState(to, animate);
   }
 
-  standardView(name: 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right' | 'iso', box: THREE.Box3) {
+  standardView(name: 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right' | 'iso', box: THREE.Box3, animate = true) {
     const dirs: Record<string, number[]> = {
       top: [0, -0.0001, 1],
       bottom: [0, 0.0001, -1],
@@ -168,8 +168,8 @@ export class CameraRig {
         fov: this.persp.fov,
         ortho: this.isOrtho,
       },
-      true,
-      () => this.zoomExtents(box, true),
+      animate,
+      () => this.zoomExtents(box, animate),
     );
   }
 

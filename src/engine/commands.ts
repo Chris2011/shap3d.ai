@@ -30,6 +30,8 @@ export interface Command {
   run: (editor: Editor) => void;
   enabled?: (editor: Editor) => boolean;
   checked?: (editor: Editor) => boolean;
+  /** starts a new block in the main menu (a line above it) */
+  separator?: boolean;
 }
 /** a command as written below – its label is the message `commands.<id>` */
 type CommandDefinition = Omit<Command, 'label'>;
@@ -125,35 +127,43 @@ export const modelToThree = (editor: Editor): THREE.Group => {
   return wrap;
 };
 
-export const exportAs = async (editor: Editor, kind: 'glb' | 'gltf' | 'stl' | 'obj' | 'png' | 'json') => {
+export type ExportKind = 'glb' | 'gltf' | 'stl' | 'obj' | 'png' | 'json';
+
+export interface ExportedFile {
+  name: string;
+  mimeType: string;
+  data: Blob | string;
+}
+
+/** The model (or for PNG the current view) as a file, without downloading it – also used by the remote API. */
+export const exportFile = async (editor: Editor, kind: ExportKind): Promise<ExportedFile> => {
   const name = safeName(editor);
   if (kind === 'json') {
-    download(`${name}.shap3d.json`, JSON.stringify(editor.model.toJSON()), 'application/json');
-    editor.ui.saved = true;
-    return;
+    return { name: `${name}.shap3d.json`, mimeType: 'application/json', data: JSON.stringify(editor.model.toJSON()) };
   }
   if (kind === 'png') {
-    const url = editor.viewer.snapshot();
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${name}.png`;
-    link.click();
-    return;
+    const image = await fetch(editor.viewer.snapshot()).then((response) => response.blob());
+    return { name: `${name}.png`, mimeType: 'image/png', data: image };
   }
   const scene = modelToThree(editor);
   if (kind === 'stl') {
-    download(`${name}.stl`, new STLExporter().parse(scene, { binary: false }) as string, 'model/stl');
-    return;
+    return { name: `${name}.stl`, mimeType: 'model/stl', data: new STLExporter().parse(scene, { binary: false }) as string };
   }
   if (kind === 'obj') {
-    download(`${name}.obj`, new OBJExporter().parse(scene), 'text/plain');
-    return;
+    return { name: `${name}.obj`, mimeType: 'text/plain', data: new OBJExporter().parse(scene) };
   }
   const res: any = await new GLTFExporter().parseAsync(scene, { binary: kind === 'glb' });
   if (kind === 'glb') {
-    download(`${name}.glb`, new Blob([res], { type: 'model/gltf-binary' }));
-  } else {
-    download(`${name}.gltf`, JSON.stringify(res), 'model/gltf+json');
+    return { name: `${name}.glb`, mimeType: 'model/gltf-binary', data: new Blob([res], { type: 'model/gltf-binary' }) };
+  }
+  return { name: `${name}.gltf`, mimeType: 'model/gltf+json', data: JSON.stringify(res) };
+};
+
+export const exportAs = async (editor: Editor, kind: ExportKind) => {
+  const file = await exportFile(editor, kind);
+  download(file.name, file.data, file.mimeType);
+  if (kind === 'json') {
+    editor.ui.saved = true;
   }
 };
 
@@ -756,6 +766,26 @@ export const setFaceStyle = (editor: Editor, style: FaceStyle) => {
   editor.invalidate();
 };
 
+/** Viewing directions (camera minus target) of the standard views, as CameraRig.standardView sets them. */
+const STANDARD_VIEW_DIRECTIONS = {
+  iso: [-1, -1, 0.8],
+  top: [0, 0, 1],
+  bottom: [0, 0, -1],
+  front: [0, -1, 0],
+  back: [0, 1, 0],
+  left: [-1, 0, 0],
+  right: [1, 0, 0],
+} as const;
+/** The camera still looks along the standard view (any zoom or pan, no orbit since). */
+const isStandardView = (editor: Editor, view: keyof typeof STANDARD_VIEW_DIRECTIONS): boolean => {
+  const rig = editor.viewer?.rig;
+  if (!rig) {
+    return false;
+  }
+  const direction = rig.position.clone().sub(rig.target).normalize();
+  return direction.dot(new THREE.Vector3(...STANDARD_VIEW_DIRECTIONS[view]).normalize()) > 0.9999;
+};
+
 const COMMAND_LIST: CommandDefinition[] = [
   // file
   {
@@ -996,6 +1026,24 @@ const COMMAND_LIST: CommandDefinition[] = [
     checked: () => measureView.grid,
   },
   {
+    id: 'toggleGridAxes',
+    group: 'view',
+    run: (editor) => {
+      measureView.gridAxes = !measureView.gridAxes;
+      editor.invalidate();
+    },
+    checked: () => measureView.gridAxes,
+  },
+  {
+    id: 'toggleGridLabels',
+    group: 'view',
+    run: (editor) => {
+      measureView.labels = !measureView.labels;
+      editor.invalidate();
+    },
+    checked: () => measureView.labels,
+  },
+  {
     id: 'togglePeopleSize',
     group: 'view',
     run: (editor) => {
@@ -1095,6 +1143,7 @@ const COMMAND_LIST: CommandDefinition[] = [
   {
     id: 'persp',
     group: 'camera',
+    separator: true,
     run: (editor) => {
       editor.viewer.rig.isOrtho = false;
       editor.ui.projection = 'persp';
@@ -1117,7 +1166,9 @@ const COMMAND_LIST: CommandDefinition[] = [
   ...(['iso', 'top', 'front', 'right', 'back', 'left', 'bottom'] as const).map((view) => ({
     id: 'view-' + view,
     group: 'camera',
+    separator: view === 'iso',
     run: (editor: Editor) => editor.viewer.rig.standardView(view, editor.model.bounds()),
+    checked: (editor: Editor) => isStandardView(editor, view),
   })),
 ];
 

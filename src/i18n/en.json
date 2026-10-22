@@ -80,6 +80,8 @@
       "toggleAxes": "Axes",
       "toggleRulers": "Rulers on the axes",
       "toggleGrid": "Ground grid",
+      "toggleGridAxes": "Axes in the ground grid",
+      "toggleGridLabels": "Labels on the axes and grid",
       "togglePeopleSize": "Size of the people",
       "toggleGuides": "Guides",
       "toggleShadows": "Shadows",
@@ -681,7 +683,8 @@
       "noActive": "No active section",
       "empty": "No section planes. Tool “Section plane” in the expanded tool set.",
       "rulers": "Rulers on the axes (m · cm · mm depending on zoom)",
-      "grid": "Ground grid (mm · cm · m depending on zoom)"
+      "grid": "Ground grid (mm · cm · m depending on zoom)",
+      "labels": "Labels along the axes and grid legend (5 m · Grid 1 m · 10 m)"
     },
     "modelInfo": {
       "units": "Units",
