@@ -45,6 +45,7 @@
   - [Dark mode and night scene](#dark-mode-and-night-scene)
   - [Languages and translations](#languages-and-translations)
 - [Getting started](#getting-started)
+  - [With Docker](#with-docker)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
 - [Connecting a local AI model](#connecting-a-local-ai-model)
@@ -213,6 +214,24 @@ npm run format:check   # only report files that are not formatted
 ```
 
 Run `lint:fix` before `format`: the fix adds the missing braces, and the formatter then puts the bodies on their own lines. For VS Code, the recommended Oxc extension is listed in `.vscode/extensions.json`.
+
+### With Docker
+
+No Node.js needed – Docker (or Rancher/Podman Desktop) is enough:
+
+```bash
+docker compose up --build
+```
+
+Open <http://localhost:5173>. The container runs the dev server, so the [remote API](#remote-control-rest-api-swagger-ui-and-mcp) works too: Swagger UI at <http://localhost:5173/api/docs>, MCP at `http://localhost:5173/mcp` (the project's `.mcp.json` works unchanged). Files the MCP tool `export_model` writes land in `./exports`. The port is published on this computer only (`127.0.0.1`).
+
+| | |
+| --- | --- |
+| `S3D_PORT=5174 docker compose up` | another port, e.g. while `npm run dev` already uses 5173 – then point MCP clients to that port (the Remote-API panel shows the right snippets) |
+| `docker compose --profile static up --build static` | the production build behind nginx on <http://localhost:8080> – no remote API |
+| `docker build -t shap3d-ai .` / `docker run --rm -p 127.0.0.1:5173:5173 shap3d-ai` | the same without Compose (`--target static` for the nginx image) |
+
+The source is copied into the image – rebuild (`--build`) after changes. Two things do not run inside the container: the Blender and SketchUp converters (they need the programs on this computer), and an AI provider at `localhost` only works where the browser calls it directly; through the app's proxy use `http://host.docker.internal:11434` (Ollama) instead.
 
 ## Keyboard shortcuts
 
@@ -568,6 +587,7 @@ docs/          logo and README screenshots
 plugins/       stand-alone plugin packages with their own package.json – e.g. openscad/ (not part of the app build)
 scripts/       screenshot automation (headless Chrome), i18n.mjs (translation check and template)
 tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
+Dockerfile, compose.yaml   container for trying it out – the dev server with the remote API, or the nginx build
 ```
 
 ## Regenerating the screenshots

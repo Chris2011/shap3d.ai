@@ -1,0 +1,17 @@
+node_modules
+dist
+exports
+.git
+.vscode
+.claude
+.mcp.json
+*.log
+*.bak
+__pycache__
+# not part of the app: README images, stand-alone plugin packages, Trimble's SDK
+docs
+plugins
+tools/sketchup-sdk
+Dockerfile
+compose.yaml
+.dockerignore

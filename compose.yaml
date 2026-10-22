@@ -1,0 +1,27 @@
+# docker compose up            → app with remote API on http://localhost:5173 (REST /api, Swagger UI /api/docs, MCP /mcp)
+# S3D_PORT=5174 docker compose up   → another port on this computer (e.g. while `npm run dev` runs)
+# docker compose --profile static up static   → production build on http://localhost:8080 (no remote API)
+services:
+  shap3d:
+    build:
+      context: .
+      target: dev
+    image: shap3d-ai:dev
+    ports:
+      # only on this computer – the remote API can change the model
+      - '127.0.0.1:${S3D_PORT:-5173}:5173'
+    volumes:
+      # files written by the MCP tool export_model
+      - ./exports:/app/exports
+    extra_hosts:
+      # lets the app's AI proxy reach Ollama / LM Studio on this computer as http://host.docker.internal:11434
+      - 'host.docker.internal:host-gateway'
+
+  static:
+    profiles: [static]
+    build:
+      context: .
+      target: static
+    image: shap3d-ai:static
+    ports:
+      - '127.0.0.1:${S3D_STATIC_PORT:-8080}:80'
