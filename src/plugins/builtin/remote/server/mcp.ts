@@ -7,8 +7,9 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, resolve } from 'node:path';
 import { ACTIONS, type RemoteAction } from './actions';
 import { RemoteError, type Bridge } from './bridge';
-import { REMOTE_VERSION } from '../version';
 
+// the version of this MCP interface (like the API version in openapi.ts) – raised when tools change incompatibly, not with every plugin version
+const SERVER_INFO = { name: 'shap3d-ai', title: 'Shap3D.ai', version: '1.0.0' };
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 const INSTRUCTIONS =
   'Controls the Shap3D.ai 3D editor that is open in the browser (SketchUp-like, units metres, Z up). ' +
@@ -95,7 +96,7 @@ export const createMcp = (bridge: Bridge, projectRoot: string) => {
           return reply({
             protocolVersion: PROTOCOL_VERSIONS.includes(requested) ? requested : PROTOCOL_VERSIONS[0],
             capabilities: { tools: { listChanged: false } },
-            serverInfo: { name: 'shap3d-ai', title: 'Shap3D.ai', version: REMOTE_VERSION },
+            serverInfo: SERVER_INFO,
             instructions: INSTRUCTIONS,
           });
         }

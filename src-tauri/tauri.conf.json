@@ -1,0 +1,43 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Shap3D.ai",
+  "mainBinaryName": "shap3d-ai",
+  "version": "../package.json",
+  "identifier": "ai.shap3d.editor",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Shap3D.ai",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 960,
+        "minHeight": 600,
+        "center": true,
+        "resizable": true,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "Christian Lenz",
+    "copyright": "© 2026 Christian Lenz – Apache-2.0",
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/Chris2011/shap3d.ai",
+    "category": "GraphicsAndDesign",
+    "shortDescription": "Easy 3D modeling with a local AI copilot",
+    "longDescription": "Easy 3D modeling – sketch, push/pull, script and sculpt terrain, with a local AI copilot, all on your own machine.",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+  }
+}

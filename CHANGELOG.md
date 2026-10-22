@@ -9,6 +9,7 @@ The built-in plugins and the [OpenSCAD plugin package](plugins/openscad) have th
 
 | Version | Date | In one sentence |
 | --- | --- | --- |
+| [0.8.0](#080--2026-10-22) | 2026-10-22 | Native desktop app with Tauri – executable and installers |
 | [0.7.0](#070--2026-10-22) | 2026-10-22 | Remote control: REST API, Swagger UI and MCP server, plus Docker |
 | [0.6.0](#060--2026-10-20) | 2026-10-20 | Code completion and five languages |
 | [0.5.0](#050--2026-10-19) | 2026-10-19 | Plugin system – terrain, imports, AI and 3D text become plugins |
@@ -17,19 +18,35 @@ The built-in plugins and the [OpenSCAD plugin package](plugins/openscad) have th
 
 Plugin versions per app version (**bold** = new version, plain = unchanged, – = not there yet):
 
-| Plugin | 0.5.0 | 0.6.0 | 0.7.0 |
-| --- | --- | --- | --- |
+| Plugin | 0.5.0 | 0.6.0 | 0.7.0 | 0.8.0 |
+| --- | --- | --- | --- | --- |
 | [AI assistant](src/plugins/builtin/ai/CHANGELOG.md) (`ai`) | **1.0.0** | **1.1.0** | **1.2.0** |
-| [Terrain](src/plugins/builtin/terrain/CHANGELOG.md) (`terrain`) | **1.0.0** | **1.1.0** | 1.1.0 |
-| [Import formats](src/plugins/builtin/imports/CHANGELOG.md) (`imports`) | **1.0.0** | **1.1.0** | 1.1.0 |
-| [3D text](src/plugins/builtin/text3d/CHANGELOG.md) (`text3d`) | **1.0.0** | **1.1.0** | 1.1.0 |
+| [Terrain](src/plugins/builtin/terrain/CHANGELOG.md) (`terrain`) | **1.0.0** | **1.1.0** |
+| [Import formats](src/plugins/builtin/imports/CHANGELOG.md) (`imports`) | **1.0.0** | **1.1.0** |
+| [3D text](src/plugins/builtin/text3d/CHANGELOG.md) (`text3d`) | **1.0.0** | **1.1.0** |
 | [Languages](src/plugins/builtin/i18n/CHANGELOG.md) (`i18n`) | – | **1.0.0** | **1.0.1** |
 | [Remote API](src/plugins/builtin/remote/CHANGELOG.md) (`remote`) | – | – | **1.0.0** |
-| [OpenSCAD](plugins/openscad/CHANGELOG.md) (package) | **1.2.0** | **1.4.0** | 1.4.0 |
+| [OpenSCAD](plugins/openscad/CHANGELOG.md) (package) | **1.2.0** | **1.4.0** |
 
 ## [Unreleased]
 
 Nothing yet.
+
+## [0.8.0] – 2026-10-22
+
+### Added
+
+- **Native desktop app** with [Tauri 2](https://tauri.app): Shap3D.ai in its own window, as a stand-alone executable and with installers – MSI and NSIS setup on Windows, `.dmg` on macOS, `.deb`, `.rpm` and AppImage on Linux (`npm run desktop:dev`, `npm run desktop:build`). It uses the system's web view, so the Windows setup is only about 3 MB.
+- App icons for all desktop platforms, generated from the favicon; dropping files on the window imports them as before.
+
+### Changed
+
+- The app version lives in one place only, `package.json` – the executable and the installers take it from there.
+- The dev server keeps its port (5173) and ignores the Rust side in `src-tauri/`.
+
+### Known limitations
+
+- The remote API (REST, Swagger UI, MCP), the AI proxy and the Blender/SketchUp converters need the dev server and are not part of the desktop build yet. A local AI server has to allow the app's origin (`http://tauri.localhost` on Windows, `tauri://localhost` on macOS and Linux).
 
 ## [0.7.0] – 2026-10-22
 
@@ -122,8 +139,9 @@ First version in this repository:
 - **Terrain editor**, **polygon inspector** (exact resolution, more or fewer polygons), **dark mode** and **night scene**.
 - Import of SketchUp, OBJ, STL and glTF/GLB files; export as GLB, glTF, STL, OBJ, PNG and the native `.shap3d.json`.
 
-[Unreleased]: https://github.com/Chris2011/shap3d.ai/compare/b50d96c...HEAD
-[0.7.0]: https://github.com/Chris2011/shap3d.ai/compare/753a191...b50d96c
+[Unreleased]: https://github.com/Chris2011/shap3d.ai/compare/15aab26...HEAD
+[0.8.0]: https://github.com/Chris2011/shap3d.ai/compare/15aab26...HEAD
+[0.7.0]: https://github.com/Chris2011/shap3d.ai/compare/753a191...15aab26
 [0.6.0]: https://github.com/Chris2011/shap3d.ai/compare/8f34310...753a191
 [0.5.0]: https://github.com/Chris2011/shap3d.ai/compare/27cb174...8f34310
 [0.4.0]: https://github.com/Chris2011/shap3d.ai/compare/699e0ce...27cb174

@@ -54,4 +54,7 @@ function aiProxy(): Plugin {
 
 export default defineConfig({
   plugins: [vue(), tailwindcss(), aiProxy(), convertBridge(), remoteApi()],
+  // Tauri (desktop app): keep its output visible, never switch ports, and don't watch the Rust side
+  clearScreen: false,
+  server: { strictPort: true, watch: { ignored: ['**/src-tauri/**'] } },
 });

@@ -1,0 +1,24 @@
+[package]
+name = "shap3d-ai"
+# not maintained here: the app version lives in package.json – tauri.conf.json reads it for the executable and installers
+version = "0.0.0"
+description = "Shap3D.ai – easy 3D modeling with a local AI copilot (desktop shell)"
+authors = ["Christian Lenz"]
+license = "Apache-2.0"
+repository = "https://github.com/Chris2011/shap3d.ai"
+edition = "2024"
+rust-version = "1.90"
+
+[lib]
+name = "shap3d_ai_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.12.5", features = [] }
+tauri-plugin-log = "2"

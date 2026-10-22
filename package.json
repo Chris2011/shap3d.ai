@@ -2,7 +2,7 @@
   "name": "shap3d-ai",
   "private": true,
   "license": "Apache-2.0",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Easy 3D modeling in the browser with a local AI copilot – sketch, push/pull, script and sculpt terrain, all on your own machine.",
   "type": "module",
   "engines": {
@@ -12,6 +12,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build",
     "lint": "oxlint src scripts plugins/openscad/src",
     "lint:fix": "oxlint --fix src scripts plugins/openscad/src",
     "format": "oxfmt src scripts plugins/openscad/src",
@@ -39,6 +41,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^22.20.5",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-vue": "^6.0.10",

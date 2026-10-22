@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <b>Easy 3D modeling in the browser – with a local AI copilot.</b><br>
+  <b>Easy 3D modeling in the browser or as a native desktop app – with a local AI copilot.</b><br>
   Sketch, push/pull, script and sculpt terrain – everything runs on your own machine.
 </p>
 
@@ -17,6 +17,7 @@
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-6-3178c6">
   <img alt="Vite" src="https://img.shields.io/badge/Vite-8-646cff">
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-4-38bdf8">
+  <img alt="Tauri" src="https://img.shields.io/badge/Tauri-2-24c8db">
   <img alt="Local AI" src="https://img.shields.io/badge/AI-100%25%20local-5fd4e6">
   <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/License-Apache%202.0-blue"></a>
 </p>
@@ -46,6 +47,7 @@
   - [Languages and translations](#languages-and-translations)
 - [Getting started](#getting-started)
   - [With Docker](#with-docker)
+  - [Desktop app (Tauri)](#desktop-app-tauri)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
 - [Connecting a local AI model](#connecting-a-local-ai-model)
@@ -67,7 +69,7 @@
 
 ## Highlights
 
-- **Push/pull modeling in the browser** – a real boundary-representation kernel with faces, edges, groups and components, inference snapping and solid tools.
+- **Push/pull modeling in the browser** – or as a [native desktop app](#desktop-app-tauri) for Windows, macOS and Linux with its own window and installer. A real boundary-representation kernel with faces, edges, groups and components, inference snapping and solid tools.
 - **AI that runs on your machine** – talk to Ollama, LM Studio or LiteLLM. The assistant writes modeling scripts, or a mesh model such as LLaMA-Mesh generates geometry directly. No cloud, no API keys.
 - **Scriptable** – a small JavaScript API (`s3d.box(…)`, `s3d.terrain(…)`, …) with 44 documented commands, 52 ready-made materials and a searchable in-app reference.
 - **Terrain sculpting** – raise, lower, smooth and flatten landscapes with a brush. Grass, earth, rock and snow are painted automatically.
@@ -76,7 +78,7 @@
 - **Measuring aids** – rulers on the axes that switch from metres to centimetres to millimetres as you zoom in, an infinite ground grid whose spacing follows the zoom, and reference people that show their height.
 - **Plugin system** – extend the app with plain JavaScript modules or whole plugin packages: commands, tools, panels, script commands and languages, file importers and exporters, overlay drawings. Three examples are included, plus an **OpenSCAD plugin** that runs the real OpenSCAD in the browser.
 - **Welcome tour** – six short animated steps on the first start, available again any time from the menu.
-- **Dark mode with a real night scene**, a split button for every combination, and an English or German user interface.
+- **Dark mode with a real night scene**, a split button for every combination, and the interface in English, German, French, Spanish or Arabic.
 
 ## Features
 
@@ -235,6 +237,19 @@ Open <http://localhost:5173>. The container runs the dev server, so the [remote 
 | `docker build -t shap3d-ai .` / `docker run --rm -p 127.0.0.1:5173:5173 shap3d-ai` | the same without Compose (`--target static` for the nginx image) |
 
 The source is copied into the image – rebuild (`--build`) after changes. Two things do not run inside the container: the Blender and SketchUp converters (they need the programs on this computer), and an AI provider at `localhost` only works where the browser calls it directly; through the app's proxy use `http://host.docker.internal:11434` (Ollama) instead.
+
+### Desktop app (Tauri)
+
+Shap3D.ai also runs as a native desktop app built with [Tauri 2](https://tauri.app) – its own window and an executable, using the system's web view (WebView2 on Windows). Requirements besides Node.js: [Rust](https://rustup.rs) (via rustup) and, on Windows, the Visual Studio C++ build tools; macOS needs the Xcode command line tools, Linux the [webkit2gtk packages](https://tauri.app/start/prerequisites/).
+
+```bash
+npm run desktop:dev     # the app in its own window, with the dev server (and the remote API)
+npm run desktop:build   # executable and installers
+```
+
+`desktop:dev` starts the dev server itself – stop a running `npm run dev` first (port 5173). `desktop:build` writes `src-tauri/target/release/shap3d-ai.exe` and the installers to `src-tauri/target/release/bundle/` (MSI and NSIS setup on Windows, `.dmg`/`.app` on macOS, `.deb`/`.rpm`/AppImage on Linux). The first build compiles the Rust dependencies and takes a few minutes. The version comes from `package.json`; the icons are generated from `public/favicon.svg` (`npx tauri icon public/favicon.svg`).
+
+What the built app does not have, because it needs the dev server: the remote API (REST, Swagger UI, MCP), the AI proxy for providers without CORS and the Blender/SketchUp converters. A local AI server has to allow the app's origin – `http://tauri.localhost` on Windows, `tauri://localhost` on macOS and Linux (for Ollama e.g. `OLLAMA_ORIGINS`).
 
 ## Keyboard shortcuts
 
@@ -590,6 +605,7 @@ docs/          logo and README screenshots
 plugins/       stand-alone plugin packages with their own package.json – e.g. openscad/ (not part of the app build)
 scripts/       screenshot automation (headless Chrome), i18n.mjs (translation check and template)
 tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
+src-tauri/      the desktop app (Tauri 2): Rust shell, tauri.conf.json, app icons
 Dockerfile, compose.yaml   container for trying it out – the dev server with the remote API, or the nginx build
 ```
 

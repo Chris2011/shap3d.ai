@@ -11,7 +11,7 @@ Nothing yet.
 - **REST API** under `/api` for the most common actions: scene and objects, creating solids, moving/rotating/scaling, materials, running `s3d` scripts, undo/redo, camera and standard views, menu commands, export (GLB, glTF, OBJ, STL, JSON) and screenshots.
 - **OpenAPI 3.1** at `/api/openapi.json` and **Swagger UI** at `/api/docs`.
 - **MCP server** at `/mcp` (Streamable HTTP) with 21 tools, and `server/mcpStdio.mjs` for stdio clients.
-- **Panel** *Remote-API*: which tab receives the requests (*Use this tab*), an activity log of every REST and MCP call, links to the documentation and the MCP set-up to copy.
+- **Panel** _Remote-API_: which tab receives the requests (_Use this tab_), an activity log of every REST and MCP call, links to the documentation and the MCP set-up to copy.
 - Requests go over the dev server's WebSocket to the tab that was active last; the plugin exists only on the dev server (`npm run dev`), not in a production build.
 
 ### Security
