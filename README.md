@@ -191,9 +191,11 @@ The languages, the language switch and the editor are the built-in plugin **Spra
 Requirements: **Node.js 20.19+ or 22.12+** and a current Chromium, Firefox or Safari.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
+
+`npm ci` installs exactly the versions in `package-lock.json` (checked against their hashes) and never changes the lock file – so nobody gets a newer, unreviewed dependency by accident. Use `npm install <package>` only when you deliberately add or update a dependency, and commit the changed lock file.
 
 Open <http://localhost:5173>. The interface follows the browser language (English, German, French, Spanish or Arabic, switchable with 🌐 at the top). On the first start the welcome tour opens.
 
@@ -518,7 +520,7 @@ The example package in [`plugins/openscad/`](plugins/openscad) runs the official
 
 ```bash
 cd plugins/openscad
-npm install
+npm ci
 npm run build
 ```
 

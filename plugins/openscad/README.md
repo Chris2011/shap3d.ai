@@ -40,11 +40,11 @@ An OpenSCAD instance can only compute once, and `s3d.scad()` needs one right awa
 
 ```bash
 cd plugins/openscad
-npm install
+npm ci
 npm run build
 ```
 
-`npm run build` is a plain `vite build` (library mode, [`vite.config.ts`](vite.config.ts)); Vite and TypeScript come from the repository root, so run `npm install` there as well. `npm run typecheck` checks the TypeScript against the app's plugin types.
+`npm run build` is a plain `vite build` (library mode, [`vite.config.ts`](vite.config.ts)); Vite and TypeScript come from the repository root, so run `npm ci` there as well. `npm run typecheck` checks the TypeScript against the app's plugin types.
 
 Then in Shap3D.ai: *Plugins › Load plugin folder…* and pick the folder `plugins/openscad/dist`. The plugin including OpenSCAD and the fonts (about 16 MB) is kept in the browser (IndexedDB) and loaded on every start.
 
