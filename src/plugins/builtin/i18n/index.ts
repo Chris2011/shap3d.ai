@@ -26,7 +26,7 @@ const LANGUAGE_ICON =
 const i18nPlugin: S3dPlugin = {
   id: 'i18n',
   name: 'i18n.plugin.name',
-  version: '1.0.0',
+  version: '1.0.1',
   author: 'Shap3D.ai',
   description: 'i18n.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },

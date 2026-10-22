@@ -32,7 +32,7 @@ const loaders = () => import('./loaders');
 const importsPlugin: S3dPlugin = {
   id: 'imports',
   name: 'imports.plugin.name',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Shap3D.ai',
   description: 'imports.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },

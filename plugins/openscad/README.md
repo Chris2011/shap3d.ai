@@ -36,6 +36,10 @@ In the “OpenSCAD” panel under **Files** you can add single files or whole fo
 
 An OpenSCAD instance can only compute once, and `s3d.scad()` needs one right away. So before every script run the plugin counts the `s3d.scad()` calls in the code and prepares that many instances. When the calls sit in a loop, the number is only known after the first run: a one-time message says that more instances are being prepared, and from the next run on there are enough (up to 24 calls per run; the learned number is kept).
 
+## Changes
+
+What changed in which version: [CHANGELOG.md](CHANGELOG.md).
+
 ## Building and installing
 
 ```bash

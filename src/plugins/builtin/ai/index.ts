@@ -21,7 +21,7 @@ export const AI_PANEL = 'ai.chat';
 const aiPlugin: S3dPlugin = {
   id: 'ai',
   name: 'ai.plugin.name',
-  version: '1.0.0',
+  version: '1.2.0',
   author: 'Shap3D.ai',
   description: 'ai.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },

@@ -61,6 +61,7 @@
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
 - [Credits](#credits)
+- [Changelog](CHANGELOG.md)
 - [Legal notice](#legal-notice)
 - [License](#license)
 
@@ -487,7 +488,7 @@ Some features of the app are written as plugins themselves, in [`src/plugins/bui
 - **Remote-API** (`src/plugins/builtin/remote/`, dev server only) – the REST API, Swagger UI and MCP server: `server/` is the Vite plugin that takes the requests, the rest answers them against the editor; its panel shows the connection, an activity log and the MCP set-up (see [Remote control](#remote-control-rest-api-swagger-ui-and-mcp)).
 - **Sprachen** (`src/plugins/builtin/i18n/`) – German, French, Spanish and Arabic for the app (`languages/*.json`), the language switch in the top bar, a *Language: …* command per language and the translation editor (see [Languages and translations](#languages-and-translations)). Switched off, only English is left.
 
-Each built-in plugin keeps its own texts in `i18n/en.json` (source) and `i18n/de.json` in its folder – the core never holds texts of plugins.
+Each built-in plugin keeps its own texts in `i18n/en.json` (source) and `i18n/de.json` in its folder – the core never holds texts of plugins. Each one also has its own version and a `CHANGELOG.md` in its folder; the app's changes are in [CHANGELOG.md](CHANGELOG.md).
 
 ![The 3D-text plugin: letters in Pacifico, Bebas Neue, Fredoka and Orbitron, and the dialog with the preview in Lobster](docs/screenshots/text3d.png)
 

@@ -65,6 +65,7 @@ export const buildOpenApi = (serverUrl: string) => {
     openapi: '3.1.0',
     info: {
       title: 'Shap3D.ai Remote API',
+      // the version of the API contract – raised when endpoints change incompatibly, independent of the app version
       version: '1.0.0',
       description:
         'Controls the Shap3D.ai editor that is open in the browser. The dev server (`npm run dev`) forwards every request over its WebSocket to the open tab ' +

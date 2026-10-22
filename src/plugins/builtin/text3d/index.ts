@@ -35,7 +35,7 @@ class TextTool extends Tool {
 const text3dPlugin: S3dPlugin = {
   id: 'text3d',
   name: 'text3d.plugin.name',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Shap3D.ai',
   description: 'text3d.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },

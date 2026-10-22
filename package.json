@@ -2,9 +2,12 @@
   "name": "shap3d-ai",
   "private": true,
   "license": "Apache-2.0",
-  "version": "0.3.0",
+  "version": "0.7.0",
   "description": "Easy 3D modeling in the browser with a local AI copilot – sketch, push/pull, script and sculpt terrain, all on your own machine.",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
