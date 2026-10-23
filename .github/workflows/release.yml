@@ -1,0 +1,250 @@
+# Release of Shap3D.ai – starts with a version tag, e.g.  git tag v0.9.0 && git push origin v0.9.0
+#
+#   prepare   tag ↔ package.json check, lint, format check, web build, draft release with the CHANGELOG.md section
+#   desktop   Tauri installers for Windows (MSI, NSIS), macOS (.dmg, universal) and Linux (.deb, .rpm, AppImage)
+#   docker    images on GHCR: dev target (with remote API) and static target (nginx)
+#   publish   turns the draft into the real release once everything above has worked
+#
+# Actions are pinned to commit SHAs; the comment behind each one names the release.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  prepare:
+    name: Check, web build and draft release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      release_id: ${{ steps.release.outputs.id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Tag must match package.json
+        id: version
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          package_version="$(node -p "require('./package.json').version")"
+          if [ "$tag_version" != "$package_version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match the version in package.json ($package_version)."
+            exit 1
+          fi
+          echo "version=$package_version" >> "$GITHUB_OUTPUT"
+          # 0.9.0-rc.1 and the like become a pre-release
+          if [[ "$package_version" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Release notes from CHANGELOG.md
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # everything between "## [<version>]" and the next "## " heading (or the link list at the end),
+          # without leading blank lines – $(…) drops the trailing ones
+          notes="$(awk -v version="$VERSION" '
+            index($0, "## [" version "]") == 1 { found = 1; next }
+            found && (/^## / || /^\[[^]]+\]: /) { exit }
+            found { print }
+          ' CHANGELOG.md | sed -e '/./,$!d')"
+          if [ -z "$notes" ]; then
+            echo "::error::CHANGELOG.md has no section \"## [$VERSION]\"."
+            exit 1
+          fi
+          printf '%s\n' "$notes" > release-notes.md
+          cat release-notes.md
+
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run build
+
+      - name: Pack web build
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: cd dist && zip -qr "../shap3d-ai_${VERSION}_web.zip" .
+
+      - name: Create draft release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          # a re-run reuses the draft of the first attempt
+          release_id="$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+            --jq ".[] | select(.draft and .tag_name == \"$GITHUB_REF_NAME\") | .id" | head -n 1)"
+          if [ -z "$release_id" ]; then
+            release_id="$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
+              -f tag_name="$GITHUB_REF_NAME" \
+              -f name="Shap3D.ai $VERSION" \
+              -F body=@release-notes.md \
+              -F draft=true \
+              -F prerelease="$PRERELEASE" \
+              --jq .id)"
+          fi
+          echo "id=$release_id" >> "$GITHUB_OUTPUT"
+          gh release upload "$GITHUB_REF_NAME" "shap3d-ai_${VERSION}_web.zip" --clobber
+
+  desktop:
+    name: Desktop (${{ matrix.name }})
+    needs: prepare
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            runner: windows-latest
+            args: ''
+            rust_targets: ''
+          - name: macOS
+            runner: macos-latest
+            # one .dmg for Apple silicon and Intel
+            args: --target universal-apple-darwin
+            rust_targets: aarch64-apple-darwin x86_64-apple-darwin
+          - name: Linux
+            # oldest supported Ubuntu: the .deb and the AppImage then also run on older glibc versions
+            runner: ubuntu-22.04
+            args: ''
+            rust_targets: ''
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Linux packages for Tauri
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Rust toolchain
+        shell: bash
+        env:
+          RUST_TARGETS: ${{ matrix.rust_targets }}
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          for target in $RUST_TARGETS; do rustup target add "$target"; done
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: src-tauri -> target
+          key: ${{ matrix.name }}
+
+      - run: npm ci --no-audit --no-fund
+
+      # same as `npm run desktop:build` (tauri build – it runs `npm run build` itself), uploads into the draft
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tauriScript: npx tauri
+          args: ${{ matrix.args }}
+          releaseId: ${{ needs.prepare.outputs.release_id }}
+
+  docker:
+    name: Docker images (GHCR)
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ghcr.io/<owner>/shap3d.ai:0.9.0, :0.9, :latest – dev server with remote API
+          - target: dev
+            suffix: ''
+            latest: auto
+            extra_tag: ''
+          # ghcr.io/<owner>/shap3d.ai:0.9.0-static, :0.9-static, :static – production build with nginx
+          - target: static
+            suffix: -static
+            latest: 'false'
+            extra_tag: type=raw,value=static,enable=${{ needs.prepare.outputs.prerelease == 'false' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=${{ matrix.latest }}
+            suffix=${{ matrix.suffix }},onlatest=true
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ needs.prepare.outputs.prerelease == 'false' }}
+            ${{ matrix.extra_tag }}
+          labels: |
+            org.opencontainers.image.title=Shap3D.ai${{ matrix.suffix }}
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+
+  publish:
+    name: Publish release
+    needs: [prepare, desktop, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
+          PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+        run: |
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
+            -F draft=false \
+            -f make_latest="$([ "$PRERELEASE" = true ] && echo false || echo true)" \
+            --silent

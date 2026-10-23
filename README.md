@@ -48,6 +48,7 @@
 - [Getting started](#getting-started)
   - [With Docker](#with-docker)
   - [Desktop app (Tauri)](#desktop-app-tauri)
+  - [Releases](#releases)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
 - [Connecting a local AI model](#connecting-a-local-ai-model)
@@ -250,6 +251,23 @@ npm run desktop:build   # executable and installers
 `desktop:dev` starts the dev server itself – stop a running `npm run dev` first (port 5173). `desktop:build` writes `src-tauri/target/release/shap3d-ai.exe` and the installers to `src-tauri/target/release/bundle/` (MSI and NSIS setup on Windows, `.dmg`/`.app` on macOS, `.deb`/`.rpm`/AppImage on Linux). The first build compiles the Rust dependencies and takes a few minutes. The version comes from `package.json`; the icons are generated from `public/favicon.svg` (`npx tauri icon public/favicon.svg`).
 
 What the built app does not have, because it needs the dev server: the remote API (REST, Swagger UI, MCP), the AI proxy for providers without CORS and the Blender/SketchUp converters. A local AI server has to allow the app's origin – `http://tauri.localhost` on Windows, `tauri://localhost` on macOS and Linux (for Ollama e.g. `OLLAMA_ORIGINS`).
+
+### Releases
+
+A version tag starts the [release workflow](.github/workflows/release.yml) on GitHub Actions:
+
+1. Raise `version` in `package.json` (`npm version 0.9.0 --no-git-tag-version` also updates the lock file) and turn `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) into `## [0.9.0] – <date>`; commit both.
+2. Tag and push: `git tag v0.9.0 && git push origin v0.9.0`.
+
+The workflow then
+
+- checks that the tag matches `package.json` and that `CHANGELOG.md` has a section for this version – otherwise it stops before anything is built,
+- runs `npm run lint` and `npm run format:check`, builds the web app and creates a **draft** release with that changelog section as its text and the web build as `shap3d-ai_<version>_web.zip`,
+- builds the desktop installers with Tauri and adds them to the draft: MSI and NSIS setup (Windows), a universal `.dmg` for Apple silicon and Intel (macOS), `.deb`, `.rpm` and AppImage (Linux),
+- pushes two Docker images to the GitHub Container Registry: `ghcr.io/chris2011/shap3d.ai:<version>` / `:latest` (dev server with the remote API) and `:<version>-static` / `:static` (production build behind nginx), each for amd64 and arm64,
+- publishes the release only when all of this has worked. If a job fails, the draft stays – fix the cause and use *Re-run failed jobs*; the run reuses the draft.
+
+A tag with a suffix such as `v0.9.0-rc.1` (and the same version in `package.json`) becomes a pre-release: it does not get the `latest`/`static` image tags and is not marked as the latest release. The installers are not code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first start (macOS: right-click → *Open*). Plugin versions are not part of the release – they live in the plugin changelogs.
 
 ## Keyboard shortcuts
 
