@@ -221,6 +221,8 @@ npm run format:check   # only report files that are not formatted
 
 Run `lint:fix` before `format`: the fix adds the missing braces, and the formatter then puts the bodies on their own lines. For VS Code, the recommended Oxc extension is listed in `.vscode/extensions.json`.
 
+A **pre-commit hook** does this for you: `npm install` sets it up ([husky](https://typicode.github.io/husky/), `.husky/pre-commit`), and on every commit [lint-staged](https://github.com/lint-staged/lint-staged) runs `oxlint --fix` and then `oxfmt` on the staged files in those folders (JSON, CSS and Markdown are only formatted). The fixes go into the commit; if oxlint still finds an error it cannot fix, the commit stops and shows it. Only the staged parts of a file are checked – changes you have not staged stay as they are. In an emergency, `git commit --no-verify` skips the hook.
+
 ### With Docker
 
 No Node.js needed – Docker (or Rancher/Podman Desktop) is enough:

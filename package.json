@@ -17,7 +17,15 @@
     "lint": "oxlint src scripts plugins/openscad/src",
     "lint:fix": "oxlint --fix src scripts plugins/openscad/src",
     "format": "oxfmt src scripts plugins/openscad/src",
-    "format:check": "oxfmt --check src scripts plugins/openscad/src"
+    "format:check": "oxfmt --check src scripts plugins/openscad/src",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "{src,scripts,plugins/openscad/src}/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "{src,scripts,plugins/openscad/src}/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "^5.3.0",
@@ -45,6 +53,8 @@
     "@types/node": "^22.20.5",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-vue": "^6.0.10",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "oxfmt": "0.72.0",
     "oxlint": "1.87.0",
     "swagger-ui-dist": "^5.34.0",
