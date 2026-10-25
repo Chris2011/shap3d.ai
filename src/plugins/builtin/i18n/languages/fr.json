@@ -84,6 +84,8 @@
       "toggleGridLabels": "Étiquettes des axes et de la grille",
       "togglePeopleSize": "Taille des personnes",
       "toggleGuides": "Guides",
+      "toggleSceneTabs": "Onglets des scènes",
+      "togglePurgeReminder": "Rappeler de purger à l’enregistrement",
       "toggleShadows": "Ombres",
       "toggleHidden": "Géométrie masquée",
       "toggleSectionPlanes": "Plans de coupe",
@@ -183,7 +185,8 @@
       "renameDefinition": "Renommer la définition",
       "script": "Script",
       "insertMesh": "Insérer un maillage",
-      "fewerPolygons": "Moins de polygones"
+      "fewerPolygons": "Moins de polygones",
+      "tagsToScenes": "Balises vers scènes"
     },
     "toast": {
       "nothingSelected": "Rien n’est sélectionné",
@@ -206,7 +209,8 @@
     "confirm": {
       "discardChanges": "Abandonner les modifications non enregistrées ?",
       "resizeGroup": "Voulez-vous redimensionner le contenu du groupe ? (facteur {factor})",
-      "resizeModel": "Voulez-vous redimensionner le modèle ? (facteur {factor})"
+      "resizeModel": "Voulez-vous redimensionner le modèle ? (facteur {factor})",
+      "purgeOnSave": "{count} groupe ou composant inutilisé – le purger avant d’enregistrer ? | {count} groupes ou composants inutilisés – les purger avant d’enregistrer ?"
     },
     "prompt": {
       "componentName": "Nom du composant",
@@ -301,9 +305,10 @@
         "scalePick": "Sélectionnez les objets à mettre à l’échelle.",
         "followmeProfile": "Cliquez sur la face de profil qui doit suivre le chemin sélectionné.",
         "followmePath": "Sélectionnez d’abord des arêtes comme chemin (p. ex. un double-clic sur une face sélectionne ses arêtes), puis cet outil.",
-        "tapeEnd": "Choisissez le point final. Ctrl active/désactive la création de guides.",
+        "tapeEnd": "Choisissez le point final. Ctrl bascule : mesurer › ligne guide › point guide.",
         "tapeStart": "Choisissez le point de départ (point ou arête).",
         "tapeStartGuides": "Choisissez le point de départ (point ou arête). Des guides sont créés.",
+        "tapeStartPoint": "Choisissez le point de départ (point ou arête). Un point guide est créé au point final.",
         "protractorVertex": "Choisissez le sommet.",
         "protractorFirst": "Choisissez le premier côté.",
         "protractorAngle": "Choisissez l’angle (crée un guide).",
@@ -640,7 +645,13 @@
       "assignTitle": "Attribuer la sélection à la balise en surbrillance",
       "assign": "Attribuer",
       "untagged": "Sans balise",
-      "hint": "Double-clic pour renommer. Les balises masquées cachent toutes les entités qui les portent."
+      "hint": "Double-clic pour renommer. Les balises masquées cachent toutes les entités qui les portent.",
+      "toScenes": "Vers les scènes…",
+      "toScenesTitle": "Appliquer la visibilité de la balise sélectionnée aux scènes",
+      "toScenesVisible": "« {tag} » est visible – l’afficher dans ces scènes :",
+      "toScenesHidden": "« {tag} » est masquée – la masquer dans ces scènes :",
+      "apply": "Appliquer",
+      "appliedToScenes": "« {tag} » appliquée à {count} scène | « {tag} » appliquée à {count} scènes"
     },
     "scenes": {
       "add": "Ajouter une scène",
@@ -673,6 +684,8 @@
     },
     "outliner": {
       "filter": "Filtrer",
+      "byHierarchy": "Hiérarchie",
+      "byTags": "Balises",
       "empty": "Aucun groupe ni composant dans le modèle.",
       "show": "Afficher"
     },
@@ -840,7 +853,8 @@
         "step1": "Cliquez sur le point de départ (ou une arête pour un guide parallèle).",
         "step2": "Cliquez sur le point final – la longueur figure dans le champ « Mesures ».",
         "step3": "Saisissez une nouvelle longueur pour mettre le modèle à l’échelle.",
-        "mod1": "Ctrl : guides activés/désactivés"
+        "step4": "Double-clic : un seul point guide à cet endroit.",
+        "mod1": "Ctrl : mesurer seulement › lignes guides › point guide"
       },
       "protractor": {
         "desc": "Mesure des angles et crée des guides inclinés.",

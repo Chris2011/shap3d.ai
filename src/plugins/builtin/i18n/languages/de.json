@@ -84,6 +84,8 @@
       "toggleGridLabels": "Beschriftung an Achsen und Raster",
       "togglePeopleSize": "Größe der Personen",
       "toggleGuides": "Hilfslinien",
+      "toggleSceneTabs": "Szenen-Tabs",
+      "togglePurgeReminder": "Beim Speichern ans Bereinigen erinnern",
       "toggleShadows": "Schatten",
       "toggleHidden": "Ausgeblendete Geometrie",
       "toggleSectionPlanes": "Schnittebenen",
@@ -183,7 +185,8 @@
       "renameDefinition": "Definition umbenennen",
       "script": "Skript",
       "insertMesh": "Mesh einfügen",
-      "fewerPolygons": "Weniger Polygone"
+      "fewerPolygons": "Weniger Polygone",
+      "tagsToScenes": "Tags auf Szenen"
     },
     "toast": {
       "nothingSelected": "Nichts ausgewählt",
@@ -206,7 +209,8 @@
     "confirm": {
       "discardChanges": "Ungespeicherte Änderungen verwerfen?",
       "resizeGroup": "Möchten Sie die Größe des Gruppeninhalts ändern? (Faktor {factor})",
-      "resizeModel": "Möchten Sie die Größe des Modells ändern? (Faktor {factor})"
+      "resizeModel": "Möchten Sie die Größe des Modells ändern? (Faktor {factor})",
+      "purgeOnSave": "{count} unbenutzte Gruppe oder Komponente – vor dem Speichern bereinigen? | {count} unbenutzte Gruppen oder Komponenten – vor dem Speichern bereinigen?"
     },
     "prompt": {
       "componentName": "Name der Komponente",
@@ -301,9 +305,10 @@
         "scalePick": "Wählen Sie die zu skalierenden Objekte aus.",
         "followmeProfile": "Klicken Sie auf die Profilfläche, die dem ausgewählten Pfad folgen soll.",
         "followmePath": "Wählen Sie zuerst Kanten als Pfad aus (z. B. Doppelklick auf eine Fläche wählt ihre Kanten), dann dieses Werkzeug.",
-        "tapeEnd": "Wählen Sie den Endpunkt aus. Strg schaltet das Erstellen von Hilfslinien um.",
+        "tapeEnd": "Wählen Sie den Endpunkt aus. Strg wechselt: Messen › Hilfslinie › Hilfspunkt.",
         "tapeStart": "Wählen Sie den Startpunkt (Punkt oder Kante) aus.",
         "tapeStartGuides": "Wählen Sie den Startpunkt (Punkt oder Kante) aus. Hilfslinien werden erstellt.",
+        "tapeStartPoint": "Wählen Sie den Startpunkt (Punkt oder Kante) aus. Am Endpunkt entsteht ein Hilfspunkt.",
         "protractorVertex": "Wählen Sie den Scheitelpunkt aus.",
         "protractorFirst": "Wählen Sie den ersten Schenkel aus.",
         "protractorAngle": "Wählen Sie den Winkel aus (erstellt eine Hilfslinie).",
@@ -640,7 +645,13 @@
       "assignTitle": "Auswahl dem markierten Tag zuweisen",
       "assign": "Zuweisen",
       "untagged": "Ohne Tag",
-      "hint": "Doppelklick benennt um. Ausgeblendete Tags verbergen alle Elemente mit diesem Tag."
+      "hint": "Doppelklick benennt um. Ausgeblendete Tags verbergen alle Elemente mit diesem Tag.",
+      "toScenes": "Auf Szenen…",
+      "toScenesTitle": "Sichtbarkeit des markierten Tags auf Szenen übertragen",
+      "toScenesVisible": "„{tag}“ ist sichtbar – in diesen Szenen einblenden:",
+      "toScenesHidden": "„{tag}“ ist ausgeblendet – in diesen Szenen ausblenden:",
+      "apply": "Übernehmen",
+      "appliedToScenes": "„{tag}“ auf {count} Szene übertragen | „{tag}“ auf {count} Szenen übertragen"
     },
     "scenes": {
       "add": "Szene hinzufügen",
@@ -673,6 +684,8 @@
     },
     "outliner": {
       "filter": "Filter",
+      "byHierarchy": "Hierarchie",
+      "byTags": "Tags",
       "empty": "Keine Gruppen oder Komponenten im Modell.",
       "show": "Einblenden"
     },
@@ -840,7 +853,8 @@
         "step1": "Startpunkt (oder Kante für parallele Hilfslinie) klicken.",
         "step2": "Endpunkt klicken – die Länge steht im Feld „Maße“.",
         "step3": "Neue Länge eingeben, um das Modell zu skalieren.",
-        "mod1": "Strg: Hilfslinien an/aus"
+        "step4": "Doppelklick: ein einzelner Hilfspunkt genau dort.",
+        "mod1": "Strg: nur messen › Hilfslinien › Hilfspunkt"
       },
       "protractor": {
         "desc": "Misst Winkel und erzeugt geneigte Hilfslinien.",

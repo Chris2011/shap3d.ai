@@ -20,6 +20,7 @@
     </div>
     <S3dViewport class="inset-x-0 top-0 bottom-status" @context="openContext" />
     <S3dTopBar />
+    <S3dSceneTabs />
     <S3dMainToolbar @search="openPalette()" />
     <S3dRightPanels />
     <S3dStatusBar ref="statusBar" />
@@ -55,6 +56,7 @@ import { provide, ref, shallowRef, onMounted, watch } from 'vue';
 import { useEventListener } from '@vueuse/core';
 import S3dViewport from './components/S3dViewport.vue';
 import S3dTopBar from './components/S3dTopBar.vue';
+import S3dSceneTabs from './components/S3dSceneTabs.vue';
 import S3dMainToolbar from './components/S3dMainToolbar.vue';
 import S3dRightPanels from './components/S3dRightPanels.vue';
 import S3dStatusBar from './components/S3dStatusBar.vue';

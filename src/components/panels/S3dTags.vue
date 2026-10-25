@@ -4,6 +4,22 @@
     <button class="s3d-btn small" :disabled="!editor.selection.size" :title="t('tags.assignTitle')" @click="assign">
       {{ t('tags.assign') }}
     </button>
+    <button class="s3d-btn small" :disabled="!scenes.length" :title="t('tags.toScenesTitle')" @click="openToScenes">
+      {{ t('tags.toScenes') }}
+    </button>
+  </div>
+  <!-- the highlighted tag's visibility into the chosen scenes (SketchUp 2025 "Apply Tags to Scenes") -->
+  <div v-if="toScenes" class="mb-2 rounded-[3px] border border-line p-2 text-xs">
+    <p class="mt-0 mb-1.5">
+      {{ t(activeTag?.visible === false ? 'tags.toScenesHidden' : 'tags.toScenesVisible', { tag: activeLabel }) }}
+    </p>
+    <label v-for="scene in scenes" :key="scene.id" class="s3d-check">
+      <input v-model="chosenScenes" type="checkbox" :value="scene.id" /> {{ scene.name }}
+    </label>
+    <div class="mt-2 flex gap-1.5">
+      <button class="s3d-btn small" :disabled="!chosenScenes.length" @click="applyToScenes">{{ t('tags.apply') }}</button>
+      <button class="s3d-btn small" @click="toScenes = false">{{ t('common.cancel') }}</button>
+    </div>
   </div>
   <div class="rounded-[3px] border border-line">
     <div
@@ -48,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import S3dIcon from '../S3dIcon.vue';
 import { useEditor } from '../keys';
 import type { Tag } from '../../core/document';
@@ -60,6 +76,31 @@ const editor = useEditor();
 const active = ref('Untagged');
 const editing = ref<string | null>(null);
 const tags = useModel(() => editor.model.tags);
+const scenes = useModel(() => [...editor.model.scenes]);
+
+const activeTag = computed(() => tags.value.find((tag) => tag.name === active.value));
+const activeLabel = computed(() => (active.value === 'Untagged' ? t('tags.untagged') : active.value));
+const toScenes = ref(false);
+const chosenScenes = ref<number[]>([]);
+const openToScenes = () => {
+  chosenScenes.value = scenes.value.map((scene) => scene.id);
+  toScenes.value = !toScenes.value;
+};
+/** writes the highlighted tag's current visibility into the chosen scenes */
+const applyToScenes = () => {
+  const tag = activeTag.value;
+  if (!tag) {
+    return;
+  }
+  editor.commit('undo.tagsToScenes', () => {
+    for (const scene of editor.model.scenes.filter((candidate) => chosenScenes.value.includes(candidate.id))) {
+      const hidden = (scene.hiddenTags ?? []).filter((name) => name !== tag.name);
+      scene.hiddenTags = tag.visible ? hidden : [...hidden, tag.name];
+    }
+  });
+  toScenes.value = false;
+  editor.toast(t('tags.appliedToScenes', { tag: activeLabel.value, count: chosenScenes.value.length }));
+};
 
 const randomColor = () =>
   '#' +
@@ -121,6 +162,10 @@ const rename = (tag: Tag, newName: string) => {
         item.tag = name;
       }
     });
+    // scenes remember hidden tags by name
+    for (const scene of editor.model.scenes) {
+      scene.hiddenTags = scene.hiddenTags?.map((hidden) => (hidden === oldName ? name : hidden));
+    }
   });
 };
 const remove = (tag: Tag) => {
@@ -131,6 +176,9 @@ const remove = (tag: Tag) => {
         item.tag = undefined;
       }
     });
+    for (const scene of editor.model.scenes) {
+      scene.hiddenTags = scene.hiddenTags?.filter((hidden) => hidden !== tag.name);
+    }
   });
 };
 /** Puts the selected faces, edges and objects on the highlighted tag. */

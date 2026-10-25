@@ -84,6 +84,8 @@
       "toggleGridLabels": "Labels on the axes and grid",
       "togglePeopleSize": "Size of the people",
       "toggleGuides": "Guides",
+      "toggleSceneTabs": "Scene tabs",
+      "togglePurgeReminder": "Remind to purge unused when saving",
       "toggleShadows": "Shadows",
       "toggleHidden": "Hidden geometry",
       "toggleSectionPlanes": "Section planes",
@@ -183,7 +185,8 @@
       "renameDefinition": "Rename definition",
       "script": "Script",
       "insertMesh": "Insert mesh",
-      "fewerPolygons": "Fewer polygons"
+      "fewerPolygons": "Fewer polygons",
+      "tagsToScenes": "Tags to scenes"
     },
     "toast": {
       "nothingSelected": "Nothing selected",
@@ -206,7 +209,8 @@
     "confirm": {
       "discardChanges": "Discard unsaved changes?",
       "resizeGroup": "Do you want to resize the group's contents? (factor {factor})",
-      "resizeModel": "Do you want to resize the model? (factor {factor})"
+      "resizeModel": "Do you want to resize the model? (factor {factor})",
+      "purgeOnSave": "{count} unused group or component – purge it before saving? | {count} unused groups or components – purge them before saving?"
     },
     "prompt": {
       "componentName": "Component name",
@@ -301,9 +305,10 @@
         "scalePick": "Select the objects to scale.",
         "followmeProfile": "Click the profile face that should follow the selected path.",
         "followmePath": "First select edges as the path (e.g. double-clicking a face selects its edges), then this tool.",
-        "tapeEnd": "Pick the end point. Ctrl toggles creating guides.",
+        "tapeEnd": "Pick the end point. Ctrl switches: measure › guide line › guide point.",
         "tapeStart": "Pick the start point (point or edge).",
         "tapeStartGuides": "Pick the start point (point or edge). Guides are created.",
+        "tapeStartPoint": "Pick the start point (point or edge). A guide point is created at the end point.",
         "protractorVertex": "Pick the vertex.",
         "protractorFirst": "Pick the first leg.",
         "protractorAngle": "Pick the angle (creates a guide).",
@@ -640,7 +645,13 @@
       "assignTitle": "Assign the selection to the highlighted tag",
       "assign": "Assign",
       "untagged": "Untagged",
-      "hint": "Double-click renames. Hidden tags hide every entity with that tag."
+      "hint": "Double-click renames. Hidden tags hide every entity with that tag.",
+      "toScenes": "To scenes…",
+      "toScenesTitle": "Apply the visibility of the highlighted tag to scenes",
+      "toScenesVisible": "“{tag}” is visible – show it in these scenes:",
+      "toScenesHidden": "“{tag}” is hidden – hide it in these scenes:",
+      "apply": "Apply",
+      "appliedToScenes": "“{tag}” applied to {count} scene | “{tag}” applied to {count} scenes"
     },
     "scenes": {
       "add": "Add scene",
@@ -673,6 +684,8 @@
     },
     "outliner": {
       "filter": "Filter",
+      "byHierarchy": "Hierarchy",
+      "byTags": "Tags",
       "empty": "No groups or components in the model.",
       "show": "Unhide"
     },
@@ -840,7 +853,8 @@
         "step1": "Click the start point (or an edge for a parallel guide).",
         "step2": "Click the end point – the length is in the “Measurements” box.",
         "step3": "Type a new length to scale the model.",
-        "mod1": "Ctrl: guides on/off"
+        "step4": "Double-click: a single guide point right there.",
+        "mod1": "Ctrl: measure only › guide lines › guide point"
       },
       "protractor": {
         "desc": "Measures angles and creates angled guides.",

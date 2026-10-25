@@ -84,6 +84,8 @@
       "toggleGridLabels": "Etiquetas de ejes y cuadrícula",
       "togglePeopleSize": "Altura de las personas",
       "toggleGuides": "Guías",
+      "toggleSceneTabs": "Pestañas de escenas",
+      "togglePurgeReminder": "Recordar purgar al guardar",
       "toggleShadows": "Sombras",
       "toggleHidden": "Geometría oculta",
       "toggleSectionPlanes": "Planos de sección",
@@ -183,7 +185,8 @@
       "renameDefinition": "Renombrar definición",
       "script": "Script",
       "insertMesh": "Insertar malla",
-      "fewerPolygons": "Menos polígonos"
+      "fewerPolygons": "Menos polígonos",
+      "tagsToScenes": "Etiquetas a escenas"
     },
     "toast": {
       "nothingSelected": "No hay nada seleccionado",
@@ -206,7 +209,8 @@
     "confirm": {
       "discardChanges": "¿Descartar los cambios no guardados?",
       "resizeGroup": "¿Quieres cambiar el tamaño del contenido del grupo? (factor {factor})",
-      "resizeModel": "¿Quieres cambiar el tamaño del modelo? (factor {factor})"
+      "resizeModel": "¿Quieres cambiar el tamaño del modelo? (factor {factor})",
+      "purgeOnSave": "{count} grupo o componente sin usar – ¿purgarlo antes de guardar? | {count} grupos o componentes sin usar – ¿purgarlos antes de guardar?"
     },
     "prompt": {
       "componentName": "Nombre del componente",
@@ -301,9 +305,10 @@
         "scalePick": "Selecciona los objetos que quieres escalar.",
         "followmeProfile": "Haz clic en la cara de perfil que debe seguir la trayectoria seleccionada.",
         "followmePath": "Selecciona primero aristas como trayectoria (p. ej. un doble clic en una cara selecciona sus aristas) y después esta herramienta.",
-        "tapeEnd": "Elige el punto final. Ctrl activa o desactiva la creación de guías.",
+        "tapeEnd": "Elige el punto final. Ctrl cambia: medir › línea guía › punto guía.",
         "tapeStart": "Elige el punto inicial (punto o arista).",
         "tapeStartGuides": "Elige el punto inicial (punto o arista). Se crean guías.",
+        "tapeStartPoint": "Elige el punto inicial (punto o arista). En el punto final se crea un punto guía.",
         "protractorVertex": "Elige el vértice.",
         "protractorFirst": "Elige el primer lado.",
         "protractorAngle": "Elige el ángulo (crea una guía).",
@@ -640,7 +645,13 @@
       "assignTitle": "Asignar la selección a la etiqueta resaltada",
       "assign": "Asignar",
       "untagged": "Sin etiqueta",
-      "hint": "Doble clic para renombrar. Las etiquetas ocultas esconden todas las entidades con esa etiqueta."
+      "hint": "Doble clic para renombrar. Las etiquetas ocultas esconden todas las entidades con esa etiqueta.",
+      "toScenes": "A escenas…",
+      "toScenesTitle": "Aplicar la visibilidad de la etiqueta marcada a escenas",
+      "toScenesVisible": "«{tag}» está visible – mostrarla en estas escenas:",
+      "toScenesHidden": "«{tag}» está oculta – ocultarla en estas escenas:",
+      "apply": "Aplicar",
+      "appliedToScenes": "«{tag}» aplicada a {count} escena | «{tag}» aplicada a {count} escenas"
     },
     "scenes": {
       "add": "Añadir escena",
@@ -673,6 +684,8 @@
     },
     "outliner": {
       "filter": "Filtrar",
+      "byHierarchy": "Jerarquía",
+      "byTags": "Etiquetas",
       "empty": "No hay grupos ni componentes en el modelo.",
       "show": "Mostrar"
     },
@@ -840,7 +853,8 @@
         "step1": "Haz clic en el punto inicial (o en una arista para una guía paralela).",
         "step2": "Haz clic en el punto final – la longitud aparece en el campo «Medidas».",
         "step3": "Escribe una nueva longitud para escalar el modelo.",
-        "mod1": "Ctrl: guías sí/no"
+        "step4": "Doble clic: un único punto guía justo ahí.",
+        "mod1": "Ctrl: solo medir › líneas guía › punto guía"
       },
       "protractor": {
         "desc": "Mide ángulos y crea guías inclinadas.",

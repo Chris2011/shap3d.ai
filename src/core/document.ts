@@ -54,6 +54,8 @@ export interface Scene {
   camera: CameraState;
   style?: Partial<StyleSettings>;
   hiddenTags?: string[];
+  /** small JPEG of the view (data URL) – shown when hovering the scene tab */
+  thumbnail?: string;
 }
 
 export type Units = 'mm' | 'cm' | 'm' | 'in' | 'ft';
@@ -85,6 +87,8 @@ export interface ModelSettings {
   shadowHour: number; // 0..24
   shadowMonth: number; // 1..12
   hiddenGeometry: boolean;
+  /** tabs for the scenes above the viewport */
+  sceneTabs: boolean;
   style: StyleSettings;
 }
 
@@ -149,6 +153,7 @@ export class Model implements DefinitionRegistry {
     shadowHour: 13.5,
     shadowMonth: 6,
     hiddenGeometry: false,
+    sceneTabs: true,
     style: { ...DEFAULT_STYLE },
   };
   name = t('names.untitled');
@@ -194,8 +199,8 @@ export class Model implements DefinitionRegistry {
     return `${base}#${i}`;
   }
 
-  /** Remove definitions that are not referenced anymore. */
-  purge() {
+  /** Definitions (groups/components) that no instance refers to any more. */
+  unusedDefinitions(): number[] {
     const used = new Set<number>();
     const walk = (entities: Entities) => {
       for (const instance of entities.instances.values()) {
@@ -206,10 +211,13 @@ export class Model implements DefinitionRegistry {
       }
     };
     walk(this.root);
-    for (const id of [...this.definitions.keys()]) {
-      if (!used.has(id)) {
-        this.definitions.delete(id);
-      }
+    return [...this.definitions.keys()].filter((id) => !used.has(id));
+  }
+
+  /** Remove definitions that are not referenced anymore. */
+  purge() {
+    for (const id of this.unusedDefinitions()) {
+      this.definitions.delete(id);
     }
   }
 

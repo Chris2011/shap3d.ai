@@ -5,10 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 Versions before 0.7.0 were not tagged at the time; they are reconstructed from the Git history and grouped by development phase.
 
-The built-in plugins and the [OpenSCAD plugin package](plugins/openscad) have their own version numbers. A plugin's version only goes up when the plugin itself changes – new features (including whole new languages) raise the minor version, fixes and translations of a few new texts the patch version. The new version is given in brackets at the entry, e.g. *(AI assistant 1.2.0)*; every plugin has its own changelog with the details (linked in the table below).
+The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC](plugins/ifc)) have their own version numbers. A plugin's version only goes up when the plugin itself changes – new features (including whole new languages) raise the minor version, fixes and translations of a few new texts the patch version. The new version is given in brackets at the entry, e.g. *(AI assistant 1.2.0)*; every plugin has its own changelog with the details (linked in the table below).
 
 | Version | Date | In one sentence |
 | --- | --- | --- |
+| [0.9.0](#090--2026-10-25) | 2026-10-25 | Scene tabs, outliner by tags, guide points – and IFC as a plugin package |
 | [0.8.0](#080--2026-10-22) | 2026-10-22 | Native desktop app with Tauri – executable and installers |
 | [0.7.0](#070--2026-10-22) | 2026-10-22 | Remote control: REST API, Swagger UI and MCP server, plus Docker |
 | [0.6.0](#060--2026-10-20) | 2026-10-20 | Code completion and five languages |
@@ -18,19 +19,36 @@ The built-in plugins and the [OpenSCAD plugin package](plugins/openscad) have th
 
 Plugin versions per app version (**bold** = new version, plain = unchanged, – = not there yet):
 
-| Plugin | 0.5.0 | 0.6.0 | 0.7.0 | 0.8.0 |
-| --- | --- | --- | --- | --- |
+| Plugin | 0.5.0 | 0.6.0 | 0.7.0 | 0.8.0 | 0.9.0 |
+| --- | --- | --- | --- | --- | --- |
 | [AI assistant](src/plugins/builtin/ai/CHANGELOG.md) (`ai`) | **1.0.0** | **1.1.0** | **1.2.0** |
 | [Terrain](src/plugins/builtin/terrain/CHANGELOG.md) (`terrain`) | **1.0.0** | **1.1.0** |
 | [Import formats](src/plugins/builtin/imports/CHANGELOG.md) (`imports`) | **1.0.0** | **1.1.0** |
 | [3D text](src/plugins/builtin/text3d/CHANGELOG.md) (`text3d`) | **1.0.0** | **1.1.0** |
-| [Languages](src/plugins/builtin/i18n/CHANGELOG.md) (`i18n`) | – | **1.0.0** | **1.0.1** |
+| [Languages](src/plugins/builtin/i18n/CHANGELOG.md) (`i18n`) | – | **1.0.0** | **1.0.1** | **1.0.2** |
 | [Remote API](src/plugins/builtin/remote/CHANGELOG.md) (`remote`) | – | – | **1.0.0** |
-| [OpenSCAD](plugins/openscad/CHANGELOG.md) (package) | **1.2.0** | **1.4.0** |
+| [OpenSCAD](plugins/openscad/CHANGELOG.md) (package) | **1.2.0** | **1.4.0** | **1.4.1** |
+| [IFC](plugins/ifc/CHANGELOG.md) (package) | – | – | – | – | **1.0.0** |
 
 ## [Unreleased]
 
 Nothing yet.
+
+## [0.9.0] – 2026-10-25
+
+### Added
+
+- **Guide points with the tape measure**: Ctrl now cycles *measure only › guide lines › guide point*. In guide point mode only a point is set at the end of the measurement, and a double-click places a single guide point right where you click, in every mode. A click on an edge without moving away no longer leaves a guide line on top of the edge.
+- **Scene tabs** above the viewport: a click jumps to the scene, hovering shows a preview of it, **+** adds a scene from the current view. Scenes now keep a small preview image. *View › Scene tabs* (or the command palette) hides them for the model.
+- **Outliner sorted by tags**: *Hierarchy | Tags* at the top of the outliner. By tags, every group and component (at any depth) is listed under its tag – in the order of the Tags panel, untagged ones last, each tag can be collapsed. The choice is kept in the browser.
+- **Tags to scenes**: *To scenes…* in the Tags panel writes the highlighted tag's current visibility into the scenes you tick, as one undo step.
+- **Purge reminder**: *File › Remind to purge unused when saving* – when it is on, saving asks whether unused groups and components should be purged first. Off by default, kept in the browser.
+
+### Fixed
+
+- Renaming or deleting a tag also updates the scenes – they kept hiding the tag under its old name.
+
+*(Languages 1.0.2)*
 
 ## [0.8.0] – 2026-10-22
 
@@ -46,7 +64,7 @@ Nothing yet.
 
 ### Known limitations
 
-- The remote API (REST, Swagger UI, MCP), the AI proxy and the Blender/SketchUp converters need the dev server and are not part of the desktop build yet. A local AI server has to allow the app's origin (`http://tauri.localhost` on Windows, `tauri://localhost` on macOS and Linux).
+- The remote API (REST, Swagger UI, MCP), the AI proxy and the converters for `.blend` and `.skp` files need the dev server and are not part of the desktop build yet. A local AI server has to allow the app's origin (`http://tauri.localhost` on Windows, `tauri://localhost` on macOS and Linux).
 
 ## [0.7.0] – 2026-10-22
 
@@ -133,14 +151,15 @@ Nothing yet.
 
 First version in this repository:
 
-- **Direct modeling** like SketchUp: lines, rectangles, circles, arcs, push/pull, move, rotate, scale, offset, follow me, groups and components, tags, guides, dimensions, section planes and solid tools.
+- **Direct modeling** with push/pull: lines, rectangles, circles, arcs, push/pull, move, rotate, scale, offset, follow me, groups and components, tags, guides, dimensions, section planes and solid tools.
 - **Local AI copilot** with Ollama or LM Studio: code models write `s3d` scripts, mesh models (LLaMA-Mesh) return geometry; fast mode, setup wizard, Hugging Face model search and a searchable chat history.
 - **Script editor** with the `s3d` API (44 commands with reference and examples), 52 ready-made materials and 12 procedural textures.
 - **Terrain editor**, **polygon inspector** (exact resolution, more or fewer polygons), **dark mode** and **night scene**.
-- Import of SketchUp, OBJ, STL and glTF/GLB files; export as GLB, glTF, STL, OBJ, PNG and the native `.shap3d.json`.
+- Import of SKP, OBJ, STL and glTF/GLB files; export as GLB, glTF, STL, OBJ, PNG and the native `.shap3d.json`.
 
-[Unreleased]: https://github.com/Chris2011/shap3d.ai/compare/15aab26...HEAD
-[0.8.0]: https://github.com/Chris2011/shap3d.ai/compare/15aab26...HEAD
+[Unreleased]: https://github.com/Chris2011/shap3d.ai/compare/53dc278...HEAD
+[0.9.0]: https://github.com/Chris2011/shap3d.ai/compare/53dc278...HEAD
+[0.8.0]: https://github.com/Chris2011/shap3d.ai/compare/15aab26...53dc278
 [0.7.0]: https://github.com/Chris2011/shap3d.ai/compare/753a191...15aab26
 [0.6.0]: https://github.com/Chris2011/shap3d.ai/compare/8f34310...753a191
 [0.5.0]: https://github.com/Chris2011/shap3d.ai/compare/27cb174...8f34310

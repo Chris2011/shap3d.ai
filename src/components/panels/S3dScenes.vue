@@ -30,42 +30,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, toRef } from 'vue';
 import { useIntervalFn } from '@vueuse/core';
 import S3dIcon from '../S3dIcon.vue';
 import { useEditor } from '../keys';
-import { newId } from '../../core/model';
 import type { Scene } from '../../core/document';
-import { applyScene } from '../../engine/scenes';
+import { addScene, applyScene, captureScene, sceneState } from '../../engine/scenes';
 import { useModel } from '../../composables/useModel';
 import { t } from '../../i18n';
 
 const editor = useEditor();
-const sel = ref<number | null>(null);
+const sel = toRef(sceneState, 'active');
 const editing = ref<number | null>(null);
 const scenes = useModel(() => editor.model.scenes);
-const capture = (): Omit<Scene, 'id' | 'name'> => {
-  return {
-    camera: editor.viewer.rig.getState(),
-    style: { ...editor.model.settings.style },
-    hiddenTags: editor.model.tags.filter((tag) => !tag.visible).map((tag) => tag.name),
-  };
-};
-const add = () => {
-  const scene: Scene = { id: newId(), name: t('scenes.defaultName', { number: editor.model.scenes.length + 1 }), ...capture() };
-  editor.commit('scenes.add', () => editor.model.scenes.push(scene));
-  sel.value = scene.id;
-};
+const add = () => addScene(editor);
 const update = () => {
   const scene = editor.model.scenes.find((entry) => entry.id === sel.value);
   if (scene) {
-    editor.commit('undo.updateScene', () => Object.assign(scene, capture()));
+    editor.commit('undo.updateScene', () => Object.assign(scene, captureScene(editor)));
   }
 };
-const go = (scene: Scene) => {
-  sel.value = scene.id;
-  applyScene(editor, scene);
-};
+const go = (scene: Scene) => applyScene(editor, scene);
 const rename = (scene: Scene, name: string) => {
   editing.value = null;
   if (name.trim()) {

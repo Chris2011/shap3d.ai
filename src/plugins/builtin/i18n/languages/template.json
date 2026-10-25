@@ -335,6 +335,10 @@
       "togglePeopleSize#en": "Size of the people",
       "toggleGuides": "",
       "toggleGuides#en": "Guides",
+      "toggleSceneTabs": "",
+      "toggleSceneTabs#en": "Scene tabs",
+      "togglePurgeReminder": "",
+      "togglePurgeReminder#en": "Remind to purge unused when saving",
       "toggleShadows": "",
       "toggleShadows#en": "Shadows",
       "toggleHidden": "",
@@ -524,7 +528,9 @@
       "insertMesh": "",
       "insertMesh#en": "Insert mesh",
       "fewerPolygons": "",
-      "fewerPolygons#en": "Fewer polygons"
+      "fewerPolygons#en": "Fewer polygons",
+      "tagsToScenes": "",
+      "tagsToScenes#en": "Tags to scenes"
     },
     "toast": {
       "nothingSelected": "",
@@ -566,7 +572,9 @@
       "resizeGroup": "",
       "resizeGroup#en": "Do you want to resize the group's contents? (factor {factor})",
       "resizeModel": "",
-      "resizeModel#en": "Do you want to resize the model? (factor {factor})"
+      "resizeModel#en": "Do you want to resize the model? (factor {factor})",
+      "purgeOnSave": "",
+      "purgeOnSave#en": "{count} unused group or component – purge it before saving? | {count} unused groups or components – purge them before saving?"
     },
     "prompt": {
       "componentName": "",
@@ -749,11 +757,13 @@
         "followmePath": "",
         "followmePath#en": "First select edges as the path (e.g. double-clicking a face selects its edges), then this tool.",
         "tapeEnd": "",
-        "tapeEnd#en": "Pick the end point. Ctrl toggles creating guides.",
+        "tapeEnd#en": "Pick the end point. Ctrl switches: measure › guide line › guide point.",
         "tapeStart": "",
         "tapeStart#en": "Pick the start point (point or edge).",
         "tapeStartGuides": "",
         "tapeStartGuides#en": "Pick the start point (point or edge). Guides are created.",
+        "tapeStartPoint": "",
+        "tapeStartPoint#en": "Pick the start point (point or edge). A guide point is created at the end point.",
         "protractorVertex": "",
         "protractorVertex#en": "Pick the vertex.",
         "protractorFirst": "",
@@ -1368,7 +1378,19 @@
       "untagged": "",
       "untagged#en": "Untagged",
       "hint": "",
-      "hint#en": "Double-click renames. Hidden tags hide every entity with that tag."
+      "hint#en": "Double-click renames. Hidden tags hide every entity with that tag.",
+      "toScenes": "",
+      "toScenes#en": "To scenes…",
+      "toScenesTitle": "",
+      "toScenesTitle#en": "Apply the visibility of the highlighted tag to scenes",
+      "toScenesVisible": "",
+      "toScenesVisible#en": "“{tag}” is visible – show it in these scenes:",
+      "toScenesHidden": "",
+      "toScenesHidden#en": "“{tag}” is hidden – hide it in these scenes:",
+      "apply": "",
+      "apply#en": "Apply",
+      "appliedToScenes": "",
+      "appliedToScenes#en": "“{tag}” applied to {count} scene | “{tag}” applied to {count} scenes"
     },
     "scenes": {
       "add": "",
@@ -1423,6 +1445,10 @@
     "outliner": {
       "filter": "",
       "filter#en": "Filter",
+      "byHierarchy": "",
+      "byHierarchy#en": "Hierarchy",
+      "byTags": "",
+      "byTags#en": "Tags",
       "empty": "",
       "empty#en": "No groups or components in the model.",
       "show": "",
@@ -1714,8 +1740,10 @@
         "step2#en": "Click the end point – the length is in the “Measurements” box.",
         "step3": "",
         "step3#en": "Type a new length to scale the model.",
+        "step4": "",
+        "step4#en": "Double-click: a single guide point right there.",
         "mod1": "",
-        "mod1#en": "Ctrl: guides on/off"
+        "mod1#en": "Ctrl: measure only › guide lines › guide point"
       },
       "protractor": {
         "desc": "",

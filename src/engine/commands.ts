@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { useLocalStorage } from '@vueuse/core';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter.js';
@@ -157,6 +158,18 @@ export const exportFile = async (editor: Editor, kind: ExportKind): Promise<Expo
     return { name: `${name}.glb`, mimeType: 'model/gltf-binary', data: new Blob([res], { type: 'model/gltf-binary' }) };
   }
   return { name: `${name}.gltf`, mimeType: 'model/gltf+json', data: JSON.stringify(res) };
+};
+
+/** ask to purge unused groups/components when saving (SketchUp's "Purge Unused" reminder) – off by default, kept in the browser */
+export const purgeReminder = useLocalStorage('s3d.purgeReminder', false);
+
+/** Saves the model as .shap3d.json – with the purge reminder first, if it is on and there is something to purge. */
+const saveModel = async (editor: Editor) => {
+  const unused = editor.model.unusedDefinitions().length;
+  if (purgeReminder.value && unused && (await editor.confirm(t('confirm.purgeOnSave', { count: unused })))) {
+    editor.commit('undo.purge', () => editor.model.purge());
+  }
+  await exportAs(editor, 'json');
 };
 
 export const exportAs = async (editor: Editor, kind: ExportKind) => {
@@ -809,7 +822,15 @@ const COMMAND_LIST: CommandDefinition[] = [
       }
     },
   },
-  { id: 'save', shortcut: 'Ctrl+S', group: 'file', run: (editor) => exportAs(editor, 'json') },
+  { id: 'save', shortcut: 'Ctrl+S', group: 'file', run: (editor) => saveModel(editor) },
+  {
+    id: 'togglePurgeReminder',
+    group: 'file',
+    run: () => {
+      purgeReminder.value = !purgeReminder.value;
+    },
+    checked: () => purgeReminder.value,
+  },
   {
     id: 'saveLocal',
     group: 'file',
@@ -1051,6 +1072,15 @@ const COMMAND_LIST: CommandDefinition[] = [
       editor.invalidate();
     },
     checked: () => measureView.people,
+  },
+  {
+    id: 'toggleSceneTabs',
+    group: 'view',
+    run: (editor) => {
+      editor.model.settings.sceneTabs = !editor.model.settings.sceneTabs;
+      editor.invalidate();
+    },
+    checked: (editor) => editor.model.settings.sceneTabs,
   },
   {
     id: 'toggleGuides',

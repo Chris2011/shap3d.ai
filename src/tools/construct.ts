@@ -10,6 +10,15 @@ import { t, formatDecimal } from '../i18n';
 type V3 = THREE.Vector3;
 
 // ===================================================================== Tape measure
+/** what the tape measure does with a measurement – Ctrl cycles through them, like in SketchUp */
+type TapeMode = 'measure' | 'guideLine' | 'guidePoint';
+const TAPE_MODES: TapeMode[] = ['measure', 'guideLine', 'guidePoint'];
+const TAPE_START_STATUS: Record<TapeMode, string> = {
+  measure: 'tools.status.tapeStart',
+  guideLine: 'tools.status.tapeStartGuides',
+  guidePoint: 'tools.status.tapeStartPoint',
+};
+
 export class TapeTool extends PointTool {
   id = 'tape';
   name = 'tools.tape';
@@ -17,11 +26,11 @@ export class TapeTool extends PointTool {
   cursor = 'crosshair';
   start: V3 | null = null;
   edgeDir: V3 | null = null;
-  guides = true;
+  mode: TapeMode = 'guideLine';
   current: V3 | null = null;
   lastMeasure = 0;
   status() {
-    return this.start ? t('tools.status.tapeEnd') : t(this.guides ? 'tools.status.tapeStartGuides' : 'tools.status.tapeStart');
+    return this.start ? t('tools.status.tapeEnd') : t(TAPE_START_STATUS[this.mode]);
   }
   busy() {
     return !!this.start;
@@ -32,7 +41,7 @@ export class TapeTool extends PointTool {
   }
   onKey(keyEvent: KeyboardEvent, isDown: boolean) {
     if (keyEvent.key === 'Control' && isDown && !keyEvent.repeat) {
-      this.guides = !this.guides;
+      this.mode = TAPE_MODES[(TAPE_MODES.indexOf(this.mode) + 1) % TAPE_MODES.length];
       this.editor.refreshStatus();
       return true;
     }
@@ -67,13 +76,22 @@ export class TapeTool extends PointTool {
     const editor = this.editor;
     const start = this.start!;
     this.lastMeasure = this.edgeDir ? this.offsetVec().length() : start.distanceTo(point);
-    if (this.guides) {
+    if (this.mode === 'guidePoint') {
+      // only the point at the end of the measurement, no line
+      const end = this.edgeDir ? start.clone().add(this.offsetVec()) : point.clone();
+      if (end.distanceTo(start) > 1e-6) {
+        editor.commit('inference.guidePoint', () => editor.model.guides.push({ id: newId(), kind: 'point', point: end }));
+      }
+    } else if (this.mode === 'guideLine') {
       if (this.edgeDir) {
         const off = this.offsetVec();
         const direction = this.edgeDir.clone();
-        editor.commit('undo.guide', () =>
-          editor.model.guides.push({ id: newId(), kind: 'line', point: start.clone().add(off), direction: direction }),
-        );
+        // a click without moving away from the edge (e.g. a double-click) makes no guide on top of it
+        if (off.lengthSq() > 1e-12) {
+          editor.commit('undo.guide', () =>
+            editor.model.guides.push({ id: newId(), kind: 'line', point: start.clone().add(off), direction: direction }),
+          );
+        }
       } else if (start.distanceTo(point) > 1e-6) {
         const direction = point.clone().sub(start).normalize();
         editor.commit('inference.guidePoint', () => {
@@ -84,6 +102,12 @@ export class TapeTool extends PointTool {
     }
     editor.setVcb(editor.fmt(this.lastMeasure));
     this.cancel();
+  }
+  /** a double-click places a single guide point right there, in every mode */
+  onDblClick(pointer: PEvt) {
+    const point = this.pick(pointer, null).point.clone();
+    this.cancel();
+    this.editor.commit('inference.guidePoint', () => this.editor.model.guides.push({ id: newId(), kind: 'point', point }));
   }
   async onVcbAsync(text: string) {
     const editor = this.editor;
