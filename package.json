@@ -14,18 +14,18 @@
     "preview": "vite preview",
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build",
-    "lint": "oxlint src scripts plugins/openscad/src",
-    "lint:fix": "oxlint --fix src scripts plugins/openscad/src",
-    "format": "oxfmt src scripts plugins/openscad/src",
-    "format:check": "oxfmt --check src scripts plugins/openscad/src",
+    "lint": "oxlint src scripts",
+    "lint:fix": "oxlint --fix src scripts",
+    "format": "oxfmt src scripts",
+    "format:check": "oxfmt --check src scripts",
     "prepare": "husky"
   },
   "lint-staged": {
-    "{src,scripts,plugins/openscad/src}/**/*.{js,mjs,ts,vue}": [
+    "{src,scripts}/**/*.{js,mjs,ts,vue}": [
       "oxlint --fix",
       "oxfmt --no-error-on-unmatched-pattern"
     ],
-    "{src,scripts,plugins/openscad/src}/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+    "{src,scripts}/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "^5.3.0",

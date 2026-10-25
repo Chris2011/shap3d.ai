@@ -1,0 +1,38 @@
+{
+  "code": "ar",
+  "name": "العربية",
+  "dir": "rtl",
+  "messages": {
+    "ifc": {
+      "plugin": {
+        "name": "IFC (BIM)",
+        "description": "يفتح ملفات IFC (IFC 2x3 وIFC 4 وIFC 4.3) كمجموعات متداخلة مع فئات IFC كوسوم ومعرّفات GlobalId ومجموعات الخصائص، ويصدّر النموذج بصيغة IFC4. يُحمَّل قارئ IFC ‏(web-ifc) عند أول استيراد."
+      },
+      "errors": {
+        "unreadable": "تعذّرت قراءة ملف IFC.",
+        "noGeometry": "لا يحتوي ملف IFC على أي هندسة."
+      },
+      "imported": "{file} ({schema}): {elements} عنصر، {classes} فئة IFC، {triangles} مثلث",
+      "undo": {
+        "classify": "فئة IFC",
+        "edit": "سمة IFC"
+      },
+      "panel": {
+        "title": "خصائص IFC",
+        "contextEntry": "خصائص IFC…",
+        "selectGroup": "اختر مجموعة أو مكوّنًا واحدًا لعرض فئة IFC الخاصة به أو تعيينها.",
+        "class": "فئة IFC",
+        "unclassified": "غير مصنّف",
+        "predefinedType": "النوع المحدّد مسبقًا",
+        "objectType": "نوع الكائن",
+        "material": "المادة",
+        "guidHint": "مأخوذ من استيراد IFC للحفاظ على الهوية عند الاستيراد والتصدير",
+        "guidOnExport": "يُنشأ عند التصدير",
+        "sharedData": "بيانات IFC هذه تخص المكوّن وتنطبق على جميع النسخ ({count}).",
+        "remove": "إزالة بيانات IFC",
+        "yes": "نعم",
+        "no": "لا"
+      }
+    }
+  }
+}

@@ -61,6 +61,7 @@
   - [Plugin packages](#plugin-packages)
 - [Multilingual: language files for developers](#multilingual-language-files-for-developers)
   - [The OpenSCAD plugin](#the-openscad-plugin)
+  - [The IFC plugin](#the-ifc-plugin)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
 - [Credits](#credits)
@@ -95,7 +96,7 @@ The toolset follows the familiar push/pull workflow: draw a shape, pull it into 
 | Structure | Groups, reusable components with live instances, tags, outliner, entity info |
 | Solids | Union, subtract, intersect, outer shell, trim and split (CSG via `three-bvh-csg`) |
 | Presentation | Styles (shaded, textured, monochrome, hidden line, wireframe, X-ray), section planes, scenes, sun shadows, reference people with a height dimension, zoom-dependent rulers on the axes |
-| Files | Native `.shap3d.json` files, import from SketchUp, Blender, 3ds Max and more – **SKP, BLEND, FBX, 3DS, DAE, KMZ, OBJ, STL, glTF/GLB, PLY, 3MF, AMF, VRML, USD/USDZ** – with materials, groups and unit detection (menu or drag & drop), export to GLB, glTF, STL, OBJ and PNG, autosave in the browser |
+| Files | Native `.shap3d.json` files, import from SketchUp, Blender, 3ds Max and more – **SKP, BLEND, FBX, 3DS, DAE, KMZ, OBJ, STL, glTF/GLB, PLY, 3MF, AMF, VRML, USD/USDZ** – with materials, groups and unit detection (menu or drag & drop), export to GLB, glTF, STL, OBJ and PNG, autosave in the browser; IFC import and IFC4 export with the [IFC plugin](#the-ifc-plugin) |
 
 ### Local AI copilot
 
@@ -210,7 +211,7 @@ npm run build     # production build in dist/
 npm run preview   # serve the build locally
 ```
 
-Linting and formatting use [oxlint](https://oxc.rs/docs/guide/usage/linter) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter) from the Oxc project. They cover `src/`, `scripts/` and `plugins/openscad/src/`. The settings are in `.oxlintrc.json` and `.oxfmtrc.json`: every `if`/`else`/loop body gets braces and its own lines, with 2-space indent, single quotes, semicolons and a print width of 140.
+Linting and formatting use [oxlint](https://oxc.rs/docs/guide/usage/linter) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter) from the Oxc project. They cover the app – `src/` and `scripts/`; plugin packages in `plugins/` lint and format themselves (see below). The settings are in `.oxlintrc.json` and `.oxfmtrc.json`: every `if`/`else`/loop body gets braces and its own lines, with 2-space indent, single quotes, semicolons and a print width of 140.
 
 ```bash
 npm run lint           # report lint problems
@@ -222,6 +223,8 @@ npm run format:check   # only report files that are not formatted
 Run `lint:fix` before `format`: the fix adds the missing braces, and the formatter then puts the bodies on their own lines. For VS Code, the recommended Oxc extension is listed in `.vscode/extensions.json`.
 
 A **pre-commit hook** does this for you: `npm install` sets it up ([husky](https://typicode.github.io/husky/), `.husky/pre-commit`), and on every commit [lint-staged](https://github.com/lint-staged/lint-staged) runs `oxlint --fix` and then `oxfmt` on the staged files in those folders (JSON, CSS and Markdown are only formatted). The fixes go into the commit; if oxlint still finds an error it cannot fix, the commit stops and shows it. Only the staged parts of a file are checked – changes you have not staged stay as they are. In an emergency, `git commit --no-verify` skips the hook.
+
+Plugin packages (`plugins/<name>/`) are not part of the app, so the app's scripts and its lint-staged configuration leave them alone. Each package has the same scripts in its own `package.json` (`npm run lint`, `lint:fix`, `format`, `format:check` in its folder) and its own `lint-staged` configuration, which the hook uses for staged files in that package – lint-staged always takes the configuration closest to a file. The rules come from the `.oxlintrc.json` and `.oxfmtrc.json` in the repository root, which oxlint and oxfmt find from the package folder.
 
 ### With Docker
 
@@ -295,10 +298,11 @@ Drag a file onto the window or use **Menu › Importieren**. Every import become
 | **Blender** | `.blend` | **Directly in the browser – no Blender needed.** Built-in reader for Blender 2.79 to 5.x, including compressed files |
 | | `.glb` / `.gltf`, `.fbx` | Directly in the browser – Blender: **File › Export** |
 | **3ds Max**, Maya, Cinema 4D | `.fbx`, `.3ds`, `.obj` | Directly in the browser. 3ds Max's own `.max` format can only be read by 3ds Max itself – export to FBX there |
+| **BIM** (Revit, ArchiCAD, Allplan, SketchUp …) | `.ifc` | Directly in the browser with the plugin package [IFC](#the-ifc-plugin) – IFC 2x3, IFC 4 and IFC 4.3, with the spatial structure, IFC classes as tags and property sets |
 | 3D printing | `.stl`, `.3mf`, `.amf` | Directly in the browser (3MF/AMF in millimetres) |
 | Scanners, AR, web | `.ply`, `.usdz` / `.usd`, `.wrl` / `.vrml` | Directly in the browser |
 
-OBJ, STL, glTF/GLB and SketchUp are read by the app itself. All other formats in the table come from the [built-in plugin](#built-in-plugins) **Importformate**: its readers (about 400 KB) are only loaded the first time such a file is imported, and it can be switched off in the plugin manager.
+OBJ, STL, glTF/GLB and SketchUp are read by the app itself. IFC comes from the plugin package [IFC](#the-ifc-plugin), all other formats in the table from the [built-in plugin](#built-in-plugins) **Importformate**: its readers (about 400 KB) are only loaded the first time such a file is imported, and it can be switched off in the plugin manager.
 
 What the importer takes care of:
 
@@ -562,11 +566,30 @@ npm run build
 
 Then *Plugins › Load plugin folder…* and pick `plugins/openscad/dist`. Details in [its README](plugins/openscad/README.md).
 
-![OpenSCAD code in the script editor – the OpenSCAD logo modelled with difference() and hull(), colours turned into materials](docs/screenshots/openscad.png)
+![OpenSCAD code in the script editor – the OpenSCAD logo modelled with difference() and hull(), colours turned into materials](plugins/openscad/docs/openscad.png)
 
 With the plugin switched on, *OpenSCAD* also shows up when you right-click an object and choose *Als Code öffnen ▸* – next to the built-in formats JavaScript, JSON and OBJ:
 
 ![Right-click › Als Code öffnen ▸ JavaScript (s3d), JSON, OBJ-Mesh and OpenSCAD](docs/screenshots/convert.png)
+
+### The IFC plugin
+
+The package in [`plugins/ifc/`](plugins/ifc) opens **IFC** files (BIM: Revit, ArchiCAD, Allplan, SketchUp …) and exports the model as **IFC4**. It reads them with [web-ifc](https://github.com/ThatOpen/engine_web-ifc) as WebAssembly – no server or converter, so it also works in the desktop app and a static deployment. web-ifc (MPL-2.0, about 7.5 MB) ships in the package, not in the app, and is only loaded on the first IFC import.
+
+```bash
+cd plugins/ifc
+npm ci
+npm run build
+```
+
+Then *Plugins › Load plugin folder…* and pick `plugins/ifc/dist`.
+
+- **Import** of IFC 2x3, IFC 4 and IFC 4.3: project › site › building › storey and aggregated elements become nested groups, each IFC class becomes a tag (spaces, zones and openings start hidden), and the IFC class, GlobalId, attributes, property sets and quantities (in metres) are kept on the group.
+- **Export as IFC4** (*Export › IFC4*): spatial structure from classified groups (or a default storey), elements in their IFC class, triangulated geometry with materials and colours, property sets and quantities; GlobalIds of imported elements are written back.
+- **IFC properties** panel (right-click › *IFC properties…*): shows the IFC data of a group and sets its class.
+- **Limits:** triangles only (no parametric walls), no type objects, no georeferencing, 200,000 triangles per import.
+
+Details in [its README](plugins/ifc/README.md).
 
 ## Multilingual: language files for developers
 
@@ -599,7 +622,7 @@ Placeholders like `{count}`, `{name}` or `{error}` must stay unchanged (the edit
 
 **Starting a new language** – [`src/plugins/builtin/i18n/languages/template.json`](src/plugins/builtin/i18n/languages/template.json) has every key of the core and of the languages plugin itself with an empty text and the English text as a hint right below (`"select": ""`, `"select#en": "Select"`). No other plugin is in it – built-in, installed or third-party: the core knows no plugins, every plugin brings its own language files (`i18n/en.json` as source) and they are merged at runtime. Fill in `code`, `name` and the texts and load the file with *Import…* in the translation editor; the hint lines are ignored. The editor's **Template** button downloads the same keys. To ship a language with the app, put the file next to `de.json`, add it to `BUILTIN_LANGUAGES` in `src/plugins/builtin/i18n/store.ts`, and add the plugin texts as `i18n/<code>.json` to each built-in plugin's `messages`.
 
-**Checking** – `node scripts/i18n.mjs` (no dependencies) lists missing, unused and mismatched keys per language and German text that is still hard-coded in `.vue`/`.ts` files – for the app, the built-in plugins and the plugin packages in `plugins/<name>/` (their texts in `src/i18n/<code>.json`); `node scripts/i18n.mjs template` rewrites `template.json` after texts were added. Not translated on purpose: the `s3d` script API (names, signatures, examples, default names of what scripts build), material names in models and the saved file format.
+**Checking** – `node scripts/i18n.mjs` (no dependencies) lists missing, unused and mismatched keys per language and German text that is still hard-coded in `.vue`/`.ts` files – for the app and the built-in plugins. Plugin packages check themselves with `npm run i18n` in their folder (`node ../../scripts/i18n.mjs check --package .`: their own `src/i18n/<code>.json` and `src/`; keys of the app count as known); `node scripts/i18n.mjs template` rewrites `template.json` after texts were added. Not translated on purpose: the `s3d` script API (names, signatures, examples, default names of what scripts build), material names in models and the saved file format.
 
 ## Project structure
 
@@ -622,8 +645,8 @@ src/
   utils/       pure helper functions – e.g. material swatches
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo and README screenshots
-plugins/       stand-alone plugin packages with their own package.json – e.g. openscad/ (not part of the app build)
-scripts/       screenshot automation (headless Chrome), i18n.mjs (translation check and template)
+plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/ (not part of the app build)
+scripts/       screenshot automation (headless Chrome: screenshots.ps1 for Windows, screenshots.sh for Linux/macOS, capture-shot.mjs for both), i18n.mjs (translation check and template)
 tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
 src-tauri/      the desktop app (Tauri 2): Rust shell, tauri.conf.json, app icons
 Dockerfile, compose.yaml   container for trying it out – the dev server with the remote API, or the nginx build
@@ -631,18 +654,22 @@ Dockerfile, compose.yaml   container for trying it out – the dev server with t
 
 ## Regenerating the screenshots
 
-The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`, `openscad`, `convert`, `plugins`, `text3d`, `translations`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
+The images in `docs/screenshots` are rendered from demo scenes (`src/devShots.ts`: `hero`, `night`, `scripts`, `terrain`, `mesh`, `measure`, `palette`, `tour`, `convert`, `plugins`, `text3d`, `translations`) with headless Chrome or Edge at 1600 × 900. Each scene can also be opened by hand, e.g. <http://localhost:5173/?shot=palette>.
 
 ```bash
 npm run dev
-powershell -File scripts/screenshots.ps1
+powershell -File scripts/screenshots.ps1   # Windows
+bash scripts/screenshots.sh                # Linux, macOS (and Git Bash)
 ```
 
-`openscad`, `convert` and `plugins` install the OpenSCAD plugin from `plugins/openscad/dist`, so build it first (`npm run build` in `plugins/openscad`). Single scenes: `powershell -File scripts/screenshots.ps1 -Shots "openscad,plugins"`.
+Single scenes: `powershell -File scripts/screenshots.ps1 -Shots "palette,tour"` or `bash scripts/screenshots.sh --shots "palette,tour"`. Both scripts take the same options (`-Query`/`--query`, `-Out`/`--out`, `-Name`/`--name`, `-Url`/`--url`, `-Width`/`--width`, `-Height`/`--height`). The bash script finds Chrome, Chromium or Edge on the `PATH` (or `CHROME=/path/to/chrome`). Scenes that have to wait until they are ready are photographed over the DevTools protocol by `scripts/capture-shot.mjs` (Node.js 22) – the bash script uses it for every scene, the PowerShell script for the slow ones and for scenes that install a package.
+
+The scenes know no plugin packages. `-Query "package=<folder>"` (URL parameter `&package=<folder>`, several separated by commas) installs a built package from `plugins/<folder>/dist` before the scene – its `dist/package.json` lists its files. The README's `convert` and `plugins` images show the OpenSCAD package that way: build it (`npm run build` in `plugins/openscad`), then `powershell -File scripts/screenshots.ps1 -Shots "convert,plugins" -Query "package=openscad"` (or `bash scripts/screenshots.sh --shots "convert,plugins" --query "package=openscad"`). The scene `script` (`&language=<id>&file=<path>`, optionally `&camera=x,y,z&target=x,y,z`) runs a file in the script editor; plugin packages use it for their own screenshots (`npm run screenshots` – or `npm run screenshots:sh` on Linux and macOS – in `plugins/openscad` writes `plugins/openscad/docs/openscad.png`).
 
 ## Credits
 
 - [fzstd](https://github.com/101arrowz/fzstd) (MIT) – zstd decompression for compressed Blender files
+- [web-ifc](https://github.com/ThatOpen/engine_web-ifc) (MPL-2.0) by That Open Company – reads IFC files in the IFC plugin package (not part of the app)
 - [three.js](https://threejs.org) (MIT), [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh) (MIT), [Vue](https://vuejs.org) (MIT), [Vite](https://vitejs.dev) (MIT), [Tailwind CSS](https://tailwindcss.com) (MIT)
 - Reference people built from the [Humaaans](https://www.humaaans.com) illustrations by Pablo Stanley (CC0) – see `src/assets/people/LICENSE.md`
 - Helvetiker and Optimer typefaces from the three.js examples, © MAGENTA Ltd. – see `src/plugins/builtin/text3d/fonts/LICENSE`

@@ -3,21 +3,32 @@
  * Translation helper for developers (no dependencies):
  *
  *   node scripts/i18n.mjs check      – missing / unused keys per language file, then `scan`
- *   node scripts/i18n.mjs scan [dir] – German-looking text still hard-coded in .vue/.ts/.js files (src/ and plugins/<name>/src/)
+ *   node scripts/i18n.mjs scan [dir] – German-looking text still hard-coded in .vue/.ts/.js files (src/)
  *   node scripts/i18n.mjs template   – writes src/plugins/builtin/i18n/languages/template.json
  *
  * Source texts (English): src/i18n/en.json and boot.en.json (the app) plus the en.json of every built-in
- * plugin (src/plugins/builtin/<id>/i18n/en.json) and of every plugin package (plugins/<name>/src/i18n/en.json).
- * Translations: src/plugins/builtin/i18n/languages/<code>.json (the app) and <code>.json next to each en.json
- * (the plugins' own texts). The template only covers the core and the i18n plugin itself: the core knows no plugins – every
- * other plugin brings its own language files, merged at runtime.
+ * plugin (src/plugins/builtin/<id>/i18n/en.json). Translations: src/plugins/builtin/i18n/languages/<code>.json
+ * (the app) and <code>.json next to each en.json (the plugins' own texts). The template only covers the core and the
+ * i18n plugin itself: the core knows no plugins – every other plugin brings its own language files, merged at runtime.
+ *
+ * A plugin package checks itself: `--package <dir>` (e.g. `node ../../scripts/i18n.mjs check --package .` from the
+ * package's folder) checks <dir>/src/i18n and scans <dir>/src instead of the app. Keys of the app (such as
+ * `import.skipped`) count as known there, because plugins may use them.
  */
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { join, relative, dirname } from 'node:path';
+import { join, relative, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const languagesDir = join(root, 'src/plugins/builtin/i18n/languages');
+
+// "--package <dir>": check a plugin package instead of the app
+const args = process.argv.slice(2);
+const packageFlag = args.indexOf('--package');
+const packageDir = packageFlag >= 0 ? resolve(args[packageFlag + 1] ?? '.') : null;
+if (packageFlag >= 0) {
+  args.splice(packageFlag, 2);
+}
 
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 /** { a: { b: 'x' } } → { 'a.b': 'x' } (hint keys like "select#en" are skipped) */
@@ -36,37 +47,34 @@ const flatten = (messages, prefix = '', out = {}) => {
   return out;
 };
 
-/** folders with a plugin's language files: built-in plugins (src/plugins/builtin/<id>/i18n) and plugin packages (plugins/<name>/src/i18n) */
-const pluginLanguageDirs = () => {
+/** the built-in plugins' language folders (src/plugins/builtin/<id>/i18n) */
+const builtinLanguageDirs = () => {
   const builtin = join(root, 'src/plugins/builtin');
-  const dirs = readdirSync(builtin).map((id) => join(builtin, id, 'i18n'));
-  const packages = join(root, 'plugins');
-  if (existsSync(packages)) {
-    dirs.push(...readdirSync(packages).map((name) => join(packages, name, 'src/i18n')));
-  }
-  return dirs.filter((dir) => existsSync(join(dir, 'en.json')));
+  return readdirSync(builtin)
+    .map((id) => join(builtin, id, 'i18n'))
+    .filter((dir) => existsSync(join(dir, 'en.json')));
 };
-/** source folders scanned for t() keys and hard-coded text: the app and the plugin packages */
-const codeRoots = () => {
-  const packages = join(root, 'plugins');
-  const roots = [join(root, 'src')];
-  if (existsSync(packages)) {
-    roots.push(
-      ...readdirSync(packages)
-        .map((name) => join(packages, name, 'src'))
-        .filter(existsSync),
-    );
-  }
-  return roots;
-};
+/** the language folders being checked: the built-in plugins', or the package's (<dir>/src/i18n) */
+const pluginLanguageDirs = () =>
+  packageDir ? [join(packageDir, 'src/i18n')].filter((dir) => existsSync(join(dir, 'en.json'))) : builtinLanguageDirs();
+/** source folders scanned for t() keys and hard-coded text: the app, or the package */
+const codeRoots = () => [packageDir ? join(packageDir, 'src') : join(root, 'src')];
 
 /** the app's own English source files (no plugin texts) */
 const coreSourceFiles = () => [join(root, 'src/i18n/en.json'), join(root, 'src/i18n/boot.en.json')];
 /** what the template covers: the core and the i18n plugin, which ships the template */
 const templateSourceFiles = () => [...coreSourceFiles(), join(root, 'src/plugins/builtin/i18n/i18n/en.json')];
-/** every English source file: the app's and the plugins' */
-const sourceFiles = () => [...coreSourceFiles(), ...pluginLanguageDirs().map((dir) => join(dir, 'en.json'))];
+/** the English source files being checked: the app's and its built-in plugins', or only the package's */
+const sourceFiles = () => [...(packageDir ? [] : coreSourceFiles()), ...pluginLanguageDirs().map((dir) => join(dir, 'en.json'))];
 const sourceMessages = () => Object.assign({}, ...sourceFiles().map((file) => flatten(readJson(file).messages)));
+/** every key code may use: the checked ones plus – for a package – the app's and its built-in plugins' */
+const knownMessages = () =>
+  Object.assign(
+    {},
+    ...[...coreSourceFiles(), ...builtinLanguageDirs().map((dir) => join(dir, 'en.json')), ...sourceFiles()].map((file) =>
+      flatten(readJson(file).messages),
+    ),
+  );
 
 /** translations: languages/<code>.json and <code>.json in every plugin's language folder */
 const languageCodes = () =>
@@ -75,7 +83,10 @@ const languageCodes = () =>
     .map((name) => name.slice(0, -5))
     .filter((code) => code !== 'en');
 const languageMessages = (code) => {
-  const files = [join(languagesDir, `${code}.json`), ...pluginLanguageDirs().map((dir) => join(dir, `${code}.json`))];
+  const files = [
+    ...(packageDir ? [] : [join(languagesDir, `${code}.json`)]),
+    ...pluginLanguageDirs().map((dir) => join(dir, `${code}.json`)),
+  ];
   return Object.assign({}, ...files.filter(existsSync).map((file) => flatten(readJson(file).messages)));
 };
 
@@ -118,7 +129,8 @@ const check = () => {
       used.add(match[1]);
     }
   }
-  const undefinedKeys = [...used].filter((key) => !(key in source));
+  const known = knownMessages();
+  const undefinedKeys = [...used].filter((key) => !(key in known));
   for (const key of undefinedKeys) {
     console.log(`  im Code, aber nicht in en.json: ${key}`);
   }
@@ -341,11 +353,14 @@ const scan = (dir) => {
   return hits;
 };
 
-const [command = 'check', argument] = process.argv.slice(2);
-if (command === 'template') {
+const [command = 'check', argument] = args;
+if (command === 'template' && packageDir) {
+  console.error('template only covers the app – it is not written for a package');
+  process.exitCode = 1;
+} else if (command === 'template') {
   template();
 } else if (command === 'scan') {
-  scan(argument ? join(root, argument) : undefined);
+  scan(argument ? resolve(packageDir ?? root, argument) : undefined);
 } else {
   const problems = check();
   console.log('');

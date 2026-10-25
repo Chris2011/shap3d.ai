@@ -1,6 +1,10 @@
 /**
  * Dev-only demo scenes for the README screenshots: http://localhost:5173/?shot=hero
  * Loaded by main.ts only in the dev server when a "shot" parameter is present (see scripts/screenshots.ps1).
+ *
+ * The scenes know no plugin packages. `&package=<folder>` (repeatable or comma-separated) installs the built
+ * package from plugins/<folder>/dist before any scene, and the scene `script` (`&language=<id>&file=<path>`)
+ * runs a file in the script editor – that is how a package renders its own screenshots.
  */
 import type { Editor } from './engine/editor';
 import { runScript } from './scripting/api';
@@ -40,7 +44,8 @@ const empty = (editor: Editor) => {
   }
 };
 
-const seed = Number(new URLSearchParams(location.search).get('seed') ?? 9);
+const params = new URLSearchParams(location.search);
+const seed = Number(params.get('seed') ?? 9);
 const LANDSCAPE = `
 s3d.terrain([-14, -10, -0.02], 34, 26, { hills: 5, scale: 15, seed: ${seed}, rock: 3.2, snow: 4.6, water: -0.2 });
 ${EXAMPLES.find((example) => example.id === 'house')!.code}
@@ -83,33 +88,45 @@ const settleLandscape = (editor: Editor) => {
   }
 };
 
+/** the plugin packages asked for with &package=… */
+const requestedPackages = params
+  .getAll('package')
+  .flatMap((value) => value.split(','))
+  .map((name) => name.trim())
+  .filter(Boolean);
+
 /**
- * Installs the OpenSCAD plugin package from plugins/openscad/dist (run `npm run build` there first) –
- * like "Plugin-Ordner laden…", just without the folder dialog. Scripts are read with ?raw so Vite
- * hands them over untouched; the fonts are left out (only text() needs them).
+ * Installs a built plugin package from plugins/<folder>/dist (run `npm run build` there first) – like
+ * "Plugin-Ordner laden…", just without the folder dialog. The files come from the `files` list in its
+ * dist/package.json; scripts are read with ?raw so Vite hands them over untouched.
  */
-const installOpenScad = async () => {
-  if (plugins.some((entry) => entry.id === 'openscad' && entry.active)) {
+const installPackage = async (folder: string) => {
+  const base = `/plugins/${folder}/dist/`;
+  const response = await fetch(base + 'package.json');
+  if (!response.ok) {
+    throw new Error(`plugins/${folder}/dist fehlt – dort zuerst npm run build ausführen`);
+  }
+  const manifestText = await response.text();
+  const manifest = JSON.parse(manifestText) as { files?: string[]; shap3d?: { id?: string } };
+  if (plugins.some((entry) => entry.id === manifest.shap3d?.id && entry.active)) {
     return;
   }
-  const base = '/plugins/openscad/dist/';
-  const manifest = await fetch(base + 'package.json');
-  if (!manifest.ok) {
-    throw new Error('plugins/openscad/dist fehlt – dort zuerst npm run build ausführen');
-  }
-  const raw = async (path: string) => ((await import(/* @vite-ignore */ `${base}${path}?raw`)) as { default: string }).default;
-  const asFile = (path: string, content: string) => {
+  const asFile = (path: string, content: BlobPart) => {
     const entry = new File([content], path);
     Object.defineProperty(entry, 'webkitRelativePath', { value: `dist/${path}` });
     return entry;
   };
-  await installPluginPackage([
-    asFile('package.json', await manifest.text()),
-    asFile('plugin.js', await raw('plugin.js')),
-    asFile('openscad.js', await raw('openscad.js')),
-  ]);
+  const read = async (path: string): Promise<BlobPart> =>
+    path.endsWith('.js')
+      ? ((await import(/* @vite-ignore */ `${base}${path}?raw`)) as { default: string }).default
+      : await (await fetch(base + path)).arrayBuffer();
+  const files = await Promise.all(
+    (manifest.files ?? []).filter((path) => path !== 'package.json').map(async (path) => asFile(path, await read(path))),
+  );
+  await installPluginPackage([asFile('package.json', manifestText), ...files]);
 };
-/** waits until `done()` is true (OpenSCAD compiles in the background), at most `limit` ms */
+
+/** waits until `done()` is true (scripts of plugins may compute in the background), at most `limit` ms */
 const until = async (done: () => boolean, limit = 60000) => {
   for (let waited = 0; !done() && waited < limit; waited += 250) {
     await wait(250);
@@ -117,23 +134,6 @@ const until = async (done: () => boolean, limit = 60000) => {
 };
 const button = (label: string) =>
   ([...document.querySelectorAll('button')] as HTMLElement[]).find((candidate) => candidate.textContent?.trim().endsWith(label));
-
-/** the OpenSCAD logo as an OpenSCAD model – colours become materials */
-const OPENSCAD_DEMO = `// OpenSCAD direkt in Shap3D.ai – Maße in Millimetern
-$fn = 96;
-
-// das OpenSCAD-Logo: Kugel minus drei Zylinder
-color("Gold") difference() {
-  sphere(r = 50);
-  for (axis = [[0, 0, 0], [90, 0, 0], [0, 90, 0]])
-    rotate(axis) cylinder(h = 120, r = 27, center = true);
-}
-
-// ein Sockel mit abgerundeten Ecken
-color("SteelBlue") translate([0, 0, -62])
-  hull() for (x = [-45, 45], y = [-45, 45])
-    translate([x, y, 0]) cylinder(h = 10, r = 10);
-`;
 
 const SCENES: Record<string, (editor: Editor) => Promise<void>> = {
   async hero(editor) {
@@ -264,26 +264,30 @@ s3d.torus([6.3, 0, 0.3], 0.6, 0.25, { segments: 18, material: 'Gold' });`,
     measureView.people = true;
     cam(editor, [0.1, -1.4, 0.95], [2.4, 2.6, 0.55], 52);
   },
-  async openscad(editor) {
-    // the OpenSCAD plugin: OpenSCAD code in the script editor, compiled by the real OpenSCAD (WebAssembly)
+  async script(editor) {
+    // a file from a plugin package (or the app) in the script editor, run once: &language=<id>&file=<path>
+    // (optional &camera=x,y,z&target=x,y,z, otherwise zoom extents)
     setTheme('light');
     setScene('day');
     empty(editor);
-    await installOpenScad();
-    useScripts().open({ lang: 'openscad', code: OPENSCAD_DEMO });
+    const code = await (await fetch(params.get('file') ?? '')).text();
+    useScripts().open({ lang: params.get('language') ?? 'js', code });
     openPanel.value = 'scripts';
     await wait(600);
     button('Ausführen')?.click();
     await until(() => editor.model.root.instances.size > 0);
-    cam(editor, [-0.32, -0.42, 0.22], [0.1, 0, -0.01], 35);
+    const [camera, target] = ['camera', 'target'].map((key) => params.get(key)?.split(',').map(Number));
+    if (camera?.length === 3 && target?.length === 3) {
+      cam(editor, camera, target);
+    } else {
+      editor.zoomExtents(false);
+    }
   },
   async convert(editor) {
-    // right-click › "Als Code öffnen ▸" – JavaScript, JSON, OBJ and (from the plugin) OpenSCAD
+    // right-click › "Als Code öffnen ▸" – JavaScript, JSON, OBJ and the code formats of installed plugins
     setTheme('dark');
     setScene('night');
     empty(editor);
-    await installOpenScad();
-    await until(() => plugins.some((entry) => entry.id === 'openscad' && entry.active), 10000);
     run(editor, EXAMPLES.find((example) => example.id === 'house')!.code);
     cam(editor, [-13, -15, 8], [3, 3, 1.5]);
     editor.invalidate();
@@ -302,13 +306,12 @@ s3d.torus([6.3, 0, 0.3], 0.6, 0.25, { segments: 18, material: 'Gold' });`,
     entry?.dispatchEvent(new MouseEvent('mouseenter'));
   },
   async plugins(editor) {
-    // the plugin manager: built-in plugins (AI assistant, terrain, import formats) and the OpenSCAD package
+    // the plugin manager: built-in plugins and the packages installed with &package=…
     setTheme('light');
     setScene('day');
     editor.newModel();
     run(editor, LANDSCAPE);
     settleLandscape(editor);
-    await installOpenScad();
     cam(editor, [-19, -23, 13], [3, 3, 1.2]);
     openPanel.value = 'plugins';
   },
@@ -368,6 +371,13 @@ export const runShot = async (editor: Editor, name: string) => {
     return;
   }
   await pluginsReady; // scenes use plugin commands such as s3d.terrain()
+  for (const folder of requestedPackages) {
+    await installPackage(folder);
+  }
+  await until(
+    () => requestedPackages.length === 0 || plugins.filter((entry) => !entry.builtin && entry.active).length >= requestedPackages.length,
+    10000,
+  );
   await scene(editor);
   editor.invalidate();
   await wait(800);

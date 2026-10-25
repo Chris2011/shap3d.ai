@@ -16,7 +16,12 @@ const versionOf = (name: string) => JSON.parse(readFileSync(join(packageDir(name
 const packageFiles = (): Plugin => ({
   name: 'shap3d-plugin-package',
   generateBundle() {
-    const emit = (fileName: string, source: string | Uint8Array) => this.emitFile({ type: 'asset', fileName, source });
+    // every file of the package, listed in its package.json – so it can also be installed without the folder dialog
+    const files = ['plugin.js'];
+    const emit = (fileName: string, source: string | Uint8Array) => {
+      files.push(fileName);
+      this.emitFile({ type: 'asset', fileName, source });
+    };
     emit('openscad.js', readFileSync(join(packageDir('openscad-wasm'), 'openscad.js')));
     const fontDir = packageDir('@typopro/dtp-liberation');
     for (const name of readdirSync(fontDir).filter((file) => file.endsWith('.ttf'))) {
@@ -27,7 +32,10 @@ const packageFiles = (): Plugin => ({
     const bundled = { 'openscad-wasm': versionOf('openscad-wasm'), '@typopro/dtp-liberation': versionOf('@typopro/dtp-liberation') };
     const { name, version, description, license } = manifest;
     const shap3d = { id: manifest.shap3d.id, main: 'plugin.js' };
-    emit('package.json', JSON.stringify({ name, version, description, license, shap3d, bundled }, null, 2) + '\n');
+    emit(
+      'package.json',
+      JSON.stringify({ name, version, description, license, shap3d, bundled, files: [...files, 'package.json'] }, null, 2) + '\n',
+    );
   },
 });
 

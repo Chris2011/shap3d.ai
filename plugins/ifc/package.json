@@ -1,0 +1,31 @@
+{
+  "name": "s3d-plugin-ifc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IFC (BIM) for Shap3D.ai: opens IFC 2x3, IFC 4 and IFC 4.3 files as nested groups with IFC classes, GlobalIds and property sets, and exports the model as IFC4 – with web-ifc as WebAssembly.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "shap3d": {
+    "id": "ifc",
+    "main": "plugin.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package ."
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "dependencies": {
+    "web-ifc": "0.0.78"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "ifc": {
+      "plugin": {
+        "name": "IFC (BIM)",
+        "description": "Abre archivos IFC (IFC 2x3, IFC 4, IFC 4.3) como grupos anidados con sus clases IFC como etiquetas, sus GlobalId y conjuntos de propiedades, y exporta el modelo como IFC4. El lector IFC (web-ifc) se carga con la primera importación."
+      },
+      "errors": {
+        "unreadable": "No se pudo leer el archivo IFC.",
+        "noGeometry": "El archivo IFC no contiene geometría."
+      },
+      "imported": "{file} ({schema}): {elements} elementos, {classes} clases IFC, {triangles} triángulos",
+      "undo": {
+        "classify": "Clase IFC",
+        "edit": "Atributo IFC"
+      },
+      "panel": {
+        "title": "Propiedades IFC",
+        "contextEntry": "Propiedades IFC…",
+        "selectGroup": "Selecciona un único grupo o componente para ver o asignar su clase IFC.",
+        "class": "Clase IFC",
+        "unclassified": "sin clasificar",
+        "predefinedType": "Tipo predefinido",
+        "objectType": "Tipo de objeto",
+        "material": "Material",
+        "guidHint": "Tomado de la importación IFC para conservar la identidad en un viaje de ida y vuelta",
+        "guidOnExport": "se crea al exportar",
+        "sharedData": "Estos datos IFC pertenecen al componente y valen para sus {count} copias.",
+        "remove": "Quitar datos IFC",
+        "yes": "sí",
+        "no": "no"
+      }
+    }
+  }
+}

@@ -4,6 +4,14 @@
 
 Nothing yet.
 
+## [1.4.1] – 2026-10-23 · Shap3D.ai 0.8.0
+
+### Changed
+
+- Linting and formatting belong to the package: `npm run lint`, `lint:fix`, `format` and `format:check` in `plugins/openscad`, and a `lint-staged` configuration of its own for the pre-commit hook. The app's scripts no longer cover this package.
+- The texts are checked from the package as well (`npm run i18n`), and `npm run screenshots` (Windows) or `npm run screenshots:sh` (Linux, macOS) renders `docs/openscad.png` (the demo model is `docs/demo.scad`) – the app's scripts and demo scenes know no plugin packages.
+- `dist/package.json` lists the package's files (`files`), so the package can also be installed without the folder dialog.
+
 ## [1.4.0] – 2026-10-20 · Shap3D.ai 0.6.0
 
 ### Added

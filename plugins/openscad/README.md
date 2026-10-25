@@ -6,7 +6,7 @@ Brings the **official OpenSCAD** (as WebAssembly, npm package [`openscad-wasm`](
 
 The plugin is a package of its own with its own `package.json` and is **not** part of the app: OpenSCAD is GPL-licensed, Shap3D.ai is Apache-2.0. The app only contains the general plugin system; OpenSCAD only reaches the browser when this package is installed.
 
-![OpenSCAD code in the Shap3D.ai script editor](../../docs/screenshots/openscad.png)
+![OpenSCAD code in the Shap3D.ai script editor](docs/openscad.png)
 
 ## Features
 
@@ -48,7 +48,7 @@ npm ci
 npm run build
 ```
 
-`npm run build` is a plain `vite build` (library mode, [`vite.config.ts`](vite.config.ts)); Vite and TypeScript come from the repository root, so run `npm ci` there as well. `npm run typecheck` checks the TypeScript against the app's plugin types.
+`npm run build` is a plain `vite build` (library mode, [`vite.config.ts`](vite.config.ts)); Vite and TypeScript come from the repository root, so run `npm ci` there as well. `npm run typecheck` checks the TypeScript against the app's plugin types. `npm run lint` and `npm run format` (with `lint:fix` and `format:check`) lint and format `src/`; the pre-commit hook runs them on staged files of this package.
 
 Then in Shap3D.ai: *Plugins › Load plugin folder…* and pick the folder `plugins/openscad/dist`. The plugin including OpenSCAD and the fonts (about 16 MB) is kept in the browser (IndexedDB) and loaded on every start.
 
@@ -70,7 +70,7 @@ plugins/openscad/
   dist/             the installable plugin folder (not checked in)
 ```
 
-**Texts** are message keys (`openscad.*`); `src/i18n/en.json` is the source, the other files are translations in the same format as the app's language files. The plugin hands them to the app as `messages` – nothing is stored in the app itself. `node scripts/i18n.mjs check` in the repository root also checks this plugin. OpenSCAD code (examples, signatures, generated `polyhedron()`), material names and OpenSCAD's own console output stay as they are.
+**Texts** are message keys (`openscad.*`); `src/i18n/en.json` is the source, the other files are translations in the same format as the app's language files. The plugin hands them to the app as `messages` – nothing is stored in the app itself. `npm run i18n` checks them (missing, unused and mismatched keys, hard-coded German text in `src/`). OpenSCAD code (examples, signatures, generated `polyhedron()`), material names and OpenSCAD's own console output stay as they are.
 
 ## License
 
