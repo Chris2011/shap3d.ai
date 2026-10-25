@@ -51,6 +51,8 @@
   - [Releases](#releases)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Importing from SketchUp, Blender, 3ds Max and others](#importing-from-sketchup-blender-3ds-max-and-others)
+  - [Blender files](#blender-files)
+  - [Reading .skp files](#reading-skp-files)
 - [Connecting a local AI model](#connecting-a-local-ai-model)
 - [Scripting example](#scripting-example)
 - [Remote control: REST API, Swagger UI and MCP](#remote-control-rest-api-swagger-ui-and-mcp)
@@ -59,13 +61,12 @@
   - [Texts and languages in plugins](#texts-and-languages-in-plugins)
   - [Built-in plugins](#built-in-plugins)
   - [Plugin packages](#plugin-packages)
-- [Multilingual: language files for developers](#multilingual-language-files-for-developers)
   - [The OpenSCAD plugin](#the-openscad-plugin)
   - [The IFC plugin](#the-ifc-plugin)
+- [Multilingual: language files for developers](#multilingual-language-files-for-developers)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
 - [Credits](#credits)
-- [Changelog](CHANGELOG.md)
 - [Legal notice](#legal-notice)
 - [License](#license)
 
@@ -259,20 +260,21 @@ What the built app does not have, because it needs the dev server: the remote AP
 
 ### Releases
 
-A version tag starts the [release workflow](.github/workflows/release.yml) on GitHub Actions:
+Releases run by themselves – no tag by hand. The [release workflow](.github/workflows/release.yml) runs on every push to `main` and releases the version in `package.json` as soon as there is no release (tag `v<version>`) for it yet:
 
 1. Raise `version` in `package.json` (`npm version 0.9.0 --no-git-tag-version` also updates the lock file) and turn `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) into `## [0.9.0] – <date>`; commit both.
-2. Tag and push: `git tag v0.9.0 && git push origin v0.9.0`.
+2. Push to `main`. Several commits may belong to one version – the release starts with the push that brings the new version, later pushes without a new version change nothing.
 
 The workflow then
 
-- checks that the tag matches `package.json` and that `CHANGELOG.md` has a section for this version – otherwise it stops before anything is built,
+- checks whether `v<version>` exists already – if so, the run ends right there,
+- takes the release notes from the `CHANGELOG.md` section for this version – without one it stops before anything is built,
 - runs `npm run lint` and `npm run format:check`, builds the web app and creates a **draft** release with that changelog section as its text and the web build as `shap3d-ai_<version>_web.zip`,
 - builds the desktop installers with Tauri and adds them to the draft: MSI and NSIS setup (Windows), a universal `.dmg` for Apple silicon and Intel (macOS), `.deb`, `.rpm` and AppImage (Linux),
 - pushes two Docker images to the GitHub Container Registry: `ghcr.io/chris2011/shap3d.ai:<version>` / `:latest` (dev server with the remote API) and `:<version>-static` / `:static` (production build behind nginx), each for amd64 and arm64,
-- publishes the release only when all of this has worked. If a job fails, the draft stays – fix the cause and use *Re-run failed jobs*; the run reuses the draft.
+- publishes the release only when all of this has worked – publishing creates the tag `v<version>` on the pushed commit. If a job fails, the draft stays: fix the cause and push again (or use *Re-run failed jobs* / *Run workflow*); the run reuses the draft and moves it to the new commit. A newer push to `main` while a release is still building replaces that run.
 
-A tag with a suffix such as `v0.9.0-rc.1` (and the same version in `package.json`) becomes a pre-release: it does not get the `latest`/`static` image tags and is not marked as the latest release. The installers are not code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first start (macOS: right-click → *Open*). Plugin versions are not part of the release – they live in the plugin changelogs.
+A version with a suffix such as `0.9.0-rc.1` in `package.json` becomes a pre-release: it does not get the `latest`/`static` image tags and is not marked as the latest release. The installers are not code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first start (macOS: right-click → *Open*). Plugin versions are not part of the release – they live in the plugin changelogs.
 
 ## Keyboard shortcuts
 

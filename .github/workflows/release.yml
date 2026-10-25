@@ -1,6 +1,11 @@
-# Release of Shap3D.ai – starts with a version tag, e.g.  git tag v0.9.0 && git push origin v0.9.0
+# Release of Shap3D.ai – runs by itself on every push to main and releases the version in package.json
+# when there is no release (tag v<version>) for it yet. So a release is: raise the version, add its section
+# to CHANGELOG.md, push. No tag by hand – publishing the release creates the tag on the pushed commit.
+# Pushes without a new version end after the first job. "Run workflow" (workflow_dispatch) starts it by hand,
+# e.g. to finish a release whose run failed.
 #
-#   prepare   tag ↔ package.json check, lint, format check, web build, draft release with the CHANGELOG.md section
+#   version   reads package.json and decides: release (no tag v<version> yet) or nothing to do
+#   prepare   CHANGELOG.md section, lint, format check, web build, draft release
 #   desktop   Tauri installers for Windows (MSI, NSIS), macOS (.dmg, universal) and Linux (.deb, .rpm, AppImage)
 #   docker    images on GHCR: dev target (with remote API) and static target (nginx)
 #   publish   turns the draft into the real release once everything above has worked
@@ -11,28 +16,64 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# one release run at a time; a newer push to main replaces a run that is still building the same version
 concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
+  group: release
+  cancel-in-progress: true
 
 env:
   NODE_VERSION: 22
 
 jobs:
+  version:
+    name: New version?
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      release: ${{ steps.version.outputs.release }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Version from package.json, released already?
+        id: version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          tag="v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          # 0.9.0-rc.1 and the like become a pre-release
+          if [[ "$version" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$tag is released already – raise the version in package.json for a new release."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Releasing $tag."
+          fi
+
   prepare:
     name: Check, web build and draft release
+    needs: version
+    if: needs.version.outputs.release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      prerelease: ${{ steps.version.outputs.prerelease }}
       release_id: ${{ steps.release.outputs.id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,26 +83,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Tag must match package.json
-        id: version
-        run: |
-          tag_version="${GITHUB_REF_NAME#v}"
-          package_version="$(node -p "require('./package.json').version")"
-          if [ "$tag_version" != "$package_version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match the version in package.json ($package_version)."
-            exit 1
-          fi
-          echo "version=$package_version" >> "$GITHUB_OUTPUT"
-          # 0.9.0-rc.1 and the like become a pre-release
-          if [[ "$package_version" == *-* ]]; then
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Release notes from CHANGELOG.md
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
           # everything between "## [<version>]" and the next "## " heading (or the link list at the end),
           # without leading blank lines – $(…) drops the trailing ones
@@ -84,34 +108,43 @@ jobs:
 
       - name: Pack web build
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: cd dist && zip -qr "../shap3d-ai_${VERSION}_web.zip" .
 
       - name: Create draft release
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
-          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+          VERSION: ${{ needs.version.outputs.version }}
+          TAG: ${{ needs.version.outputs.tag }}
+          PRERELEASE: ${{ needs.version.outputs.prerelease }}
         run: |
-          # a re-run reuses the draft of the first attempt
+          # a draft has no tag yet – it points at this commit, and publishing creates the tag there.
+          # A later run for the same version (re-run, or a newer push before it was published) reuses the draft
+          # and moves it to its own commit with the current release notes.
           release_id="$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
-            --jq ".[] | select(.draft and .tag_name == \"$GITHUB_REF_NAME\") | .id" | head -n 1)"
+            --jq ".[] | select(.draft and .tag_name == \"$TAG\") | .id" | head -n 1)"
           if [ -z "$release_id" ]; then
             release_id="$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
-              -f tag_name="$GITHUB_REF_NAME" \
+              -f tag_name="$TAG" \
+              -f target_commitish="$GITHUB_SHA" \
               -f name="Shap3D.ai $VERSION" \
               -F body=@release-notes.md \
               -F draft=true \
               -F prerelease="$PRERELEASE" \
               --jq .id)"
+          else
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$release_id" \
+              -f target_commitish="$GITHUB_SHA" \
+              -F body=@release-notes.md \
+              --silent
           fi
           echo "id=$release_id" >> "$GITHUB_OUTPUT"
-          gh release upload "$GITHUB_REF_NAME" "shap3d-ai_${VERSION}_web.zip" --clobber
+          gh release upload "$TAG" "shap3d-ai_${VERSION}_web.zip" --clobber
 
   desktop:
     name: Desktop (${{ matrix.name }})
-    needs: prepare
+    needs: [version, prepare]
     permissions:
       contents: write
     strategy:
@@ -174,7 +207,7 @@ jobs:
 
   docker:
     name: Docker images (GHCR)
-    needs: prepare
+    needs: [version, prepare]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -186,13 +219,13 @@ jobs:
           # ghcr.io/<owner>/shap3d.ai:0.9.0, :0.9, :latest – dev server with remote API
           - target: dev
             suffix: ''
-            latest: auto
+            latest: ${{ needs.version.outputs.prerelease == 'false' }}
             extra_tag: ''
           # ghcr.io/<owner>/shap3d.ai:0.9.0-static, :0.9-static, :static – production build with nginx
           - target: static
             suffix: -static
             latest: 'false'
-            extra_tag: type=raw,value=static,enable=${{ needs.prepare.outputs.prerelease == 'false' }}
+            extra_tag: type=raw,value=static,enable=${{ needs.version.outputs.prerelease == 'false' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -213,9 +246,10 @@ jobs:
           flavor: |
             latest=${{ matrix.latest }}
             suffix=${{ matrix.suffix }},onlatest=true
+          # the version comes from package.json – the run belongs to a push to main, not to a tag
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ needs.prepare.outputs.prerelease == 'false' }}
+            type=semver,pattern={{version}},value=${{ needs.version.outputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.tag }},enable=${{ needs.version.outputs.prerelease == 'false' }}
             ${{ matrix.extra_tag }}
           labels: |
             org.opencontainers.image.title=Shap3D.ai${{ matrix.suffix }}
@@ -233,7 +267,7 @@ jobs:
 
   publish:
     name: Publish release
-    needs: [prepare, desktop, docker]
+    needs: [version, prepare, desktop, docker]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -242,8 +276,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
-          PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+          PRERELEASE: ${{ needs.version.outputs.prerelease }}
         run: |
+          # publishing creates the tag v<version> on the commit the draft points at
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
             -F draft=false \
             -f make_latest="$([ "$PRERELEASE" = true ] && echo false || echo true)" \

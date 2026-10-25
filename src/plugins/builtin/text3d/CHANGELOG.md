@@ -15,6 +15,6 @@ Nothing yet.
 
 ### Added
 
-- The *3D text* tool with a dialog and live preview: letters and numbers flat or upright, filled, extruded or as an outline, over several lines – placed as a component with a click.
+- The _3D text_ tool with a dialog and live preview: letters and numbers flat or upright, filled, extruded or as an outline, over several lines – placed as a component with a click.
 - 15 fonts – Helvetiker, Optimer and 13 under the SIL Open Font License – plus your own TTF, OTF or WOFF files, kept in the browser. Fonts and the font reader load only when used.
 - `s3d.text3d()` for scripts; the fonts a script names are loaded before it runs.

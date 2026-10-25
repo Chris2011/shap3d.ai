@@ -9,8 +9,8 @@ Nothing yet.
 ### Added
 
 - Setup wizard: each suggested model can be installed in another quantization (Q3_K_M … Q8_0, F16) with its estimated size; installed models show their quantization.
-- Setup wizard: once the assistant is set up, every step can be clicked directly, and *Apply* saves a change (e.g. just another model) without going through to the end.
-- Model search: repos published by the model's maker itself are marked *official* and listed first.
+- Setup wizard: once the assistant is set up, every step can be clicked directly, and _Apply_ saves a change (e.g. just another model) without going through to the end.
+- Model search: repos published by the model's maker itself are marked _official_ and listed first.
 
 ## [1.2.0] – 2026-10-22 · Shap3D.ai 0.7.0
 
@@ -20,7 +20,7 @@ Nothing yet.
 - The model's thought process is shown folded, with its length in words.
 - A warning when an answer was cut off because the model hit its token limit.
 - A hint when there is no download progress from Ollama because a virus scanner or web filter (e.g. Sophos) holds the response back – the download keeps running.
-- Model search: an explanation of GGUF and quants, mixture-of-experts models (…-A3B) show their active parameters and count with them in the *small models* filter, and models that are no language model (e.g. image → 3D) are marked *not for Ollama*.
+- Model search: an explanation of GGUF and quants, mixture-of-experts models (…-A3B) show their active parameters and count with them in the _small models_ filter, and models that are no language model (e.g. image → 3D) are marked _not for Ollama_.
 
 ### Fixed
 
@@ -40,5 +40,5 @@ Nothing yet.
 
 ### Added
 
-- The AI assistant moved from the core into a built-in plugin: the chat panel with its tile, the ✦ button in the top bar, the setup wizard, the model search on Hugging Face, the chat history and the palette switches *Fast mode* and *Run code automatically*.
+- The AI assistant moved from the core into a built-in plugin: the chat panel with its tile, the ✦ button in the top bar, the setup wizard, the model search on Hugging Face, the chat history and the palette switches _Fast mode_ and _Run code automatically_.
 - Switched off, an answer that is being written and running model downloads stop; settings and history stay.

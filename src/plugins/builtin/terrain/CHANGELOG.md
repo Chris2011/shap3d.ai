@@ -14,5 +14,5 @@ Nothing yet.
 
 ### Added
 
-- The terrain editor moved from the core into a built-in plugin: the terrain tool with its floating window, the context-menu entries *Edit terrain* and *Terrain from face*, the command and `s3d.terrain()`.
+- The terrain editor moved from the core into a built-in plugin: the terrain tool with its floating window, the context-menu entries _Edit terrain_ and _Terrain from face_, the command and `s3d.terrain()`.
 - Terrains in a model stay intact while the plugin is off; they can be sculpted again once it is on.

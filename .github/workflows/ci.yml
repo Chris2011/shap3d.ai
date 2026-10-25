@@ -1,0 +1,36 @@
+# Checks of the app on every push and pull request: lint, format, types and the web build.
+# The pre-commit hook only looks at staged files – this catches everything else (older files, commits made with
+# --no-verify) before a release stops at the same checks. Plugin packages in plugins/ check themselves.
+#
+# Actions are pinned to commit SHAs; the comment behind each one names the release.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, format, types and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npx vue-tsc --noEmit -p tsconfig.json
+      - run: npm run build
