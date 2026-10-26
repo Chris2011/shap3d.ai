@@ -4,6 +4,12 @@
 
 Nothing yet.
 
+## [1.0.3] – 2026-10-25 · Shap3D.ai (unreleased)
+
+### Added
+
+- German, French, Spanish and Arabic text for the switch between the model and the workspaces of plugins in the top bar.
+
 ## [1.0.2] – 2026-10-25 · Shap3D.ai 0.9.0
 
 ### Added

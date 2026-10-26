@@ -3008,6 +3008,10 @@
       "noFaces": "",
       "noFaces#en": "The code creates no faces"
     },
+    "workspace": {
+      "model": "",
+      "model#en": "Model"
+    },
     "brand": {
       "tagline": "",
       "tagline#en": "Easy 3D modelling with AI",

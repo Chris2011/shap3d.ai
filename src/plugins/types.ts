@@ -9,12 +9,14 @@ import type { ScriptLanguage, ScriptCompletion, CompletionProvider } from '../sc
 import type { Definition, Entities } from '../core/model';
 import type { ApiCategory } from '../scripting/catalog';
 import type { ContextMenuEntry, TopBarButton } from './uiExtensions';
+import type { ViewRequest, ViewLines } from '../engine/viewRender';
 import type { LoadedScene } from './fileFormats';
 import type { CodeFormat } from '../scripting/codeExport';
 import type { LanguageInfo, MessageTree } from '../i18n';
 export type { LanguageInfo, MessageTree, LanguageFile } from '../i18n';
 export type { ScriptCompletion, CompletionRequest, CompletionKind, CompletionProvider } from '../scripting/languages';
 export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
+export type { ViewRequest, ViewLines, ViewLine } from '../engine/viewRender';
 
 /**
  * A Shap3D.ai plugin: an ES module whose default export is this object.
@@ -89,6 +91,15 @@ export interface PluginImporter {
   import?: (file: File, editor: Editor) => void | Promise<void>;
   /** … or only reads the file into a three.js scene; the app converts it to faces, guesses units, places it and makes it one undo step */
   loadScene?: (file: File) => Promise<LoadedScene>;
+}
+
+/** A workspace next to the 3D model: its component fills the window below the top bar while it is active. */
+export interface PluginWorkspace {
+  id: string;
+  /** text or message key – shown in the switch in the top bar */
+  label: string;
+  icon?: string;
+  component: Component;
 }
 
 export interface PluginExporter {
@@ -220,10 +231,34 @@ export interface PluginContext {
     /** a button in the top bar next to the model name */
     addTopBarButton: (button: TopBarButton) => Disposer;
   };
-  /** JSON data the plugin keeps on a group/component definition – saved with the model */
+  /**
+   * Workspaces of their own next to the 3D model (e.g. sheets for plans): a switch in the top bar changes
+   * between "Model" and the workspaces. While one is active, only Ctrl+Z/Y/S and the command palette stay global keys.
+   */
+  workspaces: {
+    register: (workspace: PluginWorkspace) => Disposer;
+    /** shows a workspace of this plugin (by id), or the 3D model with null */
+    open: (id: string | null) => void;
+    /** the active workspace's full id ("<plugin>.<id>"), null = the 3D model */
+    active: () => string | null;
+  };
+  /**
+   * A view of the model rendered on demand – camera, style, hidden tags, size and an optional drawing scale
+   * (`orthoHeight`, metres from top to bottom) – without changing the viewport.
+   */
+  render: {
+    /** as a PNG (data URL) */
+    image: (request: ViewRequest) => string;
+    /** as lines in pixels: visible edges and silhouettes, hidden parts removed (for vector output) */
+    lines: (request: ViewRequest) => ViewLines;
+  };
+  /** JSON data the plugin keeps on a group/component definition or on the model – saved with the model */
   data: {
     get: <T>(definition: Definition) => T | undefined;
     set: (definition: Definition, value: unknown) => void;
+    /** data on the model itself (call setModel inside editor.commit for undo) */
+    getModel: <T>() => T | undefined;
+    setModel: (value: unknown) => void;
   };
   /**
    * Languages: texts as message keys (`t('my-plugin.hello', { name })`). A plugin brings its own texts – at least

@@ -5,7 +5,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 Versions before 0.7.0 were not tagged at the time; they are reconstructed from the Git history and grouped by development phase.
 
-The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC](plugins/ifc)) have their own version numbers. A plugin's version only goes up when the plugin itself changes – new features (including whole new languages) raise the minor version, fixes and translations of a few new texts the patch version. The new version is given in brackets at the entry, e.g. *(AI assistant 1.2.0)*; every plugin has its own changelog with the details (linked in the table below).
+The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC](plugins/ifc), [LayOut](plugins/layout)) have their own version numbers. A plugin's version only goes up when the plugin itself changes – new features (including whole new languages) raise the minor version, fixes and translations of a few new texts the patch version. The new version is given in brackets at the entry, e.g. *(AI assistant 1.2.0)*; every plugin has its own changelog with the details (linked in the table below).
 
 | Version | Date | In one sentence |
 | --- | --- | --- |
@@ -32,7 +32,14 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **Workspaces for plugins**: a plugin can add a workspace next to the 3D model (`context.workspaces`). The top bar then shows a switch *Model | …*; the active workspace fills the window below the top bar.
+- **Views rendered on demand** for plugins (`context.render`): a camera, style, hidden tags, size and an optional drawing scale give an image or vector lines with hidden lines removed – without changing the viewport.
+- **Plugin data on the model** (`context.data.getModel` / `setModel`), saved in the `.shap3d.json` – next to the data on groups and components.
+- Screenshot scenes: `&command=<id>` runs commands after the scene.
+
+*(Languages 1.0.3; LayOut package 1.0.0 – sheets for plans with 2D tools and floor plan symbols, built on these)*
 
 ## [0.9.0] – 2026-10-25
 

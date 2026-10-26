@@ -1,0 +1,30 @@
+{
+  "name": "s3d-plugin-layout",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LayOut for Shap3D.ai: sheets for plans next to the 3D model – viewports from scenes with a drawing scale, live linked to the model, text, lines, dimensions, title block, SVG export and printing to PDF.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "shap3d": {
+    "id": "layout",
+    "main": "plugin.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "screenshots": "powershell -File ../../scripts/screenshots.ps1 -Shots script -Name layout -Out docs -Query \"package=layout&file=/plugins/layout/docs/demo.js&command=layout.fromScenes\" && powershell -File ../../scripts/screenshots.ps1 -Shots script -Name layout-plan -Out docs -Query \"package=layout&file=/plugins/layout/docs/demo-plan.js&command=layout.open\"",
+    "screenshots:sh": "bash ../../scripts/screenshots.sh --shots script --name layout --out docs --query \"package=layout&file=/plugins/layout/docs/demo.js&command=layout.fromScenes\" && bash ../../scripts/screenshots.sh --shots script --name layout-plan --out docs --query \"package=layout&file=/plugins/layout/docs/demo-plan.js&command=layout.open\""
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  }
+}

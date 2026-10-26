@@ -19,8 +19,12 @@
       </div>
     </div>
     <S3dViewport class="inset-x-0 top-0 bottom-status" @context="openContext" />
+    <!-- a plugin's workspace (e.g. the layout sheets) covers the viewport, the tools and the panels -->
+    <div v-if="activeWorkspace" class="absolute inset-x-0 top-0 bottom-status z-29 bg-surface-2">
+      <component :is="activeWorkspace.component" />
+    </div>
     <S3dTopBar />
-    <S3dSceneTabs />
+    <S3dSceneTabs v-if="!activeWorkspace" />
     <S3dMainToolbar @search="openPalette()" />
     <S3dRightPanels />
     <S3dStatusBar ref="statusBar" />
@@ -52,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { provide, ref, shallowRef, onMounted, watch } from 'vue';
+import { computed, provide, ref, shallowRef, onMounted, watch } from 'vue';
 import { useEventListener } from '@vueuse/core';
 import S3dViewport from './components/S3dViewport.vue';
 import S3dTopBar from './components/S3dTopBar.vue';
@@ -64,7 +68,7 @@ import S3dContextMenu from './components/S3dContextMenu.vue';
 import S3dCommandPalette from './components/S3dCommandPalette.vue';
 import { palette, openPalette, closePalette } from './components/paletteState';
 import S3dDialogs from './components/S3dDialogs.vue';
-import { PLUGIN_WINDOWS } from './plugins/uiExtensions';
+import { PLUGIN_WINDOWS, WORKSPACES, workspaceState } from './plugins/uiExtensions';
 import S3dIcon from './components/S3dIcon.vue';
 import S3dWelcomeTour from './components/S3dWelcomeTour.vue';
 import { openTour, tourSeen } from './components/tour';
@@ -80,6 +84,7 @@ provide(EDITOR, editor);
 (window as any).editor = editor; // handy for debugging in the console
 
 const contextMenu = shallowRef<{ x: number; y: number } | null>(null);
+const activeWorkspace = computed(() => WORKSPACES.find((workspace) => workspace.id === workspaceState.active));
 const statusBar = ref<InstanceType<typeof S3dStatusBar> | null>(null);
 const openContext = (position: { x: number; y: number }) => {
   contextMenu.value = position;

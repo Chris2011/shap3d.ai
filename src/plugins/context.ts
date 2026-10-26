@@ -15,7 +15,8 @@ import { buildMesh } from '../scripting/mesh';
 import { registerScriptLanguage, registerBeforeRun } from '../scripting/languages';
 import { useScripts } from '../composables/useScripts';
 import { putPluginFile, getPluginFile, removePluginFile, clearPluginFiles, listPluginFiles, type PluginAssets } from './assetStore';
-import { addContextMenuEntry, addPluginWindow, addTopBarButton } from './uiExtensions';
+import { addContextMenuEntry, addPluginWindow, addTopBarButton, addWorkspace, workspaceState } from './uiExtensions';
+import { renderViewImage, renderViewLines } from '../engine/viewRender';
 import { registerCodeFormat } from '../scripting/codeExport';
 import { registerCompletionValues, registerLanguageCompletions } from '../scripting/completion';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
@@ -369,7 +370,31 @@ export const createPluginContext = (
       addTopBarButton: (button) => track(addTopBarButton(button)),
     },
 
+    workspaces: {
+      register: (workspace) => track(addWorkspace({ ...workspace, id: qualified(workspace.id) })),
+      open: (id) => {
+        workspaceState.active = id ? (id.includes('.') ? id : qualified(id)) : null;
+        editor.invalidate();
+      },
+      active: () => workspaceState.active,
+    },
+
+    render: {
+      image: (request) => renderViewImage(editor, request),
+      lines: (request) => renderViewLines(editor, request),
+    },
+
     data: {
+      getModel: () => editor.model.pluginData?.[plugin.id] as any,
+      setModel: (value) => {
+        const data = { ...editor.model.pluginData };
+        if (value === undefined) {
+          delete data[plugin.id];
+        } else {
+          data[plugin.id] = value;
+        }
+        editor.model.pluginData = Object.keys(data).length ? data : undefined;
+      },
       get: (definition) => definition.pluginData?.[plugin.id] as any,
       set: (definition, value) => {
         const data = { ...definition.pluginData };

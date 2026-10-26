@@ -63,6 +63,7 @@
   - [Plugin packages](#plugin-packages)
   - [The OpenSCAD plugin](#the-openscad-plugin)
   - [The IFC plugin](#the-ifc-plugin)
+  - [The LayOut plugin](#the-layout-plugin)
 - [Multilingual: language files for developers](#multilingual-language-files-for-developers)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
@@ -476,7 +477,9 @@ export default {
 | | `ui.addWindow(component)` | A floating window (Vue component, rendered once; it decides itself when to show). |
 | | `ui.addTopBarButton({ icon, title, active?(), badge?(), position?, run(editor, event) })` | A button in the top bar next to the model name (`position: 'theme'`: right of the light/dark switch), highlighted while `active()` is true; `badge()` shows a short text next to the icon. `event` lets it open a popover at its position. |
 | Languages | `i18n.t(key, params?)`, `i18n.addMessages(language, messages)`, `i18n.addLanguage({ code, name, dir? }, messages?)`, `i18n.language()`, `i18n.languages()`, `i18n.setLanguage(code)`, `i18n.onChange(listener)` | Texts by key with `{placeholders}` and fallback (current language → English → key). `addMessages` adds texts for a language (nested or flat), `addLanguage` a whole language that can be chosen. See [Texts and languages in plugins](#texts-and-languages-in-plugins). |
-| Model data | `data.get(definition)`, `data.set(definition, value)` | JSON the plugin keeps on a group/component – saved with the model and kept while the plugin is off (the terrain plugin stores its height grid here). |
+| Workspaces | `workspaces.register({ id, label, icon?, component })`, `workspaces.open(id \| null)`, `workspaces.active()` | A workspace of its own next to the 3D model: the top bar gets a switch *Model \| …*, and while it is active the component fills the window below the top bar instead of the viewport, the tools and the panels. Only Ctrl+Z/Y/S and the command palette stay global keys then. |
+| Views | `render.image({ camera, width, height, style?, hiddenTags?, orthoHeight? })`, `render.lines(…)` | A view of the model rendered on demand without changing the viewport – as a PNG, or as lines (visible edges and silhouettes, hidden parts removed) for vector output. `orthoHeight` (metres from top to bottom) gives a parallel projection at a drawing scale. |
+| Model data | `data.get(definition)`, `data.set(definition, value)`, `data.getModel()`, `data.setModel(value)` | JSON the plugin keeps on a group/component or on the model itself – saved with the model and kept while the plugin is off (the terrain plugin stores its height grid here, the LayOut plugin its sheets). |
 | Model | `editor`, `THREE`, `newId()` | The full editor (model, selection, viewer; `editor.commit(label, change)` makes one undo step) and three.js. |
 
 `script.extend` also takes `category`, `title` and `returns` to place the command in the API reference (e.g. under *Körper*).
@@ -593,6 +596,30 @@ Then *Plugins › Load plugin folder…* and pick `plugins/ifc/dist`.
 
 Details in [its README](plugins/ifc/README.md).
 
+### The LayOut plugin
+
+The package in [`plugins/layout/`](plugins/layout) adds sheets for plans **next to the 3D model** – a workspace *Sheets* that the switch *Model | Sheets* in the top bar opens. It needs no dependencies of its own and is built like the others:
+
+```bash
+cd plugins/layout
+npm run build
+```
+
+Then *Plugins › Load plugin folder…* and pick `plugins/layout/dist`.
+
+![LayOut: a sheet with a perspective, two elevations and a top view at 1:100, title block in the bottom right](plugins/layout/docs/layout.png)
+
+- **Sheets** in A4 to A1, Letter and Tabloid with frame and title block.
+- **Viewports** show scenes of the model **live** – change the model and the sheet follows – at a drawing scale (1:1 … 1:1000) and as hybrid, raster or vector drawing. *From scenes* puts up to four scenes on a new sheet with fitting scales.
+- **The tools of a layout program**: text, labels, dimensions and angle dimensions (on a scaled viewport they measure the model), lines, freehand, arcs, pies, rectangles (rounded, lozenge, bulged), circles, ellipses, polygons, images, offset, fillet, chamfer, trim, extend, split, join, groups, style transfer – with line styles, fills and patterns.
+- **Floor plan symbols** in real size – doors, windows, stairs, furniture, kitchen and bath, people, trees, cars – that take the scale of the viewport they are dropped on.
+- **Sections per viewport** with filled cut surfaces, own face style and tags per viewport, titles with the live scale, layers, sheet templates and a document setup (grid, snapping, dimension units).
+- **Presentation** of the sheets full screen, **SVG export** of a sheet and **printing** all sheets in their paper sizes (to PDF through the print dialog). The sheets are saved in the `.shap3d.json`.
+
+![LayOut: a floor plan at 1:50 with door, window and furniture symbols, dimensions, room names and labels](plugins/layout/docs/layout-plan.png)
+
+It builds on three parts of the plugin API made for it: workspaces, views rendered on demand (image and vector lines) and data on the model. Its `.vue` components use the app's Vue – see [its README](plugins/layout/README.md).
+
 ## Multilingual: language files for developers
 
 Every visible text is a message key (`t('tools.select')`). English is the source and the fallback: [`src/i18n/en.json`](src/i18n/en.json) for the app, [`src/i18n/boot.en.json`](src/i18n/boot.en.json) for the loading screen, and `i18n/en.json` in each built-in plugin. The small core in [`src/i18n/index.ts`](src/i18n/index.ts) only registers texts and languages and translates (`t`, fallback current language → English → key); every other language comes from a plugin – German, French, Spanish and Arabic from **Sprachen** ([`languages/de.json`](src/plugins/builtin/i18n/languages/de.json), `fr.json`, `es.json`, `ar.json`), each plugin's own texts from the plugin itself (`i18n/<code>.json` next to its `index.ts`).
@@ -647,7 +674,7 @@ src/
   utils/       pure helper functions – e.g. material swatches
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo and README screenshots
-plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/ (not part of the app build)
+plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/ (not part of the app build)
 scripts/       screenshot automation (headless Chrome: screenshots.ps1 for Windows, screenshots.sh for Linux/macOS, capture-shot.mjs for both), i18n.mjs (translation check and template)
 tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
 src-tauri/      the desktop app (Tauri 2): Rust shell, tauri.conf.json, app icons
@@ -666,7 +693,7 @@ bash scripts/screenshots.sh                # Linux, macOS (and Git Bash)
 
 Single scenes: `powershell -File scripts/screenshots.ps1 -Shots "palette,tour"` or `bash scripts/screenshots.sh --shots "palette,tour"`. Both scripts take the same options (`-Query`/`--query`, `-Out`/`--out`, `-Name`/`--name`, `-Url`/`--url`, `-Width`/`--width`, `-Height`/`--height`). The bash script finds Chrome, Chromium or Edge on the `PATH` (or `CHROME=/path/to/chrome`). Scenes that have to wait until they are ready are photographed over the DevTools protocol by `scripts/capture-shot.mjs` (Node.js 22) – the bash script uses it for every scene, the PowerShell script for the slow ones and for scenes that install a package.
 
-The scenes know no plugin packages. `-Query "package=<folder>"` (URL parameter `&package=<folder>`, several separated by commas) installs a built package from `plugins/<folder>/dist` before the scene – its `dist/package.json` lists its files. The README's `convert` and `plugins` images show the OpenSCAD package that way: build it (`npm run build` in `plugins/openscad`), then `powershell -File scripts/screenshots.ps1 -Shots "convert,plugins" -Query "package=openscad"` (or `bash scripts/screenshots.sh --shots "convert,plugins" --query "package=openscad"`). The scene `script` (`&language=<id>&file=<path>`, optionally `&camera=x,y,z&target=x,y,z`) runs a file in the script editor; plugin packages use it for their own screenshots (`npm run screenshots` – or `npm run screenshots:sh` on Linux and macOS – in `plugins/openscad` writes `plugins/openscad/docs/openscad.png`).
+The scenes know no plugin packages. `-Query "package=<folder>"` (URL parameter `&package=<folder>`, several separated by commas) installs a built package from `plugins/<folder>/dist` before the scene – its `dist/package.json` lists its files. The README's `convert` and `plugins` images show the OpenSCAD package that way: build it (`npm run build` in `plugins/openscad`), then `powershell -File scripts/screenshots.ps1 -Shots "convert,plugins" -Query "package=openscad"` (or `bash scripts/screenshots.sh --shots "convert,plugins" --query "package=openscad"`). The scene `script` (`&language=<id>&file=<path>`, optionally `&camera=x,y,z&target=x,y,z`) runs a file in the script editor, and `&command=<id>` (several separated by commas) runs commands after the scene; plugin packages use them for their own screenshots (`npm run screenshots` – or `npm run screenshots:sh` on Linux and macOS – in `plugins/openscad` writes `plugins/openscad/docs/openscad.png`, in `plugins/layout` `plugins/layout/docs/layout.png` and `layout-plan.png`).
 
 ## Credits
 

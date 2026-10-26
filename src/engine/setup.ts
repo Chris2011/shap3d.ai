@@ -1,5 +1,6 @@
 import { shallowReactive } from 'vue';
 import { Editor } from './editor';
+import { workspaceState } from '../plugins/uiExtensions';
 import { SelectTool, LassoTool, EraserTool, PaintTool, SampleTool } from '../tools/select';
 import { LineTool, FreehandTool, RectangleTool, RotatedRectangleTool, CircleTool, Arc2Tool, ArcCenterTool, Arc3Tool } from '../tools/draw';
 import { PushPullTool, OffsetTool, MoveTool, RotateTool, ScaleTool, FollowMeTool } from '../tools/modify';
@@ -159,6 +160,10 @@ export const installKeyboard = (editor: Editor, focusVcb: (initial: string) => v
     }
     const key = keyEvent.key;
     const ctrl = keyEvent.ctrlKey || keyEvent.metaKey;
+    // a plugin's workspace handles its own keys – only undo/redo, save and the command palette stay global
+    if (workspaceState.active && !(ctrl && ['z', 'y', 's', 'p', 'k'].includes(key.toLowerCase())) && key !== 'F1') {
+      return;
+    }
     // let the active tool react first (arrow locks, ctrl copy toggle, shift lock)
     if (editor.tool.onKey(keyEvent, true)) {
       keyEvent.preventDefault();

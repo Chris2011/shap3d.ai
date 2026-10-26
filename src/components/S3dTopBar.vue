@@ -20,6 +20,14 @@
     >
       {{ modelName }}
     </div>
+    <!-- model | workspaces of plugins (e.g. the layout plugin's sheets) -->
+    <S3dSegmentedControl
+      v-if="WORKSPACES.length"
+      class="mx-1.5 w-auto [&_button]:px-2"
+      :model-value="workspaceState.active ?? ''"
+      :options="workspaceOptions"
+      @update:model-value="switchWorkspace"
+    />
     <button
       v-for="(button, i) in buttonsAt('name')"
       :key="i"
@@ -92,18 +100,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, nextTick, useTemplateRef } from 'vue';
+import { computed, ref, shallowRef, nextTick, useTemplateRef } from 'vue';
 import { usePopover } from '../composables/usePopover';
 import S3dIcon from './S3dIcon.vue';
 import S3dMainMenu from './S3dMainMenu.vue';
 import { useEditor } from './keys';
 import { runCommand } from '../engine/commands';
-import { TOP_BAR_BUTTONS } from '../plugins/uiExtensions';
+import { TOP_BAR_BUTTONS, WORKSPACES, workspaceState } from '../plugins/uiExtensions';
+import S3dSegmentedControl from './ui/S3dSegmentedControl.vue';
 import S3dThemeButton from './S3dThemeButton.vue';
 import { useModel } from '../composables/useModel';
 import { t, localize } from '../i18n';
 
 const editor = useEditor();
+const workspaceOptions = computed(() => [
+  { value: '', label: t('workspace.model'), icon: 'cube' },
+  ...WORKSPACES.map((workspace) => ({ value: workspace.id, label: localize(workspace.label), icon: workspace.icon })),
+]);
+const switchWorkspace = (id: string) => {
+  workspaceState.active = id || null;
+  editor.invalidate();
+};
 const TB_BASE = 'flex h-9 items-center justify-center border-0 p-0 hover:enabled:bg-hover disabled:cursor-default disabled:opacity-35';
 const TOOLBAR_BUTTON = `${TB_BASE} w-9 text-navy`;
 const TB_SM = `${TB_BASE} w-6 text-[#6b6f7b] dark:text-ink-2`;

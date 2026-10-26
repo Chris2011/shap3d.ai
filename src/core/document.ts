@@ -225,6 +225,12 @@ export class Model implements DefinitionRegistry {
     return this.root.bounds(new THREE.Box3(), new THREE.Matrix4(), this.hiddenTags());
   }
 
+  /**
+   * data plugins keep on the model itself, by plugin id (e.g. the sheets of the layout plugin) –
+   * plain JSON, saved with the model and kept while the plugin is off
+   */
+  pluginData?: Record<string, unknown>;
+
   clear() {
     this.root = new Entities();
     this.definitions.clear();
@@ -232,6 +238,7 @@ export class Model implements DefinitionRegistry {
     this.dimensions = [];
     this.labels = [];
     this.sections = [];
+    this.pluginData = undefined;
   }
 
   // ---------------- serialization ----------------
@@ -286,6 +293,7 @@ export class Model implements DefinitionRegistry {
         entities: entitiesToJSON(definition.entities),
       })),
       root: entitiesToJSON(this.root),
+      pluginData: this.pluginData ? JSON.parse(JSON.stringify(this.pluginData)) : undefined,
       guides: this.guides.map((guide) => ({
         id: guide.id,
         kind: guide.kind,
@@ -338,6 +346,7 @@ export class Model implements DefinitionRegistry {
     const toVector = (values: number[]) => new THREE.Vector3(values[0], values[1], values[2]);
     this.name = json.name ?? t('names.untitled');
     this.settings = { ...this.settings, ...json.settings, style: { ...DEFAULT_STYLE, ...json.settings?.style } };
+    this.pluginData = json.pluginData ? JSON.parse(JSON.stringify(json.pluginData)) : undefined;
     if (json.materials) {
       this.materials = json.materials.map((material: MaterialDef) => ({ ...material }));
     }

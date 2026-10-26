@@ -1606,6 +1606,9 @@
       "failedTitle": "{name} konnte nicht starten",
       "failedText": "Beim Start ist ein Fehler aufgetreten. Details stehen in der Browser-Konsole (F12).",
       "reload": "Neu laden"
+    },
+    "workspace": {
+      "model": "Modell"
     }
   }
 }

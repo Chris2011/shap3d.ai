@@ -1,4 +1,4 @@
-import { markRaw, shallowReactive, type Component } from 'vue';
+import { markRaw, reactive, shallowReactive, type Component } from 'vue';
 import type { Editor } from '../engine/editor';
 
 /** Context-menu entries contributed by plugins (shown for the current selection). */
@@ -38,6 +38,32 @@ const addTo = <T>(list: T[], item: T) => {
     const index = list.indexOf(item);
     if (index >= 0) {
       list.splice(index, 1);
+    }
+  };
+};
+
+/**
+ * A workspace of its own next to the 3D model (e.g. the layout plugin's sheets): while it is active, its
+ * component fills the window below the top bar instead of the viewport, the tools and the panels.
+ */
+export interface Workspace {
+  id: string;
+  /** text or message key – shown in the switch in the top bar */
+  label: string;
+  icon?: string;
+  component: Component;
+}
+
+export const WORKSPACES = shallowReactive<Workspace[]>([]);
+/** the active workspace's id – null is the 3D model */
+export const workspaceState = reactive({ active: null as string | null });
+
+export const addWorkspace = (workspace: Workspace) => {
+  const remove = addTo(WORKSPACES, { ...workspace, component: markRaw(workspace.component) as Component });
+  return () => {
+    remove();
+    if (workspaceState.active === workspace.id) {
+      workspaceState.active = null;
     }
   };
 };

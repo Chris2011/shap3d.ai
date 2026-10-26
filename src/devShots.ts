@@ -4,10 +4,12 @@
  *
  * The scenes know no plugin packages. `&package=<folder>` (repeatable or comma-separated) installs the built
  * package from plugins/<folder>/dist before any scene, and the scene `script` (`&language=<id>&file=<path>`)
- * runs a file in the script editor – that is how a package renders its own screenshots.
+ * runs a file in the script editor – that is how a package renders its own screenshots. `&command=<id>`
+ * (comma-separated) runs commands after the scene, e.g. one that opens a package's workspace.
  */
 import type { Editor } from './engine/editor';
 import { runScript } from './scripting/api';
+import { findCommand } from './engine/commands';
 import { EXAMPLES } from './scripting/examples';
 import { setTheme, setScene } from './theme';
 import { openPanel } from './components/panelState';
@@ -379,6 +381,13 @@ export const runShot = async (editor: Editor, name: string) => {
     10000,
   );
   await scene(editor);
+  // &command=<id>,<id> runs commands after the scene (e.g. a package's command that opens its workspace)
+  for (const id of (params.get('command') ?? '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)) {
+    await findCommand(id)?.run(editor);
+  }
   editor.invalidate();
   await wait(800);
   document.body.dataset.shotReady = '1';

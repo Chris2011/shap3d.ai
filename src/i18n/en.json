@@ -1588,6 +1588,9 @@
       "nothing": "No faces or edges to convert",
       "cannotConvert": "Cannot convert from “{format}”",
       "noFaces": "The code creates no faces"
+    },
+    "workspace": {
+      "model": "Model"
     }
   }
 }
