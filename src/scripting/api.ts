@@ -6,6 +6,7 @@ import { newId } from '../core/model';
 import { parseLength } from '../core/units';
 import { offsetPolygon } from '../core/geometry';
 import { TEXTURES, isTextureKind } from '../core/textures';
+import { SURFACE_SHADERS, surfaceShader } from '../engine/surfaceShaders';
 import { buildMesh, parseObj } from './mesh';
 import { MATERIAL_LIBRARY, libraryMaterial } from '../core/materialLibrary';
 import { t } from '../i18n';
@@ -313,9 +314,14 @@ export class ScriptApi {
   /** Define or update a material. */
   /**
    * Define or update a material. Third argument: opacity (0..1) or options
-   * { opacity, texture: 'holz'|'ziegel'|'stein'|'gras'|'fliesen'|'beton'|'metall'|'stoff'|'wasser'|'marmor'|'dach'|'parkett', size: meters }.
+   * { opacity, texture: 'holz'|'ziegel'|'stein'|'gras'|'fliesen'|'beton'|'metall'|'stoff'|'wasser'|'marmor'|'dach'|'parkett', size: meters,
+   *   shader: a shader of a plugin, e.g. 'shaders.wood', params: { … } }.
    */
-  material(name: string, color?: string, opts: number | { opacity?: number; texture?: string; size?: number } = 1) {
+  material(
+    name: string,
+    color?: string,
+    opts: number | { opacity?: number; texture?: string; size?: number; shader?: string; params?: Record<string, number | string> } = 1,
+  ) {
     if (color == null) {
       const materialName = this.ensureMaterial(name);
       return materialName;
@@ -331,6 +337,24 @@ export class ScriptApi {
     }
     if (options.size) {
       material.textureSize = this.length(options.size);
+    }
+    if (options.shader !== undefined) {
+      if (options.shader && !surfaceShader(options.shader)) {
+        throw new Error(
+          t('script.errors.unknownShader', {
+            shader: options.shader,
+            allowed: SURFACE_SHADERS.map((shader) => shader.id).join(', ') || '–',
+          }),
+        );
+      }
+      material.shader = options.shader || undefined;
+      material.shaderParams = undefined;
+      if (material.shader) {
+        material.texture = undefined;
+      }
+    }
+    if (options.params) {
+      material.shaderParams = { ...material.shaderParams, ...options.params };
     }
     return name;
   }

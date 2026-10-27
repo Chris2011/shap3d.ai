@@ -7,8 +7,32 @@ export interface MaterialDef {
   color: string;
   opacity: number;
   texture?: string;
+  /** width (m) one texture tile covers – the height follows the image's proportions */
   textureSize?: number;
+  /** the user's own image (data URL, saved with the model) – drawn as it is, instead of a procedural texture */
+  image?: string;
+  /** height / width of the image, so the tile keeps its proportions */
+  imageAspect?: number;
+  /** where the texture starts on a face (m along the face's axes) */
+  textureOffset?: [number, number];
+  /** turn of the texture on a face (degrees) */
+  textureRotation?: number;
+  /** a surface shader registered by a plugin (e.g. "shaders.wood") – drawn instead of colour and texture while the plugin is on */
+  shader?: string;
+  /** the shader's parameters (numbers, colours as "#rrggbb") – missing ones take the shader's defaults */
+  shaderParams?: Record<string, number | string>;
 }
+/** a copy that shares nothing with the original */
+export const copyMaterial = (material: MaterialDef): MaterialDef => {
+  const copy = { ...material };
+  if (material.shaderParams) {
+    copy.shaderParams = { ...material.shaderParams };
+  }
+  if (material.textureOffset) {
+    copy.textureOffset = [material.textureOffset[0], material.textureOffset[1]];
+  }
+  return copy;
+};
 export interface Tag {
   name: string;
   visible: boolean;
@@ -281,7 +305,7 @@ export class Model implements DefinitionRegistry {
       name: this.name,
       // copies, not references – undo snapshots must not change when the model changes later
       settings: JSON.parse(JSON.stringify(this.settings)),
-      materials: this.materials.map((material) => ({ ...material })),
+      materials: this.materials.map(copyMaterial),
       tags: this.tags.map((tag) => ({ ...tag })),
       definitions: [...this.definitions.values()].map((definition) => ({
         id: definition.id,
@@ -348,7 +372,7 @@ export class Model implements DefinitionRegistry {
     this.settings = { ...this.settings, ...json.settings, style: { ...DEFAULT_STYLE, ...json.settings?.style } };
     this.pluginData = json.pluginData ? JSON.parse(JSON.stringify(json.pluginData)) : undefined;
     if (json.materials) {
-      this.materials = json.materials.map((material: MaterialDef) => ({ ...material }));
+      this.materials = json.materials.map(copyMaterial);
     }
     if (json.tags) {
       this.tags = json.tags.map((tag: Tag) => ({ ...tag }));

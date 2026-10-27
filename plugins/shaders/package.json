@@ -1,0 +1,30 @@
+{
+  "name": "s3d-plugin-shaders",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shader materials for Shap3D.ai: wood, marble, granite, terrazzo, rust and patina, brick walls, checker and exposed concrete – drawn by GLSL shaders as solid patterns without seams, every parameter adjustable in the Materials panel.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "shap3d": {
+    "id": "shaders",
+    "main": "plugin.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "screenshots": "powershell -File ../../scripts/screenshots.ps1 -Shots script -Name shaders -Out docs -Query \"package=shaders&file=/plugins/shaders/docs/demo.js&command=shaders.open&camera=6.2,-6.8,4.6&target=1.6,0.6,0.6\"",
+    "screenshots:sh": "bash ../../scripts/screenshots.sh --shots script --name shaders --out docs --query \"package=shaders&file=/plugins/shaders/docs/demo.js&command=shaders.open&camera=6.2,-6.8,4.6&target=1.6,0.6,0.6\""
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  }
+}

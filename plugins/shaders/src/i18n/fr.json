@@ -1,0 +1,86 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "shaders": {
+      "plugin": {
+        "name": "Matériaux shader",
+        "description": "Des matériaux dessinés par des shaders : bois, marbre, granit, terrazzo, rouille et patine, maçonnerie, damier et béton brut – des motifs massifs sans raccords, chaque paramètre réglable dans le panneau Matériaux."
+      },
+      "panel": {
+        "title": "Matériaux shader",
+        "hint": "Cliquez sur un matériau, puis sur des faces (pot de peinture). Le motif traverse l’objet comme un bloc massif – autour de chaque arête, sans raccords.",
+        "paint": "Peindre avec « {name} »",
+        "edit": "Couleurs et paramètres : panneau Matériaux › Texture affiche les shaders et leurs curseurs.",
+        "script": "Dans les scripts :"
+      },
+      "commands": {
+        "open": "Matériaux shader"
+      },
+      "material": "{name} (shader)",
+      "shader": {
+        "wood": "Bois",
+        "marble": "Marbre",
+        "granite": "Granit",
+        "terrazzo": "Terrazzo",
+        "rust": "Rouille et patine",
+        "bricks": "Maçonnerie",
+        "checker": "Damier",
+        "concrete": "Béton brut"
+      },
+      "param": {
+        "ringColor": "Couleur des cernes",
+        "rings": "Cernes",
+        "distortion": "Distorsion",
+        "grain": "Fibre",
+        "axis": "Sens du fil (0 = X, 1 = Y, 2 = Z)",
+        "veinColor": "Couleur des veines",
+        "veins": "Veines",
+        "sharpness": "Netteté",
+        "turbulence": "Turbulence",
+        "darkColor": "Grains foncés",
+        "lightColor": "Grains clairs",
+        "grainSize": "Taille du grain",
+        "amount": "Quantité",
+        "chip1": "Éclats 1",
+        "chip2": "Éclats 2",
+        "chip3": "Éclats 3",
+        "density": "Densité",
+        "chips": "Éclats par carreau",
+        "rustColor": "Couleur de la rouille",
+        "scale": "Échelle",
+        "mortarColor": "Couleur du joint",
+        "brickWidth": "Longueur de brique (carreaux)",
+        "brickHeight": "Hauteur de brique (carreaux)",
+        "joint": "Joint (carreaux)",
+        "variation": "Variation",
+        "color2": "Seconde couleur",
+        "squares": "Cases par carreau",
+        "stains": "Taches",
+        "pores": "Pores",
+        "panels": "Joints de coffrage"
+      },
+      "preset": {
+        "oak": "Chêne",
+        "walnut": "Noyer",
+        "pine": "Pin",
+        "carrara": "Marbre de Carrare",
+        "nero": "Nero Marquina",
+        "granite": "Granit gris",
+        "terrazzo": "Terrazzo",
+        "rustySteel": "Acier rouillé",
+        "copperPatina": "Cuivre patiné",
+        "clinker": "Clinker",
+        "sandstoneBrick": "Pierre de taille",
+        "checker": "Damier",
+        "exposedConcrete": "Béton brut"
+      },
+      "script": {
+        "unknown": "Matériau shader inconnu « {id} ». Disponibles : {allowed}",
+        "description": "Ajoute un matériau shader prêt à l’emploi au modèle (s’il n’y est pas encore) et renvoie son nom.",
+        "returns": "Nom du matériau"
+      }
+    }
+  }
+}

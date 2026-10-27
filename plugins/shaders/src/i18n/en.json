@@ -1,0 +1,86 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "shaders": {
+      "plugin": {
+        "name": "Shader materials",
+        "description": "Materials drawn by shaders: wood, marble, granite, terrazzo, rust and patina, brick walls, checker and exposed concrete – solid patterns without seams, every parameter adjustable in the Materials panel."
+      },
+      "panel": {
+        "title": "Shader materials",
+        "hint": "Click a material, then faces (paint bucket). The pattern runs through the object like in a solid block – round every edge, without seams.",
+        "paint": "Paint with “{name}”",
+        "edit": "Colours and parameters: Materials panel › Texture shows the shaders and their sliders.",
+        "script": "In scripts:"
+      },
+      "commands": {
+        "open": "Shader materials"
+      },
+      "material": "{name} (shader)",
+      "shader": {
+        "wood": "Wood",
+        "marble": "Marble",
+        "granite": "Granite",
+        "terrazzo": "Terrazzo",
+        "rust": "Rust & patina",
+        "bricks": "Brick wall",
+        "checker": "Checker",
+        "concrete": "Exposed concrete"
+      },
+      "param": {
+        "ringColor": "Ring colour",
+        "rings": "Rings",
+        "distortion": "Distortion",
+        "grain": "Grain",
+        "axis": "Grain direction (0 = X, 1 = Y, 2 = Z)",
+        "veinColor": "Vein colour",
+        "veins": "Veins",
+        "sharpness": "Sharpness",
+        "turbulence": "Turbulence",
+        "darkColor": "Dark grains",
+        "lightColor": "Light grains",
+        "grainSize": "Grain size",
+        "amount": "Amount",
+        "chip1": "Chips 1",
+        "chip2": "Chips 2",
+        "chip3": "Chips 3",
+        "density": "Density",
+        "chips": "Chips per tile",
+        "rustColor": "Rust colour",
+        "scale": "Scale",
+        "mortarColor": "Mortar colour",
+        "brickWidth": "Brick length (tiles)",
+        "brickHeight": "Brick height (tiles)",
+        "joint": "Joint (tiles)",
+        "variation": "Variation",
+        "color2": "Second colour",
+        "squares": "Squares per tile",
+        "stains": "Stains",
+        "pores": "Pores",
+        "panels": "Formwork joints"
+      },
+      "preset": {
+        "oak": "Oak",
+        "walnut": "Walnut",
+        "pine": "Pine",
+        "carrara": "Carrara marble",
+        "nero": "Nero Marquina",
+        "granite": "Granite grey",
+        "terrazzo": "Terrazzo",
+        "rustySteel": "Rusty steel",
+        "copperPatina": "Copper patina",
+        "clinker": "Clinker",
+        "sandstoneBrick": "Sandstone blocks",
+        "checker": "Checker",
+        "exposedConcrete": "Exposed concrete"
+      },
+      "script": {
+        "unknown": "Unknown shader material “{id}”. Available: {allowed}",
+        "description": "Puts a ready-made shader material into the model (if it is not there yet) and returns its name.",
+        "returns": "Material name"
+      }
+    }
+  }
+}

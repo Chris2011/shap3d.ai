@@ -25,8 +25,11 @@ export class Overlay {
 
   draw() {
     const context = this.context;
-    context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+    // clear in device pixels: scaled, a pixel ratio below 1 (zoomed out) would leave a strip on the right and
+    // at the bottom with what was drawn before
+    context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
     for (const drawer of this.drawers) {
       context.save();
       try {

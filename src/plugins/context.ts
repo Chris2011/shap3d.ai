@@ -17,6 +17,8 @@ import { useScripts } from '../composables/useScripts';
 import { putPluginFile, getPluginFile, removePluginFile, clearPluginFiles, listPluginFiles, type PluginAssets } from './assetStore';
 import { addContextMenuEntry, addPluginWindow, addTopBarButton, addWorkspace, workspaceState } from './uiExtensions';
 import { renderViewImage, renderViewLines } from '../engine/viewRender';
+import { registerSurfaceShader } from '../engine/surfaceShaders';
+import { swatchStyle } from '../utils/materialSwatch';
 import { registerCodeFormat } from '../scripting/codeExport';
 import { registerCompletionValues, registerLanguageCompletions } from '../scripting/completion';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
@@ -277,8 +279,39 @@ export const createPluginContext = (
     materials: {
       ensure: (name, material) => {
         const existing = editor.model.materials.find((candidate) => candidate.name === name);
-        return existing ? existing.name : new ScriptApi(editor).ensureMaterial(name, material.color, material.opacity ?? 1);
+        if (existing) {
+          return existing.name;
+        }
+        new ScriptApi(editor).ensureMaterial(name, material.color, material.opacity ?? 1);
+        const created = editor.model.materials.find((candidate) => candidate.name === name)!;
+        if (material.shader) {
+          created.shader = material.shader;
+          created.shaderParams = material.params ? { ...material.params } : undefined;
+        }
+        if (material.size) {
+          created.textureSize = material.size;
+        }
+        return name;
       },
+      registerShader: (shader) => {
+        const id = qualified(shader.id);
+        const unregister = registerSurfaceShader({ ...shader, id });
+        // models opened before the plugin came on show the pattern now, and again only the colour when it goes
+        editor.invalidate();
+        track(() => {
+          unregister();
+          editor.invalidate();
+        });
+        return id;
+      },
+      preview: (material) =>
+        swatchStyle({
+          color: material.color,
+          opacity: material.opacity,
+          shader: material.shader,
+          shaderParams: material.params,
+          textureSize: material.size,
+        }).background,
     },
 
     code: { registerFormat: (format) => track(registerCodeFormat(format)) },

@@ -119,10 +119,46 @@ export interface PluginMesh {
   faceMaterials?: (string | null)[];
 }
 
-/** colour (CSS, e.g. "#ff0000") and opacity 0–1 of a material */
+/** colour (CSS, e.g. "#ff0000") and opacity 0–1 of a material – optionally drawn with a shader (materials.registerShader) */
 export interface PluginMaterial {
   color: string;
   opacity?: number;
+  /** full shader id, e.g. "shaders.wood" */
+  shader?: string;
+  /** the shader's parameters – missing ones take its defaults */
+  params?: Record<string, number | string>;
+  /** metres one tile of the texture or shader covers */
+  size?: number;
+}
+
+/** a parameter of a shader – a slider (number) or a colour picker (colour as "#rrggbb") in the Materials panel */
+export interface PluginShaderParam {
+  /** letters, digits and _ – the GLSL reads it as uniform `u_<name>` (float, or vec3 for colours) */
+  name: string;
+  /** text or message key */
+  label: string;
+  type: 'number' | 'color';
+  default: number | string;
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+/**
+ * A surface shader for materials. `glsl` defines `vec3 s3dSurface(vec3 p, vec3 n, vec3 base)`: `p` is the point
+ * in the object's own coordinates divided by the material's size (1 = one tile), `n` the face normal, `base` the
+ * material colour – it returns the colour there. Colours are linear. Light, shadows, clipping and colour space stay
+ * with the app; while the plugin is off, materials with the shader show their colour.
+ */
+export interface PluginShader {
+  /** short id – the full id is "<plugin>.<id>" (what materials store) */
+  id: string;
+  /** text or message key */
+  label: string;
+  glsl: string;
+  params?: PluginShaderParam[];
+  /** metres one tile covers (default 1) */
+  size?: number;
 }
 
 export interface PluginMeshOptions {
@@ -196,6 +232,10 @@ export interface PluginContext {
   materials: {
     /** creates the material if the model doesn't have it yet (call inside editor.commit or a script for undo); returns its name */
     ensure: (name: string, material: PluginMaterial) => string;
+    /** a shader that materials can use – listed with the textures in the Materials panel; returns its full id */
+    registerShader: (shader: PluginShader) => string;
+    /** a small picture of a material as the Materials panel shows it (CSS background value) */
+    preview: (material: PluginMaterial) => string;
   };
   /**
    * Code formats for "Als Code öffnen ▸" (context menu) and "Umwandeln in…" (script editor).

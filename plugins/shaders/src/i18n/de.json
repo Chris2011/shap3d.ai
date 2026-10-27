@@ -1,0 +1,86 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "shaders": {
+      "plugin": {
+        "name": "Shader-Materialien",
+        "description": "Materialien, die Shader zeichnen: Holz, Marmor, Granit, Terrazzo, Rost und Patina, Mauerwerk, Schachbrett und Sichtbeton – massive Muster ohne Nähte, jeder Parameter im Materialien-Panel einstellbar."
+      },
+      "panel": {
+        "title": "Shader-Materialien",
+        "hint": "Ein Material anklicken, dann Flächen (Farbeimer). Das Muster läuft wie in einem massiven Block durch das Objekt – um jede Kante, ohne Nähte.",
+        "paint": "Mit „{name}“ malen",
+        "edit": "Farben und Parameter: Materialien-Panel › Textur zeigt die Shader und ihre Regler.",
+        "script": "In Skripten:"
+      },
+      "commands": {
+        "open": "Shader-Materialien"
+      },
+      "material": "{name} (Shader)",
+      "shader": {
+        "wood": "Holz",
+        "marble": "Marmor",
+        "granite": "Granit",
+        "terrazzo": "Terrazzo",
+        "rust": "Rost & Patina",
+        "bricks": "Mauerwerk",
+        "checker": "Schachbrett",
+        "concrete": "Sichtbeton"
+      },
+      "param": {
+        "ringColor": "Jahresringe",
+        "rings": "Ringe",
+        "distortion": "Verzerrung",
+        "grain": "Maserung",
+        "axis": "Faserrichtung (0 = X, 1 = Y, 2 = Z)",
+        "veinColor": "Aderfarbe",
+        "veins": "Adern",
+        "sharpness": "Schärfe",
+        "turbulence": "Turbulenz",
+        "darkColor": "Dunkle Körner",
+        "lightColor": "Helle Körner",
+        "grainSize": "Korngröße",
+        "amount": "Menge",
+        "chip1": "Splitter 1",
+        "chip2": "Splitter 2",
+        "chip3": "Splitter 3",
+        "density": "Dichte",
+        "chips": "Splitter je Kachel",
+        "rustColor": "Rostfarbe",
+        "scale": "Maßstab",
+        "mortarColor": "Fugenfarbe",
+        "brickWidth": "Steinlänge (Kacheln)",
+        "brickHeight": "Steinhöhe (Kacheln)",
+        "joint": "Fuge (Kacheln)",
+        "variation": "Variation",
+        "color2": "Zweite Farbe",
+        "squares": "Felder je Kachel",
+        "stains": "Flecken",
+        "pores": "Poren",
+        "panels": "Schalungsfugen"
+      },
+      "preset": {
+        "oak": "Eiche",
+        "walnut": "Nussbaum",
+        "pine": "Kiefer",
+        "carrara": "Carrara-Marmor",
+        "nero": "Nero Marquina",
+        "granite": "Granit grau",
+        "terrazzo": "Terrazzo",
+        "rustySteel": "Rostiger Stahl",
+        "copperPatina": "Kupfer-Patina",
+        "clinker": "Klinker",
+        "sandstoneBrick": "Sandsteinquader",
+        "checker": "Schachbrett",
+        "exposedConcrete": "Sichtbeton"
+      },
+      "script": {
+        "unknown": "Unbekanntes Shader-Material „{id}“. Verfügbar: {allowed}",
+        "description": "Legt ein fertiges Shader-Material im Modell an (falls es noch fehlt) und gibt seinen Namen zurück.",
+        "returns": "Materialname"
+      }
+    }
+  }
+}

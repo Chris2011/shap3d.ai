@@ -5,7 +5,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 Versions before 0.7.0 were not tagged at the time; they are reconstructed from the Git history and grouped by development phase.
 
-The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC](plugins/ifc), [LayOut](plugins/layout)) have their own version numbers. A plugin's version only goes up when the plugin itself changes – new features (including whole new languages) raise the minor version, fixes and translations of a few new texts the patch version. The new version is given in brackets at the entry, e.g. *(AI assistant 1.2.0)*; every plugin has its own changelog with the details (linked in the table below).
+The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC](plugins/ifc), [LayOut](plugins/layout), [Room planner](plugins/roomplanner), [Shader materials](plugins/shaders)) have their own version numbers. A plugin's version only goes up when the plugin itself changes – new features (including whole new languages) raise the minor version, fixes and translations of a few new texts the patch version. The new version is given in brackets at the entry, e.g. *(AI assistant 1.2.0)*; every plugin has its own changelog with the details (linked in the table below).
 
 | Version | Date | In one sentence |
 | --- | --- | --- |
@@ -38,8 +38,17 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **Views rendered on demand** for plugins (`context.render`): a camera, style, hidden tags, size and an optional drawing scale give an image or vector lines with hidden lines removed – without changing the viewport.
 - **Plugin data on the model** (`context.data.getModel` / `setModel`), saved in the `.shap3d.json` – next to the data on groups and components.
 - Screenshot scenes: `&command=<id>` runs commands after the scene.
+- **Shader materials** for plugins (`context.materials.registerShader`): a plugin brings a surface function in GLSL with parameters; a material that uses it is drawn with it in the 3D view, with and without shadows, in scene previews and in rendered views. In the Materials panel the shaders are listed with the textures and their parameters become sliders and colour pickers, the swatches show the pattern. Without the plugin the material shows its colour again – the shader and its parameters stay in the model. Scripts: `s3d.material(name, colour, { shader, params })`.
+- **Own image textures**: *Own image…* in the texture list of the Materials panel loads a picture (PNG, JPEG, WebP, GIF, BMP) into the material. It is saved in the model (larger than 2048 px it is scaled down first) and drawn as it is, not tinted. Width and height (the height follows the picture's proportions), offset along and across the face and rotation can be set – offset and rotation work for the built-in textures too.
+- **Textures in glTF/GLB exports**: own images and the built-in textures are exported with texture coordinates instead of only the colour. Shader materials are **baked** into a picture: every face gets its own patch, drawn from its real position – so the pattern runs on around corners like in the 3D view.
 
-*(Languages 1.0.3; LayOut package 1.0.0 – sheets for plans with 2D tools and floor plan symbols, built on these)*
+### Fixed
+
+- Smeared rulers, labels and measures at the right and bottom of the 3D view when the page is zoomed out (a pixel ratio below 1): the overlay is now cleared completely before every frame.
+- The tiles on the right no longer run off low screens: they scroll between the top bar and the status bar and get a little smaller on low windows.
+- _Update_ in the plugin manager only shows for a plugin from a folder when the folder holds a new build (or can't be read without asking) – and it goes away after the update. The folders are checked again when the window gets the focus back, e.g. after `npm run build`.
+
+*(Languages 1.0.3; LayOut package 1.0.0 – sheets for plans with 2D tools and floor plan symbols, built on these; Room planner package 1.0.0 – furnish a room with snapping, measures and a shopping list; Shader materials package 1.0.0 – wood, marble, granite, terrazzo, rust, brick, checker and concrete as shaders, built on these)*
 
 ## [0.9.0] – 2026-10-25
 

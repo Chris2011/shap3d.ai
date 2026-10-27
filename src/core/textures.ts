@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { localized } from '../i18n';
+import type { MaterialDef } from './document';
 
 /** Procedural textures (drawn on a canvas, tinted with the material colour). */
 const TEXTURE_KINDS = [
@@ -246,4 +247,98 @@ export const makeTexture = (kind: TextureKind, color: string): THREE.CanvasTextu
   texture.anisotropy = 4;
   cache.set(key, texture);
   return texture;
+};
+
+// ---- the user's own images (data URLs saved in the model)
+
+const imageCache = new Map<string, THREE.Texture>();
+const imageListeners = new Set<() => void>();
+
+/** called whenever an image texture has finished loading – the viewer draws again */
+export const onImageTextureLoad = (listener: () => void) => {
+  imageListeners.add(listener);
+  return () => imageListeners.delete(listener);
+};
+
+/** A texture of an image (data URL), shared by every material showing it. It stays empty until the image has loaded. */
+export const imageTexture = (url: string): THREE.Texture => {
+  let texture = imageCache.get(url);
+  if (texture) {
+    return texture;
+  }
+  const image = new Image();
+  texture = new THREE.Texture(image);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  // photos stay JPEG in glTF exports instead of growing into PNGs
+  texture.userData.mimeType = url.startsWith('data:image/jpeg') ? 'image/jpeg' : 'image/png';
+  const loaded = texture;
+  image.onload = () => {
+    loaded.needsUpdate = true;
+    imageListeners.forEach((listener) => listener());
+  };
+  image.src = url;
+  imageCache.set(url, texture);
+  return texture;
+};
+
+/** resolves once every image texture made so far has loaded (or failed) – exporters need the pixels */
+export const imageTexturesReady = () =>
+  Promise.all([...imageCache.values()].map((texture) => (texture.image as HTMLImageElement).decode().catch(() => undefined)));
+
+/** How a texture lies on a face: tile size (m), offset (m) and turn. */
+export interface TextureTile {
+  map: THREE.Texture;
+  width: number;
+  height: number;
+  offsetU: number;
+  offsetV: number;
+  cos: number;
+  sin: number;
+}
+
+type TexturedMaterial = Pick<
+  MaterialDef,
+  'color' | 'texture' | 'textureSize' | 'image' | 'imageAspect' | 'textureOffset' | 'textureRotation'
+>;
+
+/** the default tile width of a material's texture (m) */
+export const defaultTextureSize = (material: Pick<MaterialDef, 'texture' | 'image'>) =>
+  !material.image && isTextureKind(material.texture) ? TEXTURE_SIZE[material.texture] : 1;
+
+/** the material's image or procedural texture with its layout – undefined for plain colours */
+export const textureTile = (material: TexturedMaterial | undefined): TextureTile | undefined => {
+  if (!material) {
+    return undefined;
+  }
+  const map = material.image
+    ? imageTexture(material.image)
+    : isTextureKind(material.texture)
+      ? makeTexture(material.texture, material.color)
+      : undefined;
+  if (!map) {
+    return undefined;
+  }
+  const width = material.textureSize ?? defaultTextureSize(material);
+  const angle = THREE.MathUtils.degToRad(material.textureRotation ?? 0);
+  return {
+    map,
+    width,
+    height: material.image ? width * (material.imageAspect ?? 1) : width,
+    offsetU: material.textureOffset?.[0] ?? 0,
+    offsetV: material.textureOffset?.[1] ?? 0,
+    cos: Math.cos(angle),
+    sin: Math.sin(angle),
+  };
+};
+
+/** texture coordinates of a point on a face with the axes `basisU`, `basisV` (planar mapping, like SketchUp) */
+export const tileUv = (tile: TextureTile, point: THREE.Vector3, basisU: THREE.Vector3, basisV: THREE.Vector3): [number, number] => {
+  const along = point.dot(basisU),
+    across = point.dot(basisV);
+  return [
+    (along * tile.cos + across * tile.sin - tile.offsetU) / tile.width,
+    (across * tile.cos - along * tile.sin - tile.offsetV) / tile.height,
+  ];
 };

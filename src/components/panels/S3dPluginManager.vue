@@ -7,7 +7,7 @@
       <S3dIcon name="folder" :size="14" /> {{ t('pluginManager.loadFolder') }}
     </button>
     <button
-      v-if="folderPlugins.length"
+      v-if="updatablePlugins.length"
       class="s3d-btn small"
       :disabled="busy"
       :title="t('pluginManager.updateAllTitle')"
@@ -54,7 +54,7 @@
     </p>
     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
       <button
-        v-if="hasFolder(plugin.id)"
+        v-if="canUpdate(plugin.id)"
         class="s3d-btn small flex items-center gap-1"
         :disabled="busy"
         :title="t('pluginManager.updateTitle')"
@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import S3dIcon from '../S3dIcon.vue';
 import S3dToggleSwitch from '../ui/S3dToggleSwitch.vue';
 import { useEditor } from '../keys';
@@ -130,12 +130,24 @@ const examples = computed(() =>
 );
 
 const folders = usePluginFolders();
-const { updateHints, updating } = folders;
+const { updateHints, upToDate, updating } = folders;
 const hasFolder = (id: string) => folders.folderIds.value.has(id) && !!plugins.find((entry) => entry.id === id)?.package;
-const folderPlugins = computed(() => plugins.filter((plugin) => hasFolder(plugin.id)));
-// silent check: only folders that are already readable, never a permission prompt
+/** "Update" only when the folder holds something new – or when it can't be read without asking */
+const canUpdate = (id: string) => hasFolder(id) && !upToDate[id];
+const updatablePlugins = computed(() => plugins.filter((plugin) => canUpdate(plugin.id)));
+// silent check: only folders that are already readable, never a permission prompt –
+// again when the window gets the focus back (e.g. after npm run build)
+const checkFolders = () => {
+  if (!busy.value) {
+    folders.checkSilently();
+  }
+};
 onMounted(() => {
-  folders.checkSilently();
+  checkFolders();
+  window.addEventListener('focus', checkFolders);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', checkFolders);
 });
 
 const install = async (code: string | File[] | (() => Promise<{ id: string; name: string } | null>)) => {

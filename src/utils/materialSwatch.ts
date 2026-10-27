@@ -1,10 +1,16 @@
 import { makeTexture, isTextureKind } from '../core/textures';
+import { shaderSwatchUrl, type ShadedMaterial } from '../engine/surfaceShaders';
 
 /** What a swatch needs to know about a material – model materials and library materials both fit. */
 export interface SwatchSource {
   color: string;
   texture?: string;
+  /** the user's own image (data URL) */
+  image?: string;
   opacity?: number;
+  textureSize?: ShadedMaterial['textureSize'];
+  shader?: ShadedMaterial['shader'];
+  shaderParams?: ShadedMaterial['shaderParams'];
 }
 
 const textureUrls = new Map<string, string>();
@@ -21,12 +27,19 @@ export const textureUrl = (kind: string, color: string): string => {
 };
 
 /**
- * Inline style for a material swatch: texture image, flat colour, or a diagonal split for see-through materials.
+ * Inline style for a material swatch: shader picture, own image, texture image, flat colour, or a diagonal split for see-through materials.
  * `null` is the default material (white/grey split).
  */
 export const swatchStyle = (material: SwatchSource | null | undefined): Record<string, string> => {
   if (!material) {
     return { background: 'linear-gradient(135deg, #fff 50%, #a4b2bf 50%)' };
+  }
+  const shaderUrl = material.shader ? shaderSwatchUrl(material) : '';
+  if (shaderUrl) {
+    return { background: `url(${shaderUrl}) center / cover` };
+  }
+  if (material.image) {
+    return { background: `url(${material.image}) center / cover` };
   }
   if (material.texture && isTextureKind(material.texture)) {
     return { background: `url(${textureUrl(material.texture, material.color)}) center / cover` };

@@ -350,7 +350,7 @@ const ENTRIES: ApiEntry[] = [
     id: 'material',
     category: 'Materialien',
     title: 'api.material.title',
-    signature: "s3d.material(name, '#rrggbb', { opacity, texture, size })",
+    signature: "s3d.material(name, '#rrggbb', { opacity, texture, size, shader, params })",
     desc: 'api.material.desc',
     example:
       "s3d.material('Mein Rot', '#c0392b', { texture: 'ziegel', size: 0.6 });\nsu.box([0, 0, 0], 2, 0.3, 1.2, { material: 'Mein Rot' });",

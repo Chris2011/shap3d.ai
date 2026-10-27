@@ -1,0 +1,30 @@
+{
+  "name": "s3d-plugin-roomplanner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Room planner for Shap3D.ai: draw a room with doors and windows, furnish it from a catalog (living, bedroom, kitchen, dining, office, bath, storage) with snapping to walls and furniture, turn, measure and list what is in it.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "shap3d": {
+    "id": "roomplanner",
+    "main": "plugin.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "screenshots": "powershell -File ../../scripts/screenshots.ps1 -Shots script -Name roomplanner -Out docs -Query \"package=roomplanner&file=/plugins/roomplanner/docs/demo.js&command=roomplanner.open&camera=9.4,-5.2,8.6&target=2.7,2.2,0\" && powershell -File ../../scripts/screenshots.ps1 -Shots script -Name roomplanner-maisonette -Out docs -Query \"package=roomplanner&file=/plugins/roomplanner/docs/demo-maisonette.js&command=roomplanner.open,roomplanner.level1&camera=10.5,-6.5,10.5&target=3.2,2.3,1.4\" && powershell -File ../../scripts/screenshots.ps1 -Shots script -Name roomplanner-house -Out docs -Query \"package=roomplanner&file=/plugins/roomplanner/docs/demo-house.js&command=roomplanner.open&camera=13,-7.5,11&target=5.4,2.2,0.6\"",
+    "screenshots:sh": "bash ../../scripts/screenshots.sh --shots script --name roomplanner --out docs --query \"package=roomplanner&file=/plugins/roomplanner/docs/demo.js&command=roomplanner.open&camera=9.4,-5.2,8.6&target=2.7,2.2,0\" && bash ../../scripts/screenshots.sh --shots script --name roomplanner-maisonette --out docs --query \"package=roomplanner&file=/plugins/roomplanner/docs/demo-maisonette.js&command=roomplanner.open,roomplanner.level1&camera=10.5,-6.5,10.5&target=3.2,2.3,1.4\" && bash ../../scripts/screenshots.sh --shots script --name roomplanner-house --out docs --query \"package=roomplanner&file=/plugins/roomplanner/docs/demo-house.js&command=roomplanner.open&camera=13,-7.5,11&target=5.4,2.2,0.6\""
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  }
+}

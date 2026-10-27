@@ -7,7 +7,8 @@ import type { Entities, Instance, EntityRef } from '../core/model';
 import type { Model } from '../core/document';
 import { CameraRig } from './camera';
 import { Overlay } from './overlay';
-import { makeTexture, isTextureKind, TEXTURE_SIZE } from '../core/textures';
+import { textureTile, tileUv, onImageTextureLoad, type TextureTile } from '../core/textures';
+import { applySurface, materialShader, surfaceSetup, type SurfaceSetup } from './surfaceShaders';
 import { planeBasis } from '../core/geometry';
 import { theme, onThemeChange } from '../theme';
 import { meshView } from './meshView';
@@ -84,10 +85,12 @@ const makeShadeMaterial = (opts: {
   depthWrite: boolean;
   clippingPlanes: THREE.Plane[];
   map?: THREE.Texture;
+  surface?: SurfaceSetup;
 }) => {
-  return new THREE.ShaderMaterial({
-    uniforms: { ...shadeUniforms, opacity: { value: opts.opacity }, map: { value: opts.map ?? null } },
-    defines: opts.map ? { USE_SU_MAP: '' } : {},
+  const surface = opts.surface;
+  const material = new THREE.ShaderMaterial({
+    uniforms: { ...shadeUniforms, ...surface?.uniforms, opacity: { value: opts.opacity }, map: { value: opts.map ?? null } },
+    defines: opts.map ? { USE_SU_MAP: '' } : surface ? { USE_S3D_SURFACE: '' } : {},
     vertexColors: true,
     side: opts.side,
     transparent: opts.transparent,
@@ -101,11 +104,13 @@ const makeShadeMaterial = (opts: {
 #include <color_pars_vertex>
 #include <clipping_planes_pars_vertex>
 varying vec3 vN; varying vec2 vSuUv;
+${surface?.vertexHeader ?? ''}
 void main(){
   #include <color_vertex>
   #ifdef USE_SU_MAP
   vSuUv = uv;
   #endif
+  ${surface?.vertexMain ?? ''}
   vN = normalize(mat3(modelMatrix) * normal);
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
   gl_Position = projectionMatrix * mvPosition;
@@ -115,6 +120,7 @@ void main(){
 varying vec3 vN; varying vec2 vSuUv;
 #include <color_pars_fragment>
 #include <clipping_planes_pars_fragment>
+${surface?.fragmentHeader ?? ''}
 vec3 toSRGB(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
 void main(){
   #include <clipping_planes_fragment>
@@ -122,12 +128,18 @@ void main(){
   float f = clamp(dark + light * max(dot(n, lightDir), 0.0), 0.0, 1.0);
   #ifdef USE_SU_MAP
   vec3 base = texture2D(map, vSuUv).rgb;
+  #elif defined(USE_S3D_SURFACE)
+  vec3 base = ${surface?.surfaceCall('vColor.rgb') ?? 'vColor.rgb'};
   #else
   vec3 base = vColor.rgb;
   #endif
   gl_FragColor = vec4(toSRGB(base) * f, opacity);
 }`,
   });
+  if (surface) {
+    material.customProgramCacheKey = () => `s3d-shade-surface:${surface.key}`;
+  }
+  return material;
 };
 
 interface ProfileRec {
@@ -198,6 +210,10 @@ export class Viewer {
   height = 1;
   frontMats: THREE.Material[] = [];
   onFrame: (() => void) | null = null;
+  /** image textures arrive after the first frame that shows them */
+  private stopImageListener = onImageTextureLoad(() => {
+    this.needsRender = true;
+  });
 
   constructor(
     public canvas: HTMLCanvasElement,
@@ -285,6 +301,7 @@ export class Viewer {
       return;
     }
     this.disposed = true;
+    this.stopImageListener();
     cancelAnimationFrame(this.raf);
     this.renderer.dispose();
     this.renderer.forceContextLoss();
@@ -465,6 +482,7 @@ export class Viewer {
       triangles: number[];
       opacities: number[];
       map?: THREE.Texture;
+      surface?: SurfaceSetup;
     };
     const bucket = (): Bucket => ({ positions: [], normals: [], uvs: [], frontColors: [], backColors: [], triangles: [], opacities: [] });
     const opaque = bucket(),
@@ -496,20 +514,30 @@ export class Viewer {
       let target = frontLook.opacity < 1 ? trans : opaque;
       let texU: THREE.Vector3 | null = null,
         texV: THREE.Vector3 | null = null,
-        tsz = 1;
-      if (mdef?.texture && isTextureKind(mdef.texture)) {
-        const key = mdef.name + (frontLook.opacity < 1 ? ':t' : '');
+        tile: TextureTile | undefined;
+      const shader = materialShader(mdef);
+      if (mdef && shader) {
+        // shader materials: their own mesh too, the shader draws the pattern from the positions
+        const key = 'shader:' + mdef.name + (frontLook.opacity < 1 ? ':t' : '');
+        let shaderBucket = textured.get(key);
+        if (!shaderBucket) {
+          shaderBucket = bucket();
+          shaderBucket.surface = surfaceSetup(shader, mdef);
+          textured.set(key, shaderBucket);
+        }
+        target = shaderBucket;
+      } else if ((tile = textureTile(mdef))) {
+        const key = mdef!.name + (frontLook.opacity < 1 ? ':t' : '');
         let textureBucket = textured.get(key);
         if (!textureBucket) {
           textureBucket = bucket();
-          textureBucket.map = makeTexture(mdef.texture, mdef.color);
+          textureBucket.map = tile.map;
           textured.set(key, textureBucket);
         }
         target = textureBucket;
         const basis = planeBasis(normal);
         texU = basis.basisU;
         texV = basis.basisV;
-        tsz = mdef.textureSize ?? TEXTURE_SIZE[mdef.texture];
       }
       const color = fadeCol(frontLook.color),
         backColor = fadeCol(backLook.color);
@@ -520,8 +548,8 @@ export class Viewer {
           target.normals.push(normal.x, normal.y, normal.z);
           target.frontColors.push(color.r, color.g, color.b);
           target.backColors.push(backColor.r, backColor.g, backColor.b);
-          if (texU && texV) {
-            target.uvs.push(point.dot(texU) / tsz, point.dot(texV) / tsz);
+          if (tile && texU && texV) {
+            target.uvs.push(...tileUv(tile, point, texU, texV));
           }
         }
         target.triangles.push(face.id);
@@ -553,17 +581,24 @@ export class Viewer {
         depthWrite: !(transparent || xray),
         clippingPlanes: this.clipPlanes,
       };
-      const makeMaterial = (side: THREE.Side) =>
-        unlit || shadows
-          ? new Mat({ ...common, side })
-          : makeShadeMaterial({
-              side,
-              transparent: common.transparent,
-              opacity: common.opacity,
-              depthWrite: common.depthWrite,
-              clippingPlanes: this.clipPlanes,
-              map: data.map,
-            });
+      const makeMaterial = (side: THREE.Side) => {
+        if (unlit || shadows) {
+          const material = new Mat({ ...common, side });
+          if (data.surface) {
+            applySurface(material, data.surface);
+          }
+          return material;
+        }
+        return makeShadeMaterial({
+          side,
+          transparent: common.transparent,
+          opacity: common.opacity,
+          depthWrite: common.depthWrite,
+          clippingPlanes: this.clipPlanes,
+          map: data.map,
+          surface: data.surface,
+        });
+      };
       const frontGeometry = meshGeometry.clone();
       frontGeometry.setAttribute('color', new THREE.Float32BufferAttribute(data.frontColors, 3));
       const geometry = meshGeometry.clone();

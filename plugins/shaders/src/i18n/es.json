@@ -1,0 +1,86 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "shaders": {
+      "plugin": {
+        "name": "Materiales shader",
+        "description": "Materiales dibujados por shaders: madera, mármol, granito, terrazo, óxido y pátina, muro de ladrillo, ajedrez y hormigón visto – patrones macizos sin costuras, cada parámetro ajustable en el panel Materiales."
+      },
+      "panel": {
+        "title": "Materiales shader",
+        "hint": "Haz clic en un material y luego en caras (bote de pintura). El patrón atraviesa el objeto como un bloque macizo, alrededor de cada arista y sin costuras.",
+        "paint": "Pintar con «{name}»",
+        "edit": "Colores y parámetros: panel Materiales › Textura muestra los shaders y sus controles.",
+        "script": "En scripts:"
+      },
+      "commands": {
+        "open": "Materiales shader"
+      },
+      "material": "{name} (shader)",
+      "shader": {
+        "wood": "Madera",
+        "marble": "Mármol",
+        "granite": "Granito",
+        "terrazzo": "Terrazo",
+        "rust": "Óxido y pátina",
+        "bricks": "Muro de ladrillo",
+        "checker": "Ajedrez",
+        "concrete": "Hormigón visto"
+      },
+      "param": {
+        "ringColor": "Color de los anillos",
+        "rings": "Anillos",
+        "distortion": "Distorsión",
+        "grain": "Veta",
+        "axis": "Dirección de la fibra (0 = X, 1 = Y, 2 = Z)",
+        "veinColor": "Color de las vetas",
+        "veins": "Vetas",
+        "sharpness": "Nitidez",
+        "turbulence": "Turbulencia",
+        "darkColor": "Granos oscuros",
+        "lightColor": "Granos claros",
+        "grainSize": "Tamaño del grano",
+        "amount": "Cantidad",
+        "chip1": "Lascas 1",
+        "chip2": "Lascas 2",
+        "chip3": "Lascas 3",
+        "density": "Densidad",
+        "chips": "Lascas por baldosa",
+        "rustColor": "Color del óxido",
+        "scale": "Escala",
+        "mortarColor": "Color de la junta",
+        "brickWidth": "Largo del ladrillo (baldosas)",
+        "brickHeight": "Alto del ladrillo (baldosas)",
+        "joint": "Junta (baldosas)",
+        "variation": "Variación",
+        "color2": "Segundo color",
+        "squares": "Casillas por baldosa",
+        "stains": "Manchas",
+        "pores": "Poros",
+        "panels": "Juntas de encofrado"
+      },
+      "preset": {
+        "oak": "Roble",
+        "walnut": "Nogal",
+        "pine": "Pino",
+        "carrara": "Mármol de Carrara",
+        "nero": "Nero Marquina",
+        "granite": "Granito gris",
+        "terrazzo": "Terrazo",
+        "rustySteel": "Acero oxidado",
+        "copperPatina": "Cobre con pátina",
+        "clinker": "Clínker",
+        "sandstoneBrick": "Sillares de arenisca",
+        "checker": "Ajedrez",
+        "exposedConcrete": "Hormigón visto"
+      },
+      "script": {
+        "unknown": "Material shader desconocido «{id}». Disponibles: {allowed}",
+        "description": "Añade al modelo un material shader listo para usar (si aún no está) y devuelve su nombre.",
+        "returns": "Nombre del material"
+      }
+    }
+  }
+}

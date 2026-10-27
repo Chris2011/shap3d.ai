@@ -1,26 +1,32 @@
 <template>
-  <div class="absolute top-1/2 right-1.5 z-27 flex -translate-y-1/2 flex-col gap-2.25">
+  <!-- between the top bar and the status bar: centred while it fits, scrolls on low screens (tiles get smaller there);
+       the outer box lets clicks through, only the tiles take them -->
+  <div class="pointer-events-none absolute top-13 right-0 bottom-[calc(var(--s3d-status-h)+0.5rem)] z-27 flex flex-col justify-center">
     <div
-      v-for="panel in tiles"
-      :key="panel.id"
-      class="flex items-center justify-end gap-2.5 rtl:flex-row-reverse"
-      @mouseenter="hot = panel.id"
-      @mouseleave="hot = null"
+      class="pointer-events-auto flex max-h-full flex-col gap-2.25 overflow-y-auto overscroll-contain py-0.5 ps-2 pe-1.5 [@media(max-height:760px)]:gap-1.25"
     >
-      <span
-        v-if="!openPanel || hot === panel.id"
-        class="cursor-pointer whitespace-nowrap rounded-[2px] bg-panel px-1.75 py-0.5 text-[0.6875rem] font-bold tracking-[0.04688rem] text-navy shadow-panel"
-        @click="toggle(panel.id)"
-        >{{ panel.label }}</span
+      <div
+        v-for="panel in tiles"
+        :key="panel.id"
+        class="flex flex-none items-center justify-end gap-2.5 rtl:flex-row-reverse"
+        @mouseenter="hot = panel.id"
+        @mouseleave="hot = null"
       >
-      <button
-        class="s3d-panel flex size-10 items-center justify-center border-0 p-0 text-ink"
-        :class="openPanel === panel.id ? 'bg-active shadow-[inset_-3px_0_0_#1f6fbf,var(--s3d-shadow)]' : 'hover:bg-hover'"
-        :title="panel.label"
-        @click="toggle(panel.id)"
-      >
-        <S3dIcon :name="panel.icon" :size="22" />
-      </button>
+        <span
+          v-if="!openPanel || hot === panel.id"
+          class="cursor-pointer whitespace-nowrap rounded-[2px] bg-panel px-1.75 py-0.5 text-[0.6875rem] font-bold tracking-[0.04688rem] text-navy shadow-panel"
+          @click="toggle(panel.id)"
+          >{{ panel.label }}</span
+        >
+        <button
+          class="s3d-panel flex size-10 flex-none items-center justify-center border-0 p-0 text-ink [@media(max-height:760px)]:size-8.5"
+          :class="openPanel === panel.id ? 'bg-active shadow-[inset_-3px_0_0_#1f6fbf,var(--s3d-shadow)]' : 'hover:bg-hover'"
+          :title="panel.label"
+          @click="toggle(panel.id)"
+        >
+          <S3dIcon :name="panel.icon" :size="22" />
+        </button>
+      </div>
     </div>
   </div>
   <div

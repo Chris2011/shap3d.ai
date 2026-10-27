@@ -64,6 +64,8 @@
   - [The OpenSCAD plugin](#the-openscad-plugin)
   - [The IFC plugin](#the-ifc-plugin)
   - [The LayOut plugin](#the-layout-plugin)
+  - [The room planner plugin](#the-room-planner-plugin)
+  - [The shader materials plugin](#the-shader-materials-plugin)
 - [Multilingual: language files for developers](#multilingual-language-files-for-developers)
 - [Project structure](#project-structure)
 - [Regenerating the screenshots](#regenerating-the-screenshots)
@@ -462,7 +464,8 @@ export default {
 | Script languages | `script.registerLanguage({ id, label, run(code, editor), examples?, help?, highlight? })`, `script.openInEditor(language, code)` | A new language in the script editor's language selector, with its own examples and help. `run` may be async and returns `{ ok, logs, error?, durationMs }`. `script.beforeRun(code => …)` is awaited before a JavaScript script runs – to prepare what a script extension needs. |
 | Code completion | `script.registerCompletions(language, ({ code, offset, word }) => candidates)`, `script.completeValues(option, () => values)` | `registerCompletions` adds suggestions to a script language – your own or another plugin's: strings or `{ label, insert?, kind?, detail?, signature?, description?, example? }`, which the editor filters and ranks by the word before the cursor. Like everything else it is gone when the plugin is switched off. `completeValues` adds suggestions for an option value – `{ font: '…' }` in JavaScript and `"font": "…"` in JSON. `values` is asked every time the list opens and returns strings or `{ label, detail?, description?, color? }`. Option keys and the methods themselves come from the `signature` of `script.extend`, e.g. `s3d.text3d(text, { at, size, font })`. |
 | Meshes | `meshes.add({ vertices, faces, faceMaterials? }, { name?, scale?, smooth?, materials? })`, `meshes.build(entities, mesh, options?)` | Turns a polygon mesh into real faces – as a new group (one undo step) or inside a script extension (`api.ents`). `scale` converts the mesh units to metres; `faceMaterials` gives each face a material, `materials` defines missing ones (`{ name: { color, opacity } }`) in the same undo step. |
-| Materials | `materials.ensure(name, { color, opacity? })` | Creates a material if the model doesn't have it yet. |
+| Materials | `materials.ensure(name, { color, opacity?, shader?, params?, size? })` | Creates a material if the model doesn't have it yet – optionally drawn with a shader. |
+| | `materials.registerShader({ id, label, glsl, params?, size? })`, `materials.preview(material)` | A surface shader for materials: `glsl` defines `vec3 s3dSurface(vec3 p, vec3 n, vec3 base)` – the point in the object's own coordinates (1 = one tile), the normal and the material colour, all linear – and returns the colour there; each parameter `{ name, label, type: 'number' \| 'color', default, min?, max?, step? }` is a uniform `u_<name>`. The shader is listed with the textures in the Materials panel, its parameters become sliders and colour pickers. Light, shadows and clipping stay with the app; without the plugin the material shows its colour. Returns the full id (`<plugin>.<id>`) that materials store. `preview` gives a material's picture as a CSS background. |
 | Package files | `assets.url(path)`, `assets.blob(path)`, `assets.list()` | Files that came with a plugin package (see below), e.g. a WebAssembly build: `await import(context.assets.url('engine.js'))`. |
 | Files | `files.registerImporter({ extensions, label, import(file, editor) })` or `{ extensions, label, loadScene(file) }` | Opens new file types through *Importieren…* and drag & drop. With `loadScene` the plugin only returns `{ object, upY, scale }` (a three.js scene) and the app does the rest like for its own formats. |
 | | `files.registerExporter({ id, label, fileName(editor), mimeType?, export(editor) })` | Adds *Exportieren: …* to the export menu; `export` returns a string or a `Blob`. |
@@ -620,6 +623,50 @@ Then *Plugins › Load plugin folder…* and pick `plugins/layout/dist`.
 
 It builds on three parts of the plugin API made for it: workspaces, views rendered on demand (image and vector lines) and data on the model. Its `.vue` components use the app's Vue – see [its README](plugins/layout/README.md).
 
+### The room planner plugin
+
+The package in [`plugins/roomplanner/`](plugins/roomplanner) furnishes a room like a furniture store's planner – a panel *Room planner* and a tool in the 3D view. No dependencies of its own; built like the others:
+
+```bash
+cd plugins/roomplanner
+npm run build
+```
+
+Then *Plugins › Load plugin folder…* and pick `plugins/roomplanner/dist`.
+
+![Room planner: a furnished living room with kitchen run, dining table, sofa corner and shelves; the panel with room figures, catalog and shopping list](plugins/roomplanner/docs/roomplanner.png)
+
+- **Rooms** side by side – rectangles, L-shapes or free floor plans with **slanted and round walls** – with doors and windows, **sloped ceilings** (shed, gable, hip roof) with **roof windows** and **maisonettes** (an upper floor with a square or round stairwell); floor and living area, perimeter, wall area and volume; the walls between the camera and the room open up (doll's house view).
+- **Catalog** of parametric furniture with thumbnails: living room, bedroom, a modular **wardrobe system** (sections, heights, depths, hinged or sliding doors, interior), **kitchen** (a whole kitchen run, base, wall and tall cabinets, island), dining, office, shelves (bookcase, cube shelf …), bathroom, kids, **stairs** (straight, quarter-turn, spiral – floor to floor) and extras.
+- **Placing and moving with snapping**: back to the nearest wall and flush against it, sides snapping to walls and neighbours, R turns by 90°, collisions shown in red.
+- **Measures** on the floor: room size, openings and the distances of a piece to walls and neighbours.
+- A **shopping list** with CSV, and the script functions `s3d.room(…)` and `s3d.furniture(…)` for rooms from code.
+
+![Room planner: an L-shaped maisonette with a sloped ceiling upstairs and a spiral stair through the stairwell](plugins/roomplanner/docs/roomplanner-maisonette.png)
+
+![Room planner: a living room with a slanted and a round wall next to an attic room under a gable roof](plugins/roomplanner/docs/roomplanner-house.png)
+
+The pieces are ordinary components of the model, built with the script API (`s3d.box`, `s3d.cylinder` …) – the app's own tools work on them too. Details in [its README](plugins/roomplanner/README.md).
+
+### The shader materials plugin
+
+The package in [`plugins/shaders/`](plugins/shaders) draws materials with GLSL shaders instead of pictures – wood, marble, granite, terrazzo, rust and patina, brick walls, checker and exposed concrete. No dependencies of its own; built like the others:
+
+```bash
+cd plugins/shaders
+npm run build
+```
+
+Then *Plugins › Load plugin folder…* and pick `plugins/shaders/dist`.
+
+![Shader materials: a table in oak, marble blocks, a terrazzo floor, a clinker wall, rusty steel and exposed concrete; the panel with the ready-made materials](plugins/shaders/docs/shaders.png)
+
+- The patterns are **solid** – computed from the point in the object's own coordinates – so they run round every edge without seams and move with the object.
+- The shaders appear with the textures in the **Materials panel** (*Texture › Shaders (plugins)*); their parameters (colours, ring count, vein sharpness, brick size …) are sliders and colour pickers there.
+- A panel with **ready-made materials** (oak, walnut, Carrara, Nero Marquina, terrazzo, rusty steel, copper patina, clinker, exposed concrete …), and `s3d.shaderMaterial('oak')` or `s3d.material(name, colour, { shader: 'shaders.wood', params })` in scripts.
+
+It uses `context.materials.registerShader` – the way to add shaders of your own is in [its README](plugins/shaders/README.md). Without the plugin, materials with a shader show their colour; export formats keep the colour too.
+
 ## Multilingual: language files for developers
 
 Every visible text is a message key (`t('tools.select')`). English is the source and the fallback: [`src/i18n/en.json`](src/i18n/en.json) for the app, [`src/i18n/boot.en.json`](src/i18n/boot.en.json) for the loading screen, and `i18n/en.json` in each built-in plugin. The small core in [`src/i18n/index.ts`](src/i18n/index.ts) only registers texts and languages and translates (`t`, fallback current language → English → key); every other language comes from a plugin – German, French, Spanish and Arabic from **Sprachen** ([`languages/de.json`](src/plugins/builtin/i18n/languages/de.json), `fr.json`, `es.json`, `ar.json`), each plugin's own texts from the plugin itself (`i18n/<code>.json` next to its `index.ts`).
@@ -674,7 +721,7 @@ src/
   utils/       pure helper functions – e.g. material swatches
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo and README screenshots
-plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/ (not part of the app build)
+plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/, roomplanner/, shaders/ (not part of the app build)
 scripts/       screenshot automation (headless Chrome: screenshots.ps1 for Windows, screenshots.sh for Linux/macOS, capture-shot.mjs for both), i18n.mjs (translation check and template)
 tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
 src-tauri/      the desktop app (Tauri 2): Rust shell, tauri.conf.json, app icons
@@ -693,7 +740,7 @@ bash scripts/screenshots.sh                # Linux, macOS (and Git Bash)
 
 Single scenes: `powershell -File scripts/screenshots.ps1 -Shots "palette,tour"` or `bash scripts/screenshots.sh --shots "palette,tour"`. Both scripts take the same options (`-Query`/`--query`, `-Out`/`--out`, `-Name`/`--name`, `-Url`/`--url`, `-Width`/`--width`, `-Height`/`--height`). The bash script finds Chrome, Chromium or Edge on the `PATH` (or `CHROME=/path/to/chrome`). Scenes that have to wait until they are ready are photographed over the DevTools protocol by `scripts/capture-shot.mjs` (Node.js 22) – the bash script uses it for every scene, the PowerShell script for the slow ones and for scenes that install a package.
 
-The scenes know no plugin packages. `-Query "package=<folder>"` (URL parameter `&package=<folder>`, several separated by commas) installs a built package from `plugins/<folder>/dist` before the scene – its `dist/package.json` lists its files. The README's `convert` and `plugins` images show the OpenSCAD package that way: build it (`npm run build` in `plugins/openscad`), then `powershell -File scripts/screenshots.ps1 -Shots "convert,plugins" -Query "package=openscad"` (or `bash scripts/screenshots.sh --shots "convert,plugins" --query "package=openscad"`). The scene `script` (`&language=<id>&file=<path>`, optionally `&camera=x,y,z&target=x,y,z`) runs a file in the script editor, and `&command=<id>` (several separated by commas) runs commands after the scene; plugin packages use them for their own screenshots (`npm run screenshots` – or `npm run screenshots:sh` on Linux and macOS – in `plugins/openscad` writes `plugins/openscad/docs/openscad.png`, in `plugins/layout` `plugins/layout/docs/layout.png` and `layout-plan.png`).
+The scenes know no plugin packages. `-Query "package=<folder>"` (URL parameter `&package=<folder>`, several separated by commas) installs a built package from `plugins/<folder>/dist` before the scene – its `dist/package.json` lists its files. The README's `convert` and `plugins` images show the OpenSCAD package that way: build it (`npm run build` in `plugins/openscad`), then `powershell -File scripts/screenshots.ps1 -Shots "convert,plugins" -Query "package=openscad"` (or `bash scripts/screenshots.sh --shots "convert,plugins" --query "package=openscad"`). The scene `script` (`&language=<id>&file=<path>`, optionally `&camera=x,y,z&target=x,y,z`) runs a file in the script editor, and `&command=<id>` (several separated by commas) runs commands after the scene; plugin packages use them for their own screenshots (`npm run screenshots` – or `npm run screenshots:sh` on Linux and macOS – in `plugins/openscad` writes `plugins/openscad/docs/openscad.png`, in `plugins/layout` `plugins/layout/docs/layout.png` and `layout-plan.png`, in `plugins/roomplanner` `plugins/roomplanner/docs/roomplanner.png`, `roomplanner-maisonette.png` and `roomplanner-house.png`, in `plugins/shaders` `plugins/shaders/docs/shaders.png`).
 
 ## Credits
 

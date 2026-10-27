@@ -40,6 +40,8 @@ export const usePluginFolders = () => {
   const folderIds = shallowRef(new Set<string>());
   /** plugin id → hint about a newer package in its folder (silent check) */
   const updateHints = reactive<Record<string, string>>({});
+  /** plugin id → true when its folder was read and holds the installed copy (nothing to update) */
+  const upToDate = reactive<Record<string, boolean>>({});
   /** plugin id currently being updated */
   const updating = ref<string | null>(null);
 
@@ -57,6 +59,7 @@ export const usePluginFolders = () => {
   /** Drops the remembered folder of a removed plugin from the list. */
   const forgetFolder = (id: string) => {
     folderIds.value = new Set([...folderIds.value].filter((folderId) => folderId !== id));
+    delete upToDate[id];
   };
 
   /** Installs (or replaces) a package from a folder handle and remembers the folder. */
@@ -64,6 +67,7 @@ export const usePluginFolders = () => {
     const plugin = await installPluginPackage(pluginPackage ?? (await readFolderFiles(handle)));
     await saveFolderHandle(plugin.id, handle);
     delete updateHints[plugin.id];
+    upToDate[plugin.id] = true;
     await refreshFolderIds();
     return plugin;
   };
@@ -106,6 +110,7 @@ export const usePluginFolders = () => {
       if (!differs(id, pluginPackage)) {
         await saveFolderHandle(id, handle!); // the user may have picked a new place for the same package
         delete updateHints[id];
+        upToDate[id] = true;
         return { text: t('plugins.folders.upToDate', { name: localize(name), version: newVersion }), error: false };
       }
       const plugin = await installFromHandle(handle!, pluginPackage);
@@ -149,19 +154,23 @@ export const usePluginFolders = () => {
       try {
         const handle = await loadFolderHandle(id);
         if (!handle || (await queryReadPermission(handle)) !== 'granted') {
+          delete upToDate[id]; // unknown – the button stays
           continue;
         }
         const pluginPackage = await readPluginPackage(await readFolderFiles(handle));
         if (!differs(id, pluginPackage)) {
           delete updateHints[id];
+          upToDate[id] = true;
           continue;
         }
+        delete upToDate[id];
         const version = pluginPackage.info.version;
         updateHints[id] =
           version && version !== installedPackage(id)?.info.version
             ? t('plugins.folders.newVersion', { version })
             : t('plugins.folders.newBuild');
       } catch (error) {
+        delete upToDate[id];
         console.warn(`Plugin-Ordner von „${id}“ nicht lesbar:`, error);
       }
     }
@@ -171,6 +180,7 @@ export const usePluginFolders = () => {
     supported: supportsFolderHandles,
     folderIds,
     updateHints,
+    upToDate,
     updating,
     installFromPicker,
     updateFromFolder,

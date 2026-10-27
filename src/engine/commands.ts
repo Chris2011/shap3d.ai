@@ -18,6 +18,9 @@ import type { FaceStyle } from '../core/document';
 import { solidOp, isSolid, type SolidOp } from '../core/solids';
 import { pluginImporters, type LoadedScene } from '../plugins/fileFormats';
 import { showPanel } from '../components/panelState';
+import { textureTile, tileUv, imageTexturesReady } from '../core/textures';
+import { planeBasis } from '../core/geometry';
+import { materialShader, bakeSurface, type BakeFace } from './surfaceShaders';
 import { t, localized, shortcutLabel, hasMessage, localize } from '../i18n';
 
 /** group: 'file', 'edit', 'view', 'camera', 'solids', 'plugins' (main menu) or any other name (palette only) */
@@ -57,31 +60,40 @@ export const pickFile = (accept: string): Promise<File | null> => {
 };
 const safeName = (editor: Editor) => (editor.model.name || t('names.model')).replace(/[^\w\-äöüÄÖÜß ]+/g, '_');
 
-/** Build a plain three.js scene of the model (for exporters). */
+/** Build a plain three.js scene of the model (for exporters). Textures come along with texture coordinates, shader materials baked into pictures. */
 export const modelToThree = (editor: Editor): THREE.Group => {
   const root = new THREE.Group();
   root.name = editor.model.name;
   const mats = new Map<string, THREE.MeshStandardMaterial>();
-  const getMat = (name: string | undefined, fallback: string) => {
+  const makeMat = (name: string | undefined, fallback: string, map?: THREE.Texture) => {
+    const material = editor.model.material(name);
+    const made = new THREE.MeshStandardMaterial({
+      // a texture already carries the colour
+      color: map ? '#ffffff' : (material?.color ?? fallback),
+      map: map ?? null,
+      transparent: (material?.opacity ?? 1) < 1,
+      opacity: material?.opacity ?? 1,
+      side: THREE.DoubleSide,
+      roughness: 0.8,
+    });
+    made.name = name ?? 'Standard';
+    return made;
+  };
+  const getMat = (name: string | undefined, fallback: string, map?: THREE.Texture) => {
     const key = name ?? '__default';
     let cached = mats.get(key);
     if (!cached) {
-      const material = editor.model.material(name);
-      cached = new THREE.MeshStandardMaterial({
-        color: material?.color ?? fallback,
-        transparent: (material?.opacity ?? 1) < 1,
-        opacity: material?.opacity ?? 1,
-        side: THREE.DoubleSide,
-        roughness: 0.8,
-      });
-      cached.name = name ?? 'Standard';
+      cached = makeMat(name, fallback, map);
       mats.set(key, cached);
     }
     return cached;
   };
+  // a definition placed many times is baked once
+  const baked = new Map<Entities, Map<string, { material: THREE.MeshStandardMaterial; uvs: number[] } | null>>();
   const hidden = editor.model.hiddenTags();
+  const frontColor = editor.model.settings.style.frontColor;
   const build = (ents: Entities, parent: THREE.Object3D, inherit?: string) => {
-    const byMat = new Map<string, number[]>();
+    const byMat = new Map<string, BakeFace[]>();
     for (const face of ents.faces.values()) {
       if (face.hidden || (face.tag && hidden.has(face.tag))) {
         continue;
@@ -89,19 +101,52 @@ export const modelToThree = (editor: Editor): THREE.Group => {
       const key = face.material ?? inherit ?? '__default';
       const tri = ents.faceTriangles(face);
       const pts = [...face.outer, ...face.holes.flat()].map((vertex) => ents.positionOf(vertex));
-      const arr = byMat.get(key) ?? [];
-      for (const i of tri) {
-        arr.push(pts[i].x, pts[i].y, pts[i].z);
-      }
-      byMat.set(key, arr);
+      const faces = byMat.get(key) ?? [];
+      faces.push({ points: tri.map((i) => pts[i]), normal: ents.faceNormal(face) });
+      byMat.set(key, faces);
     }
-    for (const [materialKey, arr] of byMat) {
+    for (const [materialKey, faces] of byMat) {
+      const name = materialKey === '__default' ? undefined : materialKey;
+      const definition = editor.model.material(name);
       const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
-      geometry.computeVertexNormals();
-      parent.add(
-        new THREE.Mesh(geometry, getMat(materialKey === '__default' ? undefined : materialKey, editor.model.settings.style.frontColor)),
+      geometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(
+          faces.flatMap((face) => face.points.flatMap((point) => [point.x, point.y, point.z])),
+          3,
+        ),
       );
+      geometry.computeVertexNormals();
+      let material: THREE.MeshStandardMaterial | undefined;
+      const shader = materialShader(definition);
+      const tile = shader ? undefined : textureTile(definition);
+      if (shader && definition) {
+        let perLevel = baked.get(ents);
+        if (!perLevel) {
+          perLevel = new Map();
+          baked.set(ents, perLevel);
+        }
+        if (!perLevel.has(materialKey)) {
+          const surface = bakeSurface(shader, definition, faces);
+          perLevel.set(materialKey, surface && { material: makeMat(name, frontColor, surface.texture), uvs: surface.uvs });
+        }
+        const surface = perLevel.get(materialKey);
+        if (surface) {
+          material = surface.material;
+          geometry.setAttribute('uv', new THREE.Float32BufferAttribute(surface.uvs, 2));
+        }
+      } else if (tile) {
+        material = getMat(name, frontColor, tile.map);
+        const uvs: number[] = [];
+        for (const face of faces) {
+          const { basisU, basisV } = planeBasis(face.normal);
+          for (const point of face.points) {
+            uvs.push(...tileUv(tile, point, basisU, basisV));
+          }
+        }
+        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      }
+      parent.add(new THREE.Mesh(geometry, material ?? getMat(name, frontColor)));
     }
     for (const instance of ents.instances.values()) {
       if (instance.hidden || (instance.tag && hidden.has(instance.tag))) {
@@ -153,6 +198,7 @@ export const exportFile = async (editor: Editor, kind: ExportKind): Promise<Expo
   if (kind === 'obj') {
     return { name: `${name}.obj`, mimeType: 'text/plain', data: new OBJExporter().parse(scene) };
   }
+  await imageTexturesReady();
   const res: any = await new GLTFExporter().parseAsync(scene, { binary: kind === 'glb' });
   if (kind === 'glb') {
     return { name: `${name}.glb`, mimeType: 'model/gltf-binary', data: new Blob([res], { type: 'model/gltf-binary' }) };
