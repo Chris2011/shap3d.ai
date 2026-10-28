@@ -1,0 +1,199 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "noise": {
+      "plugin": {
+        "name": "Bruit",
+        "description": "Bruit de Perlin/simplex pour les paysages : terrains avec collines, montagnes, îles, canyons et dunes (aperçu en direct, modifiables avec l’outil Terrain), dispersion d’arbres, de buissons et de rochers, déformation de groupes, un matériau de bruit et s3d.noise() pour les scripts."
+      },
+      "panel": {
+        "title": "Bruit"
+      },
+      "commands": {
+        "open": "Terrain de bruit…",
+        "scatter": "Disperser des objets…",
+        "paving": "Pavage et pierres…",
+        "deform": "Déformer avec du bruit…"
+      },
+      "menu": {
+        "edit": "Modifier le terrain de bruit…",
+        "deform": "Déformer avec du bruit…",
+        "paving": "Paver avec des pierres…"
+      },
+      "tabs": {
+        "terrain": "Terrain",
+        "scatter": "Disperser",
+        "deform": "Déformer",
+        "script": "Script",
+        "paving": "Pierres"
+      },
+      "terrain": {
+        "name": "Terrain de bruit",
+        "hint": "Choisissez un paysage ou bougez les curseurs – l’aperçu suit. « Créer » l’ajoute au modèle.",
+        "editing": "Modification de « {name} » – l’aperçu montre la nouvelle version.",
+        "size": "Taille",
+        "width": "Largeur (m)",
+        "depth": "Profondeur (m)",
+        "detail": "Détail (cellules)",
+        "noise": "Bruit",
+        "mode": "Type",
+        "seed": "Graine",
+        "randomSeed": "Graine aléatoire",
+        "scale": "Échelle (m)",
+        "height": "Hauteur (m)",
+        "octaves": "Octaves",
+        "persistence": "Persistance",
+        "lacunarity": "Lacunarité",
+        "exponent": "Vallées ↔ sommets",
+        "warp": "Distorsion",
+        "shape": "Forme",
+        "falloff": "Île (chute vers le bord)",
+        "terraces": "Terrasses (m)",
+        "terraceSharpness": "Bords des terrasses",
+        "water": "Eau",
+        "waterLevel": "Niveau de l’eau (m)",
+        "snow": "Neige",
+        "snowLine": "Limite des neiges (m)",
+        "skirt": "Bloc fermé avec parois de terre",
+        "preview": "Aperçu en direct",
+        "stats": "grille {columns}×{rows} · {faces} triangles · hauteur {low} … {high} m",
+        "create": "Créer le terrain",
+        "apply": "Appliquer les changements",
+        "createNew": "Comme nouveau terrain",
+        "sculptHint": "Le terrain est un terrain comme celui de l’outil Terrain : sélectionnez-le et lancez « Terrain » pour le modeler à la main."
+      },
+      "presets": {
+        "hills": "Collines",
+        "hillsTitle": "Collines douces et ondulées",
+        "mountains": "Montagnes",
+        "mountainsTitle": "Crêtes vives avec de la neige sur les sommets",
+        "island": "Île",
+        "islandTitle": "Une terre qui descend dans la mer vers les bords",
+        "canyon": "Canyon",
+        "canyonTitle": "Vallées sinueuses et roche en terrasses",
+        "dunes": "Dunes",
+        "dunesTitle": "Dunes basses et rondes"
+      },
+      "modes": {
+        "fbm": "fBm (doux)",
+        "ridged": "Ridged (crêtes vives)",
+        "billow": "Billow (bosses rondes)"
+      },
+      "objects": {
+        "conifer": "Conifère",
+        "tree": "Feuillu",
+        "bush": "Buisson",
+        "rock": "Rocher"
+      },
+      "scatter": {
+        "name": "Objets dispersés",
+        "hint": "Répartit des objets – le long des arêtes sélectionnées (un chemin, une allée), sur les faces sélectionnées ou sur le terrain sélectionné (sinon le plus récent). Un masque de bruit les regroupe ; les pentes raides et l’eau restent libres. Le tout dans un seul groupe.",
+        "component": "Composant propre",
+        "spacing": "Espacement (m)",
+        "density": "Densité",
+        "clumping": "Regroupement",
+        "clumpSize": "Taille des groupes (m)",
+        "maxSlope": "Pente max. (°)",
+        "sizeMin": "Taille de",
+        "sizeMax": "Taille jusqu’à",
+        "run": "Disperser",
+        "done": "{count} objet dispersé | {count} objets dispersés",
+        "nothingChosen": "Choisissez au moins un type d’objet.",
+        "nothing": "Aucun emplacement ne convient – réduisez l’espacement, augmentez la densité ou autorisez des pentes plus raides.",
+        "noTarget": "Aucun terrain où disperser – sélectionnez-en un, créez un terrain de bruit ou indiquez une zone.",
+        "unknownObject": "Objet inconnu « {name} » – permis : {allowed} ou le nom d’un composant du modèle.",
+        "target": {
+          "path": "Le long de {count} arête(s) sélectionnée(s)",
+          "faces": "Sur {count} face(s) sélectionnée(s)",
+          "terrain": "Sur le terrain sélectionné ou le plus récent"
+        },
+        "offset": "À côté du chemin (m)",
+        "alongPath": "Orienter le long du chemin",
+        "align": "Debout sur la face (murs, toits)"
+      },
+      "deform": {
+        "hint": "Déforme les groupes sélectionnés : leurs faces sont finement subdivisées, puis tordues, effilées ou courbées sur leur hauteur et déplacées par un bruit 3D – les boîtes deviennent des rochers ou des tours torsadées. Sur un terrain, le bruit s’ajoute à sa grille de hauteurs.",
+        "amount": "Intensité (m)",
+        "scale": "Taille des bosses (m)",
+        "detail": "Longueur d’arête (m)",
+        "run": "Déformer la sélection ({count})",
+        "done": "Déformé.",
+        "noTarget": "Sélectionnez d’abord un ou plusieurs groupes.",
+        "shape": "Forme",
+        "twist": "Torsion (°)",
+        "taper": "Effilement (haut)",
+        "bend": "Courbure (°)"
+      },
+      "script": {
+        "hint": "Le plugin ajoute ces fonctions à s3d :",
+        "shader": "Le matériau de bruit (panneau Matériaux › texture « Bruit ») marche aussi dans les scripts :",
+        "open": "Ouvrir l’exemple dans l’éditeur de scripts",
+        "noiseTitle": "Bruit simplex (plugin)",
+        "noiseDescription": "Bruit simplex avec graine en un point, −1 … 1 : en 2D avec x et y, en 3D avec z en plus. Le même point et la même graine donnent toujours la même valeur ; des points voisins des valeurs proches.",
+        "fbmTitle": "Bruit fractal (plugin)",
+        "fbmDescription": "Plusieurs octaves de bruit simplex additionnées (fBm, −1 … 1) ou en ridged (crêtes vives, 0 … 1) ou billow (bosses rondes, 0 … 1). Octaves, persistance et lacunarité règlent la quantité de détails fins.",
+        "terrainTitle": "Terrain de bruit (plugin)",
+        "terrainDescription": "Un terrain de bruit fractal en groupe, avec herbe, terre, roche et neige selon la hauteur et la pente, eau et terrasses en option. Il garde ses réglages et sa grille de hauteurs – le panneau Bruit le modifie, l’outil Terrain le modèle.",
+        "scatterTitle": "Disperser des objets (plugin)",
+        "scatterDescription": "Place des arbres, buissons, rochers ou composants du modèle sur un terrain (ou une zone au sol), regroupés par un masque de bruit, avec taille et rotation aléatoires. Renvoie le groupe qui les contient.",
+        "deformTitle": "Déformer avec du bruit (plugin)",
+        "deformDescription": "Subdivise finement les faces de groupes et les déplace le long de leurs normales par un bruit 3D – pierres, murs rugueux, formes tordues. Sur un terrain, le bruit s’ajoute à la grille de hauteurs. Renvoie le nombre de groupes modifiés.",
+        "cellTitle": "Bruit cellulaire (plugin)",
+        "cellReturns": "{ f1, f2, id, site }",
+        "cellDescription": "Bruit cellulaire (Worley/Voronoï) en un point : f1 est la distance au centre le plus proche, f2 au deuxième (f2 − f1 vaut 0 aux bords des cellules), id un nombre 0 … 1 par cellule, site le centre le plus proche. Une cellule ≈ une unité.",
+        "pavingTitle": "Pierres en bruit cellulaire (plugin)",
+        "pavingDescription": "Pose des pierres sur les faces sélectionnées (toute direction – sols et murs) ou sur une zone : cellules de Voronoï avec joints, dessus chanfreinés, hauteurs et teintes variées, mortier en option. Renvoie le groupe."
+      },
+      "shader": {
+        "label": "Bruit",
+        "color2": "Deuxième couleur",
+        "mode": "Type (0 doux · 1 crêtes · 2 bosses)",
+        "octaves": "Octaves",
+        "persistence": "Persistance",
+        "warp": "Distorsion",
+        "contrast": "Contraste",
+        "balance": "Équilibre",
+        "cellsLabel": "Cellules",
+        "jointColor": "Couleur des joints",
+        "joint": "Largeur des joints",
+        "jitter": "Irrégularité",
+        "variation": "Variation de teinte"
+      },
+      "paving": {
+        "hint": "Des pierres issues d’un bruit cellulaire (Voronoï) : dallage en pierre naturelle, pavés, dalles ou mur en pierre sèche – chaque pierre à part avec un chanfrein, des joints entre elles, hauteurs et teintes variées.",
+        "onFaces": "Sur {count} face(s) sélectionnée(s) – murs compris",
+        "onArea": "Aucune face sélectionnée : une zone à part à côté du modèle",
+        "presets": {
+          "flagstones": "Pierre naturelle",
+          "flagstonesTitle": "Dalles irrégulières en pierre naturelle",
+          "cobbles": "Pavés",
+          "cobblesTitle": "Petites pierres arrondies",
+          "slabs": "Dalles",
+          "slabsTitle": "Grandes dalles presque régulières",
+          "wall": "Pierre sèche",
+          "wallTitle": "Pierres longues et épaisses – pour une face de mur"
+        },
+        "size": "Taille des pierres (m)",
+        "gap": "Joint (m)",
+        "jitter": "Irrégularité",
+        "stretch": "Longueur ↔ largeur",
+        "thickness": "Épaisseur (m)",
+        "variation": "Variation de hauteur",
+        "bevel": "Chanfrein (m)",
+        "shades": "Teintes",
+        "color": "Couleur",
+        "joint": "Mortier dans les joints",
+        "run": "Poser les pierres",
+        "done": "Pierres posées ({count} faces).",
+        "stone": "Pierre",
+        "mortar": "Mortier",
+        "name": "Pierres",
+        "noTarget": "Sélectionnez une ou plusieurs faces ou indiquez une zone.",
+        "nothing": "Aucune pierre ne tient – réduisez les pierres ou agrandissez la zone.",
+        "tooMany": "Trop de pierres (plus de {max}) – agrandissez-les."
+      }
+    }
+  }
+}

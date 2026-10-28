@@ -1,0 +1,199 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "noise": {
+      "plugin": {
+        "name": "Noise",
+        "description": "Perlin/simplex noise for landscapes: terrains with hills, mountains, islands, canyons and dunes (live preview, editable with the Terrain tool), scattering trees, bushes and rocks, roughening groups, a noise material and s3d.noise() for scripts."
+      },
+      "panel": {
+        "title": "Noise"
+      },
+      "commands": {
+        "open": "Noise terrain…",
+        "scatter": "Scatter objects…",
+        "paving": "Paving and stones…",
+        "deform": "Deform with noise…"
+      },
+      "menu": {
+        "edit": "Change noise terrain…",
+        "deform": "Deform with noise…",
+        "paving": "Pave with stones…"
+      },
+      "tabs": {
+        "terrain": "Terrain",
+        "scatter": "Scatter",
+        "deform": "Deform",
+        "script": "Script",
+        "paving": "Stones"
+      },
+      "terrain": {
+        "name": "Noise terrain",
+        "hint": "Pick a landscape or move the sliders – the preview follows. “Create” adds it to the model.",
+        "editing": "Changing “{name}” – the preview shows the new version.",
+        "size": "Size",
+        "width": "Width (m)",
+        "depth": "Depth (m)",
+        "detail": "Detail (cells)",
+        "noise": "Noise",
+        "mode": "Kind",
+        "seed": "Seed",
+        "randomSeed": "Random seed",
+        "scale": "Scale (m)",
+        "height": "Height (m)",
+        "octaves": "Octaves",
+        "persistence": "Persistence",
+        "lacunarity": "Lacunarity",
+        "exponent": "Valleys ↔ peaks",
+        "warp": "Warp",
+        "shape": "Shape",
+        "falloff": "Island (edge falloff)",
+        "terraces": "Terraces (m)",
+        "terraceSharpness": "Terrace edges",
+        "water": "Water",
+        "waterLevel": "Water level (m)",
+        "snow": "Snow",
+        "snowLine": "Snow line (m)",
+        "skirt": "Closed block with earth walls",
+        "preview": "Live preview",
+        "stats": "grid {columns}×{rows} · {faces} triangles · height {low} … {high} m",
+        "create": "Create terrain",
+        "apply": "Apply changes",
+        "createNew": "As new terrain",
+        "sculptHint": "The terrain is a terrain like the Terrain tool’s: select it and start “Terrain” to sculpt it further by hand."
+      },
+      "presets": {
+        "hills": "Hills",
+        "hillsTitle": "Gentle rolling hills",
+        "mountains": "Mountains",
+        "mountainsTitle": "Sharp ridges with snow on the peaks",
+        "island": "Island",
+        "islandTitle": "Land that falls into the sea towards the edges",
+        "canyon": "Canyon",
+        "canyonTitle": "Winding valleys and terraced rock",
+        "dunes": "Dunes",
+        "dunesTitle": "Low, round dunes"
+      },
+      "modes": {
+        "fbm": "fBm (soft)",
+        "ridged": "Ridged (sharp crests)",
+        "billow": "Billow (round bumps)"
+      },
+      "objects": {
+        "conifer": "Conifer",
+        "tree": "Broadleaf tree",
+        "bush": "Bush",
+        "rock": "Rock"
+      },
+      "scatter": {
+        "name": "Scattered objects",
+        "hint": "Spreads objects – along the selected edges (a path, an avenue), on the selected faces, or over the selected terrain (else the newest one). A noise mask gathers them in clumps; steep slopes and water stay free. All of it lands in one group.",
+        "component": "Own component",
+        "spacing": "Spacing (m)",
+        "density": "Density",
+        "clumping": "Clumping",
+        "clumpSize": "Clump size (m)",
+        "maxSlope": "Max. slope (°)",
+        "sizeMin": "Size from",
+        "sizeMax": "Size up to",
+        "run": "Scatter",
+        "done": "{count} object scattered | {count} objects scattered",
+        "nothingChosen": "Pick at least one kind of object.",
+        "nothing": "No place matched – lower the spacing, raise the density or allow steeper slopes.",
+        "noTarget": "No terrain to scatter on – select one, create a noise terrain or give an area.",
+        "unknownObject": "Unknown object “{name}” – allowed: {allowed} or the name of a component in the model.",
+        "target": {
+          "path": "Along {count} selected edge(s)",
+          "faces": "On {count} selected face(s)",
+          "terrain": "On the selected or newest terrain"
+        },
+        "offset": "Beside the path (m)",
+        "alongPath": "Face along the path",
+        "align": "Stand on the face (walls, roofs)"
+      },
+      "deform": {
+        "hint": "Deforms the selected groups: their faces are split finely, then twisted, tapered or bent along their height and moved in and out by 3D noise – boxes become boulders or twisted towers. On a terrain the noise goes onto its height grid.",
+        "amount": "Amount (m)",
+        "scale": "Bump size (m)",
+        "detail": "Edge length (m)",
+        "run": "Deform selection ({count})",
+        "done": "Deformed.",
+        "noTarget": "Select one or more groups first.",
+        "shape": "Shape",
+        "twist": "Twist (°)",
+        "taper": "Taper (top)",
+        "bend": "Bend (°)"
+      },
+      "script": {
+        "hint": "The plugin adds these functions to s3d:",
+        "shader": "The noise material (Materials panel › texture “Noise”) also works in scripts:",
+        "open": "Open example in the script editor",
+        "noiseTitle": "Simplex noise (plugin)",
+        "noiseDescription": "Seeded simplex noise at a point, −1 … 1: in 2D with x and y, in 3D with z as well. The same point and seed always give the same value; neighbouring points give similar ones.",
+        "fbmTitle": "Fractal noise (plugin)",
+        "fbmDescription": "Several octaves of simplex noise added up (fBm, −1 … 1) or as ridged (sharp crests, 0 … 1) or billow (round bumps, 0 … 1). Octaves, persistence and lacunarity set how much fine detail there is.",
+        "terrainTitle": "Noise terrain (plugin)",
+        "terrainDescription": "A terrain from fractal noise as a group, with grass, earth, rock and snow by height and slope, optional water and terraces. It keeps its settings and its height grid – the Noise panel changes it, the Terrain tool sculpts it.",
+        "scatterTitle": "Scatter objects (plugin)",
+        "scatterDescription": "Places trees, bushes, rocks or components of the model on a terrain (or an area on the ground), gathered by a noise mask, with random size and turn. Returns the group with all of them.",
+        "deformTitle": "Roughen with noise (plugin)",
+        "deformDescription": "Splits the faces of groups finely and moves them along their normals by 3D noise – stones, rough walls, bent shapes. On a terrain it adds the noise to the height grid. Returns the number of groups changed.",
+        "cellTitle": "Cell noise (plugin)",
+        "cellReturns": "{ f1, f2, id, site }",
+        "cellDescription": "Cellular (Worley/Voronoi) noise at a point: f1 is the distance to the nearest site, f2 to the second nearest (f2 − f1 is 0 on the borders between cells), id a number 0 … 1 per cell, site the nearest site. One cell ≈ one unit.",
+        "pavingTitle": "Stones from cell noise (plugin)",
+        "pavingDescription": "Lays stones on the selected faces (any direction – floors and walls) or on an area: Voronoi cells with joints, chamfered tops, varied heights and shades, optional mortar. Returns the group."
+      },
+      "shader": {
+        "label": "Noise",
+        "color2": "Second colour",
+        "mode": "Kind (0 soft · 1 ridged · 2 billow)",
+        "octaves": "Octaves",
+        "persistence": "Persistence",
+        "warp": "Warp",
+        "contrast": "Contrast",
+        "balance": "Balance",
+        "cellsLabel": "Cells",
+        "jointColor": "Joint colour",
+        "joint": "Joint width",
+        "jitter": "Irregularity",
+        "variation": "Shade variation"
+      },
+      "paving": {
+        "hint": "Stones from cellular noise (Voronoi): flagstones, cobbles, slabs or a dry wall – each a stone of its own with a chamfer, joints between them, heights and shades varied.",
+        "onFaces": "On {count} selected face(s) – walls too",
+        "onArea": "No face selected: an area of its own beside the model",
+        "presets": {
+          "flagstones": "Flagstones",
+          "flagstonesTitle": "Irregular natural stone slabs",
+          "cobbles": "Cobbles",
+          "cobblesTitle": "Small rounded stones",
+          "slabs": "Slabs",
+          "slabsTitle": "Large, almost regular slabs",
+          "wall": "Dry wall",
+          "wallTitle": "Long, thick stones – for a wall face"
+        },
+        "size": "Stone size (m)",
+        "gap": "Joint (m)",
+        "jitter": "Irregularity",
+        "stretch": "Length ↔ width",
+        "thickness": "Thickness (m)",
+        "variation": "Height variation",
+        "bevel": "Chamfer (m)",
+        "shades": "Shades",
+        "color": "Colour",
+        "joint": "Mortar in the joints",
+        "run": "Lay stones",
+        "done": "Stones laid ({count} faces).",
+        "stone": "Stone",
+        "mortar": "Mortar",
+        "name": "Stones",
+        "noTarget": "Select one or more faces or give an area.",
+        "nothing": "No stone fits – make the stones smaller or the area bigger.",
+        "tooMany": "Too many stones (more than {max}) – make them bigger."
+      }
+    }
+  }
+}

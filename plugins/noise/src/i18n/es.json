@@ -1,0 +1,199 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "noise": {
+      "plugin": {
+        "name": "Ruido",
+        "description": "Ruido Perlin/simplex para paisajes: terrenos con colinas, montañas, islas, cañones y dunas (vista previa en directo, editables con la herramienta Terreno), dispersar árboles, arbustos y rocas, dar rugosidad a grupos, un material de ruido y s3d.noise() para scripts."
+      },
+      "panel": {
+        "title": "Ruido"
+      },
+      "commands": {
+        "open": "Terreno de ruido…",
+        "scatter": "Dispersar objetos…",
+        "paving": "Pavimento y piedras…",
+        "deform": "Deformar con ruido…"
+      },
+      "menu": {
+        "edit": "Cambiar terreno de ruido…",
+        "deform": "Deformar con ruido…",
+        "paving": "Pavimentar con piedras…"
+      },
+      "tabs": {
+        "terrain": "Terreno",
+        "scatter": "Dispersar",
+        "deform": "Deformar",
+        "script": "Script",
+        "paving": "Piedras"
+      },
+      "terrain": {
+        "name": "Terreno de ruido",
+        "hint": "Elige un paisaje o mueve los controles – la vista previa los sigue. «Crear» lo añade al modelo.",
+        "editing": "Cambiando «{name}» – la vista previa muestra la nueva versión.",
+        "size": "Tamaño",
+        "width": "Ancho (m)",
+        "depth": "Fondo (m)",
+        "detail": "Detalle (celdas)",
+        "noise": "Ruido",
+        "mode": "Tipo",
+        "seed": "Semilla",
+        "randomSeed": "Semilla aleatoria",
+        "scale": "Escala (m)",
+        "height": "Altura (m)",
+        "octaves": "Octavas",
+        "persistence": "Persistencia",
+        "lacunarity": "Lacunaridad",
+        "exponent": "Valles ↔ cumbres",
+        "warp": "Distorsión",
+        "shape": "Forma",
+        "falloff": "Isla (caída hacia el borde)",
+        "terraces": "Terrazas (m)",
+        "terraceSharpness": "Bordes de terraza",
+        "water": "Agua",
+        "waterLevel": "Nivel del agua (m)",
+        "snow": "Nieve",
+        "snowLine": "Límite de nieve (m)",
+        "skirt": "Bloque cerrado con paredes de tierra",
+        "preview": "Vista previa en directo",
+        "stats": "rejilla {columns}×{rows} · {faces} triángulos · altura {low} … {high} m",
+        "create": "Crear terreno",
+        "apply": "Aplicar cambios",
+        "createNew": "Como terreno nuevo",
+        "sculptHint": "El terreno es un terreno como el de la herramienta Terreno: selecciónalo e inicia «Terreno» para modelarlo a mano."
+      },
+      "presets": {
+        "hills": "Colinas",
+        "hillsTitle": "Colinas suaves y onduladas",
+        "mountains": "Montañas",
+        "mountainsTitle": "Crestas afiladas con nieve en las cumbres",
+        "island": "Isla",
+        "islandTitle": "Tierra que cae al mar hacia los bordes",
+        "canyon": "Cañón",
+        "canyonTitle": "Valles sinuosos y roca en terrazas",
+        "dunes": "Dunas",
+        "dunesTitle": "Dunas bajas y redondas"
+      },
+      "modes": {
+        "fbm": "fBm (suave)",
+        "ridged": "Ridged (crestas afiladas)",
+        "billow": "Billow (bultos redondos)"
+      },
+      "objects": {
+        "conifer": "Conífera",
+        "tree": "Árbol frondoso",
+        "bush": "Arbusto",
+        "rock": "Roca"
+      },
+      "scatter": {
+        "name": "Objetos dispersos",
+        "hint": "Reparte objetos – a lo largo de las aristas seleccionadas (un camino, una avenida), sobre las caras seleccionadas o sobre el terreno seleccionado (si no, el más reciente). Una máscara de ruido los agrupa; las pendientes fuertes y el agua quedan libres. Todo queda en un grupo.",
+        "component": "Componente propio",
+        "spacing": "Separación (m)",
+        "density": "Densidad",
+        "clumping": "Agrupamiento",
+        "clumpSize": "Tamaño de grupo (m)",
+        "maxSlope": "Pendiente máx. (°)",
+        "sizeMin": "Tamaño desde",
+        "sizeMax": "Tamaño hasta",
+        "run": "Dispersar",
+        "done": "{count} objeto dispersado | {count} objetos dispersados",
+        "nothingChosen": "Elige al menos un tipo de objeto.",
+        "nothing": "Ningún sitio encaja – reduce la separación, sube la densidad o permite pendientes más fuertes.",
+        "noTarget": "No hay terreno donde dispersar – selecciona uno, crea un terreno de ruido o indica un área.",
+        "unknownObject": "Objeto desconocido «{name}» – permitidos: {allowed} o el nombre de un componente del modelo.",
+        "target": {
+          "path": "A lo largo de {count} arista(s) seleccionada(s)",
+          "faces": "Sobre {count} cara(s) seleccionada(s)",
+          "terrain": "Sobre el terreno seleccionado o el más reciente"
+        },
+        "offset": "Junto al camino (m)",
+        "alongPath": "Orientar a lo largo del camino",
+        "align": "De pie sobre la cara (muros, tejados)"
+      },
+      "deform": {
+        "hint": "Deforma los grupos seleccionados: sus caras se subdividen finamente, luego se tuercen, estrechan o doblan a lo largo de su altura y se desplazan con ruido 3D – las cajas se vuelven peñascos o torres retorcidas. En un terreno el ruido va a su rejilla de alturas.",
+        "amount": "Intensidad (m)",
+        "scale": "Tamaño de bulto (m)",
+        "detail": "Longitud de arista (m)",
+        "run": "Deformar la selección ({count})",
+        "done": "Deformado.",
+        "noTarget": "Selecciona primero uno o más grupos.",
+        "shape": "Forma",
+        "twist": "Torsión (°)",
+        "taper": "Estrechar (arriba)",
+        "bend": "Doblar (°)"
+      },
+      "script": {
+        "hint": "El plugin añade estas funciones a s3d:",
+        "shader": "El material de ruido (panel Materiales › textura «Ruido») también funciona en scripts:",
+        "open": "Abrir el ejemplo en el editor de scripts",
+        "noiseTitle": "Ruido simplex (plugin)",
+        "noiseDescription": "Ruido simplex con semilla en un punto, −1 … 1: en 2D con x e y, en 3D también con z. El mismo punto y semilla dan siempre el mismo valor; puntos vecinos, valores parecidos.",
+        "fbmTitle": "Ruido fractal (plugin)",
+        "fbmDescription": "Varias octavas de ruido simplex sumadas (fBm, −1 … 1) o como ridged (crestas afiladas, 0 … 1) o billow (bultos redondos, 0 … 1). Octavas, persistencia y lacunaridad fijan cuánto detalle fino hay.",
+        "terrainTitle": "Terreno de ruido (plugin)",
+        "terrainDescription": "Un terreno de ruido fractal como grupo, con hierba, tierra, roca y nieve según altura y pendiente, agua y terrazas opcionales. Guarda sus ajustes y su rejilla de alturas – el panel Ruido lo cambia, la herramienta Terreno lo modela.",
+        "scatterTitle": "Dispersar objetos (plugin)",
+        "scatterDescription": "Coloca árboles, arbustos, rocas o componentes del modelo sobre un terreno (o un área en el suelo), agrupados por una máscara de ruido, con tamaño y giro aleatorios. Devuelve el grupo con todos ellos.",
+        "deformTitle": "Deformar con ruido (plugin)",
+        "deformDescription": "Subdivide finamente las caras de grupos y las desplaza a lo largo de sus normales con ruido 3D – piedras, muros rugosos, formas dobladas. En un terreno suma el ruido a la rejilla de alturas. Devuelve el número de grupos cambiados.",
+        "cellTitle": "Ruido celular (plugin)",
+        "cellReturns": "{ f1, f2, id, site }",
+        "cellDescription": "Ruido celular (Worley/Voronoi) en un punto: f1 es la distancia al centro más cercano, f2 al segundo (f2 − f1 es 0 en los bordes de las celdas), id un número 0 … 1 por celda, site el centro más cercano. Una celda ≈ una unidad.",
+        "pavingTitle": "Piedras de ruido celular (plugin)",
+        "pavingDescription": "Coloca piedras sobre las caras seleccionadas (en cualquier dirección – suelos y muros) o sobre un área: celdas de Voronoi con juntas, caras superiores achaflanadas, alturas y tonos variados, mortero opcional. Devuelve el grupo."
+      },
+      "shader": {
+        "label": "Ruido",
+        "color2": "Segundo color",
+        "mode": "Tipo (0 suave · 1 crestas · 2 bultos)",
+        "octaves": "Octavas",
+        "persistence": "Persistencia",
+        "warp": "Distorsión",
+        "contrast": "Contraste",
+        "balance": "Equilibrio",
+        "cellsLabel": "Celdas",
+        "jointColor": "Color de junta",
+        "joint": "Ancho de junta",
+        "jitter": "Irregularidad",
+        "variation": "Variación de tono"
+      },
+      "paving": {
+        "hint": "Piedras de ruido celular (Voronoi): losas de piedra natural, adoquines, placas o un muro de piedra seca – cada piedra por separado con chaflán, juntas entre ellas, alturas y tonos variados.",
+        "onFaces": "Sobre {count} cara(s) seleccionada(s) – también muros",
+        "onArea": "Ninguna cara seleccionada: un área propia junto al modelo",
+        "presets": {
+          "flagstones": "Piedra natural",
+          "flagstonesTitle": "Losas irregulares de piedra natural",
+          "cobbles": "Adoquines",
+          "cobblesTitle": "Piedras pequeñas y redondeadas",
+          "slabs": "Placas",
+          "slabsTitle": "Placas grandes casi regulares",
+          "wall": "Piedra seca",
+          "wallTitle": "Piedras largas y gruesas – para una cara de muro"
+        },
+        "size": "Tamaño de piedra (m)",
+        "gap": "Junta (m)",
+        "jitter": "Irregularidad",
+        "stretch": "Largo ↔ ancho",
+        "thickness": "Grosor (m)",
+        "variation": "Variación de altura",
+        "bevel": "Chaflán (m)",
+        "shades": "Tonos",
+        "color": "Color",
+        "joint": "Mortero en las juntas",
+        "run": "Colocar piedras",
+        "done": "Piedras colocadas ({count} caras).",
+        "stone": "Piedra",
+        "mortar": "Mortero",
+        "name": "Piedras",
+        "noTarget": "Selecciona una o más caras o indica un área.",
+        "nothing": "No cabe ninguna piedra – haz las piedras más pequeñas o el área más grande.",
+        "tooMany": "Demasiadas piedras (más de {max}) – hazlas más grandes."
+      }
+    }
+  }
+}

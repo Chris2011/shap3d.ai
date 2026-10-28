@@ -108,3 +108,26 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/shaders/dist`.
 - A panel with **ready-made materials** (oak, walnut, Carrara, Nero Marquina, terrazzo, rusty steel, copper patina, clinker, exposed concrete …), and `s3d.shaderMaterial('oak')` or `s3d.material(name, colour, { shader: 'shaders.wood', params })` in scripts.
 
 It uses `context.materials.registerShader` – the way to add shaders of your own is in [its README](../../plugins/shaders/README.md). Without the plugin, materials with a shader show their colour; export formats keep the colour too.
+
+## The noise plugin
+
+The package in [`plugins/noise/`](../../plugins/noise) brings procedural generation from seeded noise – simplex noise (fBm, ridged, billow) and cellular (Voronoi) noise – to the app. No dependencies of its own; built like the others:
+
+```bash
+cd plugins/noise
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/noise/dist`.
+
+![Noise terrain: an island with water, snow, woods and rocks; the panel with the terrain settings](../../plugins/noise/docs/noise.png)
+
+- **Noise terrains** with a live preview: seed, scale, height, octaves, persistence, lacunarity, warp, island falloff, terraces, water and snow, five presets. They store their height grid in the terrain plugin's format, so the **Terrain tool sculpts them further**.
+- **Scattering** trees, bushes, rocks or the model's own components – on a terrain, on selected faces or **along selected edges** (an avenue) – gathered by a noise mask.
+- **Stones** from cellular noise: flagstones, cobbles, slabs and dry walls as real stones with joints and chamfers, on selected faces or an area.
+- **Deforming** groups: twist, taper, bend and roughen with 3D noise – boxes become towers, columns or boulders; two material shaders (_Noise_, _Cells_).
+- `s3d.noise`, `s3d.fbm`, `s3d.cellNoise`, `s3d.noiseTerrain`, `s3d.scatter`, `s3d.paving` and `s3d.noiseDeform` for scripts.
+
+![Stones: flagstones, cobbles, slabs and a dry stone wall from cellular noise](../../plugins/noise/docs/noise-stones.png)
+
+More pictures (scattering, deforming) and all options in [its README](../../plugins/noise/README.md).

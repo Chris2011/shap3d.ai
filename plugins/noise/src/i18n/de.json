@@ -1,0 +1,199 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "noise": {
+      "plugin": {
+        "name": "Rauschen",
+        "description": "Perlin-/Simplex-Rauschen für Landschaften: Gelände mit Hügeln, Bergen, Inseln, Canyons und Dünen (Live-Vorschau, mit dem Terrain-Werkzeug weiter bearbeitbar), Bäume, Büsche und Steine streuen, Gruppen verrauschen, ein Noise-Material und s3d.noise() für Skripte."
+      },
+      "panel": {
+        "title": "Rauschen"
+      },
+      "commands": {
+        "open": "Noise-Gelände…",
+        "scatter": "Objekte streuen…",
+        "paving": "Pflaster und Steine…",
+        "deform": "Mit Rauschen verformen…"
+      },
+      "menu": {
+        "edit": "Noise-Gelände ändern…",
+        "deform": "Mit Rauschen verformen…",
+        "paving": "Mit Steinen pflastern…"
+      },
+      "tabs": {
+        "terrain": "Gelände",
+        "scatter": "Streuen",
+        "deform": "Verformen",
+        "script": "Skript",
+        "paving": "Steine"
+      },
+      "terrain": {
+        "name": "Noise-Gelände",
+        "hint": "Eine Landschaft wählen oder die Regler bewegen – die Vorschau folgt. „Gelände erzeugen“ fügt es ins Modell ein.",
+        "editing": "„{name}“ wird geändert – die Vorschau zeigt die neue Fassung.",
+        "size": "Größe",
+        "width": "Breite (m)",
+        "depth": "Tiefe (m)",
+        "detail": "Detail (Zellen)",
+        "noise": "Rauschen",
+        "mode": "Art",
+        "seed": "Seed",
+        "randomSeed": "Zufälliger Seed",
+        "scale": "Skalierung (m)",
+        "height": "Höhe (m)",
+        "octaves": "Oktaven",
+        "persistence": "Persistenz",
+        "lacunarity": "Lacunarity",
+        "exponent": "Täler ↔ Gipfel",
+        "warp": "Verwirbelung",
+        "shape": "Form",
+        "falloff": "Insel (Abfall zum Rand)",
+        "terraces": "Terrassen (m)",
+        "terraceSharpness": "Terrassenkanten",
+        "water": "Wasser",
+        "waterLevel": "Wasserlinie (m)",
+        "snow": "Schnee",
+        "snowLine": "Schneegrenze (m)",
+        "skirt": "Geschlossener Block mit Erdwänden",
+        "preview": "Live-Vorschau",
+        "stats": "Raster {columns}×{rows} · {faces} Dreiecke · Höhe {low} … {high} m",
+        "create": "Gelände erzeugen",
+        "apply": "Änderungen übernehmen",
+        "createNew": "Als neues Gelände",
+        "sculptHint": "Das Gelände ist ein Gelände wie das des Terrain-Werkzeugs: auswählen und „Gelände“ starten, um es von Hand weiter zu modellieren."
+      },
+      "presets": {
+        "hills": "Hügel",
+        "hillsTitle": "Sanfte, weite Hügel",
+        "mountains": "Berge",
+        "mountainsTitle": "Scharfe Grate mit Schnee auf den Gipfeln",
+        "island": "Insel",
+        "islandTitle": "Land, das zum Rand hin ins Meer abfällt",
+        "canyon": "Canyon",
+        "canyonTitle": "Gewundene Täler und Fels in Terrassen",
+        "dunes": "Dünen",
+        "dunesTitle": "Flache, runde Dünen"
+      },
+      "modes": {
+        "fbm": "fBm (weich)",
+        "ridged": "Ridged (scharfe Grate)",
+        "billow": "Billow (runde Buckel)"
+      },
+      "objects": {
+        "conifer": "Nadelbaum",
+        "tree": "Laubbaum",
+        "bush": "Busch",
+        "rock": "Stein"
+      },
+      "scatter": {
+        "name": "Gestreute Objekte",
+        "hint": "Verteilt Objekte – entlang der ausgewählten Kanten (ein Weg, eine Allee), auf den ausgewählten Flächen oder über das ausgewählte Gelände (sonst das neueste). Eine Rauschmaske sammelt sie in Gruppen; steile Hänge und Wasser bleiben frei. Alles landet in einer Gruppe.",
+        "component": "Eigene Komponente",
+        "spacing": "Abstand (m)",
+        "density": "Dichte",
+        "clumping": "Gruppierung",
+        "clumpSize": "Gruppengröße (m)",
+        "maxSlope": "Max. Hang (°)",
+        "sizeMin": "Größe von",
+        "sizeMax": "Größe bis",
+        "run": "Streuen",
+        "done": "{count} Objekt gestreut | {count} Objekte gestreut",
+        "nothingChosen": "Mindestens eine Objektart wählen.",
+        "nothing": "Keine Stelle passte – Abstand verkleinern, Dichte erhöhen oder steilere Hänge erlauben.",
+        "noTarget": "Kein Gelände zum Streuen – eines auswählen, ein Noise-Gelände erzeugen oder eine Fläche angeben.",
+        "unknownObject": "Unbekanntes Objekt „{name}“ – erlaubt: {allowed} oder der Name einer Komponente im Modell.",
+        "target": {
+          "path": "Entlang {count} ausgewählter Kante(n)",
+          "faces": "Auf {count} ausgewählter Fläche(n)",
+          "terrain": "Auf dem ausgewählten oder neuesten Gelände"
+        },
+        "offset": "Neben dem Weg (m)",
+        "alongPath": "In Wegrichtung drehen",
+        "align": "Auf der Fläche stehend (Wände, Dächer)"
+      },
+      "deform": {
+        "hint": "Verformt die ausgewählten Gruppen: ihre Flächen werden fein unterteilt, dann entlang der Höhe verdreht, verjüngt oder gebogen und durch 3D-Rauschen nach innen und außen verschoben – aus Quadern werden Felsbrocken oder verdrehte Türme. Bei einem Gelände geht das Rauschen auf sein Höhenraster.",
+        "amount": "Stärke (m)",
+        "scale": "Buckelgröße (m)",
+        "detail": "Kantenlänge (m)",
+        "run": "Auswahl verformen ({count})",
+        "done": "Verformt.",
+        "noTarget": "Zuerst eine oder mehrere Gruppen auswählen.",
+        "shape": "Form",
+        "twist": "Verdrehen (°)",
+        "taper": "Verjüngen (oben)",
+        "bend": "Biegen (°)"
+      },
+      "script": {
+        "hint": "Das Plugin ergänzt s3d um diese Funktionen:",
+        "shader": "Das Noise-Material (Materialien-Panel › Textur „Rauschen“) geht auch in Skripten:",
+        "open": "Beispiel im Skript-Editor öffnen",
+        "noiseTitle": "Simplex-Rauschen (Plugin)",
+        "noiseDescription": "Simplex-Rauschen mit Seed an einem Punkt, −1 … 1: in 2D mit x und y, in 3D zusätzlich mit z. Gleicher Punkt und Seed ergeben immer denselben Wert, benachbarte Punkte ähnliche.",
+        "fbmTitle": "Fraktales Rauschen (Plugin)",
+        "fbmDescription": "Mehrere Oktaven Simplex-Rauschen aufaddiert (fBm, −1 … 1) oder als Ridged (scharfe Grate, 0 … 1) bzw. Billow (runde Buckel, 0 … 1). Oktaven, Persistenz und Lacunarity bestimmen, wie viel feines Detail es gibt.",
+        "terrainTitle": "Noise-Gelände (Plugin)",
+        "terrainDescription": "Ein Gelände aus fraktalem Rauschen als Gruppe, mit Gras, Erde, Fels und Schnee nach Höhe und Hang, optional mit Wasser und Terrassen. Es behält seine Einstellungen und sein Höhenraster – das Rauschen-Panel ändert es, das Terrain-Werkzeug modelliert es.",
+        "scatterTitle": "Objekte streuen (Plugin)",
+        "scatterDescription": "Setzt Bäume, Büsche, Steine oder Komponenten des Modells auf ein Gelände (oder eine Fläche am Boden), gesammelt durch eine Rauschmaske, mit zufälliger Größe und Drehung. Gibt die Gruppe mit allen zurück.",
+        "deformTitle": "Mit Rauschen verformen (Plugin)",
+        "deformDescription": "Unterteilt die Flächen von Gruppen fein und verschiebt sie entlang ihrer Normalen durch 3D-Rauschen – Steine, raue Wände, verbogene Formen. Bei einem Gelände kommt das Rauschen auf das Höhenraster. Gibt die Zahl der geänderten Gruppen zurück.",
+        "cellTitle": "Zellrauschen (Plugin)",
+        "cellReturns": "{ f1, f2, id, site }",
+        "cellDescription": "Zellrauschen (Worley/Voronoi) an einem Punkt: f1 ist der Abstand zum nächsten Zentrum, f2 zum zweitnächsten (f2 − f1 ist 0 an den Zellgrenzen), id eine Zahl 0 … 1 pro Zelle, site das nächste Zentrum. Eine Zelle ≈ eine Einheit.",
+        "pavingTitle": "Steine aus Zellrauschen (Plugin)",
+        "pavingDescription": "Verlegt Steine auf den ausgewählten Flächen (jede Richtung – Böden und Wände) oder auf einer Fläche: Voronoi-Zellen mit Fugen, gefasten Oberseiten, variierten Höhen und Farbtönen, optional mit Mörtel. Gibt die Gruppe zurück."
+      },
+      "shader": {
+        "label": "Rauschen",
+        "color2": "Zweite Farbe",
+        "mode": "Art (0 weich · 1 Grate · 2 Buckel)",
+        "octaves": "Oktaven",
+        "persistence": "Persistenz",
+        "warp": "Verwirbelung",
+        "contrast": "Kontrast",
+        "balance": "Verteilung",
+        "cellsLabel": "Zellen",
+        "jointColor": "Fugenfarbe",
+        "joint": "Fugenbreite",
+        "jitter": "Unregelmäßigkeit",
+        "variation": "Farbunterschied"
+      },
+      "paving": {
+        "hint": "Steine aus Zellrauschen (Voronoi): Bruchsteinplatten, Kopfsteinpflaster, Platten oder eine Trockenmauer – jeder Stein für sich mit Fase, Fugen dazwischen, Höhen und Farbtöne variiert.",
+        "onFaces": "Auf {count} ausgewählter Fläche(n) – auch Wände",
+        "onArea": "Keine Fläche ausgewählt: eine eigene Fläche neben dem Modell",
+        "presets": {
+          "flagstones": "Bruchstein",
+          "flagstonesTitle": "Unregelmäßige Natursteinplatten",
+          "cobbles": "Kopfstein",
+          "cobblesTitle": "Kleine, abgerundete Steine",
+          "slabs": "Platten",
+          "slabsTitle": "Große, fast regelmäßige Platten",
+          "wall": "Trockenmauer",
+          "wallTitle": "Lange, dicke Steine – für eine Wandfläche"
+        },
+        "size": "Steingröße (m)",
+        "gap": "Fuge (m)",
+        "jitter": "Unregelmäßigkeit",
+        "stretch": "Länge ↔ Breite",
+        "thickness": "Dicke (m)",
+        "variation": "Höhenunterschied",
+        "bevel": "Fase (m)",
+        "shades": "Farbtöne",
+        "color": "Farbe",
+        "joint": "Mörtel in den Fugen",
+        "run": "Steine verlegen",
+        "done": "Steine verlegt ({count} Flächen).",
+        "stone": "Stein",
+        "mortar": "Mörtel",
+        "name": "Steine",
+        "noTarget": "Eine oder mehrere Flächen auswählen oder eine Fläche angeben.",
+        "nothing": "Kein Stein passt – Steine kleiner oder die Fläche größer machen.",
+        "tooMany": "Zu viele Steine (mehr als {max}) – Steine größer machen."
+      }
+    }
+  }
+}
