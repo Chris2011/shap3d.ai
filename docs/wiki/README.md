@@ -25,6 +25,7 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
 
 ## Working on the project
 
+- [Contributing](../../CONTRIBUTING.md) – where a change belongs, code style, texts and languages, versions and changelogs, checks before a pull request
 - [Development](development.md) – linting and formatting, the pre-commit hook, releases, project structure, regenerating the screenshots
 - [Credits and legal notice](credits-and-legal.md)
 - [CHANGELOG](../../CHANGELOG.md)

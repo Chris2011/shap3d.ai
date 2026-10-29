@@ -73,6 +73,7 @@ The details live in the [wiki](docs/wiki/README.md):
 | [Remote control](docs/wiki/remote-api.md)                  | REST API, Swagger UI and MCP                                                         |
 | [Writing plugins](docs/wiki/plugins.md)                    | plugin modules, the `context` API, built-in plugins                                  |
 | [Plugin packages](docs/wiki/plugin-packages.md)            | OpenSCAD, IFC, LayOut, room planner, shader materials                                |
+| [Contributing](CONTRIBUTING.md)                            | where changes belong, code style, texts, versions, checks                            |
 | [Development](docs/wiki/development.md)                    | linting, releases, project structure, screenshots                                    |
 | [Credits and legal notice](docs/wiki/credits-and-legal.md) | third-party code and assets, trademarks                                              |
 
