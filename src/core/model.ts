@@ -59,7 +59,22 @@ export interface Instance {
   tag?: string;
   hidden?: boolean;
   locked?: boolean;
+  /**
+   * data plugins keep on this one instance, by plugin id (e.g. the properties of a game object) – plain JSON, saved
+   * with the model, kept while the plugin is off and copied with the instance
+   */
+  pluginData?: Record<string, unknown>;
 }
+
+/** what a copy of an instance takes over from it besides its definition and place */
+export const copyInstanceDetails = (source: Instance, copy: Instance) => {
+  copy.material = source.material;
+  copy.tag = source.tag;
+  if (source.pluginData) {
+    copy.pluginData = JSON.parse(JSON.stringify(source.pluginData));
+  }
+  return copy;
+};
 
 export class Definition {
   id = newId();
@@ -1768,9 +1783,10 @@ export class Entities {
           continue;
         }
         const def = sourceInstance.definition.isComponent ? sourceInstance.definition : defs.cloneDefinition(sourceInstance.definition);
-        const instance = this.addInstance(def, sourceInstance.matrix.clone().premultiply(matrix), sourceInstance.name);
-        instance.material = sourceInstance.material;
-        instance.tag = sourceInstance.tag;
+        const instance = copyInstanceDetails(
+          sourceInstance,
+          this.addInstance(def, sourceInstance.matrix.clone().premultiply(matrix), sourceInstance.name),
+        );
         out.push({ kind: 'instance', id: instance.id });
       }
     }
@@ -1897,9 +1913,10 @@ export class Entities {
     }
     for (const childInstance of src.instances.values()) {
       const def = childInstance.definition.isComponent ? childInstance.definition : defs.cloneDefinition(childInstance.definition);
-      const instance = this.addInstance(def, childInstance.matrix.clone().premultiply(matrix), childInstance.name);
-      instance.material = childInstance.material;
-      instance.tag = childInstance.tag;
+      const instance = copyInstanceDetails(
+        childInstance,
+        this.addInstance(def, childInstance.matrix.clone().premultiply(matrix), childInstance.name),
+      );
       out.push({ kind: 'instance', id: instance.id });
     }
     return out;

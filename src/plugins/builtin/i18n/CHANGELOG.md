@@ -11,6 +11,7 @@ Nothing yet.
 - German, French, Spanish and Arabic text for the switch between the model and the workspaces of plugins in the top bar.
 - German, French, Spanish and Arabic texts for shader materials in the Materials panel and in scripts.
 - German, French, Spanish and Arabic texts for own image textures in the Materials panel (image, width, height, offset, rotation).
+- German, French, Spanish and Arabic texts for plugin bundles in the plugin manager and for the messages of plugin data formats.
 
 ## [1.0.2] – 2026-10-25 · Shap3D.ai 0.9.0
 

@@ -407,6 +407,12 @@
     "plugins": {
       "errors": {
         "commandExists": "الأمر «{id}» موجود بالفعل",
+        "bundleFolderMissing": "تذكر الحزمة المجلد „{folder}“ لكنه غير موجود",
+        "bundlePartMissing": "يحتوي المجلد على حزمة بدون الإضافة „{id}“ (shap3d.id في package.json الخاص بها)",
+        "dataChangeLoop": "ظلت الإضافات ترد على تغييرات بيانات بعضها – تم تجاهل الباقي",
+        "formatMismatch": "صيغة البيانات „{id}“ مسجلة بالفعل بمفتاح أو إصدار آخر ({existing}، وليس {version})",
+        "formatUnknown": "صيغة البيانات „{id}“ غير مسجلة – سجّلها باستخدام data.formats.register",
+        "formatInvalid": "البيانات ليست بشكل الصيغة „{id}“",
         "toolExists": "الأداة «{id}» موجودة بالفعل",
         "panelNeedsComponent": "اللوحة «{id}» تحتاج إلى component أو mount",
         "scriptExists": "s3d.{name} موجود بالفعل",
@@ -1483,6 +1489,9 @@
       "howTo": "كيفية كتابة إضافاتك الخاصة مشروحة في README تحت «Plugins». الأمثلة موجودة في",
       "installedButFailed": "تم تثبيت «{name}» لكنه فشل في البدء: {error}",
       "installedActive": "«{name}» مثبتة ونشطة.",
+      "installedBundle": "تم تثبيت الحزمة: {names}.",
+      "keptNewer": "تم الاحتفاظ بالإصدار الأحدث",
+      "fromBundle": "من الحزمة {name}",
       "loadFailed": "تعذّر تحميل الإضافة: {error}",
       "confirmRemove": "إزالة الإضافة «{name}»؟",
       "removed": "تمت إزالة «{name}»."

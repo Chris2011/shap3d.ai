@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { Editor } from '../engine/editor';
 import type { StyleSettings } from '../core/document';
 import type { Entities, EntityRef, Instance, Definition } from '../core/model';
-import { newId } from '../core/model';
+import { copyInstanceDetails, newId } from '../core/model';
 import { parseLength } from '../core/units';
 import { offsetPolygon } from '../core/geometry';
 import { TEXTURES, isTextureKind } from '../core/textures';
@@ -188,9 +188,7 @@ export class GroupHandle {
   }
   copy(offset?: Pt): GroupHandle {
     const def = this.inst.definition.isComponent ? this.inst.definition : this.api.editor.model.cloneDefinition(this.inst.definition);
-    const instance = this.parent.addInstance(def, this.inst.matrix.clone(), this.inst.name);
-    instance.material = this.inst.material;
-    instance.tag = this.inst.tag;
+    const instance = copyInstanceDetails(this.inst, this.parent.addInstance(def, this.inst.matrix.clone(), this.inst.name));
     const handle = new GroupHandle(this.api, this.parent, instance);
     if (offset) {
       handle.move(offset);

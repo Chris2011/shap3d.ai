@@ -37,7 +37,23 @@ export interface PackageInfo {
   license: string;
   files: number;
   bytes: number;
+  /** the plugin id its package.json names (`shap3d.id`), if it does */
+  id?: string;
+  /** the name of the bundle it came with (see readPluginPackages) */
+  bundle?: string;
 }
+
+/** is version `a` newer than `b`? ("1.10.0" > "1.9.2"; missing parts count as 0) */
+const newerThan = (a: string, b: string) => {
+  const partsA = a.split(/[.+-]/).map((part) => parseInt(part, 10) || 0),
+    partsB = b.split(/[.+-]/).map((part) => parseInt(part, 10) || 0);
+  for (let index = 0; index < Math.max(partsA.length, partsB.length); index++) {
+    if ((partsA[index] ?? 0) !== (partsB[index] ?? 0)) {
+      return (partsA[index] ?? 0) > (partsB[index] ?? 0);
+    }
+  }
+  return false;
+};
 
 interface StoredPlugin {
   id: string;
@@ -246,11 +262,19 @@ const startPlugins = async () => {
   }
 };
 
-/** Installs (or updates) a plugin from its source code and switches it on. */
-export const installPlugin = async (code: string, packageFiles?: { info: PackageInfo; assets: PluginAssets }) => {
-  const plugin = await evaluate(code);
+/**
+ * Installs (or updates) a plugin from its source code and switches it on. With `keepNewer` an installed copy of a
+ * newer version stays (a bundle does not downgrade a plugin installed on its own); the result then says `kept`.
+ */
+export const installPlugin = async (code: string, packageFiles?: { info: PackageInfo; assets: PluginAssets }, keepNewer = false) => {
+  const plugin: S3dPlugin & { kept?: boolean } = await evaluate(code);
   if (isBuiltin(plugin.id)) {
     throw new Error(t('plugins.errors.builtinReplace', { id: plugin.id }));
+  }
+  const installedVersion = entryOf(plugin.id)?.version ?? '';
+  if (keepNewer && installedVersion && newerThan(installedVersion, plugin.version ?? packageFiles?.info.version ?? '')) {
+    plugin.kept = true;
+    return plugin;
   }
   const existing = stored.value.find((item) => item.id === plugin.id);
   if (existing) {
@@ -285,15 +309,20 @@ export interface PluginPackage {
  * handle). The folder needs a package.json whose "shap3d.main" (or "main") names the plugin
  * module; every other file except node_modules is kept as an asset (context.assets).
  */
-export const readPluginPackage = async (files: File[]): Promise<PluginPackage> => {
-  const pathOf = (file: File) => (file.webkitRelativePath || file.name).replace(/\\/g, '/');
+const pathOf = (file: File) => (file.webkitRelativePath || file.name).replace(/\\/g, '/');
+
+/** the package.json nearest the top of the folder, read, and the folder path it lies in */
+const topManifest = async (files: File[]) => {
   const manifests = files.filter((file) => pathOf(file).split('/').pop() === 'package.json' && !pathOf(file).includes('/node_modules/'));
   const manifestFile = manifests.sort((a, b) => pathOf(a).split('/').length - pathOf(b).split('/').length)[0];
   if (!manifestFile) {
     throw new Error(t('plugins.errors.noPackageJson'));
   }
-  const manifest = JSON.parse(await manifestFile.text());
-  const base = pathOf(manifestFile).slice(0, -'package.json'.length);
+  return { manifest: JSON.parse(await manifestFile.text()), base: pathOf(manifestFile).slice(0, -'package.json'.length) };
+};
+
+export const readPluginPackage = async (files: File[]): Promise<PluginPackage> => {
+  const { manifest, base } = await topManifest(files);
   const mainPath = String(manifest.shap3d?.main ?? manifest.main ?? '').replace(/^\.?\//, '');
   if (!mainPath) {
     throw new Error(t('plugins.errors.noMain'));
@@ -326,14 +355,59 @@ export const readPluginPackage = async (files: File[]): Promise<PluginPackage> =
     license: manifest.license ?? '',
     files: Object.keys(assets).length,
     bytes,
+    ...(manifest.shap3d?.id ? { id: String(manifest.shap3d.id) } : {}),
   };
   return { code: mainCode, info, assets };
 };
 
-/** Installs a plugin package from the files of a folder (see readPluginPackage). */
+/**
+ * Reads the plugin packages in a folder: one, or – when its package.json lists folders in `shap3d.bundle` – the
+ * package in each of them (a bundle, e.g. a level editor that brings the noise plugin along). The plugins of a bundle
+ * are installed side by side: each can be switched off, removed and updated on its own, and none needs another.
+ */
+export const readPluginPackages = async (files: File[]): Promise<PluginPackage[]> => {
+  const { manifest, base } = await topManifest(files);
+  const bundle = manifest.shap3d?.bundle;
+  if (!Array.isArray(bundle)) {
+    return [await readPluginPackage(files)];
+  }
+  const packages: PluginPackage[] = [];
+  for (const folder of bundle) {
+    const prefix =
+      base +
+      String(folder)
+        .replace(/^\.?\//, '')
+        .replace(/\/?$/, '/');
+    const inside = files.filter((file) => pathOf(file).startsWith(prefix));
+    if (!inside.length) {
+      throw new Error(t('plugins.errors.bundleFolderMissing', { folder }));
+    }
+    const pluginPackage = await readPluginPackage(inside);
+    pluginPackage.info.bundle = manifest.name ?? '';
+    packages.push(pluginPackage);
+  }
+  return packages;
+};
+
+/**
+ * Installs the plugin packages of a folder (see readPluginPackages). A plugin of a bundle that is installed already
+ * in a newer version keeps that version.
+ */
+export const installPluginPackages = async (source: File[] | PluginPackage[]) => {
+  const packages = source.length && 'code' in source[0] ? (source as PluginPackage[]) : await readPluginPackages(source as File[]);
+  const installed = [];
+  for (const pluginPackage of packages) {
+    installed.push(
+      await installPlugin(pluginPackage.code, { info: pluginPackage.info, assets: pluginPackage.assets }, packages.length > 1),
+    );
+  }
+  return installed;
+};
+
+/** Installs one plugin package (from the files of a folder, see readPluginPackage) – for a bundle, its last plugin. */
 export const installPluginPackage = async (files: File[] | PluginPackage) => {
-  const pluginPackage = Array.isArray(files) ? await readPluginPackage(files) : files;
-  return installPlugin(pluginPackage.code, { info: pluginPackage.info, assets: pluginPackage.assets });
+  const installed = await installPluginPackages(Array.isArray(files) ? files : [files]);
+  return installed[installed.length - 1];
 };
 
 /** Code and package info of an installed package plugin (to compare with a newer folder). */

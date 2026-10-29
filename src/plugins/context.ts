@@ -5,7 +5,7 @@ import { Tool, type Editor } from '../engine/editor';
 import { PointTool } from '../tools/base';
 import { COMMANDS, runCommand, download } from '../engine/commands';
 import { TOOL_INFO, TOOL_SHORTCUTS, PLUGIN_TOOLS } from '../engine/setup';
-import { addPanel, showPanel } from '../components/panelState';
+import { addPanel, showPanel, PANEL_INFO } from '../components/panelState';
 import { registerIcon } from '../components/iconRegistry';
 import { ScriptApi, runScript } from '../scripting/api';
 import { API_CATALOG } from '../scripting/catalog';
@@ -15,13 +15,23 @@ import { buildMesh } from '../scripting/mesh';
 import { registerScriptLanguage, registerBeforeRun } from '../scripting/languages';
 import { useScripts } from '../composables/useScripts';
 import { putPluginFile, getPluginFile, removePluginFile, clearPluginFiles, listPluginFiles, type PluginAssets } from './assetStore';
-import { addContextMenuEntry, addPluginWindow, addTopBarButton, addWorkspace, workspaceState } from './uiExtensions';
+import {
+  addContextMenuEntry,
+  addMode,
+  addPluginWindow,
+  addTopBarButton,
+  addWorkspace,
+  modeState,
+  switchView,
+  workspaceState,
+} from './uiExtensions';
 import { renderViewImage, renderViewLines } from '../engine/viewRender';
 import { registerSurfaceShader } from '../engine/surfaceShaders';
 import { swatchStyle } from '../utils/materialSwatch';
 import { registerCodeFormat } from '../scripting/codeExport';
 import { registerCompletionValues, registerLanguageCompletions } from '../scripting/completion';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
+import { dataFormat, onDataChange, readData, readFormat, registerDataFormat, writeData, writeFormat } from './pluginData';
 import { t, localize, copyLocalized, addMessages, addLanguage, setLanguage, language, languages } from '../i18n';
 
 const MIME_TYPES: Record<string, string> = {
@@ -361,6 +371,7 @@ export const createPluginContext = (
         editor.onNewModel.push(listener);
         return track(() => removeFrom(editor.onNewModel, listener));
       },
+      onDataChange: (listener) => track(onDataChange(editor, listener)),
     },
 
     storage: {
@@ -405,11 +416,26 @@ export const createPluginContext = (
 
     workspaces: {
       register: (workspace) => track(addWorkspace({ ...workspace, id: qualified(workspace.id) })),
-      open: (id) => {
-        workspaceState.active = id ? (id.includes('.') ? id : qualified(id)) : null;
-        editor.invalidate();
-      },
+      open: (id) => switchView(editor, id ? (id.includes('.') ? id : qualified(id)) : null),
       active: () => workspaceState.active,
+    },
+
+    modes: {
+      register: (mode) => {
+        // the plugin's own tools and panels may be given by their short ids
+        const full = (id: string, known: (candidate: string) => boolean) =>
+          !id.includes('.') && known(qualified(id)) ? qualified(id) : id;
+        return track(
+          addMode(editor, {
+            ...mode,
+            id: qualified(mode.id),
+            tools: mode.tools.map((tool) => full(tool, (candidate) => editor.hasTool(candidate))),
+            panels: mode.panels?.map((panel) => full(panel, (candidate) => PANEL_INFO.some((info) => info.id === candidate))),
+          }),
+        );
+      },
+      open: (id) => switchView(editor, id ? (id.includes('.') ? id : qualified(id)) : null),
+      active: () => modeState.active,
     },
 
     render: {
@@ -418,26 +444,19 @@ export const createPluginContext = (
     },
 
     data: {
-      getModel: () => editor.model.pluginData?.[plugin.id] as any,
-      setModel: (value) => {
-        const data = { ...editor.model.pluginData };
-        if (value === undefined) {
-          delete data[plugin.id];
-        } else {
-          data[plugin.id] = value;
-        }
-        editor.model.pluginData = Object.keys(data).length ? data : undefined;
+      getModel: () => readData(editor, plugin.id, null) as any,
+      setModel: (value) => writeData(editor, plugin.id, null, value),
+      get: (target) => readData(editor, plugin.id, target) as any,
+      set: (target, value) => writeData(editor, plugin.id, target, value),
+      formats: {
+        register: (format) => track(registerDataFormat(format)),
+        get: (id) => {
+          const format = dataFormat(id);
+          return format && { id: format.id, key: format.key, version: format.version, label: format.label };
+        },
       },
-      get: (definition) => definition.pluginData?.[plugin.id] as any,
-      set: (definition, value) => {
-        const data = { ...definition.pluginData };
-        if (value === undefined) {
-          delete data[plugin.id];
-        } else {
-          data[plugin.id] = value;
-        }
-        definition.pluginData = Object.keys(data).length ? data : undefined;
-      },
+      read: (format, target) => readFormat(editor, format, target) as any,
+      write: (format, target, value) => writeFormat(editor, format, target, value),
     },
 
     i18n: {

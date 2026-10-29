@@ -407,6 +407,12 @@
     "plugins": {
       "errors": {
         "commandExists": "El comando «{id}» ya existe",
+        "bundleFolderMissing": "El paquete menciona la carpeta «{folder}», pero no está",
+        "bundlePartMissing": "La carpeta contiene un paquete sin el plugin «{id}» (shap3d.id en su package.json)",
+        "dataChangeLoop": "Los plugins se respondían sin fin a datos cambiados – se descartó el resto",
+        "formatMismatch": "El formato de datos «{id}» ya está declarado con otra clave o versión ({existing}, no {version})",
+        "formatUnknown": "El formato de datos «{id}» no está declarado – declararlo con data.formats.register",
+        "formatInvalid": "Los datos no tienen la forma del formato «{id}»",
         "toolExists": "La herramienta «{id}» ya existe",
         "panelNeedsComponent": "El panel «{id}» necesita component o mount",
         "scriptExists": "s3d.{name} ya existe",
@@ -1483,6 +1489,9 @@
       "howTo": "Cómo escribir tus propios plugins se explica en el README, en «Plugins». Los ejemplos están en",
       "installedButFailed": "«{name}» instalado, pero falló al iniciarse: {error}",
       "installedActive": "«{name}» está instalado y activo.",
+      "installedBundle": "Paquete instalado: {names}.",
+      "keptNewer": "se mantuvo la versión más nueva",
+      "fromBundle": "del paquete {name}",
       "loadFailed": "No se pudo cargar el plugin: {error}",
       "confirmRemove": "¿Quitar el plugin «{name}»?",
       "removed": "Se ha quitado «{name}»."

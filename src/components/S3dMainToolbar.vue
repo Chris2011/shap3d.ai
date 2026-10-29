@@ -4,14 +4,17 @@
       <button class="s3d-iconbtn" :title="t('toolbar.searchTitle')" @click="$emit('search')"><S3dIcon name="search" /></button>
     </div>
     <div class="s3d-panel flex w-10 flex-col [&_.s3d-iconbtn]:rounded-none">
-      <S3dToolButton v-for="tool in MAIN_TOOLS" :key="tool" :tool="tool" />
-      <div class="mx-1.5 my-1.25 h-px bg-[#c9cbd4] dark:bg-line-2"></div>
-      <S3dToolButton v-for="tool in recentTools" :key="'r' + tool" :tool="tool" />
-      <button class="s3d-iconbtn" :class="{ active: expanded }" :title="t('toolbar.moreTools')" @click.stop="expanded = !expanded">
-        <S3dIcon name="more" />
-      </button>
+      <S3dToolButton v-for="tool in tools" :key="tool" :tool="tool" />
+      <!-- a plugin's mode shows only its own tools -->
+      <template v-if="!mode">
+        <div class="mx-1.5 my-1.25 h-px bg-[#c9cbd4] dark:bg-line-2"></div>
+        <S3dToolButton v-for="tool in recentTools" :key="'r' + tool" :tool="tool" />
+        <button class="s3d-iconbtn" :class="{ active: expanded }" :title="t('toolbar.moreTools')" @click.stop="expanded = !expanded">
+          <S3dIcon name="more" />
+        </button>
+      </template>
     </div>
-    <S3dExpandedToolset v-if="expanded" @close="expanded = false" />
+    <S3dExpandedToolset v-if="expanded && !mode" @close="expanded = false" />
   </div>
 </template>
 
@@ -22,6 +25,7 @@ import S3dToolButton from './S3dToolButton.vue';
 import S3dExpandedToolset from './S3dExpandedToolset.vue';
 import { useEditor } from './keys';
 import { MAIN_TOOLS } from '../engine/editor';
+import { activeMode } from '../plugins/uiExtensions';
 import { t } from '../i18n';
 
 defineEmits<{ (event: 'search'): void }>();
@@ -29,4 +33,6 @@ const editor = useEditor();
 const expanded = ref(false);
 /** recently used tools that are still there (a plugin's tool disappears as soon as the plugin is off) */
 const recentTools = computed(() => editor.ui.recentTools.filter((id) => editor.hasTool(id)));
+const mode = computed(() => activeMode());
+const tools = computed(() => (mode.value ? mode.value.tools.filter((id) => editor.hasTool(id)) : MAIN_TOOLS));
 </script>

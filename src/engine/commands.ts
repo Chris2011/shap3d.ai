@@ -13,7 +13,7 @@ import { openTour } from '../components/tour';
 import { openPalette } from '../components/paletteState';
 import { measureView } from './measureView';
 import type { Entities, EntityRef } from '../core/model';
-import { Entities as EntitiesClass } from '../core/model';
+import { Entities as EntitiesClass, copyInstanceDetails } from '../core/model';
 import type { FaceStyle } from '../core/document';
 import { solidOp, isSolid, type SolidOp } from '../core/solids';
 import { pluginImporters, type LoadedScene } from '../plugins/fileFormats';
@@ -469,7 +469,7 @@ export const copySelection = (editor: Editor, cut = false) => {
     if (entityRef.kind === 'instance') {
       const instance = ents.instances.get(entityRef.id);
       if (instance) {
-        tmp.addInstance(instance.definition, editor.contextMatrix.multiply(instance.matrix), instance.name).material = instance.material;
+        copyInstanceDetails(instance, tmp.addInstance(instance.definition, editor.contextMatrix.multiply(instance.matrix), instance.name));
       }
     }
   }
