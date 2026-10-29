@@ -137,3 +137,55 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
 }
 `,
 };
+
+/**
+ * Facade: windows in a grid of storeys (one tile = one storey) – lit or dark per window, a shop floor at the
+ * bottom. Vertical faces only; roofs keep the colour, a little darker. Cheap enough for whole cities.
+ */
+export const FACADE_SHADER: PluginShader = {
+  id: 'facade',
+  label: 'noise.shader.facadeLabel',
+  size: 3.2,
+  params: [
+    { name: 'color2', label: 'noise.shader.windowColor', type: 'color', default: '#2e3a46' },
+    { name: 'light', label: 'noise.shader.litColor', type: 'color', default: '#f2d58c' },
+    { name: 'lit', label: 'noise.shader.litShare', type: 'number', default: 0.2, min: 0, max: 1 },
+    { name: 'bay', label: 'noise.shader.bay', type: 'number', default: 0.8, min: 0.3, max: 2 },
+    { name: 'windowWidth', label: 'noise.shader.windowWidth', type: 'number', default: 0.55, min: 0.1, max: 0.95 },
+    { name: 'windowHeight', label: 'noise.shader.windowHeight', type: 'number', default: 0.5, min: 0.1, max: 0.9 },
+    { name: 'shops', label: 'noise.shader.shops', type: 'number', default: 1, min: 0, max: 1, step: 1 },
+  ],
+  glsl: /* glsl */ `
+float nzWindowHash(vec2 p) {
+  return fract(sin(dot(p, vec2(41.37, 289.11))) * 43758.5453);
+}
+vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+  vec3 a = abs(n);
+  if (a.z > 0.5) {
+    return base * 0.8;
+  }
+  float along = a.x >= a.y ? p.y : p.x;
+  vec2 cell = vec2(floor(along / u_bay), floor(p.z));
+  vec2 local = vec2(fract(along / u_bay), fract(p.z));
+  float width = u_windowWidth;
+  float bottom = 0.3;
+  float top = 0.3 + u_windowHeight;
+  if (cell.y < 0.5 && u_shops > 0.5) {
+    // the shop floor: wide windows from low down
+    width = 0.86;
+    bottom = 0.12;
+    top = 0.78;
+  }
+  float inX = step(0.5 - width * 0.5, local.x) * step(local.x, 0.5 + width * 0.5);
+  float inY = step(bottom, local.y) * step(local.y, top);
+  float window = inX * inY;
+  float frameX = step(0.5 - width * 0.5 - 0.03, local.x) * step(local.x, 0.5 + width * 0.5 + 0.03);
+  float frameY = step(bottom - 0.03, local.y) * step(local.y, top + 0.03);
+  float frame = frameX * frameY * (1.0 - window);
+  float lit = step(1.0 - u_lit, nzWindowHash(cell));
+  vec3 glass = mix(u_color2, u_light, lit) * (0.85 + 0.3 * nzWindowHash(cell + 7.0));
+  vec3 colour = mix(base, base * 0.7, frame);
+  return mix(colour, glass, window);
+}
+`,
+};

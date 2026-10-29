@@ -1,4 +1,5 @@
 import type { PluginMesh } from '../../../src/plugins/types';
+import { erode } from './erosion';
 import { HEIGHT_DEFAULTS, heightField, type HeightOptions } from './noise';
 
 /**
@@ -8,6 +9,12 @@ import { HEIGHT_DEFAULTS, heightField, type HeightOptions } from './noise';
 
 /** the built-in terrain plugin's id – its height grid lives in `definition.pluginData.terrain` */
 export const TERRAIN_PLUGIN = 'terrain';
+
+/**
+ * The height grid as the app's data format (declared by the terrain plugin and by every plugin that reads or
+ * writes it – the declarations must agree on key and version)
+ */
+export const TERRAIN_FORMAT = { id: 'terrain.grid', key: TERRAIN_PLUGIN, version: 1 };
 
 /** surface layers like the terrain plugin's (same material names, same rules) */
 export interface TerrainLayers {
@@ -53,6 +60,10 @@ export interface TerrainSettings extends Required<HeightOptions> {
   snow: number | null;
   /** a closed block with earth walls down to below the lowest point */
   skirt: boolean;
+  /** 0 … 3: raindrops per grid point that erode the terrain (0 = none) */
+  erosion: number;
+  /** 0 … 1: how much each drop digs and carries */
+  erosionStrength: number;
 }
 
 export const TERRAIN_DEFAULTS: TerrainSettings = {
@@ -64,6 +75,8 @@ export const TERRAIN_DEFAULTS: TerrainSettings = {
   rock: null,
   snow: null,
   skirt: true,
+  erosion: 0,
+  erosionStrength: 0.5,
 };
 
 /** the settings with every gap filled and every number in its range */
@@ -97,7 +110,7 @@ export const makeGrid = (settings: TerrainSettings): TerrainGrid => {
       heights.push(Math.round(field((column / columns) * settings.width, (row / rows) * settings.depth) * 1000) / 1000);
     }
   }
-  return {
+  const grid: TerrainGrid = {
     width: settings.width,
     depth: settings.depth,
     columns,
@@ -115,6 +128,7 @@ export const makeGrid = (settings: TerrainSettings): TerrainGrid => {
     skirt: settings.skirt,
     water: settings.water,
   };
+  return settings.erosion > 0 ? erode(grid, { amount: settings.erosion, strength: settings.erosionStrength, seed: settings.seed }) : grid;
 };
 
 export const gridIndex = (grid: TerrainGrid, column: number, row: number) => row * (grid.columns + 1) + column;

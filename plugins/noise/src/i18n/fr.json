@@ -13,21 +13,25 @@
       },
       "commands": {
         "open": "Terrain de bruit…",
-        "scatter": "Disperser des objets…",
+        "scatter": "Arbres et dispersion…",
         "paving": "Pavage et pierres…",
-        "deform": "Déformer avec du bruit…"
+        "deform": "Déformer avec du bruit…",
+        "city": "Façades et villes…"
       },
       "menu": {
         "edit": "Modifier le terrain de bruit…",
         "deform": "Déformer avec du bruit…",
-        "paving": "Paver avec des pierres…"
+        "paving": "Paver avec des pierres…",
+        "facade": "Façade avec fenêtres…",
+        "erode": "Éroder le terrain"
       },
       "tabs": {
         "terrain": "Terrain",
-        "scatter": "Disperser",
+        "scatter": "Nature",
         "deform": "Déformer",
         "script": "Script",
-        "paving": "Pierres"
+        "paving": "Pierres",
+        "city": "Ville"
       },
       "terrain": {
         "name": "Terrain de bruit",
@@ -62,7 +66,9 @@
         "create": "Créer le terrain",
         "apply": "Appliquer les changements",
         "createNew": "Comme nouveau terrain",
-        "sculptHint": "Le terrain est un terrain comme celui de l’outil Terrain : sélectionnez-le et lancez « Terrain » pour le modeler à la main."
+        "sculptHint": "Le terrain est un terrain comme celui de l’outil Terrain : sélectionnez-le et lancez « Terrain » pour le modeler à la main.",
+        "erosion": "Érosion (gouttes)",
+        "erosionStrength": "Force de l’érosion"
       },
       "presets": {
         "hills": "Collines",
@@ -85,7 +91,11 @@
         "conifer": "Conifère",
         "tree": "Feuillu",
         "bush": "Buisson",
-        "rock": "Rocher"
+        "rock": "Rocher",
+        "oak": "Chêne",
+        "birch": "Bouleau",
+        "pine": "Pin",
+        "palm": "Palmier"
       },
       "scatter": {
         "name": "Objets dispersés",
@@ -111,7 +121,8 @@
         },
         "offset": "À côté du chemin (m)",
         "alongPath": "Orienter le long du chemin",
-        "align": "Debout sur la face (murs, toits)"
+        "align": "Debout sur la face (murs, toits)",
+        "title": "Disperser"
       },
       "deform": {
         "hint": "Déforme les groupes sélectionnés : leurs faces sont finement subdivisées, puis tordues, effilées ou courbées sur leur hauteur et déplacées par un bruit 3D – les boîtes deviennent des rochers ou des tours torsadées. Sur un terrain, le bruit s’ajoute à sa grille de hauteurs.",
@@ -144,7 +155,28 @@
         "cellReturns": "{ f1, f2, id, site }",
         "cellDescription": "Bruit cellulaire (Worley/Voronoï) en un point : f1 est la distance au centre le plus proche, f2 au deuxième (f2 − f1 vaut 0 aux bords des cellules), id un nombre 0 … 1 par cellule, site le centre le plus proche. Une cellule ≈ une unité.",
         "pavingTitle": "Pierres en bruit cellulaire (plugin)",
-        "pavingDescription": "Pose des pierres sur les faces sélectionnées (toute direction – sols et murs) ou sur une zone : cellules de Voronoï avec joints, dessus chanfreinés, hauteurs et teintes variées, mortier en option. Renvoie le groupe."
+        "pavingDescription": "Pose des pierres sur les faces sélectionnées (toute direction – sols et murs) ou sur une zone : cellules de Voronoï avec joints, dessus chanfreinés, hauteurs et teintes variées, mortier en option. Renvoie le groupe.",
+        "facadeTitle": "Façade (plugin)",
+        "facadeDescription": "Pose des fenêtres avec cadres et appuis, des balcons, des volets et un rez-de-chaussée avec vitrines et porte sur des murs : les faces sélectionnées, une face ou tous les murs d’un groupe. La variation par fenêtre vient de la graine. Renvoie le groupe.",
+        "cityTitle": "Ville (plugin)",
+        "cityDescription": "Une ville de rues, d’îlots et de bâtiments dont les hauteurs suivent une carte de densité en bruit (centre haut, bords bas), avec retraits et édicules ; les façades utilisent le shader de façade. Renvoie le groupe. Avec `on` (un terrain), la ville est construite dessus : elle prend sa taille, `flatten` adoucit les pentes, chaque îlot devient une terrasse plane avec murs de soutènement et les rues suivent le sol.",
+        "treeTitle": "Arbre (plugin)",
+        "treeDescription": "Fait pousser un arbre comme composant et le place : chêne, bouleau, pin ou palmier, avec hauteur, aspect noueux (branches courbées) et densité de la couronne ; les mêmes réglages donnent le même arbre et réutilisent son composant. Renvoie l’arbre placé.",
+        "erodeTitle": "Éroder le terrain (plugin)",
+        "erodeDescription": "Érosion hydraulique sur des terrains (terrains de bruit ou de l’outil Terrain) : les gouttes de pluie creusent des ravines dans les pentes et remplissent les vallées de sédiments, puis les pentes raides glissent un peu. Renvoie le nombre de terrains modifiés.",
+        "riverTitle": "Rivière (plugin)",
+        "riverDescription": "Creuse une rivière dans un terrain (terrain de bruit ou de l’outil Terrain) : le chemin le moins coûteux à travers les vallées de `from` à `to` (par défaut : d’un point haut du bord à son point le plus bas), serpentant selon le bruit, avec un lit qui ne fait que descendre et s’élargit vers l’aval, rempli d’eau. Renvoie le groupe avec l’eau.",
+        "roadTitle": "Route (plugin)",
+        "roadDescription": "Construit une route ou un chemin de gravier sur un terrain : entre `from` et `to` elle cherche le chemin sous la pente maximale, avec `along` (ou plusieurs arêtes sélectionnées) elle suit les points. Le terrain est déblayé et remblayé en un lit à pente régulière avec talus ; l’asphalte reçoit une ligne médiane pointillée. Renvoie le groupe avec le revêtement.",
+        "villagesTitle": "Villages (plugin)",
+        "villagesDescription": "Construit des villages sur un terrain (terrain de bruit ou de l’outil Terrain) : des sites sur un sol doux et sec, loin des villes, rivières et routes, une rue principale le long de la courbe de niveau avec des ruelles, des maisons à toit à deux pans ou en croupe sur des socles, et des routes entre les villages (un arbre couvrant minimal, gravier ou asphalte, ou aucune). Renvoie le groupe avec les maisons.",
+        "rebuildTitle": "Reconstruire le terrain (plugin)",
+        "rebuildDescription": "Reconstruit la recette d’un terrain : les hauteurs de départ (les réglages du terrain de bruit ou les hauteurs avant la première étape), tout ce que les étapes ont construit supprimé, puis chaque étape active dans l’ordre. Le modelage avec l’outil Terrain depuis la dernière fois devient une étape à part. Renvoie le nombre d’étapes exécutées.",
+        "stepsReturns": "Liste des étapes",
+        "stepsTitle": "Étapes de construction du terrain (plugin)",
+        "stepsDescription": "Les étapes de construction d’un terrain, dans l’ordre : index, type (erode, river, road, city, villages, scatter, sculpt), si elle est active et sa graine.",
+        "editStepTitle": "Modifier une étape (plugin)",
+        "editStepDescription": "Active ou désactive une étape, lui donne une autre graine ou la supprime – puis reconstruit le terrain. Renvoie le nombre d’étapes exécutées."
       },
       "shader": {
         "label": "Bruit",
@@ -159,7 +191,15 @@
         "jointColor": "Couleur des joints",
         "joint": "Largeur des joints",
         "jitter": "Irrégularité",
-        "variation": "Variation de teinte"
+        "variation": "Variation de teinte",
+        "facadeLabel": "Façade",
+        "windowColor": "Couleur des fenêtres",
+        "litColor": "Couleur des fenêtres éclairées",
+        "litShare": "Fenêtres éclairées",
+        "bay": "Espacement des fenêtres",
+        "windowWidth": "Largeur des fenêtres",
+        "windowHeight": "Hauteur des fenêtres",
+        "shops": "Étage commercial (0/1)"
       },
       "paving": {
         "hint": "Des pierres issues d’un bruit cellulaire (Voronoï) : dallage en pierre naturelle, pavés, dalles ou mur en pierre sèche – chaque pierre à part avec un chanfrein, des joints entre elles, hauteurs et teintes variées.",
@@ -193,6 +233,161 @@
         "noTarget": "Sélectionnez une ou plusieurs faces ou indiquez une zone.",
         "nothing": "Aucune pierre ne tient – réduisez les pierres ou agrandissez la zone.",
         "tooMany": "Trop de pierres (plus de {max}) – agrandissez-les."
+      },
+      "facade": {
+        "title": "Façade",
+        "hint": "Des fenêtres avec cadres et appuis, des balcons, des volets et un rez-de-chaussée avec vitrines et porte – sur les faces de mur sélectionnées ou tous les murs du groupe sélectionné. Chaque fenêtre varie selon la graine.",
+        "onFaces": "Sur {count} face(s) sélectionnée(s)",
+        "onGroup": "Sur tous les murs du groupe sélectionné",
+        "noTarget": "Sélectionnez des faces de mur ou un groupe (p. ex. une boîte).",
+        "nothing": "Aucune fenêtre ne tient – les murs sont trop petits pour la hauteur d’étage et la taille des fenêtres.",
+        "floorHeight": "Hauteur d’étage (m)",
+        "groundFloor": "Rez-de-chaussée (m)",
+        "windowWidth": "Largeur de fenêtre (m)",
+        "windowHeight": "Hauteur de fenêtre (m)",
+        "spacing": "Mur entre (m)",
+        "sill": "Hauteur d’allège (m)",
+        "balconies": "Balcons",
+        "shutters": "Volets",
+        "lit": "Fenêtres éclairées",
+        "gaps": "Fenêtres aveugles",
+        "shops": "Commerces au rez-de-chaussée",
+        "run": "Créer la façade",
+        "done": "Façade créée.",
+        "name": "Façade",
+        "materials": {
+          "frame": "Cadre de fenêtre",
+          "glass": "Vitre",
+          "litGlass": "Vitre éclairée",
+          "shutter": "Volet",
+          "balcony": "Balcon",
+          "railing": "Garde-corps",
+          "door": "Porte d’entrée"
+        }
+      },
+      "city": {
+        "title": "Ville",
+        "hint": "Une grille de rues avec trottoirs, des îlots divisés en parcelles et un bâtiment sur chacune. Les hauteurs suivent une carte de densité de bruit – hautes au centre, basses aux bords, où les maisons reçoivent des toits à deux pans ou en croupe. Certains îlots deviennent des îlots fermés autour d’une cour, d’autres des parcs ; arbres d’alignement et marquages au sol complètent le tout. Les façades sont dessinées par le shader de façade, ainsi même les grandes villes restent légères.",
+        "block": "Taille des îlots (m)",
+        "street": "Largeur des rues (m)",
+        "plot": "Plus grande parcelle (m)",
+        "gap": "Écart entre (m)",
+        "minFloors": "Étages de",
+        "maxFloors": "Étages jusqu’à",
+        "scale": "Carte de densité (m)",
+        "centre": "Centre élevé",
+        "empty": "Parcelles vides",
+        "run": "Créer la ville",
+        "done": "Ville créée : {count} bâtiments et rues.",
+        "name": "Ville",
+        "building": "Bâtiment ({floors} étages)",
+        "nothing": "Aucun bâtiment ne tient – agrandissez les îlots ou les parcelles.",
+        "materials": {
+          "facade": "Façade {number}",
+          "roof": "Toit plat",
+          "asphalt": "Asphalte",
+          "pavement": "Trottoir",
+          "tiles": "Tuiles {number}",
+          "lawn": "Pelouse",
+          "marking": "Marquage routier",
+          "wall": "Mur de soutènement"
+        },
+        "sidewalk": "Trottoir (m)",
+        "roofs": "Toits en pente",
+        "pitchedFloors": "En pente jusqu’à étages",
+        "courts": "Îlots fermés",
+        "parks": "Parcs",
+        "treeSpacing": "Arbres de rue tous les (m)",
+        "markings": "Marquage au sol",
+        "trees": "Arbres",
+        "onTerrain": "Sur le terrain sélectionné – la ville prend sa taille, les îlots deviennent des terrasses avec murs de soutènement, les rues suivent le sol.",
+        "besideModel": "Aucun terrain sélectionné : sur un sol plat à côté du modèle.",
+        "flatten": "Adoucir les pentes"
+      },
+      "tree": {
+        "title": "Faire pousser un arbre",
+        "hint": "Un arbre issu d’une graine : le tronc se ramifie encore et encore, chaque branche courbée par le bruit, des feuilles en touffes aux extrémités. Chêne, bouleau, pin et palmier – chaque graine en fait pousser un autre.",
+        "species": "Espèce",
+        "gnarl": "Noueux",
+        "density": "Densité de la couronne",
+        "run": "Planter l’arbre",
+        "unknownSpecies": "Espèce inconnue « {name} » – permises : {allowed}."
+      },
+      "erosion": {
+        "noTarget": "Sélectionnez d’abord un terrain (un terrain de bruit ou un de l’outil Terrain).",
+        "done": "Terrain érodé."
+      },
+      "routes": {
+        "noTarget": "Créez ou sélectionnez d’abord un terrain (un terrain de bruit ou un de l’outil Terrain)."
+      },
+      "river": {
+        "title": "Rivière",
+        "hint": "Une rivière sur le terrain sélectionné (ou le plus récent) : elle suit les vallées, serpente selon le bruit, creuse un lit qui ne fait que descendre et le remplit d’eau. Sans réglages, elle va d’un point haut du bord jusqu’au point le plus bas du bord.",
+        "width": "Largeur (m)",
+        "depth": "Profondeur (m)",
+        "wiggle": "Méandres",
+        "run": "Creuser la rivière",
+        "done": "Rivière creusée : {length} m.",
+        "name": "Rivière"
+      },
+      "road": {
+        "title": "Route ou chemin",
+        "hint": "Une route sur le terrain qui cherche le chemin le plus doux – taillée dans les collines, remblayée dans les creux, à pente régulière, avec des talus sur les côtés. Une arête sélectionnée : la route cherche son chemin entre ses extrémités ; plusieurs : elle les suit.",
+        "target": {
+          "path": "Le long de {count} arêtes sélectionnées.",
+          "across": "Rien de sélectionné : à travers le terrain."
+        },
+        "surface": "Revêtement",
+        "asphalt": "Asphalte",
+        "gravel": "Chemin de gravier",
+        "width": "Largeur (m)",
+        "maxGrade": "Pente maximale (%)",
+        "run": "Construire la route",
+        "done": "Route construite : {length} m.",
+        "name": "Route",
+        "pathName": "Chemin",
+        "materials": {
+          "gravel": "Gravier"
+        }
+      },
+      "village": {
+        "title": "Villages",
+        "hint": "Des villages sur le terrain sélectionné (ou le plus récent) : sur un sol doux, loin de l’eau et de ce qui est bâti, une rue principale le long de la pente et des ruelles qui montent et descendent, des maisons à côté sur des socles – reliés par des routes qui cherchent le chemin le plus doux en contournant les autres villages.",
+        "count": "Villages",
+        "houses": "Maisons par village",
+        "maxSlope": "Site le plus raide (°)",
+        "roads": "Routes entre eux",
+        "noRoads": "Aucune",
+        "run": "Construire les villages",
+        "done": "Villages construits : {count} maisons.",
+        "nothing": "Pas de place pour un village – moins de villages ou plus petits, ou autoriser un sol plus raide.",
+        "name": "Village {number}",
+        "groupName": "Villages",
+        "house": "Maison",
+        "materials": {
+          "house": "Maison de village {number}"
+        }
+      },
+      "steps": {
+        "title": "Étapes de construction",
+        "hint": "Ce qui a été construit sur ce terrain, dans l’ordre. Désactiver une étape, lui donner une autre graine ou la supprimer – tout est reconstruit sur le terrain ; de même quand les réglages du terrain changent. Le modelage avec l’outil Terrain devient une étape à part.",
+        "kinds": {
+          "erode": "Érosion",
+          "river": "Rivière",
+          "road": "Route",
+          "city": "Ville",
+          "villages": "Villages",
+          "scatter": "Dispersion",
+          "sculpt": "Modelé"
+        },
+        "rebuild": "Reconstruire",
+        "done": "Reconstruit : {count} étapes.",
+        "failed": "Reconstruit : {count} étapes. Plus possible : {steps}.",
+        "reseed": "Autre graine",
+        "remove": "Supprimer l’étape",
+        "none": "Ce terrain n’a pas d’étapes de construction – construisez d’abord une rivière, une route, une ville ou des villages dessus.",
+        "unknown": "Il n’y a pas d’étape {index} – le terrain en a {count}.",
+        "baseChanged": "La grille du terrain n’a plus la taille qu’elle avait à la première étape – les étapes ne peuvent pas être reconstruites."
       }
     }
   }

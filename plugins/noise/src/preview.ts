@@ -1,7 +1,7 @@
 import type * as THREE from 'three';
 import type { Instance } from '../../../src/core/model';
 import { pluginContext } from './runtime';
-import { classify, gridIndex, makeGrid, type TerrainSettings } from './terrain';
+import { classify, gridIndex, makeGrid, type TerrainSettings } from '@shap3d/procgen';
 
 /**
  * The live preview: the noise terrain as a plain three.js mesh among the viewport's helpers, coloured by the

@@ -1,4 +1,4 @@
-import type { TerrainSettings } from './terrain';
+import { type TerrainSettings } from '@shap3d/procgen';
 
 /** ready-made landscapes – they change the noise and keep size, detail and seed */
 export const PRESETS = {

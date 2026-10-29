@@ -4,7 +4,7 @@
  * (scripts/screenshots.ps1 on Windows, scripts/screenshots.sh elsewhere). Start the dev server first (npm run dev in
  * the repository root) and build the package (npm run build), then from plugins/noise:
  *
- *   node docs/screenshots.mjs [--url http://localhost:5173] [--only stones,deform]
+ *   node docs/screenshots.mjs [--url http://localhost:5173] [--only stones,city]
  */
 import { spawnSync } from 'node:child_process';
 
@@ -12,6 +12,14 @@ const SHOTS = [
   { name: 'noise', file: 'demo.js', command: 'noise.open', camera: '58,-62,44', target: '36,30,2' },
   { name: 'noise-scatter', file: 'demo-scatter.js', command: 'noise.scatter', camera: '24,-30,30', target: '24,10,0' },
   { name: 'noise-stones', file: 'demo-paving.js', command: 'noise.paving', camera: '9,-12,8', target: '8.5,2.5,0.5' },
+  { name: 'noise-facade', file: 'demo-facade.js', command: 'noise.city', camera: '0,-44,16', target: '17,5,8.5' },
+  { name: 'noise-city', file: 'demo-city.js', command: 'noise.city', camera: '20,-120,175', target: '110,75,0' },
+  { name: 'noise-hillcity', file: 'demo-hillcity.js', command: 'noise.city', camera: '-45,-95,105', target: '110,85,0' },
+  { name: 'noise-trees', file: 'demo-trees.js', command: 'noise.scatter', camera: '34,-82,22', target: '42,3,6' },
+  { name: 'noise-villages', file: 'demo-villages.js', command: 'noise.city', camera: '150,-120,175', target: '150,105,0' },
+  { name: 'noise-routes', file: 'demo-routes.js', command: 'noise.scatter', camera: '62,-62,72', target: '60,42,0' },
+  { name: 'noise-junctions', file: 'demo-junctions.js', command: 'noise.scatter', camera: '58,-22,50', target: '62,40,0' },
+  { name: 'noise-erosion', file: 'demo-erosion.js', command: 'noise.open', camera: '82,-62,92', target: '82,34,0' },
   { name: 'noise-deform', file: 'demo-deform.js', command: 'noise.deform', camera: '8,-17,9', target: '8.5,0.5,1.8' },
 ];
 
@@ -27,8 +35,14 @@ for (const shot of SHOTS.filter((entry) => !only || only.some((name) => entry.na
   const query = `package=noise&file=/plugins/noise/docs/${shot.file}&command=${shot.command}&camera=${shot.camera}&target=${shot.target}`;
   const [program, scriptArgs] =
     process.platform === 'win32'
-      ? ['powershell', ['-File', '../../scripts/screenshots.ps1', '-Url', url, '-Shots', 'script', '-Name', shot.name, '-Out', 'docs', '-Query', query]]
-      : ['bash', ['../../scripts/screenshots.sh', '--url', url, '--shots', 'script', '--name', shot.name, '--out', 'docs', '--query', query]];
+      ? [
+          'powershell',
+          ['-File', '../../scripts/screenshots.ps1', '-Url', url, '-Shots', 'script', '-Name', shot.name, '-Out', 'docs', '-Query', query],
+        ]
+      : [
+          'bash',
+          ['../../scripts/screenshots.sh', '--url', url, '--shots', 'script', '--name', shot.name, '--out', 'docs', '--query', query],
+        ];
   console.log(`${shot.name}.png`);
   const result = spawnSync(program, scriptArgs, { stdio: 'inherit' });
   if (result.status !== 0) {

@@ -123,11 +123,23 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/noise/dist`.
 ![Noise terrain: an island with water, snow, woods and rocks; the panel with the terrain settings](../../plugins/noise/docs/noise.png)
 
 - **Noise terrains** with a live preview: seed, scale, height, octaves, persistence, lacunarity, warp, island falloff, terraces, water and snow, five presets. They store their height grid in the terrain plugin's format, so the **Terrain tool sculpts them further**.
+- **Trees** grown from seeds (oak, birch, pine, palm) and **erosion** for terrains (raindrops dig gullies and fill valleys), **rivers** dug through the valleys and **roads** that find the gentlest way, with bridges.
 - **Scattering** trees, bushes, rocks or the model's own components – on a terrain, on selected faces or **along selected edges** (an avenue) – gathered by a noise mask.
 - **Stones** from cellular noise: flagstones, cobbles, slabs and dry walls as real stones with joints and chamfers, on selected faces or an area.
-- **Deforming** groups: twist, taper, bend and roughen with 3D noise – boxes become towers, columns or boulders; two material shaders (_Noise_, _Cells_).
-- `s3d.noise`, `s3d.fbm`, `s3d.cellNoise`, `s3d.noiseTerrain`, `s3d.scatter`, `s3d.paving` and `s3d.noiseDeform` for scripts.
+- **Facades** with windows, shutters, balconies and shops on walls or whole groups, and **cities** of streets, blocks and buildings whose heights follow a density map – with pitched roofs, perimeter blocks round courtyards, parks, street trees and road markings – on flat ground or on a terrain, where the blocks become terraces on retaining walls – and **villages** on the gentle slopes, connected by roads.
+- **Deforming** groups: twist, taper, bend and roughen with 3D noise – boxes become towers, columns or boulders; three material shaders (_Noise_, _Cells_, _Facade_).
+- `s3d.noise`, `s3d.fbm`, `s3d.cellNoise`, `s3d.noiseTerrain`, `s3d.scatter`, `s3d.tree`, `s3d.erode`, `s3d.river`, `s3d.road`, `s3d.villages`, `s3d.paving`, `s3d.facade`, `s3d.city` and `s3d.noiseDeform` for scripts.
 
 ![Stones: flagstones, cobbles, slabs and a dry stone wall from cellular noise](../../plugins/noise/docs/noise-stones.png)
 
-More pictures (scattering, deforming) and all options in [its README](../../plugins/noise/README.md).
+![City: towers in the centre, perimeter blocks and pitched roofs at the edges, parks, street trees and road markings](../../plugins/noise/docs/noise-city.png)
+
+![City on a terrain: block terraces on retaining walls, streets following the ground](../../plugins/noise/docs/noise-hillcity.png)
+
+![Villages on the slopes of a valley, connected by gravel roads](../../plugins/noise/docs/noise-villages.png)
+
+![Trees: oaks, birches, pines and palms grown from seeds](../../plugins/noise/docs/noise-trees.png)
+
+![Rivers and roads: a river through the valleys, a road crossing it on bridges and a gravel path](../../plugins/noise/docs/noise-routes.png)
+
+More pictures (erosion, scattering, facades, deforming) and all options in [its README](../../plugins/noise/README.md).

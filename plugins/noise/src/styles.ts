@@ -18,6 +18,9 @@ const CSS = `
 .s3d-nz-slider input[type=range] { width: 100%; min-width: 0; accent-color: var(--s3d-navy-bg); }
 .s3d-nz-slider .s3d-input { height: 1.5rem; padding: 0 0.25rem; font-size: 0.75rem; }
 .s3d-nz-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; }
+.s3d-nz-step { display: flex; align-items: center; gap: 0.25rem; }
+.s3d-nz-step .s3d-check { flex: 1; min-width: 0; }
+.s3d-nz-step.off .s3d-check { opacity: 0.55; }
 .s3d-nz-row .s3d-input { flex: 1; min-width: 0; }
 .s3d-nz-row .s3d-btn { flex: 1; }
 .s3d-nz-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0.5rem; }

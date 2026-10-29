@@ -1,6 +1,6 @@
 import type { PluginMesh } from '../../../src/plugins/types';
 import { cellSite, hash2 } from './noise';
-import { t } from './runtime';
+import { ProcgenError } from './errors';
 
 /**
  * Stones from cellular noise: the Voronoi cells of jittered grid sites become flagstones, cobbles or the stones
@@ -87,7 +87,8 @@ const isConvex = (polygon: Point[]) => {
   return true;
 };
 
-const inside = (polygon: Point[], [x, y]: Point) => {
+/** is a point inside a polygon (even–odd rule) */
+export const inside = (polygon: Point[], [x, y]: Point) => {
   let within = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
     const [xi, yi] = polygon[index],
@@ -129,7 +130,7 @@ export const pavingStones = (outline: Point[], options: PavingOptions): Stone[] 
     minJ = Math.floor(Math.min(...vs) / cellV) - 1,
     maxJ = Math.ceil(Math.max(...vs) / cellV) + 1;
   if ((maxI - minI) * (maxJ - minJ) > MAX_STONES * 2) {
-    throw new Error(t('noise.paving.tooMany', { max: MAX_STONES }));
+    throw new ProcgenError('paving.tooMany', { max: MAX_STONES });
   }
   const stones: Stone[] = [];
   for (let j = minJ; j <= maxJ; j++) {

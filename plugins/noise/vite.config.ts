@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import vue from '@vitejs/plugin-vue';
 import * as vueRuntime from 'vue';
 import { defineConfig, type Plugin } from 'vite';
@@ -53,6 +54,8 @@ const packageFiles = (): Plugin => ({
 export default defineConfig({
   publicDir: false,
   plugins: [appVue(), vue(), packageFiles()],
+  // the generators live in packages/procgen and are bundled into plugin.js – no other plugin is needed at runtime
+  resolve: { alias: { '@shap3d/procgen': fileURLToPath(new URL('../../packages/procgen/src/index.ts', import.meta.url)) } },
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
   build: {
     outDir: 'dist',

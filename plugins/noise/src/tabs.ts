@@ -1,7 +1,7 @@
 import { pluginContext } from './runtime';
 
 /** the panel's tabs – the context menu opens the panel on one of them */
-export const TABS = ['terrain', 'scatter', 'paving', 'deform', 'script'] as const;
+export const TABS = ['terrain', 'scatter', 'paving', 'city', 'deform', 'script'] as const;
 export type PanelTab = (typeof TABS)[number];
 
 export const PANEL = 'noise';

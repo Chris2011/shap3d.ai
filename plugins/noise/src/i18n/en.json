@@ -13,21 +13,25 @@
       },
       "commands": {
         "open": "Noise terrain…",
-        "scatter": "Scatter objects…",
+        "scatter": "Trees and scattering…",
         "paving": "Paving and stones…",
-        "deform": "Deform with noise…"
+        "deform": "Deform with noise…",
+        "city": "Facades and cities…"
       },
       "menu": {
         "edit": "Change noise terrain…",
         "deform": "Deform with noise…",
-        "paving": "Pave with stones…"
+        "paving": "Pave with stones…",
+        "facade": "Facade with windows…",
+        "erode": "Erode terrain"
       },
       "tabs": {
         "terrain": "Terrain",
-        "scatter": "Scatter",
+        "scatter": "Nature",
         "deform": "Deform",
         "script": "Script",
-        "paving": "Stones"
+        "paving": "Stones",
+        "city": "City"
       },
       "terrain": {
         "name": "Noise terrain",
@@ -62,7 +66,9 @@
         "create": "Create terrain",
         "apply": "Apply changes",
         "createNew": "As new terrain",
-        "sculptHint": "The terrain is a terrain like the Terrain tool’s: select it and start “Terrain” to sculpt it further by hand."
+        "sculptHint": "The terrain is a terrain like the Terrain tool’s: select it and start “Terrain” to sculpt it further by hand.",
+        "erosion": "Erosion (drops)",
+        "erosionStrength": "Erosion strength"
       },
       "presets": {
         "hills": "Hills",
@@ -85,7 +91,11 @@
         "conifer": "Conifer",
         "tree": "Broadleaf tree",
         "bush": "Bush",
-        "rock": "Rock"
+        "rock": "Rock",
+        "oak": "Oak",
+        "birch": "Birch",
+        "pine": "Pine",
+        "palm": "Palm"
       },
       "scatter": {
         "name": "Scattered objects",
@@ -111,7 +121,8 @@
         },
         "offset": "Beside the path (m)",
         "alongPath": "Face along the path",
-        "align": "Stand on the face (walls, roofs)"
+        "align": "Stand on the face (walls, roofs)",
+        "title": "Scatter"
       },
       "deform": {
         "hint": "Deforms the selected groups: their faces are split finely, then twisted, tapered or bent along their height and moved in and out by 3D noise – boxes become boulders or twisted towers. On a terrain the noise goes onto its height grid.",
@@ -144,7 +155,28 @@
         "cellReturns": "{ f1, f2, id, site }",
         "cellDescription": "Cellular (Worley/Voronoi) noise at a point: f1 is the distance to the nearest site, f2 to the second nearest (f2 − f1 is 0 on the borders between cells), id a number 0 … 1 per cell, site the nearest site. One cell ≈ one unit.",
         "pavingTitle": "Stones from cell noise (plugin)",
-        "pavingDescription": "Lays stones on the selected faces (any direction – floors and walls) or on an area: Voronoi cells with joints, chamfered tops, varied heights and shades, optional mortar. Returns the group."
+        "pavingDescription": "Lays stones on the selected faces (any direction – floors and walls) or on an area: Voronoi cells with joints, chamfered tops, varied heights and shades, optional mortar. Returns the group.",
+        "facadeTitle": "Facade (plugin)",
+        "facadeDescription": "Lays windows with frames and sills, balconies, shutters and a ground floor with shop windows and a door on walls: the selected faces, a face, or all walls of a group. The variation per window comes from the seed. Returns the group.",
+        "cityTitle": "City (plugin)",
+        "cityDescription": "A city of streets, blocks and buildings whose heights follow a noise density map (high centre, low edges), with setbacks and roof boxes; the facades use the facade shader. Returns the group. With `on` (a terrain) the city is built on it: it takes the terrain's size, `flatten` eases the slopes, every block becomes a level terrace with retaining walls and the streets follow the ground.",
+        "treeTitle": "Tree (plugin)",
+        "treeDescription": "Grows a tree as a component and places it: oak, birch, pine or palm, with height, gnarl (bent branches) and crown density; the same settings grow the same tree and reuse its component. Returns the placed tree.",
+        "erodeTitle": "Erode terrain (plugin)",
+        "erodeDescription": "Hydraulic erosion on terrains (noise terrains or ones from the Terrain tool): raindrops dig gullies into the slopes and fill the valleys with sediment, then steep slopes slide a little. Returns how many terrains changed.",
+        "riverTitle": "River (plugin)",
+        "riverDescription": "Digs a river into a terrain (a noise terrain or one from the Terrain tool): the cheapest way through the valleys from `from` to `to` (default: high on the border to its lowest spot), meandering by noise, with a bed that only falls, wider downstream, filled with water. Returns the group with the water.",
+        "roadTitle": "Road (plugin)",
+        "roadDescription": "Builds a road or gravel path over a terrain: between `from` and `to` it finds the way below the steepest grade, `along` (or several selected edges) it follows the points. The terrain is cut and filled to an evenly graded bed with banks; asphalt gets a dashed centre line. Returns the group with the road surface.",
+        "villagesTitle": "Villages (plugin)",
+        "villagesDescription": "Builds villages on a terrain (a noise terrain or one from the Terrain tool): sites on gentle, dry ground away from cities, rivers and roads, a main street along the contour with side streets, houses with gable or hip roofs on plinths beside them, and roads between the villages (a minimum spanning tree, gravel or asphalt, or none). Returns the group with the houses.",
+        "rebuildTitle": "Build terrain again (plugin)",
+        "rebuildDescription": "Builds a terrain’s recipe again: the heights from the start (the noise terrain’s settings, or the heights before the first step), everything the steps made removed, then every step that is switched on, in order. Sculpting with the Terrain tool since the last time becomes a step of its own. Returns how many steps ran.",
+        "stepsReturns": "List of steps",
+        "stepsTitle": "Terrain building steps (plugin)",
+        "stepsDescription": "The building steps of a terrain, in order: index, kind (erode, river, road, city, villages, scatter, sculpt), whether it is switched on and its seed.",
+        "editStepTitle": "Edit building step (plugin)",
+        "editStepDescription": "Switches a building step on or off, gives it another seed or removes it – then builds the terrain again. Returns how many steps ran."
       },
       "shader": {
         "label": "Noise",
@@ -159,7 +191,15 @@
         "jointColor": "Joint colour",
         "joint": "Joint width",
         "jitter": "Irregularity",
-        "variation": "Shade variation"
+        "variation": "Shade variation",
+        "facadeLabel": "Facade",
+        "windowColor": "Window colour",
+        "litColor": "Lit window colour",
+        "litShare": "Lit windows",
+        "bay": "Window spacing",
+        "windowWidth": "Window width",
+        "windowHeight": "Window height",
+        "shops": "Shop floor (0/1)"
       },
       "paving": {
         "hint": "Stones from cellular noise (Voronoi): flagstones, cobbles, slabs or a dry wall – each a stone of its own with a chamfer, joints between them, heights and shades varied.",
@@ -193,6 +233,161 @@
         "noTarget": "Select one or more faces or give an area.",
         "nothing": "No stone fits – make the stones smaller or the area bigger.",
         "tooMany": "Too many stones (more than {max}) – make them bigger."
+      },
+      "facade": {
+        "title": "Facade",
+        "hint": "Windows with frames and sills, balconies, shutters and a ground floor with shop windows and a door – laid on the selected wall faces or all walls of the selected group. Each window varies by the seed.",
+        "onFaces": "On {count} selected face(s)",
+        "onGroup": "On all walls of the selected group",
+        "noTarget": "Select wall faces or a group (e.g. a box).",
+        "nothing": "No window fits – the walls are too small for the storey height and window size.",
+        "floorHeight": "Storey height (m)",
+        "groundFloor": "Ground floor (m)",
+        "windowWidth": "Window width (m)",
+        "windowHeight": "Window height (m)",
+        "spacing": "Wall between (m)",
+        "sill": "Sill height (m)",
+        "balconies": "Balconies",
+        "shutters": "Shutters",
+        "lit": "Lit windows",
+        "gaps": "Blind windows",
+        "shops": "Shops on the ground floor",
+        "run": "Create facade",
+        "done": "Facade created.",
+        "name": "Facade",
+        "materials": {
+          "frame": "Window frame",
+          "glass": "Window glass",
+          "litGlass": "Window glass lit",
+          "shutter": "Shutter",
+          "balcony": "Balcony",
+          "railing": "Railing",
+          "door": "Front door"
+        }
+      },
+      "city": {
+        "title": "City",
+        "hint": "A grid of streets with pavements, blocks split into plots and a building on each. The heights follow a density map of noise – tall in the middle, low at the edges, where the houses get gable and hip roofs. Some blocks become perimeter blocks round a courtyard, some parks; street trees and road markings finish it off. The facades are drawn by the facade shader, so even large cities stay light.",
+        "block": "Block size (m)",
+        "street": "Street width (m)",
+        "plot": "Largest plot (m)",
+        "gap": "Gap between (m)",
+        "minFloors": "Floors from",
+        "maxFloors": "Floors up to",
+        "scale": "Density map (m)",
+        "centre": "High centre",
+        "empty": "Empty plots",
+        "run": "Create city",
+        "done": "City created: {count} buildings and streets.",
+        "name": "City",
+        "building": "Building ({floors} floors)",
+        "nothing": "No building fits – make the blocks or plots bigger.",
+        "materials": {
+          "facade": "Facade {number}",
+          "roof": "Flat roof",
+          "asphalt": "Asphalt",
+          "pavement": "Pavement",
+          "tiles": "Roof tiles {number}",
+          "lawn": "Lawn",
+          "marking": "Road marking",
+          "wall": "Retaining wall"
+        },
+        "sidewalk": "Pavement (m)",
+        "roofs": "Pitched roofs",
+        "pitchedFloors": "Pitched up to floors",
+        "courts": "Perimeter blocks",
+        "parks": "Parks",
+        "treeSpacing": "Street trees every (m)",
+        "markings": "Road markings",
+        "trees": "Trees",
+        "onTerrain": "On the selected terrain – the city takes its size, blocks become terraces with retaining walls, streets follow the ground.",
+        "besideModel": "No terrain selected: on flat ground beside the model.",
+        "flatten": "Ease the slopes"
+      },
+      "tree": {
+        "title": "Grow a tree",
+        "hint": "A tree grown from a seed: the trunk forks again and again, every branch bent by noise, leaves in clusters at the tips. Oak, birch, pine and palm – each seed grows another one.",
+        "species": "Species",
+        "gnarl": "Gnarl",
+        "density": "Crown density",
+        "run": "Plant tree",
+        "unknownSpecies": "Unknown species “{name}” – allowed: {allowed}."
+      },
+      "erosion": {
+        "noTarget": "Select a terrain first (a noise terrain or one from the Terrain tool).",
+        "done": "Terrain eroded."
+      },
+      "routes": {
+        "noTarget": "Make or select a terrain first (a noise terrain or one from the Terrain tool)."
+      },
+      "river": {
+        "title": "River",
+        "hint": "A river over the selected (or newest) terrain: it keeps to the valleys, meanders by noise, digs a bed that only falls downstream and fills it with water. Without settings it runs from high on the border to the lowest spot of it.",
+        "width": "Width (m)",
+        "depth": "Depth (m)",
+        "wiggle": "Meanders",
+        "run": "Dig river",
+        "done": "River dug: {length} m.",
+        "name": "River"
+      },
+      "road": {
+        "title": "Road or path",
+        "hint": "A road over the terrain that finds the gentlest way – cut into hills, filled in hollows, evenly graded, with banks at its sides. One selected edge: the road finds its way between its ends; several: it follows them.",
+        "target": {
+          "path": "Along {count} selected edges.",
+          "across": "Nothing selected: across the terrain."
+        },
+        "surface": "Surface",
+        "asphalt": "Asphalt",
+        "gravel": "Gravel path",
+        "width": "Width (m)",
+        "maxGrade": "Steepest grade (%)",
+        "run": "Build road",
+        "done": "Road built: {length} m.",
+        "name": "Road",
+        "pathName": "Path",
+        "materials": {
+          "gravel": "Gravel"
+        }
+      },
+      "village": {
+        "title": "Villages",
+        "hint": "Villages on the selected (or newest) terrain: on gentle ground away from water and what is built, a main street along the slope and side streets up and down it, houses beside them on plinths – connected by roads that find the gentlest way around the other villages.",
+        "count": "Villages",
+        "houses": "Houses each",
+        "maxSlope": "Steepest site (°)",
+        "roads": "Roads between",
+        "noRoads": "None",
+        "run": "Build villages",
+        "done": "Villages built: {count} houses.",
+        "nothing": "No place for a village – fewer or smaller villages, or allow steeper ground.",
+        "name": "Village {number}",
+        "groupName": "Villages",
+        "house": "House",
+        "materials": {
+          "house": "Village house {number}"
+        }
+      },
+      "steps": {
+        "title": "Building steps",
+        "hint": "What was built on this terrain, in order. Switch a step off, give it another seed or remove it – everything is built again on the terrain; so it is when the terrain’s settings change. Sculpting with the Terrain tool becomes a step of its own.",
+        "kinds": {
+          "erode": "Erosion",
+          "river": "River",
+          "road": "Road",
+          "city": "City",
+          "villages": "Villages",
+          "scatter": "Scattering",
+          "sculpt": "Sculpted"
+        },
+        "rebuild": "Build again",
+        "done": "Built again: {count} steps.",
+        "failed": "Built again: {count} steps. No longer possible: {steps}.",
+        "reseed": "Another seed",
+        "remove": "Remove step",
+        "none": "This terrain has no building steps – build a river, road, city or villages on it first.",
+        "unknown": "There is no step {index} – the terrain has {count}.",
+        "baseChanged": "The terrain’s grid has a different size than when its first step was built – the steps cannot be built again."
       }
     }
   }

@@ -1,0 +1,27 @@
+{
+  "name": "@shap3d/procgen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Procedural generation for Shap3D.ai plugins: seeded noise, terrains, erosion, rivers and roads, cities, villages, trees, stones and facades – pure functions, bundled into each plugin at build time.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src test",
+    "lint:fix": "oxlint --fix src test",
+    "format": "oxfmt src test",
+    "format:check": "oxfmt --check src test"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "{src,test}/**/*.ts": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "*.{json,md}": "oxfmt --no-error-on-unmatched-pattern"
+  }
+}
