@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-full min-h-0 flex-col">
-    <div class="flex gap-1.5 px-2.5 pt-2 pb-1">
+    <div class="relative flex gap-1.5 px-2.5 pt-2 pb-1">
       <select class="s3d-input w-27.5 flex-none" :value="lang" @change="setLang(($event.target as HTMLSelectElement).value as any)">
         <option value="js">JavaScript</option>
         <option value="json">JSON</option>
@@ -44,12 +44,33 @@
           <option v-for="script in saved" :key="script.name" :value="'my:' + script.name">{{ script.name }}</option>
         </optgroup>
       </select>
-      <button class="s3d-btn primary flex h-7 items-center gap-1.5" :title="t('scriptEditor.runTitle')" :disabled="running" @click="run">
-        <S3dIcon name="play" :size="14" /> {{ t('scriptEditor.run') }}
+      <!-- while the worker builds: a spinner and "building" in the button, a thin bar under the row – nothing moves -->
+      <button
+        class="s3d-btn primary flex h-7 items-center gap-1.5"
+        :title="running ? t('scriptEditor.executing') : t('scriptEditor.runTitle')"
+        :disabled="running"
+        :aria-busy="running"
+        @click="run"
+      >
+        <span
+          v-if="running"
+          class="size-3.5 flex-none animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
+        ></span>
+        <S3dIcon v-else name="play" :size="14" />
+        <!-- both labels in one cell: the button keeps the width of the longer one -->
+        <span class="grid">
+          <span class="[grid-area:1/1]" :class="{ invisible: running }">{{ t('scriptEditor.run') }}</span>
+          <span class="[grid-area:1/1]" :class="{ invisible: !running }">{{ t('scriptEditor.executing') }}</span>
+        </span>
       </button>
-      <span v-if="running" class="text-xs text-ink-2 after:animate-blink after:tracking-[0.125rem] after:text-blue after:content-['●●●']">{{
-        t('scriptEditor.executing')
-      }}</span>
+      <div
+        v-if="running"
+        class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 overflow-hidden"
+        role="progressbar"
+        :aria-label="t('scriptEditor.executing')"
+      >
+        <div class="h-full w-2/5 animate-splash-load bg-blue motion-reduce:animate-none"></div>
+      </div>
     </div>
     <div class="flex items-center gap-2.5 px-2.5 pb-1.5 text-xs">
       <label class="s3d-check"><input type="checkbox" v-model="clearFirst" /> {{ t('scriptEditor.clearFirst') }}</label>
