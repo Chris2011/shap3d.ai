@@ -60,7 +60,7 @@ npm run build
 node scripts/i18n.mjs
 ```
 
-CI runs the first four on every push. For a plugin package or a library, run its own scripts in its folder (`npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build`, and `npm test` where there are tests).
+CI runs the first four on every push. For a plugin package or a library, run its own scripts in its folder (`npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build`, and `npm test` where there are tests) – CI runs them too: the tests and checks of `packages/procgen`, and for every package in `plugins/` its type, lint, format and text checks and its build.
 
 For changes you can see, check them in the running app (`npm run dev`). If screenshots in a README show what you changed, regenerate them ([Regenerating the screenshots](docs/wiki/development.md#regenerating-the-screenshots)).
 
