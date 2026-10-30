@@ -25,6 +25,7 @@
         "autoFix": "↻ Error devuelto – el asistente lo está corrigiendo …",
         "startEnd": "Inicio {start} · fin {end}",
         "writing": "escribiendo …",
+        "building": "creando el modelo …",
         "thinking": "pensando …",
         "stopped": "Detenido.",
         "runAgain": "Ejecutar de nuevo",

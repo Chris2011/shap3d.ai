@@ -529,7 +529,8 @@
       "twoFingers": "Zwei Finger",
       "pinch": "Zwei Finger zusammenziehen",
       "middleDrag": "Mittlere Taste ziehen",
-      "middleButton": "Mittlere Taste"
+      "middleButton": "Mittlere Taste",
+      "building": "Skript baut das Modell …"
     },
     "contextMenu": {
       "editGroup": "Gruppe/Komponente bearbeiten",
@@ -1528,6 +1529,7 @@
       "exampleWithDescription": "Beispiel „{name}“: {description}",
       "example": "Beispiel „{name}“",
       "running": "{language} läuft …",
+      "executing": "Wird gebaut …",
       "invalidSize": "Ungültige Größe: {size}",
       "done": "Fertig – {count} Fläche im Modell. | Fertig – {count} Flächen im Modell.",
       "exampleGroup": "Beispiel",

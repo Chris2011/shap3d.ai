@@ -529,7 +529,8 @@
       "twoFingers": "إصبعان",
       "pinch": "قرص بإصبعين",
       "middleDrag": "سحب بالزر الأوسط",
-      "middleButton": "الزر الأوسط"
+      "middleButton": "الزر الأوسط",
+      "building": "البرنامج النصي يبني النموذج …"
     },
     "contextMenu": {
       "editGroup": "تحرير المجموعة/المكوّن",
@@ -1528,6 +1529,7 @@
       "exampleWithDescription": "المثال «{name}»: {description}",
       "example": "المثال «{name}»",
       "running": "جارٍ تنفيذ {language} …",
+      "executing": "جارٍ الإنشاء …",
       "invalidSize": "حجم غير صالح: {size}",
       "done": "تم – لا أوجه في النموذج. | تم – وجه واحد في النموذج. | تم – وجهان في النموذج. | تم – {count} أوجه في النموذج. | تم – {count} وجهًا في النموذج. | تم – {count} وجه في النموذج.",
       "exampleGroup": "مثال",

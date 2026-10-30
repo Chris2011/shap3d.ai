@@ -1140,6 +1140,8 @@
     },
     "statusbar": {
       "help": "",
+      "building": "",
+      "building#en": "Script is building the model …",
       "help#en": "Help / keyboard shortcuts",
       "inputDeviceTitle": "",
       "inputDeviceTitle#en": "Input device: {device}",
@@ -2918,6 +2920,8 @@
       "example": "",
       "example#en": "Example “{name}”",
       "running": "",
+      "executing#en": "Building …",
+      "executing": "",
       "running#en": "{language} is running …",
       "invalidSize": "",
       "invalidSize#en": "Invalid size: {size}",

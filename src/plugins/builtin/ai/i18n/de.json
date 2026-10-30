@@ -25,6 +25,7 @@
         "autoFix": "↻ Fehler zurückgemeldet – Assistent korrigiert …",
         "startEnd": "Start {start} · Ende {end}",
         "writing": "schreibt …",
+        "building": "Modell wird gebaut …",
         "thinking": "denkt nach …",
         "stopped": "Abgebrochen.",
         "runAgain": "Erneut ausführen",

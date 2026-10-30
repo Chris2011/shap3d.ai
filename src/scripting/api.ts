@@ -10,6 +10,7 @@ import { SURFACE_SHADERS, surfaceShader } from '../engine/surfaceShaders';
 import { buildMesh, parseObj } from './mesh';
 import { MATERIAL_LIBRARY, libraryMaterial } from '../core/materialLibrary';
 import { t } from '../i18n';
+import type { ScriptWorkerRequest, ScriptWorkerResponse } from './scriptWorker';
 
 export type Pt = [number, number, number] | { x: number; y: number; z: number } | THREE.Vector3;
 const toVec = (point: Pt | undefined, def: [number, number, number] = [0, 0, 0]): THREE.Vector3 => {
@@ -1139,6 +1140,70 @@ export const runScript = (editor: Editor, code: string, label = 'undo.script'): 
       error: (error?.message ?? String(error)) + (error?.stack ? '\n' + String(error.stack).split('\n').slice(1, 3).join('\n') : ''),
       durationMs: performance.now() - startedAt,
     };
+  }
+};
+
+/**
+ * Runs a script in a Web Worker (`scriptWorker.ts`), so even huge scripts can't
+ * freeze the browser: the heavy geometry building happens off the main thread and
+ * only the finished model travels back as one undo step. Meanwhile the status bar
+ * shows `statusbar.building`, so the user knows something is being built.
+ *
+ * Falls back to the synchronous `runScript` when the script needs something only
+ * the main thread has (e.g. a plugin's s3d extension) or when no worker is
+ * available; inside an open group context the script has to build into the live
+ * model anyway.
+ */
+export const runScriptAsync = async (editor: Editor, code: string, label = 'undo.script'): Promise<RunResult> => {
+  if (editor.activePath.length) {
+    return runScript(editor, code, label);
+  }
+  // visible while the worker builds – nothing else happens on the main thread, so the run would look "dead"
+  const statusBefore = editor.ui.status;
+  editor.ui.status = t('statusbar.building');
+  try {
+    return await runScriptInWorker(editor, code, label);
+  } finally {
+    editor.ui.status = statusBefore;
+  }
+};
+
+/** Worker part of `runScriptAsync` (its own function so the status handling around it stays short). */
+const runScriptInWorker = async (editor: Editor, code: string, label: string): Promise<RunResult> => {
+  const seed = editor.model.toJSON();
+  try {
+    const worker = new Worker(new URL('./scriptWorker.ts', import.meta.url), { type: 'module' });
+    try {
+      const response = await new Promise<ScriptWorkerResponse>((resolve, reject) => {
+        worker.onerror = (event) => reject(new Error(event.message));
+        worker.onmessage = (event) => resolve(event.data as ScriptWorkerResponse);
+        worker.postMessage({ seed, code } satisfies ScriptWorkerRequest);
+      });
+      if (!response.ok) {
+        // plugin-only s3d extension or similar → retry once on the main thread (same result, just blocking)
+        if (response.retriable) {
+          return runScript(editor, code, label);
+        }
+        return { ok: false, logs: response.logs ?? [], error: response.error, durationMs: response.durationMs };
+      }
+      // the built model lands as one undo step – commit() snapshots the old model first
+      editor.commit(label, () => editor.restoreModel(response.model!));
+      // camera commands of the script (recorded in the worker) apply to the restored model
+      const view = response.view;
+      if (view?.kind === 'view') {
+        editor.viewer.rig.standardView(view.name, editor.model.bounds());
+      } else if (view?.kind === 'state') {
+        editor.viewer.rig.applyState(view.state);
+      } else if (view?.kind === 'zoom') {
+        editor.zoomExtents(false);
+      }
+      return { ok: true, logs: response.logs ?? [], durationMs: response.durationMs };
+    } finally {
+      worker.terminate();
+    }
+  } catch {
+    // worker unavailable (CSP, old webview …) → the classic synchronous path
+    return runScript(editor, code, label);
   }
 };
 

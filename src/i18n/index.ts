@@ -135,7 +135,9 @@ export const addLanguage = (info: LanguageInfo, messages?: MessageTree | FlatMes
 
 /** the user's choice ('' = not chosen yet → browser language) */
 const chosen = useStorage<string>('s3d:language', '');
-const parameters = new URLSearchParams(location.search);
+/** workers have no location – the URL switches (?lang=, ?shot=) then simply don't apply */
+const parameters =
+  typeof location === 'undefined' || !('search' in location) ? new URLSearchParams() : new URLSearchParams(location.search);
 /** ?lang=de wins (handy for testing); the README screenshots show German unless a scene asks for another language */
 const forced = parameters.get('lang') ?? (parameters.has('shot') ? 'de' : null);
 
@@ -162,7 +164,7 @@ export const language = computed(() => {
   if (chosen.value) {
     return hasLanguage(chosen.value) ? chosen.value : SOURCE_LANGUAGE;
   }
-  return bestMatch(navigator.languages ?? [navigator.language]) ?? SOURCE_LANGUAGE;
+  return bestMatch(typeof navigator === 'undefined' ? [] : (navigator.languages ?? [navigator.language])) ?? SOURCE_LANGUAGE;
 });
 export const languageInfo = computed(() => languages.find((entry) => entry.code === language.value) ?? languages[0]);
 /** the code the user picked ('' = automatic) */
@@ -173,6 +175,9 @@ export const setLanguage = (code: string) => {
 };
 
 watchEffect(() => {
+  if (typeof document === 'undefined') {
+    return; // workers have no DOM
+  }
   document.documentElement.lang = language.value;
   document.documentElement.dir = languageInfo.value.dir ?? 'ltr';
 });

@@ -517,6 +517,7 @@
     },
     "statusbar": {
       "help": "Help / keyboard shortcuts",
+      "building": "Script is building the model …",
       "inputDeviceTitle": "Input device: {device}",
       "mouse": "Mouse",
       "trackpad": "Trackpad",
@@ -1528,6 +1529,7 @@
       "exampleWithDescription": "Example “{name}”: {description}",
       "example": "Example “{name}”",
       "running": "{language} is running …",
+      "executing": "Building …",
       "invalidSize": "Invalid size: {size}",
       "done": "Done – {count} face in the model. | Done – {count} faces in the model.",
       "exampleGroup": "Example",
