@@ -13,21 +13,23 @@ It is **not a plugin** and nothing loads it at runtime. A plugin imports it and 
 
 ## Modules
 
-| Module                  | What it does                                                                                                                                        |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `noise.ts`              | Seeded random numbers, simplex noise 2D/3D, fBm, ridged, billow, domain warp, terraces, height fields, cellular (Voronoi) noise                     |
-| `terrain.ts`            | Height grids in the format of the built-in terrain plugin (`pluginData.terrain`): sampling, surfaces, the mesh with walls and water                 |
-| `erosion.ts`            | Hydraulic (raindrops) and thermal erosion on a height grid                                                                                          |
-| `routes.ts`             | Route search over a grid, rivers (a bed that only falls, a water ribbon) and roads (cut and fill, bridges, markings), courses that others keep free |
-| `junctions.ts`          | Where a new road meets the roads built before: ends cut along their edges, crossings split, going on from a road's end, rounded corners             |
-| `city.ts`               | A city plan: streets, blocks, plots, buildings from a density map, pitched roofs, perimeter blocks, parks, trees, markings                          |
-| `cityground.ts`         | A city on a terrain: eased slopes, block terraces, retaining walls, the street surface                                                              |
-| `village.ts`            | Village sites, streets along the contour, houses beside them, the network of roads between them                                                     |
-| `facade.ts`             | Windows, balconies, shutters and shops on a wall                                                                                                    |
-| `tree.ts`               | Grown trees: oak, birch, pine, palm                                                                                                                 |
-| `paving.ts`             | Stones from Voronoi cells, cut to an outline                                                                                                        |
-| `mesh.ts`, `builder.ts` | Triangle meshes (refine, displace, bend, icospheres, cones); boxes, prisms, pitched roofs and faces in a plane                                      |
-| `errors.ts`             | `ProcgenError`                                                                                                                                      |
+| Module                  | What it does                                                                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `noise.ts`              | Seeded random numbers, simplex noise 2D/3D, fBm, ridged, billow, domain warp, terraces, height fields, cellular (Voronoi) noise                                       |
+| `terrain.ts`            | Height grids in the format of the built-in terrain plugin (`pluginData.terrain`): sampling, surfaces, the mesh with walls and water                                   |
+| `erosion.ts`            | Hydraulic (raindrops) and thermal erosion on a height grid                                                                                                            |
+| `routes.ts`             | Route search over a grid, rivers (a bed that only falls, a water ribbon) and roads (cut and fill, bridges, markings), courses that others keep free                   |
+| `floorplan.ts`          | Floor plans from a seed: rooms apart from each other, linked by corridors (spanning tree and loops), start and end room                                               |
+| `blockout.ts`           | Rooms, corridors and stairs on a grid of cells: floors, walls and ceilings, openings where corridors run into rooms, doorways, rooms on floors above each other       |
+| `junctions.ts`          | Where a new road meets the roads built before: ends cut along their edges, crossings split, going on from a road's end, rounded corners, the approach to a road's end |
+| `city.ts`               | A city plan: streets (also as lines for roads to meet), blocks, plots, buildings from a density map, pitched roofs, perimeter blocks, parks, trees, markings          |
+| `cityground.ts`         | A city on a terrain: eased slopes, block terraces, retaining walls, the street surface                                                                                |
+| `village.ts`            | Village sites, streets along the contour, houses beside them, the network of roads between them                                                                       |
+| `facade.ts`             | Windows, balconies, shutters and shops on a wall                                                                                                                      |
+| `tree.ts`               | Grown trees: oak, birch, pine, palm                                                                                                                                   |
+| `paving.ts`             | Stones from Voronoi cells, cut to an outline                                                                                                                          |
+| `mesh.ts`, `builder.ts` | Triangle meshes (refine, displace, bend, icospheres, cones); boxes, prisms, pitched roofs and faces in a plane                                                        |
+| `errors.ts`             | `ProcgenError`                                                                                                                                                        |
 
 Everything is exported from `src/index.ts`.
 
@@ -57,7 +59,7 @@ npm install
 npm test
 ```
 
-`npm install` brings [Vitest](https://vitest.dev/) – the only dependency, for the tests; TypeScript, oxlint and oxfmt come from the repository root (`npm ci` there first). `npm test` runs the tests in `test/` (determinism, a river bed only falls, routes reach their goal, roads end at the edge of the road they run into, buildings and houses keep apart, the terrain under a city lies below its surfaces …), `npm run typecheck`, `npm run lint` and `npm run format` check `src/` and `test/`.
+`npm install` brings [Vitest](https://vitest.dev/) – the only dependency, for the tests; TypeScript, oxlint and oxfmt come from the repository root (`npm ci` there first). `npm test` runs the tests in `test/` (determinism, a river bed only falls, routes reach their goal, roads end at the edge of the road they run into, a blockout closes its rooms and opens them to corridors, buildings and houses keep apart, the terrain under a city lies below its surfaces …), `npm run typecheck`, `npm run lint` and `npm run format` check `src/` and `test/`.
 
 ## License
 

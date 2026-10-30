@@ -124,6 +124,34 @@ describe('roadOn', () => {
     expect(sampleGrid(road.grid, middle[0], middle[1]).height).toBeLessThan(surface);
   });
 
+  it('turns in a hairpin tighter than it is wide without folding over', () => {
+    const grid = testGrid({ height: 0.5 });
+    // up, across and back down – two sharp corners 8 m apart, rounded tighter than the 6 m road is wide
+    const points: Point2[] = [
+      [30, 10],
+      [30, 42],
+      [38, 42],
+      [38, 10],
+    ];
+    const road = roadOn(grid, { ...ROAD_DEFAULTS, width: 6, markings: false }, points, MATERIALS);
+    expectValidMesh(road.surface);
+    // every face of the top (on flat ground all at the highest level – below it lie the deck's sides and underside)
+    // faces up, counter-clockwise from above; a folded band would show faces turned over
+    const top = Math.max(...road.surface.vertices.map(([, , z]) => z));
+    const turned = road.surface.faces.filter((face) => {
+      const corners = face.map((corner) => road.surface.vertices[corner]);
+      if (corners.some(([, , z]) => z < top - 0.05)) {
+        return false;
+      }
+      const area = corners.reduce((sum, [x, y], index) => {
+        const [nx, ny] = corners[(index + 1) % corners.length];
+        return sum + (x * ny - nx * y);
+      }, 0);
+      return area < -1e-6;
+    });
+    expect(turned).toHaveLength(0);
+  });
+
   it('follows the given points when there are more than two', () => {
     const grid = testGrid();
     const points: Point2[] = [

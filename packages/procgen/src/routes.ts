@@ -1,5 +1,5 @@
 import type { PluginMesh } from '../../../src/plugins/types';
-import { carriagewayOf, leadIn, meetRoads, type JunctionCorner, type RoadCourse } from './junctions';
+import { approachOf, carriagewayOf, leadIn, meetRoads, type JunctionCorner, type RoadCourse } from './junctions';
 import { fractal } from './noise';
 import { gridIndex, gridRange, sampleGrid, type TerrainGrid } from './terrain';
 
@@ -414,7 +414,9 @@ const ribbon = (
       mesh.faceMaterials!.push(material);
     }
   };
-  const previous: [Point2, Point2] = [line[0], line[0]];
+  // the right and left edge (left of the way along the line), kept on the terrain – a river's mouth or a road's end
+  // does not stick out over its border – and moved back onto cut ends
+  const edges: [Point2[], Point2[]] = [[], []];
   for (let index = 0; index < line.length; index++) {
     const [px, py] = line[Math.max(0, index - 1)],
       [nx, ny] = line[Math.min(line.length - 1, index + 1)];
@@ -423,26 +425,61 @@ const ribbon = (
       alongY = (ny - py) / length;
     const [x, y] = line[index];
     const half = halfWidths[index];
-    // right and left edge (left of the way along the line); on the inside of a bend tighter than the band is
-    // wide an edge would run backwards and fold the band over – there it waits where it was
-    const sides = [-1, 1].map((side, which) => {
+    [-1, 1].forEach((side, which) => {
       const cut = index === 0 ? ends.start : index === line.length - 1 ? ends.end : undefined;
       if (cut) {
-        previous[which] = cut[which];
-        return cut[which];
+        edges[which].push(cut[which]);
+        return;
       }
-      // kept on the terrain – a river's mouth or a road's end does not stick out over its border
-      let edge: Point2 = [clamp(x - alongY * half * side, 0, bounds[0]), clamp(y + alongX * half * side, 0, bounds[1])];
-      edge = behind(behind(edge, ends.start, [-alongX, -alongY]), ends.end, [alongX, alongY]);
-      const [lastX, lastY] = previous[which];
-      if (index > 0 && (edge[0] - lastX) * alongX + (edge[1] - lastY) * alongY < 0) {
-        return previous[which];
-      }
-      previous[which] = edge;
-      return edge;
+      const edge: Point2 = [clamp(x - alongY * half * side, 0, bounds[0]), clamp(y + alongX * half * side, 0, bounds[1])];
+      edges[which].push(behind(behind(edge, ends.start, [-alongX, -alongY]), ends.end, [alongX, alongY]));
     });
-    const tilt = ends.tilts?.[index] ?? 0;
-    mesh.vertices.push([sides[0][0], sides[0][1], levels[index] + tilt], [sides[1][0], sides[1][1], levels[index] - tilt]);
+  }
+  // on the inside of a bend tighter than the band is wide (a hairpin) an edge runs back and crosses itself: the
+  // loop is cut out – its points all go to where the edge crosses, so the band turns around that point without folding
+  const crossing = (a: Point2, b: Point2, c: Point2, d: Point2): Point2 | null => {
+    const rx = b[0] - a[0],
+      ry = b[1] - a[1],
+      sx = d[0] - c[0],
+      sy = d[1] - c[1];
+    const denominator = rx * sy - ry * sx;
+    if (Math.abs(denominator) < 1e-12) {
+      return null;
+    }
+    const t = ((c[0] - a[0]) * sy - (c[1] - a[1]) * sx) / denominator,
+      u = ((c[0] - a[0]) * ry - (c[1] - a[1]) * rx) / denominator;
+    return t > 1e-9 && t < 1 - 1e-9 && u > 1e-9 && u < 1 - 1e-9 ? [a[0] + rx * t, a[1] + ry * t] : null;
+  };
+  // the height each edge point is drawn at – points gathered at a crossing share one, so no sliver stands up there
+  const heights = [-1, 1].map((sign) => levels.map((level, index) => level - sign * (ends.tilts?.[index] ?? 0)));
+  edges.forEach((edge, which) => {
+    for (let index = 1; index < edge.length - 2; index++) {
+      // a loop is never much longer than the band is wide – look that far ahead along the line
+      let reach = index + 2;
+      let travelled = 0;
+      while (reach < edge.length - 1 && travelled < halfWidths[index] * 8 + 4) {
+        travelled += Math.hypot(line[reach][0] - line[reach - 1][0], line[reach][1] - line[reach - 1][1]);
+        reach++;
+      }
+      for (let later = reach; later >= index + 2; later--) {
+        const point = crossing(edge[index - 1], edge[index], edge[later - 1], edge[later]);
+        if (point) {
+          const shared = heights[which].slice(index, later).reduce((sum, value) => sum + value, 0) / (later - index);
+          for (let inside = index; inside < later; inside++) {
+            edge[inside] = point;
+            heights[which][inside] = shared;
+          }
+          index = later - 1;
+          break;
+        }
+      }
+    }
+  });
+  for (let index = 0; index < line.length; index++) {
+    mesh.vertices.push(
+      [edges[0][index][0], edges[0][index][1], heights[0][index]],
+      [edges[1][index][0], edges[1][index][1], heights[1][index]],
+    );
   }
   for (let index = 0; index < line.length - 1; index++) {
     const right = start + index * 2,
@@ -631,24 +668,31 @@ export const roadOn = (
   const steepest = Math.max(0.5, options.maxGrade) / 100;
   const cell = Math.min(grid.width / grid.columns, grid.depth / grid.rows);
   const half = options.width / 2;
-  const route =
+  const ways = existing.map((course) => carriagewayOf(course, (x, y) => sampleGrid(grid, x, y).height));
+  // to or from another road's end the way is searched from a little out along that road – it comes in straight
+  const [startApproach, endApproach] =
+    points.length > 2 ? [null, null] : [approachOf(points[0], ways, options.width), approachOf(points[1], ways, options.width)];
+  const found =
     points.length > 2
       ? points
       : findRoute(
           grid,
-          points[0],
-          points[1],
+          startApproach ?? points[0],
+          endApproach ?? points[1],
           (fromIndex, toIndex, length) => {
             const grade = Math.abs(grid.heights[toIndex] - grid.heights[fromIndex]) / length;
             const wet = (grid.water != null && grid.heights[toIndex] < grid.water) || inRiver[toIndex] ? 20 : 0;
-            return length * (1 + 4 * (grade / steepest) ** 2 + (grade > steepest ? 40 : 0) + wet + 0.3 * wiggleAt(toIndex));
+            // along the terrain's border the road would hang over it (and fold in a bend there) – it keeps off
+            const [x, y] = position(toIndex);
+            const border = Math.min(x, y, grid.width - x, grid.depth - y) < half + 2 ? 20 : 0;
+            return length * (1 + 4 * (grade / steepest) ** 2 + (grade > steepest ? 40 : 0) + wet + border + 0.3 * wiggleAt(toIndex));
           },
           // steps a little longer than the road is wide – no bend gets tighter than the road can take
           Math.max(1, Math.round((options.width * 1.2) / cell)),
         );
+  const route = [...(startApproach ? [points[0]] : []), ...found, ...(endApproach ? [points[1]] : [])];
   // a found route zigzags from grid point to grid point – straightened first, then rounded into wide bends
   const straight = points.length > 2 ? route : simplifyLine(route, cell);
-  const ways = existing.map((course) => carriagewayOf(course, (x, y) => sampleGrid(grid, x, y).height));
   // going on from another road's end, it leaves that road straight and bends after
   let line = resample(smoothLine(leadIn(straight, ways, options.width), 5), Math.min(cell, 1));
   // the road's heights: the ground along it, evened out over about ten metres, above any water

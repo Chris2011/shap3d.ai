@@ -113,6 +113,35 @@ const WING = 10;
 /** a hair's breadth between touching buildings, so their walls do not flicker */
 const TOUCH = 0.05;
 
+/**
+ * The middle lines of a city's streets – the same grid as `planCity` lays its blocks on: between the columns from the
+ * city's front edge to its back, between the rows from side to side. Each runs from edge to edge, so a road built
+ * later can go on from a street's end or cross it (city coordinates, metres).
+ */
+export const cityStreetLines = (options: Pick<CityOptions, 'width' | 'depth' | 'block' | 'street'>): [number, number][][] => {
+  const pitch = options.block + options.street;
+  const columns = Math.max(1, Math.floor((options.width + options.street) / pitch)),
+    rows = Math.max(1, Math.floor((options.depth + options.street) / pitch));
+  const blockWidth = (options.width - (columns - 1) * options.street) / columns,
+    blockDepth = (options.depth - (rows - 1) * options.street) / rows;
+  const lines: [number, number][][] = [];
+  for (let column = 1; column < columns; column++) {
+    const x = column * (blockWidth + options.street) - options.street / 2;
+    lines.push([
+      [x, 0],
+      [x, options.depth],
+    ]);
+  }
+  for (let row = 1; row < rows; row++) {
+    const y = row * (blockDepth + options.street) - options.street / 2;
+    lines.push([
+      [0, y],
+      [options.width, y],
+    ]);
+  }
+  return lines;
+};
+
 /** the streets' blocks, the buildings, parks and trees on them and the road markings */
 export const planCity = (options: CityOptions, styles: number, roofStyles = 1) => {
   const random = randomGenerator(options.seed + 0.25);

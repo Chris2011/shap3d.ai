@@ -86,6 +86,20 @@ const endNear = (existing: Carriageway[], [x, y]: Point2) => {
 };
 
 /**
+ * Where a road's way is searched to when it starts or ends at another road's end: a little out along that road's
+ * direction, so the way found comes in straight – the end itself is added after (null: not at a road's end).
+ */
+export const approachOf = (end: Point2, existing: Carriageway[], width: number): Point2 | null => {
+  const near = endNear(existing, end);
+  if (!near) {
+    return null;
+  }
+  const [x, y] = near.way.line[near.wayEnd];
+  const lead = Math.max(4, width * 1.5) * 2;
+  return [x + near.out[0] * lead, y + near.out[1] * lead];
+};
+
+/**
  * A road's rough line (before it is rounded) that starts or ends at another road's end: moved onto that end, with
  * a point a few metres on in the way the other road ran out – so it leaves the old road straight and bends after.
  */
