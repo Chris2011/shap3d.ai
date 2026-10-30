@@ -29,6 +29,8 @@ export interface ApiEntry {
   returns?: string;
   /** `returns` untranslated (message key or plugin text) – for code completion */
   returnsKey?: string;
+  /** the plugin that added the call (`script.extend`) – none for the app's own */
+  plugin?: string;
 }
 
 // i18n-ignore-next-line
@@ -456,6 +458,9 @@ const ENTRIES: ApiEntry[] = [
 export const API_CATALOG = shallowReactive<ApiEntry[]>(
   ENTRIES.map((entry) => copyLocalized(Object.assign(entry, { returnsKey: entry.returns }), entry, ['title', 'desc', 'returns'])),
 );
+
+/** the calls plugins added (`script.extend`), whatever category they are in */
+export const pluginEntries = () => API_CATALOG.filter((entry) => entry.plugin);
 
 /** Plain-text version (one line per call) – for the AI prompt and as fallback help. */
 export const catalogText = (cats: ApiCategory[] = API_CATEGORIES): string => {

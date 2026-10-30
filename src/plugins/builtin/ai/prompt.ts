@@ -1,6 +1,6 @@
 import { EXAMPLES } from '../../../scripting/examples';
 import { TEXTURES } from '../../../core/textures';
-import { catalogText } from '../../../scripting/catalog';
+import { catalogText, pluginEntries } from '../../../scripting/catalog';
 import { MATERIAL_LIBRARY, MATERIAL_CATEGORIES } from '../../../core/materialLibrary';
 
 /** Full reference of the `s3d` scripting API – generated from the catalog (src/scripting/catalog.ts), built on demand so commands added by plugins are included. */
@@ -12,7 +12,7 @@ export const suReference = () => `
 - Jeder Skriptlauf ist EIN Rückgängig-Schritt.
 
 ${catalogText()}
-
+${pluginExamples()}
 ## Wichtige Hinweise
 - Körper-Funktionen (box, cylinder, cone, pyramid, prism, sphere, dome, tube, torus, wedge, stairs …) geben eine Gruppe zurück: .move() .rotate() .copy() .material() sind verkettbar.
 - Mit { group: false } landen box/cylinder/cylinderBetween direkt in der aktuellen Gruppe (sinnvoll innerhalb von s3d.group).
@@ -29,6 +29,23 @@ ${MATERIAL_CATEGORIES.map(
 ).join('\n')}
 - Texturen für eigene Materialien (s3d.material(name, '#hex', { texture })): ${Object.keys(TEXTURES).join(', ')}.
 `;
+
+/**
+ * How the calls of the active plugins are used – their own examples, built on demand like the reference, so the
+ * assistant knows every plugin that extends the script editor (they are in the reference above by category too).
+ */
+const pluginExamples = () => {
+  const entries = pluginEntries().filter((entry) => entry.example.trim());
+  return entries.length
+    ? `\n## Beispiele der Plugin-Funktionen\n${entries.map((entry) => `### ${entry.signature}\n\`\`\`js\n${entry.example.trim()}\n\`\`\``).join('\n\n')}\n`
+    : '';
+};
+
+/** the plugins' calls for the short prompt: one line each */
+const pluginSignatures = () => {
+  const entries = pluginEntries();
+  return entries.length ? `\nFunktionen der Plugins:\n${entries.map((entry) => `${entry.signature} – ${entry.desc}`).join('\n')}\n` : '';
+};
 
 /** Realistic default dimensions so objects come out in plausible sizes. */
 const SIZES = `Tisch: 0,75 m hoch, Platte 1,6 × 0,9 m · Stuhl: Sitz 0,45 m hoch, 0,45 × 0,45 m, Lehne bis 0,9 m · Tür: 0,9 × 2,1 m · Fenster: 1,2 × 1,2 m, Brüstung 0,9 m · Raumhöhe 2,5–2,8 m · Wand 0,2–0,3 m dick · Treppenstufe 17,5 cm hoch, 28 cm tief · Bett 2 × 1,4 m, 0,45 m hoch · Sofa 2,2 × 0,9 m, Sitz 0,45 m · Baum 4–8 m · Auto 4,5 × 1,8 × 1,5 m · Person 1,75 m.`;
@@ -61,7 +78,7 @@ s3d.cone([x,y,z], radius, höhe, { material })  s3d.pyramid([x,y,z], kante, höh
 s3d.tube([x,y,z], rAußen, rInnen, höhe, { material })  s3d.torus(mitte, R, r, { material })  s3d.dome([x,y,z], radius, { material })
 Fertige Materialien: Holz, Eiche hell, Nussbaum, Ziegel, Beton, Naturstein, Marmor, Glas, Stahl, Gold, Kupfer, Gras, Wasser, Stoff grau, Leder braun, Weiß, Schwarz, Rot, Grün, Blau, Gelb.
 s3d.group(name, () => { … }) → .move([dx,dy,dz]) .rotate(grad) .copy([dx,dy,dz])
-
+${pluginSignatures()}
 Beispiel – Nutzer: „eine grüne Laterne“:
 \`\`\`js
 s3d.material('Grün', '#2f6b3a');

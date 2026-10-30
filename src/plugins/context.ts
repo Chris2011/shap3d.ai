@@ -220,6 +220,7 @@ export const createPluginContext = (
         };
         const entry = {
           id: qualified(name),
+          plugin: plugin.id,
           category: info.category ?? 'Plugins',
           title: '',
           returns: info.returns,
