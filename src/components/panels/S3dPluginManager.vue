@@ -48,8 +48,9 @@
     </p>
     <p v-if="updateHints[plugin.id]" class="mt-1 text-xs font-semibold text-navy">{{ updateHints[plugin.id] }}</p>
     <p v-if="plugin.package" class="mt-0.5 text-[0.6875rem] text-ink-2">
-      {{ t('pluginManager.package', { name: plugin.package.name }) }} · {{ t('pluginManager.files', { count: plugin.package.files }) }},
-      {{ megabytes(plugin.package.bytes)
+      {{ t('pluginManager.package', { name: plugin.package.name })
+      }}<template v-if="plugin.package.bundle"> · {{ t('pluginManager.fromBundle', { name: plugin.package.bundle }) }}</template> ·
+      {{ t('pluginManager.files', { count: plugin.package.files }) }}, {{ megabytes(plugin.package.bytes)
       }}<template v-if="plugin.package.license"> · {{ t('pluginManager.license', { license: plugin.package.license }) }}</template>
     </p>
     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
@@ -101,7 +102,7 @@ import { usePluginFolders } from '../../composables/usePluginFolders';
 import {
   plugins,
   installPlugin,
-  installPluginPackage,
+  installPluginPackages,
   setPluginEnabled,
   removePlugin,
   pluginSource,
@@ -154,8 +155,22 @@ const install = async (code: string | File[] | (() => Promise<{ id: string; name
   busy.value = true;
   message.value = null;
   try {
-    const plugin =
-      typeof code === 'string' ? await installPlugin(code) : typeof code === 'function' ? await code() : await installPluginPackage(code);
+    if (Array.isArray(code)) {
+      // a folder may hold a bundle of several plugins
+      const installed = await installPluginPackages(code);
+      if (installed.length > 1) {
+        const failed = installed.find((plugin) => plugins.find((candidate) => candidate.id === plugin.id)?.error);
+        message.value = {
+          text: t('pluginManager.installedBundle', {
+            names: installed.map((plugin) => localize(plugin.name) + (plugin.kept ? ` (${t('pluginManager.keptNewer')})` : '')).join(', '),
+          }),
+          error: !!failed,
+        };
+        return;
+      }
+      code = async () => installed[0];
+    }
+    const plugin = typeof code === 'string' ? await installPlugin(code) : await code();
     if (!plugin) {
       return;
     } // folder picker cancelled

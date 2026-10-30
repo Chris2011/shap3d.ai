@@ -399,10 +399,23 @@ export const cloneTerrain = (terrain: TerrainData): TerrainData => ({
 /** id of the terrain plugin – its data lives in `definition.pluginData.terrain` */
 export const TERRAIN_PLUGIN = 'terrain';
 
+/** the height grid as a data format, so other plugins can read and write it (version 1: terrainToJSON) */
+export const TERRAIN_FORMAT = { id: 'terrain.grid', key: TERRAIN_PLUGIN, version: 1, label: 'terrain.plugin.name' };
+
+/** how the grid is stored – through the plugin context while the plugin runs, so other plugins hear of changes */
+let writeGrid = (definition: Definition, json: unknown) => {
+  definition.pluginData = { ...definition.pluginData, [TERRAIN_PLUGIN]: json };
+};
+export const useGridWriter = (writer: (definition: Definition, json: unknown) => void) => {
+  const previous = writeGrid;
+  writeGrid = writer;
+  return () => {
+    writeGrid = previous;
+  };
+};
+
 /** The height grid stored on a group (made by the terrain plugin), or undefined. */
 export const terrainOf = (definition: Definition): TerrainData | undefined => terrainFromJSON(definition.pluginData?.[TERRAIN_PLUGIN]);
 
 /** Stores the height grid on a group so it can be sculpted again later (saved with the model). */
-export const setTerrain = (definition: Definition, terrain: TerrainData) => {
-  definition.pluginData = { ...definition.pluginData, [TERRAIN_PLUGIN]: terrainToJSON(terrain) };
-};
+export const setTerrain = (definition: Definition, terrain: TerrainData) => writeGrid(definition, terrainToJSON(terrain));

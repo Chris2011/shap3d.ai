@@ -21,9 +21,12 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
   - LayOut – [overview](plugin-packages.md#the-layout-plugin) · [README](../../plugins/layout/README.md)
   - Room planner – [overview](plugin-packages.md#the-room-planner-plugin) · [README](../../plugins/roomplanner/README.md)
   - Shader materials – [overview](plugin-packages.md#the-shader-materials-plugin) · [README](../../plugins/shaders/README.md)
+  - Noise – [overview](plugin-packages.md#the-noise-plugin) · [README](../../plugins/noise/README.md)
+  - Level editor – [overview](plugin-packages.md#the-level-editor-plugin) · [README](../../plugins/level/README.md)
 
 ## Working on the project
 
+- [Contributing](../../CONTRIBUTING.md) – where a change belongs, code style, texts and languages, versions and changelogs, checks before a pull request
 - [Development](development.md) – linting and formatting, the pre-commit hook, releases, project structure, regenerating the screenshots
 - [Credits and legal notice](credits-and-legal.md)
 - [CHANGELOG](../../CHANGELOG.md)

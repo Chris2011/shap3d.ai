@@ -298,6 +298,7 @@ export class Model implements DefinitionRegistry {
         tag: instance.tag,
         hidden: instance.hidden || undefined,
         locked: instance.locked || undefined,
+        pluginData: instance.pluginData ? JSON.parse(JSON.stringify(instance.pluginData)) : undefined,
       })),
     });
     return {
@@ -428,6 +429,9 @@ export class Model implements DefinitionRegistry {
           hidden: !!instance.hidden,
           locked: !!instance.locked,
         };
+        if (instance.pluginData) {
+          loaded.pluginData = JSON.parse(JSON.stringify(instance.pluginData));
+        }
         entities.instances.set(loaded.id, loaded);
       }
     };

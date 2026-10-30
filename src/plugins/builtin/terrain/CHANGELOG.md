@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- The height grid is a data format of the app (`terrain.grid`, version 1): other plugins read and write it through the plugin API, and hear when a terrain was sculpted.
 
 ## [1.1.0] – 2026-10-20 · Shap3D.ai 0.6.0
 

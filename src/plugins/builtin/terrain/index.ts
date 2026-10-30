@@ -9,7 +9,17 @@ import spanish from './i18n/es.json';
 import french from './i18n/fr.json';
 import arabic from './i18n/ar.json';
 import { TERRAIN_TOOL, session, discardTerrain } from './session';
-import { newTerrain, generateHills, bakeTerrain, terrainOf, setTerrain, TERRAIN_PLUGIN } from './terrainData';
+import {
+  newTerrain,
+  generateHills,
+  bakeTerrain,
+  terrainOf,
+  terrainFromJSON,
+  setTerrain,
+  useGridWriter,
+  TERRAIN_FORMAT,
+  TERRAIN_PLUGIN,
+} from './terrainData';
 
 /** the selected group that is a terrain made by this plugin, if any */
 const selectedTerrain = (editor: Editor) =>
@@ -30,13 +40,18 @@ const selectedTerrain = (editor: Editor) =>
 const terrainPlugin: S3dPlugin = {
   id: TERRAIN_PLUGIN,
   name: 'terrain.plugin.name',
-  version: '1.1.0',
+  version: '1.2.0',
   author: 'Shap3D.ai',
   description: 'terrain.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },
 
   activate(context) {
     const start = (editor: Editor) => editor.setTool(TERRAIN_TOOL);
+
+    // the height grid as a data format other plugins can use (the noise plugin builds on it), written through the
+    // context so they hear when a terrain was sculpted
+    context.data.formats.register({ ...TERRAIN_FORMAT, validate: (value) => !!terrainFromJSON(value) });
+    context.onDispose(useGridWriter((definition, json) => context.data.set(definition, json)));
 
     context.tools.register({ id: 'sandbox', name: 'terrain.plugin.name', icon: 'terrain', create: (editor) => new TerrainTool(editor) });
 

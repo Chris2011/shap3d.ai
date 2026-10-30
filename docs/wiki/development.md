@@ -56,7 +56,8 @@ src/
   utils/       pure helper functions – e.g. material swatches
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 docs/          logo, README screenshots and this wiki (docs/wiki/)
-plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/, roomplanner/, shaders/ (not part of the app build)
+plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/, roomplanner/, shaders/, noise/, level/ (not part of the app build)
+packages/      libraries that plugins bundle at build time – procgen/ (procedural generation, with Vitest tests; not part of the app build)
 scripts/       screenshot automation (headless Chrome: screenshots.ps1 for Windows, screenshots.sh for Linux/macOS, capture-shot.mjs for both), i18n.mjs (translation check and template)
 tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
 src-tauri/      the desktop app (Tauri 2): Rust shell, tauri.conf.json, app icons

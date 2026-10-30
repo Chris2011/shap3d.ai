@@ -407,6 +407,12 @@
     "plugins": {
       "errors": {
         "commandExists": "Command “{id}” already exists",
+        "bundleFolderMissing": "The bundle lists the folder “{folder}”, but it is not there",
+        "bundlePartMissing": "The folder holds a bundle without the plugin “{id}” (shap3d.id in its package.json)",
+        "dataChangeLoop": "Plugins kept answering each other's data changes – the rest was dropped",
+        "formatMismatch": "Data format “{id}” is declared already with another key or version ({existing}, not {version})",
+        "formatUnknown": "Data format “{id}” is not declared – declare it with data.formats.register",
+        "formatInvalid": "The data does not have the shape of format “{id}”",
         "toolExists": "Tool “{id}” already exists",
         "panelNeedsComponent": "Panel “{id}” needs component or mount",
         "scriptExists": "s3d.{name} already exists",
@@ -1484,6 +1490,9 @@
       "howTo": "How to write your own plugins is described in the README under “Plugins”. The examples are in",
       "installedButFailed": "“{name}” installed, but failed to start: {error}",
       "installedActive": "“{name}” is installed and active.",
+      "installedBundle": "Bundle installed: {names}.",
+      "keptNewer": "newer version kept",
+      "fromBundle": "from bundle {name}",
       "loadFailed": "The plugin could not be loaded: {error}",
       "confirmRemove": "Remove plugin “{name}”?",
       "removed": "“{name}” was removed."

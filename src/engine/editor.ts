@@ -118,6 +118,12 @@ export class Editor {
   lastPushPull = 0;
   lastOffset = 0;
   onToolChange: (() => void)[] = [];
+  /**
+   * run at the end of every undo step, still inside it – what they change is undone with the step (e.g. plugins
+   * answering changed plugin data)
+   */
+  settling: (() => void)[] = [];
+  private commitDepth = 0;
 
   constructor() {
     (this as any).model = markRaw(this.model);
@@ -312,13 +318,19 @@ export class Editor {
     const snap = this.snapshot();
     const path = this.activePath.map((instance) => instance.id);
     let result: T;
+    this.commitDepth++;
     try {
       result = action();
+      if (this.commitDepth === 1) {
+        this.settle();
+      }
     } catch (error) {
       console.error(error);
       this.restore(snap, path);
       this.toast('Fehler: ' + (error as Error).message);
       throw error;
+    } finally {
+      this.commitDepth--;
     }
     this.undoStack.push({ label, snap, path });
     if (this.undoStack.length > 100) {
@@ -327,6 +339,15 @@ export class Editor {
     this.redoStack = [];
     this.changed();
     return result;
+  }
+  /** inside an undo step (commit or a long-running operation)? */
+  changing() {
+    return this.commitDepth > 0 || !!this.operation;
+  }
+  private settle() {
+    for (const listener of [...this.settling]) {
+      listener();
+    }
   }
   changed() {
     this.ui.saved = false;
@@ -349,6 +370,7 @@ export class Editor {
     if (!this.operation) {
       return;
     }
+    this.settle();
     this.undoStack.push(this.operation);
     this.redoStack = [];
     this.operation = null;

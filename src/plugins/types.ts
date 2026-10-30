@@ -6,7 +6,9 @@ import type { PointTool } from '../tools/base';
 import type { Overlay } from '../engine/overlay';
 import type { RunResult, ScriptApi } from '../scripting/api';
 import type { ScriptLanguage, ScriptCompletion, CompletionProvider } from '../scripting/languages';
-import type { Definition, Entities } from '../core/model';
+import type { Definition, Entities, Instance } from '../core/model';
+import type { DataChange, DataTarget, PluginDataFormat } from './pluginData';
+import type { PluginAtmosphere, PluginLight } from '../engine/pluginLighting';
 import type { ApiCategory } from '../scripting/catalog';
 import type { ContextMenuEntry, TopBarButton } from './uiExtensions';
 import type { ViewRequest, ViewLines } from '../engine/viewRender';
@@ -17,6 +19,8 @@ export type { LanguageInfo, MessageTree, LanguageFile } from '../i18n';
 export type { ScriptCompletion, CompletionRequest, CompletionKind, CompletionProvider } from '../scripting/languages';
 export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
 export type { ViewRequest, ViewLines, ViewLine } from '../engine/viewRender';
+export type { DataChange, DataTarget, PluginDataFormat } from './pluginData';
+export type { PluginLight, PluginAtmosphere } from '../engine/pluginLighting';
 
 /**
  * A Shap3D.ai plugin: an ES module whose default export is this object.
@@ -91,6 +95,24 @@ export interface PluginImporter {
   import?: (file: File, editor: Editor) => void | Promise<void>;
   /** … or only reads the file into a three.js scene; the app converts it to faces, guesses units, places it and makes it one undo step */
   loadScene?: (file: File) => Promise<LoadedScene>;
+}
+
+/**
+ * A mode of the 3D model: the toolbar shows the mode's tools and the right-hand bar only its panels (e.g. a level
+ * editor's tools for game objects). Tools and panels by full id ("select", "<plugin>.<id>") or the plugin's short id.
+ */
+export interface PluginMode {
+  id: string;
+  /** text or message key – shown in the switch in the top bar */
+  label: string;
+  icon?: string;
+  /** the tools in the toolbar while the mode is on, in order – the first one is chosen on entering */
+  tools: string[];
+  /** the panels in the right-hand bar while the mode is on; without it all stay */
+  panels?: string[];
+  /** called after the mode is switched on / before it is switched off */
+  enter?: (editor: Editor) => void;
+  leave?: (editor: Editor) => void;
 }
 
 /** A workspace next to the 3D model: its component fills the window below the top bar while it is active. */
@@ -196,9 +218,18 @@ export interface PluginContext {
   newId: () => number;
   /** base classes for custom tools */
   readonly classes: { Tool: typeof Tool; PointTool: typeof PointTool };
-  commands: { register: (command: PluginCommand) => Disposer; run: (id: string) => void };
+  commands: {
+    register: (command: PluginCommand) => Disposer;
+    /** runs a command: the plugin's own by its short id, another plugin's by its full id, the app's by its id ("export-glb") */
+    run: (id: string) => void;
+  };
   tools: { register: (tool: PluginTool) => Disposer };
-  panels: { register: (panel: PluginPanel) => Disposer; open: (id: string) => void };
+  panels: {
+    register: (panel: PluginPanel) => Disposer;
+    open: (id: string) => void;
+    /** closes the open panel – with an id only when that one is open (the plugin's own by its short id) */
+    close: (id?: string) => void;
+  };
   icons: { register: (name: string, svgContent: string) => Disposer };
   script: {
     /** adds `s3d.<name>(...)`; `implementation` receives the script API as first argument */
@@ -246,7 +277,15 @@ export interface PluginContext {
   code: { registerFormat: (format: CodeFormat) => Disposer };
   files: { registerImporter: (importer: PluginImporter) => Disposer; registerExporter: (exporter: PluginExporter) => Disposer };
   overlay: { draw: (draw: (overlay: Overlay, editor: Editor) => void) => Disposer };
-  events: { onToolChange: (listener: () => void) => Disposer; onNewModel: (listener: () => void) => Disposer };
+  events: {
+    onToolChange: (listener: () => void) => Disposer;
+    onNewModel: (listener: () => void) => Disposer;
+    /**
+     * plugin data changed (any plugin's, through `data` – not by undo, redo or opening a model): called at the end
+     * of the undo step the change was made in, still inside it, so what the listener changes is undone with it
+     */
+    onDataChange: (listener: (change: DataChange) => void) => Disposer;
+  };
   /** JSON storage, namespaced per plugin */
   storage: {
     get: <T>(key: string, fallback: T) => T;
@@ -283,6 +322,35 @@ export interface PluginContext {
     active: () => string | null;
   };
   /**
+   * Modes of the 3D model: a switch in the top bar (with the workspaces) changes the toolbar and the right-hand bar
+   * to a plugin's own set of tools and panels, the 3D view stays.
+   */
+  modes: {
+    register: (mode: PluginMode) => Disposer;
+    /** switches a mode of this plugin on (by id), or back to the usual 3D model with null */
+    open: (id: string | null) => void;
+    /** the active mode's full id ("<plugin>.<id>"), null = none */
+    active: () => string | null;
+  };
+  /**
+   * Lights and atmosphere in the 3D view (a level's lamps, a torch, fog, a dark night): while any are set, faces are
+   * drawn lit so the lights fall on them. They belong to the view, not to the model – they go when the plugin stops.
+   */
+  lighting: {
+    /**
+     * the plugin's lights (replaces its earlier ones; the same number and kinds are updated in place, e.g. every frame);
+     * `shadow: true` lets one cast shadows – the first four in the view
+     */
+    set: (lights: PluginLight[]) => void;
+    /** fog, daylight (0 … 1) and background – null gives the view back to the model's style */
+    atmosphere: (atmosphere: PluginAtmosphere | null) => void;
+  };
+  /** what the 3D view shows for now, without changing the model */
+  display: {
+    /** shows an instance at another place (its matrix in its parent) – e.g. moving enemies in a test run; null puts it back */
+    place: (instance: Instance, matrix: InstanceType<typeof THREE.Matrix4> | null) => void;
+  };
+  /**
    * A view of the model rendered on demand – camera, style, hidden tags, size and an optional drawing scale
    * (`orthoHeight`, metres from top to bottom) – without changing the viewport.
    */
@@ -292,13 +360,28 @@ export interface PluginContext {
     /** as lines in pixels: visible edges and silhouettes, hidden parts removed (for vector output) */
     lines: (request: ViewRequest) => ViewLines;
   };
-  /** JSON data the plugin keeps on a group/component definition or on the model – saved with the model */
+  /**
+   * JSON data the plugin keeps on a group/component definition (all its copies), on one instance or on the model –
+   * saved with the model, kept while the plugin is off (call the setters inside editor.commit or a script for undo)
+   */
   data: {
-    get: <T>(definition: Definition) => T | undefined;
-    set: (definition: Definition, value: unknown) => void;
-    /** data on the model itself (call setModel inside editor.commit for undo) */
+    get: <T>(target: Definition | Instance) => T | undefined;
+    set: (target: Definition | Instance, value: unknown) => void;
+    /** data on the model itself */
     getModel: <T>() => T | undefined;
     setModel: (value: unknown) => void;
+    /**
+     * Data formats: data under a key (usually another plugin's) with a version and a check – declared by the plugin
+     * it belongs to and by any plugin that reads or writes it, so neither needs the other running.
+     */
+    formats: {
+      register: (format: PluginDataFormat) => Disposer;
+      get: (id: string) => Omit<PluginDataFormat, 'validate'> | undefined;
+    };
+    /** the data of a format at a definition, instance or the model (null) – undefined if missing or not of its shape */
+    read: <T>(format: string, target: DataTarget) => T | undefined;
+    /** writes the data of a format (undefined removes it) – refused when it does not have the format's shape */
+    write: (format: string, target: DataTarget, value: unknown) => void;
   };
   /**
    * Languages: texts as message keys (`t('my-plugin.hello', { name })`). A plugin brings its own texts – at least

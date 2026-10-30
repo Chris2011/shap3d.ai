@@ -1,6 +1,7 @@
 # Checks of the app on every push and pull request: lint, format, types and the web build.
 # The pre-commit hook only looks at staged files – this catches everything else (older files, commits made with
-# --no-verify) before a release stops at the same checks. Plugin packages in plugins/ check themselves.
+# --no-verify) before a release stops at the same checks. The library in packages/procgen runs its tests, and every
+# plugin package in plugins/ its own checks (types, lint, format, texts) and build.
 #
 # Actions are pinned to commit SHAs; the comment behind each one names the release.
 
@@ -33,4 +34,56 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npx vue-tsc --noEmit -p tsconfig.json
+      - run: npm run build
+
+  procgen:
+    name: packages/procgen – tests, types and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      # TypeScript, oxlint and oxfmt come from the repository root; Vitest from the package
+      - run: npm ci --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
+        working-directory: packages/procgen
+      - run: npm test
+        working-directory: packages/procgen
+      - run: npm run typecheck
+        working-directory: packages/procgen
+      - run: npm run lint
+        working-directory: packages/procgen
+      - run: npm run format:check
+        working-directory: packages/procgen
+
+  plugins:
+    name: plugins/${{ matrix.plugin }} – types, lint, format, texts and build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: [ifc, layout, level, noise, openscad, roomplanner, shaders]
+    defaults:
+      run:
+        working-directory: plugins/${{ matrix.plugin }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      # the build tools come from the repository root; packages with dependencies of their own install them too
+      - run: npm ci --no-audit --no-fund
+        working-directory: .
+      - run: if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; fi
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run i18n
       - run: npm run build

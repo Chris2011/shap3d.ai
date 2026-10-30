@@ -1,5 +1,6 @@
 import { markRaw, reactive, shallowReactive, type Component } from 'vue';
 import type { Editor } from '../engine/editor';
+import { openPanel } from '../components/panelState';
 
 /** Context-menu entries contributed by plugins (shown for the current selection). */
 export interface ContextMenuEntry {
@@ -65,6 +66,67 @@ export const addWorkspace = (workspace: Workspace) => {
     if (workspaceState.active === workspace.id) {
       workspaceState.active = null;
     }
+  };
+};
+
+/**
+ * A mode of a plugin (e.g. a level editor's): the 3D view stays, but the toolbar shows the mode's tools and the
+ * right-hand bar only its panels – switched like a workspace in the top bar.
+ */
+export interface Mode {
+  id: string;
+  /** text or message key – shown in the switch in the top bar */
+  label: string;
+  icon?: string;
+  /** the tools in the toolbar while the mode is on (full tool ids) – the first one is chosen on entering */
+  tools: string[];
+  /** the panels in the right-hand bar while the mode is on (full panel ids); without it all stay */
+  panels?: string[];
+  enter?: (editor: Editor) => void;
+  leave?: (editor: Editor) => void;
+}
+
+export const MODES = shallowReactive<Mode[]>([]);
+/** the active mode's id – null is the usual 3D model */
+export const modeState = reactive({ active: null as string | null });
+
+export const activeMode = () => MODES.find((mode) => mode.id === modeState.active);
+
+/**
+ * Shows the 3D model, a workspace or a mode (by id; null = the 3D model with its usual tools) – leaving the mode
+ * that was on.
+ */
+export const switchView = (editor: Editor, id: string | null) => {
+  const mode = MODES.find((candidate) => candidate.id === id);
+  const previous = activeMode();
+  if (previous && previous !== mode) {
+    modeState.active = null;
+    previous.leave?.(editor);
+    editor.setTool('select');
+  }
+  workspaceState.active = mode || !id ? null : id;
+  if (mode && previous !== mode) {
+    modeState.active = mode.id;
+    const first = mode.tools.find((tool) => editor.hasTool(tool));
+    if (first) {
+      editor.setTool(first);
+    }
+    // an open panel the mode does not show closes
+    if (mode.panels && openPanel.value && !mode.panels.includes(openPanel.value)) {
+      openPanel.value = null;
+    }
+    mode.enter?.(editor);
+  }
+  editor.invalidate();
+};
+
+export const addMode = (editor: Editor, mode: Mode) => {
+  const remove = addTo(MODES, mode);
+  return () => {
+    if (modeState.active === mode.id) {
+      switchView(editor, null);
+    }
+    remove();
   };
 };
 

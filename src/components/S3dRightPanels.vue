@@ -49,6 +49,7 @@ import S3dCloseButton from './ui/S3dCloseButton.vue';
 import { ref, computed, markRaw, type Component } from 'vue';
 import S3dIcon from './S3dIcon.vue';
 import { openPanel, PANEL_INFO, togglePanel as toggle } from './panelState';
+import { activeMode } from '../plugins/uiExtensions';
 import S3dEntityInfo from './panels/S3dEntityInfo.vue';
 import S3dOutliner from './panels/S3dOutliner.vue';
 import S3dInstructor from './panels/S3dInstructor.vue';
@@ -84,6 +85,10 @@ const COMPS: Record<string, Component> = {
   plugins: S3dPluginManager,
 };
 const PANELS = computed(() => PANEL_INFO.map((panel) => ({ ...panel, comp: markRaw(panel.component ?? COMPS[panel.id]) })));
-const tiles = computed(() => PANELS.value.filter((panel) => panel.tile !== false));
+// a plugin's mode shows only its own panels
+const tiles = computed(() => {
+  const only = activeMode()?.panels;
+  return PANELS.value.filter((panel) => panel.tile !== false && (!only || only.includes(panel.id)));
+});
 const current = computed(() => PANELS.value.find((panel) => panel.id === openPanel.value));
 </script>

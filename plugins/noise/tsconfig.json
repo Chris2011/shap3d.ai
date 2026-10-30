@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": { "@shap3d/procgen": ["../../packages/procgen/src/index.ts"] }
+  },
+  "include": ["src"]
+}

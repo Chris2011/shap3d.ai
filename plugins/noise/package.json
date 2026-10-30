@@ -1,0 +1,29 @@
+{
+  "name": "s3d-plugin-noise",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Procedural generation for Shap3D.ai from seeded simplex and cellular noise: terrains with a live preview (editable with the Terrain tool), scattering on terrains, faces and along paths, flagstones, cobbles and dry walls as real stones, twisting, bending and roughening groups, two material shaders and s3d.noise() for scripts.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "shap3d": {
+    "id": "noise",
+    "main": "plugin.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "screenshots": "node docs/screenshots.mjs"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  }
+}

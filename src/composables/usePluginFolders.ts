@@ -1,5 +1,5 @@
 import { reactive, ref, shallowRef } from 'vue';
-import { plugins, installPluginPackage, installedPackage, readPluginPackage, type PluginPackage } from '../plugins/registry';
+import { plugins, installPluginPackages, installedPackage, readPluginPackages, type PluginPackage } from '../plugins/registry';
 import { saveFolderHandle, loadFolderHandle, listFolderHandles } from '../plugins/assetStore';
 import {
   supportsFolderHandles,
@@ -30,6 +30,16 @@ const differs = (id: string, candidate: PluginPackage) => {
 };
 
 const nameOf = (id: string) => plugins.find((entry) => entry.id === id)?.name ?? id;
+
+/** the package of a plugin in its folder – the folder may hold a bundle of several (matched by `shap3d.id`) */
+const packageFor = async (id: string, handle: FileSystemDirectoryHandle) => {
+  const packages = await readPluginPackages(await readFolderFiles(handle));
+  const found = packages.length === 1 ? packages[0] : packages.find((candidate) => candidate.info.id === id);
+  if (!found) {
+    throw new Error(t('plugins.errors.bundlePartMissing', { id }));
+  }
+  return found;
+};
 
 /**
  * Plugin packages installed from a folder: remembers the folder (Chromium) and updates the
@@ -62,14 +72,18 @@ export const usePluginFolders = () => {
     delete upToDate[id];
   };
 
-  /** Installs (or replaces) a package from a folder handle and remembers the folder. */
+  /** Installs (or replaces) the package(s) of a folder handle and remembers the folder for each plugin. */
   const installFromHandle = async (handle: FileSystemDirectoryHandle, pluginPackage?: PluginPackage) => {
-    const plugin = await installPluginPackage(pluginPackage ?? (await readFolderFiles(handle)));
-    await saveFolderHandle(plugin.id, handle);
-    delete updateHints[plugin.id];
-    upToDate[plugin.id] = true;
+    const installed = await installPluginPackages(pluginPackage ? [pluginPackage] : await readFolderFiles(handle));
+    for (const plugin of installed) {
+      if (!plugin.kept) {
+        await saveFolderHandle(plugin.id, handle);
+        delete updateHints[plugin.id];
+        upToDate[plugin.id] = true;
+      }
+    }
     await refreshFolderIds();
-    return plugin;
+    return installed[installed.length - 1];
   };
 
   /** "Plugin-Ordner laden…" in Chromium: folder picker instead of the file input; null if cancelled */
@@ -91,7 +105,7 @@ export const usePluginFolders = () => {
       let pluginPackage: PluginPackage | null = null;
       if (handle && (await requestReadPermission(handle))) {
         try {
-          pluginPackage = await readPluginPackage(await readFolderFiles(handle));
+          pluginPackage = await packageFor(id, handle);
         } catch (error: any) {
           if (error?.name !== 'NotFoundError') {
             throw error;
@@ -104,7 +118,7 @@ export const usePluginFolders = () => {
         if (!handle) {
           return null;
         }
-        pluginPackage = await readPluginPackage(await readFolderFiles(handle));
+        pluginPackage = await packageFor(id, handle);
       }
       const newVersion = pluginPackage.info.version;
       if (!differs(id, pluginPackage)) {
@@ -157,7 +171,7 @@ export const usePluginFolders = () => {
           delete upToDate[id]; // unknown – the button stays
           continue;
         }
-        const pluginPackage = await readPluginPackage(await readFolderFiles(handle));
+        const pluginPackage = await packageFor(id, handle);
         if (!differs(id, pluginPackage)) {
           delete updateHints[id];
           upToDate[id] = true;

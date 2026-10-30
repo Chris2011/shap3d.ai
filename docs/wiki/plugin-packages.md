@@ -108,3 +108,73 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/shaders/dist`.
 - A panel with **ready-made materials** (oak, walnut, Carrara, Nero Marquina, terrazzo, rusty steel, copper patina, clinker, exposed concrete …), and `s3d.shaderMaterial('oak')` or `s3d.material(name, colour, { shader: 'shaders.wood', params })` in scripts.
 
 It uses `context.materials.registerShader` – the way to add shaders of your own is in [its README](../../plugins/shaders/README.md). Without the plugin, materials with a shader show their colour; export formats keep the colour too.
+
+## The noise plugin
+
+The package in [`plugins/noise/`](../../plugins/noise) brings procedural generation from seeded noise – simplex noise (fBm, ridged, billow) and cellular (Voronoi) noise – to the app. No dependencies of its own; built like the others:
+
+```bash
+cd plugins/noise
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/noise/dist`.
+
+![Noise terrain: an island with water, snow, woods and rocks; the panel with the terrain settings](../../plugins/noise/docs/noise.png)
+
+- **Noise terrains** with a live preview: seed, scale, height, octaves, persistence, lacunarity, warp, island falloff, terraces, water and snow, five presets. They store their height grid in the terrain plugin's format, so the **Terrain tool sculpts them further**.
+- **Trees** grown from seeds (oak, birch, pine, palm) and **erosion** for terrains (raindrops dig gullies and fill valleys), **rivers** dug through the valleys and **roads** that find the gentlest way, with bridges.
+- **Scattering** trees, bushes, rocks or the model's own components – on a terrain, on selected faces or **along selected edges** (an avenue) – gathered by a noise mask.
+- **Stones** from cellular noise: flagstones, cobbles, slabs and dry walls as real stones with joints and chamfers, on selected faces or an area.
+- **Facades** with windows, shutters, balconies and shops on walls or whole groups, and **cities** of streets, blocks and buildings whose heights follow a density map – with pitched roofs, perimeter blocks round courtyards, parks, street trees and road markings – on flat ground or on a terrain, where the blocks become terraces on retaining walls – and **villages** on the gentle slopes, connected by roads.
+- **Deforming** groups: twist, taper, bend and roughen with 3D noise – boxes become towers, columns or boulders; three material shaders (_Noise_, _Cells_, _Facade_).
+- `s3d.noise`, `s3d.fbm`, `s3d.cellNoise`, `s3d.noiseTerrain`, `s3d.scatter`, `s3d.tree`, `s3d.erode`, `s3d.river`, `s3d.road`, `s3d.villages`, `s3d.paving`, `s3d.facade`, `s3d.city` and `s3d.noiseDeform` for scripts.
+
+![Stones: flagstones, cobbles, slabs and a dry stone wall from cellular noise](../../plugins/noise/docs/noise-stones.png)
+
+![City: towers in the centre, perimeter blocks and pitched roofs at the edges, parks, street trees and road markings](../../plugins/noise/docs/noise-city.png)
+
+![City on a terrain: block terraces on retaining walls, streets following the ground](../../plugins/noise/docs/noise-hillcity.png)
+
+![Villages on the slopes of a valley, connected by gravel roads](../../plugins/noise/docs/noise-villages.png)
+
+![Trees: oaks, birches, pines and palms grown from seeds](../../plugins/noise/docs/noise-trees.png)
+
+![Rivers and roads: a river through the valleys, a road crossing it on bridges and a gravel path](../../plugins/noise/docs/noise-routes.png)
+
+More pictures (erosion, scattering, facades, deforming) and all options in [its README](../../plugins/noise/README.md).
+
+## The level editor plugin
+
+The package in [`plugins/level/`](../../plugins/level) puts game objects into the model and exports them for game engines. It needs no other plugin – a terrain from the noise plugin is just geometry the objects stand on. Built like the others:
+
+```bash
+cd plugins/level
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/level/dist`.
+
+![Level editor: an arena with spawn points, pickups, a jump pad and linked teleporters; the level mode and the Level panel](../../plugins/level/docs/level.png)
+
+![Level editor: a mansion blocked out on the grid with stairs to a gallery and a doorway cut by a level door](../../plugins/level/docs/level-blockout.png)
+
+![Test run through a fixed camera in the blocked-out mansion](../../plugins/level/docs/level-play.png)
+
+![Test run in the mansion at night with the torch](../../plugins/level/docs/level-night-play.png)
+
+![Level editor: a house with a locked door, a trigger that switches the camera and lets zombies come, the cameras' views](../../plugins/level/docs/level-house.png)
+
+- **Blockout**: rooms, corridors and stairs drawn on a grid (key K) and built with floors, walls and ceilings – corridors open into rooms, level doors cut doorways.
+- **Level objects** for an arena shooter or a survival horror house: spawn points, enemies, waypoints, triggers, hazards, sound zones, pickups, doors with lock and key, save points, fixed cameras, jump pads and teleporters – components of the model, each placed object with its own id and properties (plugin data on the instance).
+- **Actions** of triggers and pickups: open or unlock a door, let enemies come, switch the fixed camera, teleport, play a sound, show a message – drawn as dashed links, the cameras' views too.
+- **Placing** with the _Place level object_ tool (J) on any surface, R turns; the **Level panel** edits name, id, properties and actions and lists all objects with **checks** (a locked door whose key nothing gives, links to nothing, no first camera …).
+- **Generated floor plans** from a seed – rooms, corridors with loops and, when wanted, start, lights, enemies, health, save point and goal.
+- **Engine templates** for Godot 4, Unity and Unreal: a script that builds the level's game objects in the engine next to the model's GLB.
+- **Light and atmosphere**: lamps and spots that triggers switch, daylight down to a dark night, fog – shown while editing and in the test run, where the player has a torch.
+- A **test run** (P): walk through the level with collision – first person, from behind or through the fixed cameras – while triggers, doors and keys, pickups, teleporters, jump pads and hazards work.
+- A **level mode** (_Model | Level_ in the top bar) with only the level tools and panels.
+- **Export**: the model as glTF and a **level file** (JSON) with id, kind, glTF node, position, rotation, scale, properties and actions of every object in glTF's space.
+- The data format `level.object` and `s3d.levelObject`, `s3d.levelObjects` and `s3d.levelFile` for scripts.
+
+More in [its README](../../plugins/level/README.md).

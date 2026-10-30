@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { PluginLighting } from './pluginLighting';
 import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
@@ -196,6 +197,12 @@ export class Viewer {
   helpers = new THREE.Group();
   highlight = new THREE.Group();
   ambient = new THREE.AmbientLight(0xffffff, 0.75);
+  /** lights and atmosphere plugins bring (a level's lamps, fog, darkness) */
+  pluginLighting = new PluginLighting();
+  /** every built group with the instances above it and the place it was built at – for places shown for now */
+  private builtGroups: { group: THREE.Group; path: Instance[]; world: THREE.Matrix4 }[] = [];
+  /** instances shown at another place for now (a test run's moving enemies) – the model is not changed */
+  private displayPlaces = new Map<Instance, THREE.Matrix4>();
   sun = new THREE.DirectionalLight(0xffffff, 1.5);
   shadowGround: THREE.Mesh;
   grid = new GroundGrid();
@@ -264,7 +271,7 @@ export class Viewer {
     this.sun.shadow.mapSize.set(2048, 2048);
     this.sun.shadow.bias = -0.0005;
     this.sun.shadow.normalBias = 0.02;
-    this.scene.add(this.ambient, this.sun, this.sun.target, this.content, this.helpers, this.highlight);
+    this.scene.add(this.ambient, this.sun, this.sun.target, this.content, this.helpers, this.highlight, this.pluginLighting.group);
     this.shadowGround = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.ShadowMaterial({ opacity: 0.25 }));
     this.shadowGround.receiveShadow = true;
     this.shadowGround.position.z = -0.001;
@@ -364,6 +371,7 @@ export class Viewer {
       }
     });
     this.content.clear();
+    this.builtGroups = [];
     this.lineMats = this.lineMats.filter((material) => !material.userData.owned);
     this.edges = [];
     this.verts = [];
@@ -393,6 +401,7 @@ export class Viewer {
       const context: PickContext = { path, entities: ents, world };
       const faceMe = path.length ? path[path.length - 1].definition.faceMe : false;
       const grp = this.buildEntities(ents, context, inheritMat, faded, hiddenTags, showHidden, faceMe);
+      this.builtGroups.push({ group: grp, path, world: world.clone() });
       if (faceMe) {
         this.faceMe.push({ group: grp, world: world.clone() });
       }
@@ -420,7 +429,8 @@ export class Viewer {
     camera.near = 0.1;
     camera.far = radius * 5;
     camera.updateProjectionMatrix();
-    this.renderer.shadowMap.enabled = model.settings.shadows;
+    // the model's sun shadows – or the shadows of lights a plugin brought
+    this.renderer.shadowMap.enabled = model.settings.shadows || this.pluginLighting.casts();
     this.sun.castShadow = model.settings.shadows;
     this.shadowGround.visible = model.settings.shadows && style.ground;
     // three.js divides Lambert irradiance by π – these values give SketchUp-like light/dark (≈ 80/45)
@@ -440,8 +450,14 @@ export class Viewer {
       this.sun.color.set(0xffffff);
       this.ambient.color.set(0xffffff);
     }
+    // a plugin's atmosphere: less daylight (night, a dark house) and fog
+    const daylight = this.pluginLighting.daylight();
+    this.ambient.intensity *= daylight;
+    this.sun.intensity *= daylight;
+    this.scene.fog = this.pluginLighting.fog();
     this.axes.visible = model.settings.axes;
 
+    this.applyDisplayPlaces();
     this.content.updateMatrixWorld(true);
     this.buildGuides();
     this.rebuildHighlight(state);
@@ -582,7 +598,8 @@ export class Viewer {
         clippingPlanes: this.clipPlanes,
       };
       const makeMaterial = (side: THREE.Side) => {
-        if (unlit || shadows) {
+        // lit materials with shadows – and while plugins bring lights or an atmosphere, so they fall on the faces
+        if (unlit || shadows || this.pluginLighting.active()) {
           const material = new Mat({ ...common, side });
           if (data.surface) {
             applySurface(material, data.surface);
@@ -793,6 +810,42 @@ export class Viewer {
 
   faceMe: { group: THREE.Group; world: THREE.Matrix4 }[] = [];
   /** Turn face-me components so their front (−Y) looks at the camera, rotating about their own Z axis. */
+  /**
+   * Shows an instance at another place for now (its matrix in its parent, null: back to its own) – the model is not
+   * changed and the view is not built again; the place stays shown until it is taken back.
+   */
+  placeForDisplay(instance: Instance, matrix: THREE.Matrix4 | null) {
+    if (matrix) {
+      this.displayPlaces.set(instance, matrix.clone());
+    } else {
+      this.displayPlaces.delete(instance);
+    }
+    this.applyDisplayPlaces(instance);
+    this.needsRender = true;
+  }
+
+  /** puts the groups below the instances shown elsewhere there (only those of `only`, when given) */
+  private applyDisplayPlaces(only?: Instance) {
+    for (const built of this.builtGroups) {
+      const index = only ? built.path.indexOf(only) : built.path.findIndex((instance) => this.displayPlaces.has(instance));
+      if (index < 0) {
+        continue;
+      }
+      const instance = built.path[index];
+      const place = this.displayPlaces.get(instance);
+      // the group's place is parent · instance · rest – the instance's own matrix swapped for the one shown
+      const parent = new THREE.Matrix4();
+      for (let at = 0; at < index; at++) {
+        parent.multiply(built.path[at].matrix);
+      }
+      const world = place
+        ? parent.clone().multiply(place).multiply(instance.matrix.clone().invert()).multiply(parent.clone().invert()).multiply(built.world)
+        : built.world;
+      built.group.matrix.copy(world);
+      built.group.updateMatrixWorld(true);
+    }
+  }
+
   private updateFaceMe() {
     if (!this.faceMe.length) {
       return;
@@ -1056,6 +1109,13 @@ export class Viewer {
       this.bgMat.uniforms.ground.value.copy(tmpGround);
       this.bgMat.uniforms.useSky.value = style.sky ? 1 : 0;
       this.bgMat.uniforms.useGround.value = style.ground ? 1 : 0;
+    }
+    // a plugin's atmosphere has a plain background (its fog's colour) – the sky would shine through the fog
+    const background = this.pluginLighting.background();
+    if (background) {
+      this.bgMat.uniforms.bg.value.set(background);
+      this.bgMat.uniforms.useSky.value = 0;
+      this.bgMat.uniforms.useGround.value = 0;
     }
     // camera-relative light like SketchUp's default (no sun shading)
     const viewDir = this.rig.forward().negate();
