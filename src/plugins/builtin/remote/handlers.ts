@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { Editor } from '../../../engine/editor';
 import { COMMANDS, clearAll, exportFile, findCommand, runCommand, type ExportKind } from '../../../engine/commands';
-import { GroupHandle, ScriptApi, runJson, runScript, type Pt } from '../../../scripting/api';
+import { GroupHandle, ScriptApi, runJson, runScriptAsync, type Pt } from '../../../scripting/api';
 import { catalogText } from '../../../scripting/catalog';
 import type { Entities, Instance } from '../../../core/model';
 import { localize } from '../../../i18n';
@@ -322,9 +322,9 @@ const HANDLERS: Record<string, (editor: Editor, input: Input) => RemoteResult | 
     return json(materialList(editor).find((material) => material.name === input.name));
   },
 
-  'script.run': (editor, input) => {
+  'script.run': async (editor, input) => {
     const code = String(input.code ?? '');
-    const result = input.language === 'json' ? runJson(editor, code) : runScript(editor, code, 'remote.undo.script');
+    const result = input.language === 'json' ? runJson(editor, code) : await runScriptAsync(editor, code, 'remote.undo.script');
     if (!result.ok) {
       throw new RemoteFailure(`Script error: ${result.error}${result.logs.length ? '\nLog: ' + JSON.stringify(result.logs) : ''}`);
     }

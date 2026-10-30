@@ -47,6 +47,9 @@
       <button class="s3d-btn primary flex h-7 items-center gap-1.5" :title="t('scriptEditor.runTitle')" :disabled="running" @click="run">
         <S3dIcon name="play" :size="14" /> {{ t('scriptEditor.run') }}
       </button>
+      <span v-if="running" class="text-xs text-ink-2 after:animate-blink after:tracking-[0.125rem] after:text-blue after:content-['●●●']">{{
+        t('scriptEditor.executing')
+      }}</span>
     </div>
     <div class="flex items-center gap-2.5 px-2.5 pb-1.5 text-xs">
       <label class="s3d-check"><input type="checkbox" v-model="clearFirst" /> {{ t('scriptEditor.clearFirst') }}</label>
@@ -163,7 +166,7 @@ import S3dIcon from '../S3dIcon.vue';
 import { useEditor } from '../keys';
 import { EXAMPLES } from '../../scripting/examples';
 import S3dApiReference from './S3dApiReference.vue';
-import { runScript, runJson, type ScriptLog } from '../../scripting/api';
+import { runScriptAsync, runJson, type ScriptLog } from '../../scripting/api';
 import { highlight, type CodeLang } from '../../scripting/highlight';
 import { importObj, looksLikeObj } from '../../scripting/mesh';
 import { parseLength } from '../../core/units';
@@ -450,12 +453,13 @@ const run = async () => {
   } else {
     // plugins prepare what the script uses (e.g. fonts for text3d) – for JSON as for JavaScript
     running.value = true;
+    out.value = [{ kind: 'log', text: t('statusbar.building') }];
     try {
       await prepareScript(code.value);
+      result = lang.value === 'json' ? runJson(editor, code.value) : await runScriptAsync(editor, code.value);
     } finally {
       running.value = false;
     }
-    result = lang.value === 'json' ? runJson(editor, code.value) : runScript(editor, code.value);
   }
   lastMs.value = result.durationMs;
   const summary: ScriptLog = result.ok
@@ -489,13 +493,13 @@ const insertText = (text: string) => {
   });
 };
 /** Build an API example right away – as its own group next to what is already there (one undo step). */
-const tryExample = (example: string) => {
+const tryExample = async (example: string) => {
   const bounds = editor.model.bounds();
   const place = bounds.isEmpty()
     ? ''
     : `
 { const bb = __g.entities.bounds(new THREE.Box3()); if (!bb.isEmpty()) __g.move([${(bounds.max.x + 1).toFixed(3)} - bb.min.x, ${bounds.min.y.toFixed(3)} - bb.min.y, 0]); }`;
-  const result = runScript(
+  const result = await runScriptAsync(
     editor,
     `const __g = s3d.group(${JSON.stringify(t('scriptEditor.exampleGroup'))}, () => {
 ${example}

@@ -416,6 +416,10 @@ export class Editor {
     this.selectionChanged();
     this.invalidate();
   }
+  /** Replaces the whole model with a snapshot and re-resolves the context – undo and scripts that built in a worker use this. */
+  restoreModel(snap: any, path: number[] = this.activePath.map((instance) => instance.id)) {
+    this.restore(snap, path);
+  }
   undo() {
     if (this.tool.busy()) {
       this.tool.cancel();

@@ -138,6 +138,11 @@
             {{ turn.text ? t('ai.chat.writing') : t('ai.chat.thinking') }}
             <b class="text-blue tabular-nums">{{ elapsed(now - turn.createdAt) }}</b>
           </div>
+          <div v-if="turn.status === 'running'" class="mt-1 text-xs text-ink-2">
+            <span class="after:animate-blink after:tracking-[0.125rem] after:text-blue after:content-['●●●']"></span>
+            {{ t('ai.chat.building') }}
+            <b class="text-blue tabular-nums">{{ elapsed(now - turn.createdAt) }}</b>
+          </div>
           <S3dCodeBlock v-if="turn.code" :code="turn.code" :lang="turn.lang ?? 'js'" :start-collapsed="turn.lang === 'obj'" />
           <div v-if="turn.status === 'done' && turn.result" class="mt-1 text-xs text-ok">✓ {{ turn.result }}</div>
           <div v-if="turn.status === 'error'" class="mt-1 text-xs text-danger">✗ {{ turn.error }}</div>
@@ -299,6 +304,9 @@ const submit = () => {
   send(editor, text);
 };
 const run = (turn: AiTurn) => {
+  if (turn.status === 'running') {
+    return; // a run is already in progress for this code
+  }
   execute(editor, turn);
 };
 const undo = (turn: AiTurn) => {

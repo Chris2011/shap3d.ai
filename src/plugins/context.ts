@@ -230,6 +230,8 @@ export const createPluginContext = (
           removeFrom(API_CATALOG, entry);
         });
       },
+      // synchronous by design: plugins read the result right away (e.g. the room planner's runPlace) –
+      // big builds go through runScriptAsync instead (AI chat, script editor)
       run: (code) => runScript(editor, code, plugin.name),
       registerLanguage: (scriptLanguage) => track(registerScriptLanguage(scriptLanguage)),
       openInEditor: (scriptLanguage, code) => {

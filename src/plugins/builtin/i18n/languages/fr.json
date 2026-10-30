@@ -523,7 +523,8 @@
       "twoFingers": "Deux doigts",
       "pinch": "Pincer à deux doigts",
       "middleDrag": "Glisser avec le bouton du milieu",
-      "middleButton": "Bouton du milieu"
+      "middleButton": "Bouton du milieu",
+      "building": "Le script construit le modèle …"
     },
     "contextMenu": {
       "editGroup": "Modifier le groupe/composant",
@@ -1519,6 +1520,7 @@
       "exampleWithDescription": "Exemple « {name} » : {description}",
       "example": "Exemple « {name} »",
       "running": "{language} en cours …",
+      "executing": "Construction …",
       "invalidSize": "Taille invalide : {size}",
       "done": "Terminé – {count} face dans le modèle. | Terminé – {count} faces dans le modèle.",
       "exampleGroup": "Exemple",

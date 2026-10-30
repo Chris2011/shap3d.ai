@@ -2,7 +2,7 @@ import { prepareScript } from '../../../scripting/languages';
 import * as THREE from 'three';
 import { reactive } from 'vue';
 import type { Editor } from '../../../engine/editor';
-import { runScript, runJson, type RunResult } from '../../../scripting/api';
+import { runScriptAsync, runJson, type RunResult } from '../../../scripting/api';
 import { aiConfig, chat, describeError, modeFor, ensureMeshModel, type ChatMsg } from './providers';
 import { buildSystemPrompt, buildFastPrompt } from './prompt';
 import { currentSession, newSession, touch } from './history';
@@ -143,11 +143,12 @@ const history = (limit = 12): ChatMsg[] => {
   return out;
 };
 
-const runCode = (editor: Editor, turn: AiTurn): RunResult => {
+/** Runs the code of an assistant turn: OBJ import / declarative JSON on the main thread, JavaScript in the worker. */
+const runCode = async (editor: Editor, turn: AiTurn): Promise<RunResult> => {
   if (turn.lang === 'obj') {
     return importObj(editor, turn.code!, { size: turn.targetSize ?? 1, name: t('ai.agent.objectName'), label: 'ai.undoLabel' });
   }
-  return turn.lang === 'json' ? runJson(editor, turn.code!) : runScript(editor, turn.code!, 'ai.undoLabel');
+  return turn.lang === 'json' ? runJson(editor, turn.code!) : runScriptAsync(editor, turn.code!, 'ai.undoLabel');
 };
 
 // ------------------------------------------------------------------ mesh models (LLaMA-Mesh)
@@ -300,7 +301,7 @@ export const execute = async (editor: Editor, turn: AiTurn): Promise<boolean> =>
     await prepareScript(turn.code);
   } // plugins prepare their s3d extensions (fonts, OpenSCAD …)
   const facesBefore = editor.model.root.stats().faces;
-  const result = runCode(editor, turn);
+  const result = await runCode(editor, turn);
   if (result.ok) {
     const added = editor.model.root.stats().faces - facesBefore;
     turn.undoable = true;

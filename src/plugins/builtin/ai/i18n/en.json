@@ -25,6 +25,7 @@
         "autoFix": "↻ Error reported back – the assistant is fixing it …",
         "startEnd": "Start {start} · end {end}",
         "writing": "writing …",
+        "building": "building model …",
         "thinking": "thinking …",
         "stopped": "Stopped.",
         "runAgain": "Run again",

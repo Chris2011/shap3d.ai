@@ -25,6 +25,7 @@
         "autoFix": "↻ Erreur renvoyée – l’assistant la corrige …",
         "startEnd": "Début {start} · fin {end}",
         "writing": "écrit …",
+        "building": "construction du modèle …",
         "thinking": "réfléchit …",
         "stopped": "Arrêté.",
         "runAgain": "Exécuter à nouveau",
