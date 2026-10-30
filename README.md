@@ -36,7 +36,7 @@
 - **Terrain sculpting, polygon inspector and measuring aids** – brushes for landscapes, segment counts for round shapes, zoom-dependent rulers and grid. [Features](docs/wiki/features.md)
 - **Command palette** – <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> finds every tool, command, material, scene and object. [Command palette](docs/wiki/features.md#command-palette)
 - **Import from SketchUp, Blender, 3ds Max and more** – SKP, BLEND, FBX, DAE, OBJ, STL, glTF, 3MF, USD … and IFC with a plugin. [Importing](docs/wiki/import.md)
-- **Plugins** – commands, tools, panels, script commands, file formats and whole workspaces, plus packages for OpenSCAD, IFC, LayOut sheets, a room planner and shader materials. [Writing plugins](docs/wiki/plugins.md) · [Plugin packages](docs/wiki/plugin-packages.md)
+- **Plugins** – commands, tools, panels, script commands, file formats and whole workspaces, plus packages for OpenSCAD, IFC, LayOut sheets, a room planner, shader materials, procedural generation and a level editor. [Writing plugins](docs/wiki/plugins.md) · [Plugin packages](docs/wiki/plugin-packages.md)
 - **Remote control** – REST API, Swagger UI and an MCP server for AI agents such as Claude Code. [Remote API](docs/wiki/remote-api.md)
 - **Dark mode with a night scene** and the interface in English, German, French, Spanish or Arabic. [Languages](docs/wiki/languages.md)
 

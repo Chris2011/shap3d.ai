@@ -22,6 +22,7 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
   - Room planner – [overview](plugin-packages.md#the-room-planner-plugin) · [README](../../plugins/roomplanner/README.md)
   - Shader materials – [overview](plugin-packages.md#the-shader-materials-plugin) · [README](../../plugins/shaders/README.md)
   - Noise – [overview](plugin-packages.md#the-noise-plugin) · [README](../../plugins/noise/README.md)
+  - Level editor – [overview](plugin-packages.md#the-level-editor-plugin) · [README](../../plugins/level/README.md)
 
 ## Working on the project
 

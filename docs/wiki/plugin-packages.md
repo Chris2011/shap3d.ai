@@ -143,3 +143,38 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/noise/dist`.
 ![Rivers and roads: a river through the valleys, a road crossing it on bridges and a gravel path](../../plugins/noise/docs/noise-routes.png)
 
 More pictures (erosion, scattering, facades, deforming) and all options in [its README](../../plugins/noise/README.md).
+
+## The level editor plugin
+
+The package in [`plugins/level/`](../../plugins/level) puts game objects into the model and exports them for game engines. It needs no other plugin – a terrain from the noise plugin is just geometry the objects stand on. Built like the others:
+
+```bash
+cd plugins/level
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/level/dist`.
+
+![Level editor: an arena with spawn points, pickups, a jump pad and linked teleporters; the level mode and the Level panel](../../plugins/level/docs/level.png)
+
+![Level editor: a mansion blocked out on the grid with stairs to a gallery and a doorway cut by a level door](../../plugins/level/docs/level-blockout.png)
+
+![Test run through a fixed camera in the blocked-out mansion](../../plugins/level/docs/level-play.png)
+
+![Test run in the mansion at night with the torch](../../plugins/level/docs/level-night-play.png)
+
+![Level editor: a house with a locked door, a trigger that switches the camera and lets zombies come, the cameras' views](../../plugins/level/docs/level-house.png)
+
+- **Blockout**: rooms, corridors and stairs drawn on a grid (key K) and built with floors, walls and ceilings – corridors open into rooms, level doors cut doorways.
+- **Level objects** for an arena shooter or a survival horror house: spawn points, enemies, waypoints, triggers, hazards, sound zones, pickups, doors with lock and key, save points, fixed cameras, jump pads and teleporters – components of the model, each placed object with its own id and properties (plugin data on the instance).
+- **Actions** of triggers and pickups: open or unlock a door, let enemies come, switch the fixed camera, teleport, play a sound, show a message – drawn as dashed links, the cameras' views too.
+- **Placing** with the _Place level object_ tool (J) on any surface, R turns; the **Level panel** edits name, id, properties and actions and lists all objects with **checks** (a locked door whose key nothing gives, links to nothing, no first camera …).
+- **Generated floor plans** from a seed – rooms, corridors with loops and, when wanted, start, lights, enemies, health, save point and goal.
+- **Engine templates** for Godot 4, Unity and Unreal: a script that builds the level's game objects in the engine next to the model's GLB.
+- **Light and atmosphere**: lamps and spots that triggers switch, daylight down to a dark night, fog – shown while editing and in the test run, where the player has a torch.
+- A **test run** (P): walk through the level with collision – first person, from behind or through the fixed cameras – while triggers, doors and keys, pickups, teleporters, jump pads and hazards work.
+- A **level mode** (_Model | Level_ in the top bar) with only the level tools and panels.
+- **Export**: the model as glTF and a **level file** (JSON) with id, kind, glTF node, position, rotation, scale, properties and actions of every object in glTF's space.
+- The data format `level.object` and `s3d.levelObject`, `s3d.levelObjects` and `s3d.levelFile` for scripts.
+
+More in [its README](../../plugins/level/README.md).
