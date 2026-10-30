@@ -54,7 +54,14 @@ const plugin: S3dPlugin = {
   activate(context) {
     useRuntime(context);
     // the terrain plugin's height grid – declared here too, so this plugin works without that one running
-    context.data.formats.register({ ...TERRAIN_FORMAT, validate: (value) => !!gridFrom(value) });
+    try {
+      context.data.formats.register({ ...TERRAIN_FORMAT, validate: (value) => !!gridFrom(value) });
+    } catch (error) {
+      // the terrain plugin declares another version of the grid: the plugin still starts – grids of the other version
+      // are not read (the check fails) and nothing is written into them (the app refuses data of the wrong shape)
+      console.warn(error);
+      context.ui.toast(t('noise.errors.gridVersion', { version: context.data.formats.get(TERRAIN_FORMAT.id)?.version ?? '?' }));
+    }
     // sculpting a terrain with steps becomes a step of its own right away (in the same undo step as the sculpting)
     context.events.onDataChange(({ key, target }) => {
       if (key === TERRAIN_FORMAT.key && target && !('definition' in target) && !ownGridWrite(target)) {

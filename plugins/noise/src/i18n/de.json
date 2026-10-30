@@ -388,6 +388,9 @@
         "none": "Dieses Gelände hat keine Bauschritte – zuerst einen Fluss, eine Straße, eine Stadt oder Dörfer darauf bauen.",
         "unknown": "Es gibt keinen Schritt {index} – das Gelände hat {count}.",
         "baseChanged": "Das Raster des Geländes hat eine andere Größe als beim ersten Bauschritt – die Schritte lassen sich nicht neu aufbauen."
+      },
+      "errors": {
+        "gridVersion": "Das Terrain-Plugin speichert sein Höhenraster in Version {version}, dieses Plugin kennt Version 1 – damit gemachte Gelände lassen sich hier nicht lesen oder ändern."
       }
     }
   }

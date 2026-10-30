@@ -388,6 +388,9 @@
         "none": "Este terreno no tiene pasos de construcción – construye primero un río, una carretera, una ciudad o pueblos sobre él.",
         "unknown": "No hay paso {index} – el terreno tiene {count}.",
         "baseChanged": "La cuadrícula del terreno tiene otro tamaño que en el primer paso – los pasos no se pueden reconstruir."
+      },
+      "errors": {
+        "gridVersion": "El plugin Terreno guarda su cuadrícula de alturas en la versión {version}, este plugin conoce la versión 1 – los terrenos hechos con ella no se pueden leer ni cambiar aquí."
       }
     }
   }

@@ -8,6 +8,7 @@ import {
   wallPlane,
   CITY_DEFAULTS,
   planCity,
+  cityStreetLines,
   type CityOptions,
   FLAT_GROUND,
   terrainGround,
@@ -42,6 +43,8 @@ import {
   type Point2,
   onCourse,
   type Course,
+  type RoadCourse,
+  resample,
   type RiverOptions,
   type RoadOptions,
   type RoadSurface,
@@ -860,7 +863,17 @@ export const city = (api: ScriptApi, call: CityCall = {}): GroupHandle => {
       offset[0] + options.width + 1,
       offset[1] + options.depth + 1,
     ];
-    remember(terrain, (data) => ({ ...data, cities: [...(data.cities ?? []), area] }));
+    // its streets as roads: a road built later goes on from a street's end at the city's edge, or crosses it
+    const streets = cityStreetLines(options).map((ends): RoadCourse => {
+      const line = resample(ends, 2).map(([x, y]): [number, number] => [x + offset[0], y + offset[1]]);
+      return {
+        line,
+        levels: line.map(([x, y]) => Math.round(land.streetAt(x - offset[0], y - offset[1]) * 1000) / 1000),
+        half: options.street / 2,
+        reach: options.street / 2,
+      };
+    });
+    remember(terrain, (data) => ({ ...data, cities: [...(data.cities ?? []), area], roads: [...(data.roads ?? []), ...streets] }));
   }
   const blockAt = (x: number, y: number) =>
     blocks.findIndex((block) => x >= block.x && x <= block.x + block.width && y >= block.y && y <= block.y + block.depth);

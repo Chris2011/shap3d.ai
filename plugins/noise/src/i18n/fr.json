@@ -388,6 +388,9 @@
         "none": "Ce terrain n’a pas d’étapes de construction – construisez d’abord une rivière, une route, une ville ou des villages dessus.",
         "unknown": "Il n’y a pas d’étape {index} – le terrain en a {count}.",
         "baseChanged": "La grille du terrain n’a plus la taille qu’elle avait à la première étape – les étapes ne peuvent pas être reconstruites."
+      },
+      "errors": {
+        "gridVersion": "Le plugin Terrain enregistre sa grille d’altitudes en version {version}, ce plugin connaît la version 1 – les terrains faits avec elle ne peuvent pas être lus ni modifiés ici."
       }
     }
   }

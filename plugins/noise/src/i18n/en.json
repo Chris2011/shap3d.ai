@@ -388,6 +388,9 @@
         "none": "This terrain has no building steps – build a river, road, city or villages on it first.",
         "unknown": "There is no step {index} – the terrain has {count}.",
         "baseChanged": "The terrain’s grid has a different size than when its first step was built – the steps cannot be built again."
+      },
+      "errors": {
+        "gridVersion": "The Terrain plugin keeps its height grid in version {version}, this plugin knows version 1 – terrains made with it cannot be read or changed here."
       }
     }
   }

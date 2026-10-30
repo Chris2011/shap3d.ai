@@ -19,6 +19,7 @@ const SHOTS = [
   { name: 'noise-villages', file: 'demo-villages.js', command: 'noise.city', camera: '150,-120,175', target: '150,105,0' },
   { name: 'noise-routes', file: 'demo-routes.js', command: 'noise.scatter', camera: '62,-62,72', target: '60,42,0' },
   { name: 'noise-junctions', file: 'demo-junctions.js', command: 'noise.scatter', camera: '58,-22,50', target: '62,40,0' },
+  { name: 'noise-cityroads', file: 'demo-cityroads.js', command: 'noise.city', camera: '80,-40,95', target: '80,55,0' },
   { name: 'noise-erosion', file: 'demo-erosion.js', command: 'noise.open', camera: '82,-62,92', target: '82,34,0' },
   { name: 'noise-deform', file: 'demo-deform.js', command: 'noise.deform', camera: '8,-17,9', target: '8.5,0.5,1.8' },
 ];
