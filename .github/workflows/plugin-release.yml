@@ -11,12 +11,13 @@
 #
 #   plan      finds the plugins to release
 #   release   checks, builds, packs and releases each of them (one job per plugin)
-#   pages     puts the newest release of every plugin on GitHub Pages, with the catalog (plugins/index.json – also
-#             the community plugins of plugins/community.json) the app installs from, and the plugin portal
-#             (portal/, a package of its own) – only when the repository variable PLUGIN_PAGES is "true" (Settings › Pages › Source:
-#             GitHub Actions); APP_URL, if set, is the app's address the portal's install links open
+#   pages     puts the newest release of every plugin – or, without one, a preview built from main – on GitHub
+#             Pages, with the catalog the app installs from (plugins/index.json, also the community plugins of
+#             plugins/community.json) and the plugin portal (portal/, a package of its own) – only when the
+#             repository variable PLUGIN_PAGES is "true" (Settings › Pages › Source: GitHub Actions); APP_URL, if
+#             set, is the app's address the portal's install links open
 #
-# Actions are pinned to commit SHAs where this repository pins them already; the Pages actions by version.
+# Actions are pinned to commit SHAs; the comment behind each one names the release.
 
 name: Plugin release
 
@@ -38,7 +39,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 24
 
 jobs:
   plan:
@@ -174,7 +175,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: portal/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            portal/package-lock.json
 
       - name: The newest release of every plugin, unpacked
         env:
@@ -193,9 +196,30 @@ jobs:
             cp -r "site/plugins/$id/$version" "site/plugins/$id/latest"
           done < newest.txt
 
+      # a plugin without a release yet is built from main – listed as a preview of its next version until it is
+      # released, so the catalog shows every plugin of this repository
+      - name: Previews of the plugins without a release, built from main
+        run: |
+          npm ci --no-audit --no-fund
+          node scripts/plugin-catalog.mjs unreleased newest.json > previews.txt
+          echo '{}' > previews.json
+          while read -r folder id version; do
+            [ -z "$folder" ] && continue
+            (cd "plugins/$folder" && if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; fi && npm run build)
+            mkdir -p "site/plugins/$id/$version"
+            cp -r "plugins/$folder/dist/." "site/plugins/$id/$version/"
+            cp -r "site/plugins/$id/$version" "site/plugins/$id/latest"
+            node -e "
+              const fs = require('fs');
+              const previews = JSON.parse(fs.readFileSync('previews.json', 'utf8'));
+              previews[process.argv[1]] = process.argv[2];
+              fs.writeFileSync('previews.json', JSON.stringify(previews));
+            " "$id" "$version"
+          done < previews.txt
+
       # the index the app (Plugins › Discover) and the portal read: these plugins and the community ones
       - name: Catalog
-        run: node scripts/plugin-catalog.mjs build site newest.json "$GITHUB_REPOSITORY"
+        run: node scripts/plugin-catalog.mjs build site newest.json "$GITHUB_REPOSITORY" previews.json
 
       # the plugin portal (portal/ – a package of its own, Vite and Vue) as the site's start page; config.json gives
       # it the app's address (repository variable APP_URL) for its install links
@@ -207,9 +231,9 @@ jobs:
           cp -r portal/dist/. site/
           node -e "console.log(JSON.stringify({ appUrl: process.env.APP_URL || '' }))" > site/config.json
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

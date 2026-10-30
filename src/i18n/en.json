@@ -1514,7 +1514,9 @@
       "catalogPrompt": "Web address of a plugin catalog (its index.json)",
       "ownCatalog": "Own catalog: {url}",
       "confirmCommunity": "Install “{name}” by {author}? It does not come from the Shap3D.ai repository and runs with full access to the app, like every plugin. Only install it if you trust its source.\n\n{url}",
-      "confirmUrlInstall": "Install the plugin at this address? Plugins run with full access to the app – only install it if you trust its source.\n\n{url}"
+      "confirmUrlInstall": "Install the plugin at this address? Plugins run with full access to the app – only install it if you trust its source.\n\n{url}",
+      "preview": "Preview",
+      "previewTitle": "Not released yet – built from the main branch of the Shap3D.ai repository, a preview of its next version"
     },
     "scriptEditor": {
       "loadExample": "Load example…",

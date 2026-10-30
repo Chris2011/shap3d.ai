@@ -107,6 +107,12 @@
         <span class="font-semibold text-navy">{{ entry.name }}</span>
         <span class="text-xs text-ink-2">{{ entry.version }}</span>
         <span
+          v-if="entry.preview"
+          class="rounded-[3px] bg-surface-2 px-1 text-[0.625rem] text-ink-2"
+          :title="t('pluginManager.previewTitle')"
+          >{{ t('pluginManager.preview') }}</span
+        >
+        <span
           v-if="entry.source === 'community' || entry.ownCatalog"
           class="rounded-[3px] bg-warn-bg px-1 text-[0.625rem] text-warn"
           :title="t('pluginManager.communityTitle')"

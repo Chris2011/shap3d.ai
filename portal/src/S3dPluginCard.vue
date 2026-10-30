@@ -2,6 +2,7 @@
   <article class="card">
     <h2>
       {{ plugin.name }}
+      <span v-if="plugin.preview" class="badge preview" title="Not released yet – built from the main branch">Preview</span>
       <span v-if="plugin.source === 'community'" class="badge" title="Built and published by its author, listed after a review"
         >Community</span
       >
@@ -60,6 +61,11 @@ h2 {
   font-size: 0.72rem;
   font-weight: 500;
   vertical-align: middle;
+}
+
+.badge.preview {
+  background: var(--line);
+  color: var(--muted);
 }
 
 .meta {

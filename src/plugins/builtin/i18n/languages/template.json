@@ -2875,7 +2875,9 @@
       "catalogPrompt": "",
       "ownCatalog": "",
       "confirmCommunity": "",
-      "confirmUrlInstall": ""
+      "confirmUrlInstall": "",
+      "preview": "",
+      "previewTitle": ""
     },
     "scriptEditor": {
       "loadExample": "",

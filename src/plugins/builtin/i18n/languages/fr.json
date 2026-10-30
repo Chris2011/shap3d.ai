@@ -1514,7 +1514,9 @@
       "catalogPrompt": "Adresse web d’un catalogue de plugins (son index.json)",
       "ownCatalog": "Catalogue personnel : {url}",
       "confirmCommunity": "Installer « {name} » de {author} ? Il ne vient pas du dépôt Shap3D.ai et s’exécute, comme tout plugin, avec un accès complet à l’application. Ne l’installez que si vous faites confiance à sa source.\n\n{url}",
-      "confirmUrlInstall": "Installer le plugin à cette adresse ? Les plugins ont un accès complet à l’application – ne l’installez que si vous faites confiance à sa source.\n\n{url}"
+      "confirmUrlInstall": "Installer le plugin à cette adresse ? Les plugins ont un accès complet à l’application – ne l’installez que si vous faites confiance à sa source.\n\n{url}",
+      "preview": "Aperçu",
+      "previewTitle": "Pas encore publié – construit depuis la branche main du dépôt Shap3D.ai, un aperçu de sa prochaine version"
     },
     "scriptEditor": {
       "loadExample": "Charger un exemple…",

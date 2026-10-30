@@ -14,6 +14,8 @@ export interface PortalPlugin {
   homepage?: string;
   minAppVersion?: string | null;
   source: 'official' | 'community';
+  /** not released yet – built from the repository's main branch, a preview of its next version */
+  preview: boolean;
   /** the plugin folder to install from, absolute */
   installUrl: string;
   /** the release's zip (official plugins) */
@@ -41,6 +43,7 @@ export const loadCatalog = async (): Promise<{ plugins: PortalPlugin[]; updated?
       homepage: plugin.homepage ? String(plugin.homepage) : undefined,
       minAppVersion: plugin.minAppVersion ? String(plugin.minAppVersion) : null,
       source: plugin.source === 'community' ? 'community' : 'official',
+      preview: plugin.preview === true,
       // folders in the catalog are relative to it; the newest version stays at latest/, so the app can update from there
       installUrl: new URL(String(plugin.latest ?? plugin.url), url).href,
       zip: plugin.zip ? String(plugin.zip) : undefined,

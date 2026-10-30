@@ -7,9 +7,13 @@
 //   node scripts/plugin-catalog.mjs check
 //       checks plugins/community.json (CI): every entry complete, its id unique and not one of this repository's,
 //       its package.json reachable at its url with that id and a version, its main script there too
-//   node scripts/plugin-catalog.mjs build <site> <newest.json> <owner/repo>
+//   node scripts/plugin-catalog.mjs unreleased <newest.json>
+//       the plugins of plugins/ without a release yet, one line each: <folder> <id> <version>
+//   node scripts/plugin-catalog.mjs build <site> <newest.json> <owner/repo> [previews.json]
 //       writes <site>/plugins/index.json from the unpacked releases (<site>/plugins/<id>/<version>/) named in
-//       newest.json ({ id: version }) and the community entries (their version read from their package.json)
+//       newest.json ({ id: version }), the previews built from main for plugins without a release (previews.json,
+//       { id: version }, unpacked the same way – marked `preview`) and the community entries (their version read from
+//       their package.json)
 //
 // A community entry: { "id", "name", "author", "url", "description"?, "homepage"?, "license"? } – `url` is the
 // plugin's folder on a web server that allows cross-origin requests (GitHub Pages does), holding its package.json
@@ -22,11 +26,17 @@ const COMMUNITY = 'plugins/community.json';
 
 const folderOf = (url) => url.replace(/package\.json([?#].*)?$/i, '').replace(/\/?$/, '/');
 
-const ownIds = () =>
+/** the plugin packages of this repository: their folder, id and version */
+const ownPlugins = () =>
   readdirSync('plugins', { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && existsSync(join('plugins', entry.name, 'package.json')))
-    .map((entry) => JSON.parse(readFileSync(join('plugins', entry.name, 'package.json'), 'utf8')).shap3d?.id)
-    .filter(Boolean);
+    .map((entry) => {
+      const manifest = JSON.parse(readFileSync(join('plugins', entry.name, 'package.json'), 'utf8'));
+      return { folder: entry.name, id: manifest.shap3d?.id, version: manifest.version };
+    })
+    .filter((plugin) => plugin.id);
+
+const ownIds = () => ownPlugins().map((plugin) => plugin.id);
 
 const community = () => JSON.parse(readFileSync(COMMUNITY, 'utf8'));
 
@@ -97,9 +107,12 @@ const check = async () => {
   return problems;
 };
 
-const build = async (site, newestFile, repository) => {
+const build = async (site, newestFile, repository, previewsFile) => {
   const newest = JSON.parse(readFileSync(newestFile, 'utf8'));
-  const official = Object.entries(newest).map(([id, version]) => {
+  const previews = previewsFile && existsSync(previewsFile) ? JSON.parse(readFileSync(previewsFile, 'utf8')) : {};
+  const released = Object.entries(newest).map(([id, version]) => [id, version, false]);
+  const unreleased = Object.entries(previews).map(([id, version]) => [id, version, true]);
+  const official = [...released, ...unreleased].map(([id, version, preview]) => {
     const manifest = JSON.parse(readFileSync(join(site, 'plugins', id, version, 'package.json'), 'utf8'));
     return {
       id,
@@ -113,7 +126,10 @@ const build = async (site, newestFile, repository) => {
       source: 'official',
       url: `${id}/${version}/`,
       latest: `${id}/latest/`,
-      zip: `https://github.com/${repository}/releases/download/${id}-v${version}/${id}-${version}.zip`,
+      // a preview is built from main – there is no release (and no zip) for it yet
+      ...(preview
+        ? { preview: true }
+        : { zip: `https://github.com/${repository}/releases/download/${id}-v${version}/${id}-${version}.zip` }),
     };
   });
   const listed = [];
@@ -189,9 +205,16 @@ if (command === 'newest') {
   }
   console.log(problems.length ? `${problems.length} problem(s) in ${COMMUNITY}` : `${COMMUNITY} is fine`);
   process.exit(problems.length ? 1 : 0);
+} else if (command === 'unreleased') {
+  const releasedVersions = JSON.parse(readFileSync(rest[0] ?? 'newest.json', 'utf8'));
+  for (const plugin of ownPlugins().filter((candidate) => !releasedVersions[candidate.id])) {
+    console.log(`${plugin.folder} ${plugin.id} ${plugin.version}`);
+  }
 } else if (command === 'build') {
   await build(...rest);
 } else {
-  console.error('usage: node scripts/plugin-catalog.mjs newest <file> | check | build <site> <newest.json> <owner/repo>');
+  console.error(
+    'usage: node scripts/plugin-catalog.mjs newest <file> | unreleased <newest.json> | check | build <site> <newest.json> <owner/repo> [previews.json]',
+  );
   process.exit(2);
 }

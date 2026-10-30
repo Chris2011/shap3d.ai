@@ -21,6 +21,8 @@ export interface CatalogEntry {
   minAppVersion?: string | null;
   /** 'official': built and released from the Shap3D.ai repository; 'community': listed there, built elsewhere */
   source?: 'official' | 'community';
+  /** not released yet – built from the repository's main branch, a preview of its next version */
+  preview?: boolean;
   /** the plugin folder to install from – absolute, resolved against the catalog */
   installUrl: string;
   /** the catalog it is listed in */
@@ -51,6 +53,7 @@ const readCatalog = async (catalog: string): Promise<CatalogEntry[]> => {
       homepage: plugin.homepage ? String(plugin.homepage) : undefined,
       minAppVersion: plugin.minAppVersion ? String(plugin.minAppVersion) : null,
       source: plugin.source === 'community' ? 'community' : 'official',
+      preview: plugin.preview === true,
       // the newest version stays at latest/ – installing from there lets "Update" find the next one
       installUrl: new URL(String(plugin.latest ?? plugin.url), catalog).href,
       catalog,
