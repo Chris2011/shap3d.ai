@@ -24,6 +24,7 @@
   },
   "shap3d": {
     "id": "level",
+    "name": "Level editor",
     "main": "plugin.js"
   }
 }

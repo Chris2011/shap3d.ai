@@ -977,7 +977,8 @@
         "noMain": "",
         "noMain#en": "package.json needs \"shap3d\": { \"main\": \"plugin.js\" }",
         "mainMissing": "",
-        "mainMissing#en": "The main file “{path}” from package.json is missing in the folder"
+        "mainMissing#en": "The main file “{path}” from package.json is missing in the folder",
+        "needsNewerApp": ""
       },
       "folders": {
         "upToDate": "",
@@ -2856,7 +2857,25 @@
       "confirmRemove": "",
       "confirmRemove#en": "Remove plugin “{name}”?",
       "removed": "",
-      "removed#en": "“{name}” was removed."
+      "removed#en": "“{name}” was removed.",
+      "loadZip": "",
+      "loadZipTitle": "",
+      "loadUrl": "",
+      "loadUrlTitle": "",
+      "urlPrompt": "",
+      "updateTo": "",
+      "discover": "",
+      "reload": "",
+      "addCatalog": "",
+      "loadingCatalogs": "",
+      "catalogFailed": "",
+      "community": "",
+      "communityTitle": "",
+      "installedState": "",
+      "catalogPrompt": "",
+      "ownCatalog": "",
+      "confirmCommunity": "",
+      "confirmUrlInstall": ""
     },
     "scriptEditor": {
       "loadExample": "",

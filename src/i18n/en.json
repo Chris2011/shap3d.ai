@@ -426,7 +426,8 @@
         "builtinReplace": "“{id}” is a built-in plugin and cannot be replaced",
         "noPackageJson": "The folder has no package.json",
         "noMain": "package.json needs \"shap3d\": { \"main\": \"plugin.js\" }",
-        "mainMissing": "The main file “{path}” from package.json is missing in the folder"
+        "mainMissing": "The main file “{path}” from package.json is missing in the folder",
+        "needsNewerApp": "{name} needs Shap3D.ai {version} or newer – this is {app}."
       },
       "folders": {
         "upToDate": "“{name}” {version} is up to date.",
@@ -1495,7 +1496,25 @@
       "fromBundle": "from bundle {name}",
       "loadFailed": "The plugin could not be loaded: {error}",
       "confirmRemove": "Remove plugin “{name}”?",
-      "removed": "“{name}” was removed."
+      "removed": "“{name}” was removed.",
+      "loadZip": "Load plugin zip…",
+      "loadZipTitle": "Install a plugin from the zip of a plugin release",
+      "loadUrl": "From URL…",
+      "loadUrlTitle": "Install a plugin from a web address – a plugin folder (with its package.json) or a zip",
+      "urlPrompt": "Web address of the plugin (folder with package.json, or .zip)",
+      "updateTo": "Update to {version}",
+      "discover": "Discover",
+      "reload": "Reload",
+      "addCatalog": "Add catalog…",
+      "loadingCatalogs": "Loading the plugin catalogs …",
+      "catalogFailed": "The catalog on {catalog} could not be read: {error}",
+      "community": "Community",
+      "communityTitle": "Not from the Shap3D.ai repository – listed, but built and published by its author",
+      "installedState": "Installed",
+      "catalogPrompt": "Web address of a plugin catalog (its index.json)",
+      "ownCatalog": "Own catalog: {url}",
+      "confirmCommunity": "Install “{name}” by {author}? It does not come from the Shap3D.ai repository and runs with full access to the app, like every plugin. Only install it if you trust its source.\n\n{url}",
+      "confirmUrlInstall": "Install the plugin at this address? Plugins run with full access to the app – only install it if you trust its source.\n\n{url}"
     },
     "scriptEditor": {
       "loadExample": "Load example…",

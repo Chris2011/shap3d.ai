@@ -2,6 +2,29 @@
 
 These stand-alone packages live in [`plugins/`](../../plugins). Each is built in its own folder and installed with _Plugins › Load plugin folder…_ – how packages work in general is described under [Writing plugins](plugins.md#plugin-packages).
 
+## Installing and releasing
+
+A package is installed in _Plugins_ from its folder (_Load plugin folder…_, the `dist/` of a build), from the zip of a plugin release (_Load plugin zip…_) or by URL (_From URL…_): a folder on a web server with the package's `package.json` – e.g. `https://<owner>.github.io/<repo>/plugins/level/latest/` – or a `.zip`. A plugin installed from a folder URL shows _Update to …_ when a newer version is at that URL. Zips from GitHub release pages cannot be loaded by URL in the browser (GitHub sends no CORS header for them) – download them, then use _Load plugin zip…_.
+
+**Discover** (in _Plugins_) lists the plugins of the plugin catalog – the plugins of this repository and the community plugins – with _Install_, _Installed_ or _Update to …_; _Add catalog…_ adds a catalog of your own (a company's plugins, say: any `index.json` in the same form). Plugins from outside this repository ask before they install, since every plugin runs with full access to the app. The same catalog is shown on the **plugin portal** (the project's GitHub Pages), whose _Install_ buttons open the app with `?install=<plugin folder>` – the app asks, installs and shows the plugin manager.
+
+**Listing a community plugin**: host your built plugin folder (its `dist/`, with `package.json` and `plugin.js`) where browsers may load it from other sites – GitHub Pages does – and add an entry to [`plugins/community.json`](../../plugins/community.json) in a pull request:
+
+```json
+{
+  "id": "my-plugin",
+  "name": "My plugin",
+  "author": "Jane Doe",
+  "url": "https://jane.github.io/my-plugin/",
+  "homepage": "https://github.com/jane/my-plugin",
+  "license": "MIT"
+}
+```
+
+The CI checks the entry (fields, a unique id that is not one of this repository's, the `package.json` at `url` naming that id and a version, its main script there); a maintainer reads the code before merging. The catalog then lists the version found at `url` – publishing a new version there updates it, so the review covers the host as much as the code.
+
+`shap3d` in a package's `package.json` may also carry `name` (the name catalogs and the portal show) and `minAppVersion` (the oldest app version it works with; older apps refuse to install it) – the build copies every `shap3d` field into `dist/package.json`. How plugins are released on their own: [Development › Plugin releases](development.md#plugin-releases).
+
 ## The OpenSCAD plugin
 
 <img src="../../plugins/openscad/docs/openscad-logo.png" alt="OpenSCAD logo" width="96" align="right">

@@ -1,8 +1,10 @@
 # Changelog – IFC (BIM) plugin
 
-## [Unreleased]
+## [1.0.1] – Shap3D.ai (unreleased)
 
-Nothing yet.
+### Changed
+
+- The built package's `package.json` keeps every `shap3d` field (its display name `shap3d.name`, `minAppVersion` …) – for the plugin catalog and the app's version check.
 
 ## [1.0.0] – 2026-10-25 · Shap3D.ai 0.9.0
 

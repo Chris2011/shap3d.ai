@@ -76,8 +76,9 @@ import { createEditor, installKeyboard } from './engine/setup';
 import { EDITOR } from './components/keys';
 import { autosave } from './engine/defaults';
 import { importFile } from './engine/commands';
-import { initPlugins } from './plugins/registry';
-import { t, language } from './i18n';
+import { initPlugins, installPluginFromUrl } from './plugins/registry';
+import { showPanel } from './components/panelState';
+import { t, language, localize } from './i18n';
 
 const editor = createEditor();
 provide(EDITOR, editor);
@@ -183,10 +184,36 @@ useEventListener(
   { capture: true },
 );
 
+/**
+ * `?install=<url>` – the link a plugin portal opens: asks first (plugins run with full access), installs the plugin
+ * at that URL and shows the plugin manager. The parameter is taken out of the address, so a reload does not ask again.
+ */
+const installFromLink = async () => {
+  const params = new URLSearchParams(location.search);
+  const url = params.get('install');
+  if (!url) {
+    return;
+  }
+  params.delete('install');
+  history.replaceState(null, '', location.pathname + (params.size ? `?${params}` : '') + location.hash);
+  if (!/^https?:\/\//i.test(url) || !(await editor.confirm(t('pluginManager.confirmUrlInstall', { url })))) {
+    return;
+  }
+  showPanel('plugins');
+  try {
+    const installed = await installPluginFromUrl(url);
+    editor.toast(t('pluginManager.installedActive', { name: installed.map((plugin) => localize(plugin.name)).join(', ') }));
+  } catch (error) {
+    editor.toast(t('pluginManager.loadFailed', { error: (error as Error)?.message ?? String(error) }));
+  }
+};
+
 onMounted(() => {
   installKeyboard(editor, (firstKey) => statusBar.value?.focusVcb(firstKey));
   // plugins need the viewer, which the viewport creates while mounting
-  initPlugins(editor).catch((error) => console.error('Plugins konnten nicht geladen werden', error));
+  initPlugins(editor)
+    .then(() => installFromLink())
+    .catch((error) => console.error('Plugins konnten nicht geladen werden', error));
   // first start: show the welcome tour once the splash is gone
   if (!tourSeen() && !new URLSearchParams(location.search).has('shot')) {
     setTimeout(() => openTour(), 2500);

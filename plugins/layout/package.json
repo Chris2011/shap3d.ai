@@ -5,10 +5,6 @@
   "description": "LayOut for Shap3D.ai: sheets for plans next to the 3D model – viewports from scenes with a drawing scale, live linked to the model, text, lines, dimensions, title block, SVG export and printing to PDF.",
   "license": "Apache-2.0",
   "type": "module",
-  "shap3d": {
-    "id": "layout",
-    "main": "plugin.js"
-  },
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p .",
@@ -26,5 +22,10 @@
       "oxfmt --no-error-on-unmatched-pattern"
     ],
     "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "layout",
+    "name": "LayOut",
+    "main": "plugin.js"
   }
 }

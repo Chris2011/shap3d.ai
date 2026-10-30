@@ -1,14 +1,10 @@
 {
   "name": "s3d-plugin-openscad",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
   "description": "OpenSCAD for Shap3D.ai: opens .scad files, OpenSCAD in the script editor and s3d.scad() – with the official OpenSCAD as WebAssembly.",
   "license": "GPL-2.0-or-later",
   "type": "module",
-  "shap3d": {
-    "id": "openscad",
-    "main": "plugin.js"
-  },
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p .",
@@ -20,6 +16,10 @@
     "screenshots": "powershell -File ../../scripts/screenshots.ps1 -Shots script -Name openscad -Out docs -Query \"package=openscad&language=openscad&file=/plugins/openscad/docs/demo.scad&camera=-0.32,-0.42,0.22&target=0.1,0,-0.01\"",
     "screenshots:sh": "bash ../../scripts/screenshots.sh --shots script --name openscad --out docs --query \"package=openscad&language=openscad&file=/plugins/openscad/docs/demo.scad&camera=-0.32,-0.42,0.22&target=0.1,0,-0.01\""
   },
+  "dependencies": {
+    "@typopro/dtp-liberation": "3.7.5",
+    "openscad-wasm": "0.0.4"
+  },
   "lint-staged": {
     "src/**/*.{js,mjs,ts,vue}": [
       "oxlint --fix",
@@ -27,8 +27,9 @@
     ],
     "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
   },
-  "dependencies": {
-    "@typopro/dtp-liberation": "3.7.5",
-    "openscad-wasm": "0.0.4"
+  "shap3d": {
+    "id": "openscad",
+    "name": "OpenSCAD",
+    "main": "plugin.js"
   }
 }

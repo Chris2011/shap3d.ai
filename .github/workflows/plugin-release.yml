@@ -1,0 +1,215 @@
+# Releases of the plugin packages in plugins/ – each on its own, apart from the app. Runs on every push to main that
+# touches a plugin (or by hand) and releases every plugin whose version is ready:
+#
+#   - the version in plugins/<name>/package.json has a section "## [<version>] – <date> …" in the plugin's
+#     CHANGELOG.md, with a date and without "unreleased" in its heading, and
+#   - there is no tag <id>-v<version> yet (<id> = shap3d.id in its package.json, e.g. level-v1.0.0).
+#
+# So a plugin release is: raise its version, date its changelog section, push. Each release gets the built plugin as
+# <id>-<version>.zip (the files of dist/ – install it with "Plugins › Load plugin zip…") and its SHA-256, and is never
+# marked "latest" (that stays the app's release).
+#
+#   plan      finds the plugins to release
+#   release   checks, builds, packs and releases each of them (one job per plugin)
+#   pages     puts the newest release of every plugin on GitHub Pages, with the catalog (plugins/index.json – also
+#             the community plugins of plugins/community.json) the app installs from, and the plugin portal
+#             (portal/, a package of its own) – only when the repository variable PLUGIN_PAGES is "true" (Settings › Pages › Source:
+#             GitHub Actions); APP_URL, if set, is the app's address the portal's install links open
+#
+# Actions are pinned to commit SHAs where this repository pins them already; the Pages actions by version.
+
+name: Plugin release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'plugins/**'
+      - 'packages/procgen/**'
+      - '.github/workflows/plugin-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plugin-release
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  plan:
+    name: Plugins to release
+    runs-on: ubuntu-latest
+    outputs:
+      plugins: ${{ steps.plan.outputs.plugins }}
+      any: ${{ steps.plan.outputs.any }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Versions, changelogs and tags
+        id: plan
+        run: |
+          plugins='[]'
+          for manifest in plugins/*/package.json; do
+            folder="$(dirname "$manifest")"
+            name="$(basename "$folder")"
+            id="$(node -p "require('./$manifest').shap3d?.id ?? ''")"
+            version="$(node -p "require('./$manifest').version")"
+            if [ -z "$id" ]; then
+              continue
+            fi
+            heading="$(grep -m1 -F "## [$version]" "$folder/CHANGELOG.md" || true)"
+            tag="$id-v$version"
+            if [ -z "$heading" ]; then
+              echo "::notice::$name $version: no changelog section – not released."
+              continue
+            fi
+            if ! echo "$heading" | grep -Eq '[0-9]{4}-[0-9]{2}-[0-9]{2}' || echo "$heading" | grep -iq 'unreleased'; then
+              echo "::notice::$name $version: changelog section without a date or marked unreleased – not released."
+              continue
+            fi
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+              continue
+            fi
+            echo "::notice::Releasing $tag."
+            plugins="$(node -e "
+              const list = JSON.parse(process.argv[1]);
+              list.push({ folder: process.argv[2], id: process.argv[3], version: process.argv[4], tag: process.argv[5] });
+              console.log(JSON.stringify(list));
+            " "$plugins" "$name" "$id" "$version" "$tag")"
+          done
+          echo "plugins=$plugins" >> "$GITHUB_OUTPUT"
+          echo "any=$([ "$plugins" = '[]' ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Release ${{ matrix.plugin.tag }}
+    needs: plan
+    if: needs.plan.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: ${{ fromJSON(needs.plan.outputs.plugins) }}
+    defaults:
+      run:
+        working-directory: plugins/${{ matrix.plugin.folder }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      # the packages build against the app's sources and types, and take oxlint/oxfmt from the root
+      - name: Install the app's packages
+        working-directory: .
+        run: npm ci --no-audit --no-fund
+
+      - name: Install the plugin's packages
+        run: if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; fi
+
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run i18n
+      - run: npm run build
+
+      - name: Release notes from the plugin's CHANGELOG.md
+        env:
+          VERSION: ${{ matrix.plugin.version }}
+        run: |
+          notes="$(awk -v version="$VERSION" '
+            index($0, "## [" version "]") == 1 { found = 1; next }
+            found && (/^## / || /^\[[^]]+\]: /) { exit }
+            found { print }
+          ' CHANGELOG.md | sed -e '/./,$!d')"
+          printf '%s\n' "$notes" > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Pack dist
+        env:
+          FILE: ${{ matrix.plugin.id }}-${{ matrix.plugin.version }}.zip
+        run: |
+          (cd dist && zip -qr "$RUNNER_TEMP/$FILE" .)
+          (cd "$RUNNER_TEMP" && sha256sum "$FILE" > "$FILE.sha256")
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ matrix.plugin.tag }}
+          VERSION: ${{ matrix.plugin.version }}
+          FILE: ${{ matrix.plugin.id }}-${{ matrix.plugin.version }}.zip
+        run: |
+          title="$(node -p "require('./package.json').name") $VERSION"
+          gh release create "$TAG" "$RUNNER_TEMP/$FILE" "$RUNNER_TEMP/$FILE.sha256" \
+            --target "$GITHUB_SHA" \
+            --title "$title" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            --latest=false
+
+  pages:
+    name: Plugin catalog and portal on GitHub Pages
+    needs: [plan, release]
+    # on every run (new releases, a changed plugins/community.json) – only where Pages is set up for it
+    if: always() && vars.PLUGIN_PAGES == 'true' && needs.release.result != 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: portal/package-lock.json
+
+      - name: The newest release of every plugin, unpacked
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p site/plugins
+          # plugin tags are <id>-v<version> (the app's are v<version>); the newest version of each
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 500 --json tagName,isDraft \
+            --jq '.[] | select(.isDraft | not) | .tagName' | node scripts/plugin-catalog.mjs newest newest.json
+          node -p "Object.entries(require('./newest.json')).map(([id, version]) => id + ' ' + version).join('\n')" > newest.txt
+          while read -r id version; do
+            [ -z "$id" ] && continue
+            gh release download "$id-v$version" --repo "$GITHUB_REPOSITORY" --pattern "$id-$version.zip" --dir downloads
+            mkdir -p "site/plugins/$id/$version"
+            unzip -q "downloads/$id-$version.zip" -d "site/plugins/$id/$version"
+            cp -r "site/plugins/$id/$version" "site/plugins/$id/latest"
+          done < newest.txt
+
+      # the index the app (Plugins › Discover) and the portal read: these plugins and the community ones
+      - name: Catalog
+        run: node scripts/plugin-catalog.mjs build site newest.json "$GITHUB_REPOSITORY"
+
+      # the plugin portal (portal/ – a package of its own, Vite and Vue) as the site's start page; config.json gives
+      # it the app's address (repository variable APP_URL) for its install links
+      - name: Portal
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          (cd portal && npm ci --no-audit --no-fund && npm run build)
+          cp -r portal/dist/. site/
+          node -e "console.log(JSON.stringify({ appUrl: process.env.APP_URL || '' }))" > site/config.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

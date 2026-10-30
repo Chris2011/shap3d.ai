@@ -1,0 +1,48 @@
+/* the portal's colours – the app's brand, light and dark following the system */
+:root {
+  --bg: #f4f5f7;
+  --surface: #fff;
+  --line: #d9dde3;
+  --text: #1d232b;
+  --muted: #5d6673;
+  --navy: #1d3a5f;
+  --on-navy: #fff;
+  --accent: #0e8ca0;
+  --warn-bg: #fff3d6;
+  --warn: #8a5a00;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f14;
+    --surface: #141a22;
+    --line: #2a323d;
+    --text: #e6ebf1;
+    --muted: #9aa4b1;
+    --navy: #8fb4e3;
+    --on-navy: #0b0f14;
+    --accent: #5fd4e6;
+    --warn-bg: #3a2c0a;
+    --warn: #f2c66d;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    15px/1.5 system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+a {
+  color: var(--accent);
+}

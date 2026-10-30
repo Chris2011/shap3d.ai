@@ -5,10 +5,6 @@
   "description": "Shader materials for Shap3D.ai: wood, marble, granite, terrazzo, rust and patina, brick walls, checker and exposed concrete – drawn by GLSL shaders as solid patterns without seams, every parameter adjustable in the Materials panel.",
   "license": "Apache-2.0",
   "type": "module",
-  "shap3d": {
-    "id": "shaders",
-    "main": "plugin.js"
-  },
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p .",
@@ -26,5 +22,10 @@
       "oxfmt --no-error-on-unmatched-pattern"
     ],
     "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "shaders",
+    "name": "Shader materials",
+    "main": "plugin.js"
   }
 }

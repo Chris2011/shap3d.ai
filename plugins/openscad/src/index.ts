@@ -17,7 +17,7 @@ import { loadSettings } from './settings';
 const plugin: S3dPlugin = {
   id: 'openscad',
   name: 'openscad.plugin.name',
-  version: '1.4.1',
+  version: '1.4.2',
   author: 'Shap3D.ai (OpenSCAD: openscad.org)',
   description: 'openscad.plugin.description',
   messages: MESSAGES,

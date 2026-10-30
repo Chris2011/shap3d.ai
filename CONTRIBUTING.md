@@ -70,6 +70,10 @@ For changes you can see, check them in the running app (`npm run dev`). If scree
 - One topic per commit. Split app, plugin and documentation changes when they stand on their own – and commit a core API before the plugin that uses it.
 - Pull requests target `main`. Describe what changed and how you checked it.
 
+## Community plugins
+
+A plugin of your own does not need to live in this repository: build it, host its folder where browsers may load it (e.g. GitHub Pages) and add it to [`plugins/community.json`](plugins/community.json) in a pull request – it then shows in the app's _Plugins › Discover_ and on the plugin portal. How: [Plugin packages › Listing a community plugin](docs/wiki/plugin-packages.md#installing-and-releasing).
+
 ## License
 
 Shap3D.ai is licensed under the [Apache License 2.0](LICENSE). By contributing you agree that your contribution is licensed under it too. Plugin packages may have their own license (e.g. OpenSCAD is GPL) – it is stated in their folder.

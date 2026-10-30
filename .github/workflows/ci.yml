@@ -1,7 +1,8 @@
 # Checks of the app on every push and pull request: lint, format, types and the web build.
 # The pre-commit hook only looks at staged files – this catches everything else (older files, commits made with
 # --no-verify) before a release stops at the same checks. The library in packages/procgen runs its tests, and every
-# plugin package in plugins/ its own checks (types, lint, format, texts) and build.
+# plugin package in plugins/ its own checks (types, lint, format, texts) and build; the community plugin list
+# (plugins/community.json) is checked against the plugins it names, and the plugin portal (portal/) is built.
 #
 # Actions are pinned to commit SHAs; the comment behind each one names the release.
 
@@ -34,6 +35,46 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npx vue-tsc --noEmit -p tsconfig.json
+      - run: npm run build
+
+  # the community plugins of the catalog: every entry complete, and its plugin reachable at its url with the id it names
+  community:
+    name: Community plugin list
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - run: node scripts/plugin-catalog.mjs check
+
+  # the plugin portal in portal/ – a package of its own (like the plugins), linted and formatted with the root's tools
+  portal:
+    name: Plugin portal – types, lint, format and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portal
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            portal/package-lock.json
+
+      - name: Install the root's tools (oxlint, oxfmt)
+        working-directory: .
+        run: npm ci --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
       - run: npm run build
 
   procgen:

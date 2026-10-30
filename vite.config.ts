@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig, type Plugin } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
@@ -18,34 +19,55 @@ function aiProxy(): Plugin {
         try {
           const target = String(req.headers['x-ai-target'] ?? '');
           const site = String(req.headers['sec-fetch-site'] ?? 'same-origin');
-          if (!/^https?:\/\//i.test(target) || site !== 'same-origin') { res.statusCode = 400; res.end('invalid proxy request'); return; }
+          if (!/^https?:\/\//i.test(target) || site !== 'same-origin') {
+            res.statusCode = 400;
+            res.end('invalid proxy request');
+            return;
+          }
           const headers: Record<string, string> = {};
           for (const [k, v] of Object.entries(req.headers)) {
             if (typeof v !== 'string') continue;
-            if (['host', 'origin', 'referer', 'connection', 'content-length', 'x-ai-target', 'cookie'].includes(k) || k.startsWith('sec-')) continue;
+            if (['host', 'origin', 'referer', 'connection', 'content-length', 'x-ai-target', 'cookie'].includes(k) || k.startsWith('sec-'))
+              continue;
             headers[k] = v;
           }
-          const chunks: Buffer[] = []; for await (const c of req) chunks.push(c as Buffer);
+          const chunks: Buffer[] = [];
+          for await (const c of req) chunks.push(c as Buffer);
           // Cancelling in the app must cancel upstream too (otherwise Ollama keeps pulling).
-          const abort = new AbortController(); res.on('close', () => abort.abort());
-          const upstream = await fetch(target, { method: req.method, headers, signal: abort.signal, body: ['GET', 'HEAD'].includes(req.method ?? 'GET') ? undefined : Buffer.concat(chunks) });
+          const abort = new AbortController();
+          res.on('close', () => abort.abort());
+          const upstream = await fetch(target, {
+            method: req.method,
+            headers,
+            signal: abort.signal,
+            body: ['GET', 'HEAD'].includes(req.method ?? 'GET') ? undefined : Buffer.concat(chunks),
+          });
           res.statusCode = upstream.status;
-          upstream.headers.forEach((v, k) => { if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(k)) res.setHeader(k, v); });
+          upstream.headers.forEach((v, k) => {
+            if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(k)) res.setHeader(k, v);
+          });
           // Web filters (e.g. Sophos) hold back application/x-ndjson until the response is complete but let real SSE
           // through – so every JSON line goes out as an SSE "data:" event (the client strips the prefix again).
           if (upstream.body && /x-ndjson/i.test(upstream.headers.get('content-type') ?? '')) {
-            res.setHeader('content-type', 'text/event-stream'); res.setHeader('cache-control', 'no-cache, no-transform'); res.flushHeaders();
-            let rest = ''; const dec = new TextDecoder();
+            res.setHeader('content-type', 'text/event-stream');
+            res.setHeader('cache-control', 'no-cache, no-transform');
+            res.flushHeaders();
+            let rest = '';
+            const dec = new TextDecoder();
             for await (const chunk of upstream.body as any) {
-              const lines = (rest + dec.decode(chunk, { stream: true })).split('\n'); rest = lines.pop() ?? '';
+              const lines = (rest + dec.decode(chunk, { stream: true })).split('\n');
+              rest = lines.pop() ?? '';
               for (const line of lines) if (line.trim()) res.write(`data: ${line}\n\n`);
             }
             if (rest.trim()) res.write(`data: ${rest}\n\n`);
-            res.end(); return;
+            res.end();
+            return;
           }
-          if (upstream.body) Readable.fromWeb(upstream.body as any).pipe(res); else res.end();
+          if (upstream.body) Readable.fromWeb(upstream.body as any).pipe(res);
+          else res.end();
         } catch (e) {
-          res.statusCode = 502; res.end('proxy error: ' + (e as Error).message);
+          res.statusCode = 502;
+          res.end('proxy error: ' + (e as Error).message);
         }
       });
     },
@@ -53,6 +75,8 @@ function aiProxy(): Plugin {
 }
 
 export default defineConfig({
+  // the app's version – plugins may name the oldest one they work with (shap3d.minAppVersion)
+  define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? JSON.parse(readFileSync('package.json', 'utf8')).version) },
   plugins: [vue(), tailwindcss(), aiProxy(), convertBridge(), remoteApi()],
   // Tauri (desktop app): keep its output visible, never switch ports, and don't watch the Rust side
   clearScreen: false,

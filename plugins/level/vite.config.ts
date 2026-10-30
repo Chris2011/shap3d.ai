@@ -48,7 +48,8 @@ const packageFiles = (): Plugin => ({
     };
     emit('README.md', readFileSync('README.md'));
     const { name, version, description, license } = manifest;
-    const shap3d = { id: manifest.shap3d.id, main: 'plugin.js' };
+    // every shap3d field (name, minAppVersion …) goes along – the built script is always plugin.js
+    const shap3d = { ...manifest.shap3d, main: 'plugin.js' };
     emit(
       'package.json',
       JSON.stringify({ name, version, description, license, shap3d, files: [...files, 'package.json'] }, null, 2) + '\n',

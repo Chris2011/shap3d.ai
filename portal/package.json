@@ -1,0 +1,34 @@
+{
+  "name": "shap3d-plugin-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Shap3D.ai plugin portal: the plugins of the plugin catalog – official and community – searchable, each with a button that installs it in the app. Built into dist/ and put on the project's GitHub Pages by the plugin release workflow.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src index.html",
+    "format:check": "oxfmt --check src index.html"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "{src/**/*.{json,css,md},index.html}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "dependencies": {
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.10",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vue-tsc": "^3.3.13"
+  }
+}

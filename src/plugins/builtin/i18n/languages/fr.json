@@ -426,7 +426,8 @@
         "builtinReplace": "« {id} » est un plugin intégré et ne peut pas être remplacé",
         "noPackageJson": "Le dossier ne contient pas de package.json",
         "noMain": "package.json nécessite \"shap3d\": { \"main\": \"plugin.js\" }",
-        "mainMissing": "Le fichier principal « {path} » de package.json manque dans le dossier"
+        "mainMissing": "Le fichier principal « {path} » de package.json manque dans le dossier",
+        "needsNewerApp": "{name} nécessite Shap3D.ai {version} ou plus récent – celle-ci est {app}."
       },
       "folders": {
         "upToDate": "« {name} » {version} est à jour.",
@@ -1495,7 +1496,25 @@
       "fromBundle": "du lot {name}",
       "loadFailed": "Le plugin n’a pas pu être chargé : {error}",
       "confirmRemove": "Retirer le plugin « {name} » ?",
-      "removed": "« {name} » a été retiré."
+      "removed": "« {name} » a été retiré.",
+      "loadZip": "Charger un zip de plugin…",
+      "loadZipTitle": "Installer un plugin depuis le zip d’une version publiée",
+      "loadUrl": "Depuis une URL…",
+      "loadUrlTitle": "Installer un plugin depuis une adresse web – un dossier de plugin (avec son package.json) ou un zip",
+      "urlPrompt": "Adresse web du plugin (dossier avec package.json, ou .zip)",
+      "updateTo": "Mettre à jour vers {version}",
+      "discover": "Découvrir",
+      "reload": "Recharger",
+      "addCatalog": "Ajouter un catalogue…",
+      "loadingCatalogs": "Chargement des catalogues de plugins …",
+      "catalogFailed": "Le catalogue sur {catalog} n’a pas pu être lu : {error}",
+      "community": "Communauté",
+      "communityTitle": "Pas du dépôt Shap3D.ai – répertorié, mais construit et publié par son auteur",
+      "installedState": "Installé",
+      "catalogPrompt": "Adresse web d’un catalogue de plugins (son index.json)",
+      "ownCatalog": "Catalogue personnel : {url}",
+      "confirmCommunity": "Installer « {name} » de {author} ? Il ne vient pas du dépôt Shap3D.ai et s’exécute, comme tout plugin, avec un accès complet à l’application. Ne l’installez que si vous faites confiance à sa source.\n\n{url}",
+      "confirmUrlInstall": "Installer le plugin à cette adresse ? Les plugins ont un accès complet à l’application – ne l’installez que si vous faites confiance à sa source.\n\n{url}"
     },
     "scriptEditor": {
       "loadExample": "Charger un exemple…",

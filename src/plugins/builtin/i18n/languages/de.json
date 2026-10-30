@@ -426,7 +426,8 @@
         "builtinReplace": "„{id}“ ist ein eingebautes Plugin und kann nicht ersetzt werden",
         "noPackageJson": "Im Ordner fehlt eine package.json",
         "noMain": "package.json braucht \"shap3d\": { \"main\": \"plugin.js\" }",
-        "mainMissing": "Die Hauptdatei „{path}“ aus package.json fehlt im Ordner"
+        "mainMissing": "Die Hauptdatei „{path}“ aus package.json fehlt im Ordner",
+        "needsNewerApp": "{name} braucht Shap3D.ai {version} oder neuer – das hier ist {app}."
       },
       "folders": {
         "upToDate": "„{name}“ {version} ist schon aktuell.",
@@ -1495,7 +1496,25 @@
       "fromBundle": "aus Paket {name}",
       "loadFailed": "Plugin konnte nicht geladen werden: {error}",
       "confirmRemove": "Plugin „{name}“ entfernen?",
-      "removed": "„{name}“ wurde entfernt."
+      "removed": "„{name}“ wurde entfernt.",
+      "loadZip": "Plugin-Zip laden…",
+      "loadZipTitle": "Ein Plugin aus dem Zip eines Plugin-Releases installieren",
+      "loadUrl": "Von URL…",
+      "loadUrlTitle": "Ein Plugin von einer Webadresse installieren – ein Plugin-Ordner (mit package.json) oder ein Zip",
+      "urlPrompt": "Webadresse des Plugins (Ordner mit package.json oder .zip)",
+      "updateTo": "Auf {version} aktualisieren",
+      "discover": "Entdecken",
+      "reload": "Neu laden",
+      "addCatalog": "Katalog hinzufügen…",
+      "loadingCatalogs": "Plugin-Kataloge werden geladen …",
+      "catalogFailed": "Der Katalog auf {catalog} ließ sich nicht lesen: {error}",
+      "community": "Community",
+      "communityTitle": "Nicht aus dem Shap3D.ai-Repository – gelistet, aber von seinem Autor gebaut und veröffentlicht",
+      "installedState": "Installiert",
+      "catalogPrompt": "Webadresse eines Plugin-Katalogs (seine index.json)",
+      "ownCatalog": "Eigener Katalog: {url}",
+      "confirmCommunity": "„{name}“ von {author} installieren? Es stammt nicht aus dem Shap3D.ai-Repository und läuft wie jedes Plugin mit vollem Zugriff auf die App. Nur installieren, wenn du der Quelle vertraust.\n\n{url}",
+      "confirmUrlInstall": "Das Plugin von dieser Adresse installieren? Plugins laufen mit vollem Zugriff auf die App – nur installieren, wenn du der Quelle vertraust.\n\n{url}"
     },
     "scriptEditor": {
       "loadExample": "Beispiel laden…",

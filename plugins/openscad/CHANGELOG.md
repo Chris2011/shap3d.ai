@@ -1,8 +1,10 @@
 # Changelog – OpenSCAD plugin
 
-## [Unreleased]
+## [1.4.2] – Shap3D.ai (unreleased)
 
-Nothing yet.
+### Changed
+
+- The built package's `package.json` keeps every `shap3d` field (its display name `shap3d.name`, `minAppVersion` …) – for the plugin catalog and the app's version check.
 
 ## [1.4.1] – 2026-10-25 · Shap3D.ai 0.9.0
 
@@ -32,7 +34,7 @@ Nothing yet.
 
 ### Added
 
-- *Open as code ▸ OpenSCAD*: an object becomes OpenSCAD code (one `polyhedron()` per material with `color()`, groups as `union()`), and *Convert to…* turns OpenSCAD code into JavaScript, JSON or OBJ and back.
+- _Open as code ▸ OpenSCAD_: an object becomes OpenSCAD code (one `polyhedron()` per material with `color()`, groups as `union()`), and _Convert to…_ turns OpenSCAD code into JavaScript, JSON or OBJ and back.
 
 ## [1.1.0] – 2026-10-19 · Shap3D.ai 0.5.0
 
@@ -42,4 +44,4 @@ First version in this repository:
 - Open `.scad` files; `color()` becomes materials (with transparency).
 - OpenSCAD as a language in the script editor, with examples and help, and `s3d.scad(code)` inside JavaScript scripts.
 - Export of the model as OpenSCAD `polyhedron()`.
-- The *OpenSCAD* panel: unit, geometry kernel (Manifold or CGAL) and a file library in the browser for `include`, `use`, `import()` and fonts; Liberation Sans, Serif and Mono ship with the plugin.
+- The _OpenSCAD_ panel: unit, geometry kernel (Manifold or CGAL) and a file library in the browser for `include`, `use`, `import()` and fonts; Liberation Sans, Serif and Mono ship with the plugin.

@@ -1,3 +1,4 @@
+import { filesFromUrl, isZipUrl, manifestAt, unzip } from './pluginSources';
 import { reactive } from 'vue';
 import { useStorage } from '@vueuse/core';
 import type { Editor } from '../engine/editor';
@@ -41,9 +42,12 @@ export interface PackageInfo {
   id?: string;
   /** the name of the bundle it came with (see readPluginPackages) */
   bundle?: string;
+  /** the URL it was installed from (a folder on a web server or a zip) – "Update" looks there for a newer version */
+  source?: string;
 }
 
 /** is version `a` newer than `b`? ("1.10.0" > "1.9.2"; missing parts count as 0) */
+export const newerVersion = (a: string, b: string) => newerThan(a, b);
 const newerThan = (a: string, b: string) => {
   const partsA = a.split(/[.+-]/).map((part) => parseInt(part, 10) || 0),
     partsB = b.split(/[.+-]/).map((part) => parseInt(part, 10) || 0);
@@ -349,6 +353,11 @@ export const readPluginPackage = async (files: File[]): Promise<PluginPackage> =
   if (mainCode == null) {
     throw new Error(t('plugins.errors.mainMissing', { path: mainPath }));
   }
+  // a plugin may need a newer app than this one
+  const minApp = manifest.shap3d?.minAppVersion;
+  if (minApp && newerThan(String(minApp), __APP_VERSION__)) {
+    throw new Error(t('plugins.errors.needsNewerApp', { name: manifest.name ?? mainPath, version: String(minApp), app: __APP_VERSION__ }));
+  }
   const info: PackageInfo = {
     name: manifest.name ?? '',
     version: manifest.version ?? '',
@@ -408,6 +417,38 @@ export const installPluginPackages = async (source: File[] | PluginPackage[]) =>
 export const installPluginPackage = async (files: File[] | PluginPackage) => {
   const installed = await installPluginPackages(Array.isArray(files) ? files : [files]);
   return installed[installed.length - 1];
+};
+
+/** Installs the plugin packages in a zip (the file a plugin release ships). */
+export const installPluginZip = async (zip: Blob) => installPluginPackages(await unzip(zip));
+
+/**
+ * Installs the plugin packages at a URL – a zip or a folder on a web server – and remembers the URL, so "Update"
+ * looks there for newer versions.
+ */
+export const installPluginFromUrl = async (url: string) => {
+  const packages = await readPluginPackages(await filesFromUrl(url));
+  for (const pluginPackage of packages) {
+    pluginPackage.info.source = url;
+  }
+  return installPluginPackages(packages);
+};
+
+/**
+ * The newer version waiting at the URL a plugin was installed from – null when there is none, the plugin did not
+ * come from a folder URL (a zip is not looked into), or the server cannot be reached.
+ */
+export const newerAtSource = async (id: string): Promise<string | null> => {
+  const info = installedPackage(id)?.info;
+  if (!info?.source || isZipUrl(info.source)) {
+    return null;
+  }
+  try {
+    const version = (await manifestAt(info.source)).version ?? '';
+    return version && newerThan(version, info.version) ? version : null;
+  } catch {
+    return null;
+  }
 };
 
 /** Code and package info of an installed package plugin (to compare with a newer folder). */

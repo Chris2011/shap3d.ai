@@ -5,10 +5,6 @@
   "description": "Room planner for Shap3D.ai: draw a room with doors and windows, furnish it from a catalog (living, bedroom, kitchen, dining, office, bath, storage) with snapping to walls and furniture, turn, measure and list what is in it.",
   "license": "Apache-2.0",
   "type": "module",
-  "shap3d": {
-    "id": "roomplanner",
-    "main": "plugin.js"
-  },
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p .",
@@ -26,5 +22,10 @@
       "oxfmt --no-error-on-unmatched-pattern"
     ],
     "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "roomplanner",
+    "name": "Room planner",
+    "main": "plugin.js"
   }
 }

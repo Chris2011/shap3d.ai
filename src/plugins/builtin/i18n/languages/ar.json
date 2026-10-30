@@ -426,7 +426,8 @@
         "builtinReplace": "«{id}» إضافة مدمجة ولا يمكن استبدالها",
         "noPackageJson": "المجلد لا يحتوي على package.json",
         "noMain": "يحتاج package.json إلى \"shap3d\": { \"main\": \"plugin.js\" }",
-        "mainMissing": "الملف الرئيسي «{path}» من package.json مفقود في المجلد"
+        "mainMissing": "الملف الرئيسي «{path}» من package.json مفقود في المجلد",
+        "needsNewerApp": "يحتاج {name} إلى Shap3D.ai {version} أو أحدث – هذا الإصدار {app}."
       },
       "folders": {
         "upToDate": "«{name}» {version} محدَّث.",
@@ -1495,7 +1496,25 @@
       "fromBundle": "من الحزمة {name}",
       "loadFailed": "تعذّر تحميل الإضافة: {error}",
       "confirmRemove": "إزالة الإضافة «{name}»؟",
-      "removed": "تمت إزالة «{name}»."
+      "removed": "تمت إزالة «{name}».",
+      "loadZip": "تحميل ملف zip لملحق…",
+      "loadZipTitle": "تثبيت ملحق من ملف zip لإصدار ملحق",
+      "loadUrl": "من رابط…",
+      "loadUrlTitle": "تثبيت ملحق من عنوان ويب – مجلد ملحق (مع package.json) أو ملف zip",
+      "urlPrompt": "عنوان الويب للملحق (مجلد فيه package.json أو ‎.zip)",
+      "updateTo": "التحديث إلى {version}",
+      "discover": "استكشاف",
+      "reload": "إعادة التحميل",
+      "addCatalog": "إضافة فهرس…",
+      "loadingCatalogs": "جارٍ تحميل فهارس الملحقات …",
+      "catalogFailed": "تعذّرت قراءة الفهرس على {catalog}: {error}",
+      "community": "المجتمع",
+      "communityTitle": "ليس من مستودع Shap3D.ai – مدرج، لكن مؤلفه يبنيه وينشره",
+      "installedState": "مثبّت",
+      "catalogPrompt": "عنوان الويب لفهرس ملحقات (ملف index.json)",
+      "ownCatalog": "فهرس خاص: {url}",
+      "confirmCommunity": "تثبيت «{name}» من {author}؟ لا يأتي من مستودع Shap3D.ai ويعمل، مثل كل ملحق، بوصول كامل إلى التطبيق. لا تثبّته إلا إذا كنت تثق بمصدره.\n\n{url}",
+      "confirmUrlInstall": "تثبيت الملحق من هذا العنوان؟ تعمل الملحقات بوصول كامل إلى التطبيق – لا تثبّته إلا إذا كنت تثق بمصدره.\n\n{url}"
     },
     "scriptEditor": {
       "loadExample": "تحميل مثال…",

@@ -35,6 +35,17 @@ The workflow then
 
 A version with a suffix such as `0.9.0-rc.1` in `package.json` becomes a pre-release: it does not get the `latest`/`static` image tags and is not marked as the latest release. The installers are not code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first start (macOS: right-click → _Open_). Plugin versions are not part of the release – they live in the plugin changelogs.
 
+### Plugin releases
+
+The packages in `plugins/` are released on their own by the [plugin release workflow](../../.github/workflows/plugin-release.yml), on every push to `main` that touches a plugin (or by hand). A plugin is released when
+
+- the `version` in its `package.json` has a section in its `CHANGELOG.md` whose heading carries a date and no _unreleased_ – e.g. `## [1.1.0] – 2026-11-02 · Shap3D.ai 0.10.0` – and
+- there is no tag `<id>-v<version>` yet (`<id>` is `shap3d.id`, e.g. `level-v1.1.0`).
+
+So a plugin release is: raise its version, date its changelog section, push. The run checks the plugin (type, lint, format, texts), builds it and creates a release with `<id>-<version>.zip` (the files of its `dist/`) and the zip's SHA-256, with the changelog section as text. Plugin releases are never marked _latest_ – that stays the app's release.
+
+**On GitHub Pages** (when the repository variable `PLUGIN_PAGES` is `true` and _Settings › Pages › Source_ is _GitHub Actions_): the newest release of every plugin, unpacked, at `plugins/<id>/<version>/` and `plugins/<id>/latest/`, with `plugins/index.json` listing them all. The app installs from such a folder by URL (_Plugins › From URL…_) and offers _Update to …_ when a newer version is there. The same run writes the catalog with the community plugins of [`plugins/community.json`](../../plugins/community.json) ([`scripts/plugin-catalog.mjs`](../../scripts/plugin-catalog.mjs) – `check` is what the CI runs on that list, `build` writes the index) and the **plugin portal** as the site's start page – a package of its own in [`portal/`](../../portal), like the plugins (Vite and Vue with its own `package.json` and dependencies; in that folder `npm install`, `npm run dev`, `npm run build` → `dist/index.html` and its assets, plus `typecheck`, `lint` and `format:check` – the latter two with the root's oxlint and oxfmt; during development `?catalog=<url of an index.json>` shows any catalog). It reads `plugins/index.json` and `config.json` next to it: with the repository variable `APP_URL` set to where the web app runs, the workflow writes that address there and the portal's _Install_ buttons open the app with `?install=…`; without, they copy the plugin's address for _From URL…_. The Pages site is built anew on each run, from the releases and the community list, so it holds nothing else.
+
 ## Project structure
 
 ```
@@ -58,7 +69,8 @@ src/
 docs/          logo, README screenshots and this wiki (docs/wiki/)
 plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/, roomplanner/, shaders/, noise/, level/ (not part of the app build)
 packages/      libraries that plugins bundle at build time – procgen/ (procedural generation, with Vitest tests; not part of the app build)
-scripts/       screenshot automation (headless Chrome: screenshots.ps1 for Windows, screenshots.sh for Linux/macOS, capture-shot.mjs for both), i18n.mjs (translation check and template)
+portal/        the plugin portal – a package of its own (Vite and Vue, built into portal/dist; the start page of the project's GitHub Pages)
+scripts/       plugin-catalog.mjs (the plugin catalog: checks plugins/community.json, builds plugins/index.json), screenshot automation (headless Chrome: screenshots.ps1 for Windows, screenshots.sh for Linux/macOS, capture-shot.mjs for both), i18n.mjs (translation check and template)
 tools/         dev-server helper convertBridge.ts (Blender/SketchUp import)
 src-tauri/      the desktop app (Tauri 2): Rust shell, tauri.conf.json, app icons
 Dockerfile, compose.yaml   container for trying it out – the dev server with the remote API, or the nginx build

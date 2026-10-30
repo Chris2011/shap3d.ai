@@ -6,6 +6,12 @@
     <button class="s3d-btn small" :disabled="busy" :title="t('pluginManager.loadFolderTitle')" @click="installFromFolderButton">
       <S3dIcon name="folder" :size="14" /> {{ t('pluginManager.loadFolder') }}
     </button>
+    <button class="s3d-btn small" :disabled="busy" :title="t('pluginManager.loadZipTitle')" @click="installFromZip">
+      <S3dIcon name="import" :size="14" /> {{ t('pluginManager.loadZip') }}
+    </button>
+    <button class="s3d-btn small" :disabled="busy" :title="t('pluginManager.loadUrlTitle')" @click="installFromUrl">
+      <S3dIcon name="download" :size="14" /> {{ t('pluginManager.loadUrl') }}
+    </button>
     <button
       v-if="updatablePlugins.length"
       class="s3d-btn small"
@@ -55,6 +61,15 @@
     </p>
     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
       <button
+        v-if="urlUpdates[plugin.id]"
+        class="s3d-btn small flex items-center gap-1"
+        :disabled="busy"
+        :title="plugin.package?.source"
+        @click="updateFromUrl(plugin.id)"
+      >
+        <S3dIcon name="refresh" :size="13" /> {{ t('pluginManager.updateTo', { version: urlUpdates[plugin.id] }) }}
+      </button>
+      <button
         v-if="canUpdate(plugin.id)"
         class="s3d-btn small flex items-center gap-1"
         :disabled="busy"
@@ -71,6 +86,60 @@
     </div>
   </div>
   <div v-if="!plugins.length" class="px-0.5 py-2 text-xs text-ink-2">{{ t('pluginManager.none') }}</div>
+
+  <!-- discover: the plugins of the catalogs, installed with one click -->
+  <div class="s3d-caption mt-4 mb-1 flex items-center gap-2 text-navy">
+    <span class="flex-1">{{ t('pluginManager.discover') }}</span>
+    <button class="s3d-link text-xs normal-case" :disabled="catalogBusy" @click="refreshCatalogs">{{ t('pluginManager.reload') }}</button>
+    <button class="s3d-link text-xs normal-case" @click="addCatalog">{{ t('pluginManager.addCatalog') }}</button>
+  </div>
+  <p v-if="catalogBusy" class="text-xs text-ink-2">{{ t('pluginManager.loadingCatalogs') }}</p>
+  <p v-for="failure in catalog.failed" :key="failure.catalog" class="text-xs text-danger" :title="failure.catalog">
+    {{ t('pluginManager.catalogFailed', { catalog: hostOf(failure.catalog), error: failure.error }) }}
+  </p>
+  <div
+    v-for="entry in catalog.entries"
+    :key="entry.catalog + entry.id"
+    class="mb-1.5 flex items-start gap-2 border border-line px-2.25 py-1.75"
+  >
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-baseline gap-x-1.5">
+        <span class="font-semibold text-navy">{{ entry.name }}</span>
+        <span class="text-xs text-ink-2">{{ entry.version }}</span>
+        <span
+          v-if="entry.source === 'community' || entry.ownCatalog"
+          class="rounded-[3px] bg-warn-bg px-1 text-[0.625rem] text-warn"
+          :title="t('pluginManager.communityTitle')"
+          >{{ entry.ownCatalog ? hostOf(entry.catalog) : t('pluginManager.community') }}</span
+        >
+      </div>
+      <p class="mt-0.5 text-xs text-ink-2">{{ entry.description }}</p>
+      <p v-if="entry.author || entry.homepage" class="mt-0.5 text-[0.6875rem] text-muted">
+        <template v-if="entry.author">{{ entry.author }}</template>
+        <a v-if="entry.homepage" :href="entry.homepage" target="_blank" rel="noopener" class="ms-1.5 s3d-link">{{
+          hostOf(entry.homepage)
+        }}</a>
+      </p>
+    </div>
+    <button
+      class="s3d-btn small flex-none"
+      :disabled="busy || stateOf(entry) === 'installed'"
+      :title="entry.installUrl"
+      @click="installEntry(entry)"
+    >
+      {{
+        stateOf(entry) === 'installed'
+          ? t('pluginManager.installedState')
+          : stateOf(entry) === 'update'
+            ? t('pluginManager.updateTo', { version: entry.version })
+            : t('pluginManager.install')
+      }}
+    </button>
+  </div>
+  <div v-for="url in ownCatalogs" :key="url" class="flex items-center gap-2 text-[0.6875rem] text-muted">
+    <span class="min-w-0 flex-1 truncate" :title="url">{{ t('pluginManager.ownCatalog', { url }) }}</span>
+    <button class="s3d-link" @click="removeCatalog(url)">{{ t('pluginManager.remove') }}</button>
+  </div>
 
   <template v-if="examples.length">
     <div class="s3d-caption mt-4 mb-1 text-navy">{{ t('pluginManager.examples') }}</div>
@@ -92,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowRef } from 'vue';
 import S3dIcon from '../S3dIcon.vue';
 import S3dToggleSwitch from '../ui/S3dToggleSwitch.vue';
 import { useEditor } from '../keys';
@@ -103,12 +172,17 @@ import {
   plugins,
   installPlugin,
   installPluginPackages,
+  installPluginFromUrl,
+  installPluginZip,
+  newerAtSource,
+  newerVersion,
   setPluginEnabled,
   removePlugin,
   pluginSource,
   EXAMPLE_PLUGINS,
 } from '../../plugins/registry';
 import { t, localize, formatNumber } from '../../i18n';
+import { loadCatalogs, ownCatalogs, type CatalogEntry } from '../../plugins/catalog';
 
 const editor = useEditor();
 const busy = ref(false);
@@ -183,6 +257,95 @@ const install = async (code: string | File[] | (() => Promise<{ id: string; name
   } finally {
     busy.value = false;
   }
+};
+
+const installFromZip = async () => {
+  const file = await pickFile('.zip,application/zip');
+  if (file) {
+    await install(() => installPluginZip(file).then((installed) => installed[installed.length - 1] ?? null));
+  }
+};
+
+const installFromUrl = async () => {
+  const url = (await editor.prompt(t('pluginManager.urlPrompt'), 'https://'))?.trim();
+  if (url && url !== 'https://') {
+    await install(() => installPluginFromUrl(url).then((installed) => installed[installed.length - 1] ?? null));
+    void checkUrlUpdates();
+  }
+};
+
+// plugins installed from a URL: is a newer version waiting there? (looked up when the panel opens)
+const urlUpdates = reactive<Record<string, string>>({});
+const checkUrlUpdates = async () => {
+  for (const plugin of plugins.filter((entry) => entry.package?.source)) {
+    const version = await newerAtSource(plugin.id);
+    if (version) {
+      urlUpdates[plugin.id] = version;
+    } else {
+      delete urlUpdates[plugin.id];
+    }
+  }
+};
+onMounted(checkUrlUpdates);
+const updateFromUrl = async (id: string) => {
+  const source = plugins.find((entry) => entry.id === id)?.package?.source;
+  if (source) {
+    await install(() => installPluginFromUrl(source).then((installed) => installed[installed.length - 1] ?? null));
+    delete urlUpdates[id];
+  }
+};
+
+// the catalogs: read when the panel opens, again with "Reload" and after adding one
+const catalog = shallowRef<Awaited<ReturnType<typeof loadCatalogs>>>({ entries: [], failed: [] });
+const catalogBusy = ref(false);
+const refreshCatalogs = async () => {
+  catalogBusy.value = true;
+  try {
+    catalog.value = await loadCatalogs();
+  } finally {
+    catalogBusy.value = false;
+  }
+};
+onMounted(refreshCatalogs);
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+};
+const addCatalog = async () => {
+  const url = (await editor.prompt(t('pluginManager.catalogPrompt'), 'https://'))?.trim();
+  if (url && url !== 'https://' && !ownCatalogs.value.includes(url)) {
+    ownCatalogs.value = [...ownCatalogs.value, url];
+    await refreshCatalogs();
+  }
+};
+const removeCatalog = async (url: string) => {
+  ownCatalogs.value = ownCatalogs.value.filter((other) => other !== url);
+  await refreshCatalogs();
+};
+/** not installed, installed in this version (or newer), or installed in an older one */
+const stateOf = (entry: CatalogEntry) => {
+  const installed = plugins.find((plugin) => plugin.id === entry.id);
+  if (!installed) {
+    return 'new';
+  }
+  const version = installed.package?.version ?? installed.version ?? '';
+  return version && entry.version && newerVersion(entry.version, version) ? 'update' : 'installed';
+};
+const installEntry = async (entry: CatalogEntry) => {
+  // a plugin from outside this repository runs with full access, like every plugin – the user says yes first
+  if ((entry.source === 'community' || entry.ownCatalog) && stateOf(entry) === 'new') {
+    const ok = await editor.confirm(
+      t('pluginManager.confirmCommunity', { name: entry.name, author: entry.author || hostOf(entry.installUrl), url: entry.installUrl }),
+    );
+    if (!ok) {
+      return;
+    }
+  }
+  await install(() => installPluginFromUrl(entry.installUrl).then((installed) => installed[installed.length - 1] ?? null));
+  delete urlUpdates[entry.id];
 };
 
 const installFromFile = async () => {
