@@ -5,12 +5,12 @@ import { Tool, type Editor } from '../engine/editor';
 import { PointTool } from '../tools/base';
 import { COMMANDS, runCommand, download } from '../engine/commands';
 import { TOOL_INFO, TOOL_SHORTCUTS, PLUGIN_TOOLS } from '../engine/setup';
-import { addPanel, showPanel, PANEL_INFO } from '../components/panelState';
+import { addPanel, openPanel, showPanel, PANEL_INFO } from '../components/panelState';
 import { registerIcon } from '../components/iconRegistry';
 import { ScriptApi, runScript } from '../scripting/api';
 import { API_CATALOG } from '../scripting/catalog';
 import { registerImporter } from './fileFormats';
-import { newId, type Entities } from '../core/model';
+import { newId, type Entities, type Instance } from '../core/model';
 import { buildMesh } from '../scripting/mesh';
 import { registerScriptLanguage, registerBeforeRun } from '../scripting/languages';
 import { useScripts } from '../composables/useScripts';
@@ -131,7 +131,8 @@ export const createPluginContext = (
         COMMANDS.push(entry);
         return track(() => removeFrom(COMMANDS, entry));
       },
-      run: (id) => runCommand(editor, id.includes('.') ? id : qualified(id)),
+      // a short id is the plugin's own command – or, when it has none of that name, the app's (e.g. "export-glb")
+      run: (id) => runCommand(editor, id.includes('.') || !COMMANDS.some((command) => command.id === qualified(id)) ? id : qualified(id)),
     },
 
     tools: {
@@ -199,6 +200,11 @@ export const createPluginContext = (
         return track(() => removeFrom(COMMANDS, command));
       },
       open: (id) => showPanel(id.includes('.') ? id : qualified(id)),
+      close: (id) => {
+        if (!id || openPanel.value === (id.includes('.') ? id : qualified(id))) {
+          openPanel.value = null;
+        }
+      },
     },
 
     icons: { register: (name, svgContent) => track(registerIcon(name, svgContent)) },
@@ -437,6 +443,58 @@ export const createPluginContext = (
       open: (id) => switchView(editor, id ? (id.includes('.') ? id : qualified(id)) : null),
       active: () => modeState.active,
     },
+
+    lighting: (() => {
+      const lighting = () => editor.viewer.pluginLighting;
+      // switching between lit and plain faces or shadows on and off builds the view again; moving lights only draws it
+      const state = () => `${lighting().active()}/${lighting().casts()}`;
+      const changed = (was: string) => {
+        if (state() !== was) {
+          editor.invalidate();
+        }
+        editor.redraw();
+      };
+      track(() => {
+        const was = state();
+        lighting().setLights(plugin.id, []);
+        lighting().setAtmosphere(plugin.id, null);
+        changed(was);
+        editor.invalidate();
+      });
+      return {
+        set: (lights) => {
+          const was = state();
+          lighting().setLights(plugin.id, lights);
+          changed(was);
+        },
+        atmosphere: (atmosphere) => {
+          lighting().setAtmosphere(plugin.id, atmosphere);
+          // daylight and fog are applied while the view is built
+          editor.invalidate();
+        },
+      };
+    })(),
+
+    display: (() => {
+      const placed = new Set<Instance>();
+      // the plugin's places go back when it stops
+      track(() => {
+        for (const instance of placed) {
+          editor.viewer.placeForDisplay(instance, null);
+        }
+        placed.clear();
+      });
+      return {
+        place: (instance, matrix) => {
+          if (matrix) {
+            placed.add(instance);
+          } else {
+            placed.delete(instance);
+          }
+          editor.viewer.placeForDisplay(instance, matrix);
+        },
+      };
+    })(),
 
     render: {
       image: (request) => renderViewImage(editor, request),

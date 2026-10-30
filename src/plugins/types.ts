@@ -8,6 +8,7 @@ import type { RunResult, ScriptApi } from '../scripting/api';
 import type { ScriptLanguage, ScriptCompletion, CompletionProvider } from '../scripting/languages';
 import type { Definition, Entities, Instance } from '../core/model';
 import type { DataChange, DataTarget, PluginDataFormat } from './pluginData';
+import type { PluginAtmosphere, PluginLight } from '../engine/pluginLighting';
 import type { ApiCategory } from '../scripting/catalog';
 import type { ContextMenuEntry, TopBarButton } from './uiExtensions';
 import type { ViewRequest, ViewLines } from '../engine/viewRender';
@@ -19,6 +20,7 @@ export type { ScriptCompletion, CompletionRequest, CompletionKind, CompletionPro
 export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
 export type { ViewRequest, ViewLines, ViewLine } from '../engine/viewRender';
 export type { DataChange, DataTarget, PluginDataFormat } from './pluginData';
+export type { PluginLight, PluginAtmosphere } from '../engine/pluginLighting';
 
 /**
  * A Shap3D.ai plugin: an ES module whose default export is this object.
@@ -216,9 +218,18 @@ export interface PluginContext {
   newId: () => number;
   /** base classes for custom tools */
   readonly classes: { Tool: typeof Tool; PointTool: typeof PointTool };
-  commands: { register: (command: PluginCommand) => Disposer; run: (id: string) => void };
+  commands: {
+    register: (command: PluginCommand) => Disposer;
+    /** runs a command: the plugin's own by its short id, another plugin's by its full id, the app's by its id ("export-glb") */
+    run: (id: string) => void;
+  };
   tools: { register: (tool: PluginTool) => Disposer };
-  panels: { register: (panel: PluginPanel) => Disposer; open: (id: string) => void };
+  panels: {
+    register: (panel: PluginPanel) => Disposer;
+    open: (id: string) => void;
+    /** closes the open panel – with an id only when that one is open (the plugin's own by its short id) */
+    close: (id?: string) => void;
+  };
   icons: { register: (name: string, svgContent: string) => Disposer };
   script: {
     /** adds `s3d.<name>(...)`; `implementation` receives the script API as first argument */
@@ -320,6 +331,24 @@ export interface PluginContext {
     open: (id: string | null) => void;
     /** the active mode's full id ("<plugin>.<id>"), null = none */
     active: () => string | null;
+  };
+  /**
+   * Lights and atmosphere in the 3D view (a level's lamps, a torch, fog, a dark night): while any are set, faces are
+   * drawn lit so the lights fall on them. They belong to the view, not to the model – they go when the plugin stops.
+   */
+  lighting: {
+    /**
+     * the plugin's lights (replaces its earlier ones; the same number and kinds are updated in place, e.g. every frame);
+     * `shadow: true` lets one cast shadows – the first four in the view
+     */
+    set: (lights: PluginLight[]) => void;
+    /** fog, daylight (0 … 1) and background – null gives the view back to the model's style */
+    atmosphere: (atmosphere: PluginAtmosphere | null) => void;
+  };
+  /** what the 3D view shows for now, without changing the model */
+  display: {
+    /** shows an instance at another place (its matrix in its parent) – e.g. moving enemies in a test run; null puts it back */
+    place: (instance: Instance, matrix: InstanceType<typeof THREE.Matrix4> | null) => void;
   };
   /**
    * A view of the model rendered on demand – camera, style, hidden tags, size and an optional drawing scale
