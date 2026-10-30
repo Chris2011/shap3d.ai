@@ -106,7 +106,22 @@ export const providerInfo = (id: ProviderId) => PROVIDERS.find((provider) => pro
 export interface ChatMsg {
   role: 'user' | 'assistant';
   content: string;
+  /** pictures sent along (data URLs) – the model has to understand images (vision) */
+  images?: string[];
 }
+
+/** Ollama: the pictures as bare base64 next to the text */
+const ollamaMessage = ({ images, ...message }: ChatMsg) =>
+  images?.length ? { ...message, images: images.map((url) => url.slice(url.indexOf(',') + 1)) } : message;
+
+/** OpenAI-compatible APIs: text and pictures as parts of the content */
+const openaiMessage = ({ images, ...message }: ChatMsg) =>
+  images?.length
+    ? {
+        role: message.role,
+        content: [{ type: 'text', text: message.content }, ...images.map((url) => ({ type: 'image_url', image_url: { url } }))],
+      }
+    : message;
 
 /**
  * fetch that falls back to the Vite dev proxy (/__ai_proxy) when the browser blocks the request
@@ -219,7 +234,7 @@ const chatOllama = async (
   }
   const msgs = [
     ...(system ? [{ role: 'system', content: system }] : []),
-    ...messages,
+    ...messages.map(ollamaMessage),
     ...(chatOptions.prefill ? [{ role: 'assistant', content: chatOptions.prefill }] : []),
   ];
   const response = await ndjsonFetch(ollamaRoot(cfg) + '/api/chat', {
@@ -288,7 +303,7 @@ export const chat = async (
       stream: true,
       temperature: opts.temperature ?? 0.2,
       ...(opts.numPredict ? { max_tokens: opts.numPredict } : {}),
-      messages: system ? [{ role: 'system', content: system }, ...messages] : messages,
+      messages: [...(system ? [{ role: 'system', content: system }] : []), ...messages.map(openaiMessage)],
     }),
   });
   if (!response.ok || !response.body) {

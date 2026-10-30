@@ -45,7 +45,14 @@
         "quick5": "Tree",
         "quick6": "Stone wall 5 m long",
         "undone": "undone",
-        "thoughts": "Thought process ({count} words)"
+        "thoughts": "Thought process ({count} words)",
+        "changeLast": "Changes the last result: {names}",
+        "changeTitle": "On: the message changes what was built last (it is replaced, one undo step). Off: it builds something new next to it.",
+        "removePicture": "Remove picture",
+        "visionHint": "The model has to understand pictures (e.g. gemma3, qwen2.5vl, llava).",
+        "attachPicture": "Attach a picture (or paste / drop one)",
+        "attachView": "Attach the current 3D view",
+        "pictureFailed": "The picture could not be read."
       },
       "code": {
         "expand": "Expand",
@@ -117,7 +124,8 @@
         "meshForSized": "Mesh for “{prompt}” (size {size})",
         "meshFor": "Mesh for “{prompt}” (longest side 1 m)",
         "result": "{faces} faces in {ms} ms",
-        "unknownError": "Unknown error"
+        "unknownError": "Unknown error",
+        "changed": "Changed – replaces {count} group(s), in {ms} ms"
       },
       "undoLabel": "AI assistant",
       "history": {

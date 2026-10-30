@@ -26,6 +26,12 @@ export interface AiTurn {
   undoable?: boolean;
   auto?: boolean;
   targetSize?: number;
+  /** pictures the user sent with the message (data URLs, scaled down) */
+  images?: string[];
+  /** what this turn's code built: the ids of the groups it added to the model */
+  built?: number[];
+  /** a change of an earlier result: the groups that are taken out when this code runs (in the same undo step) */
+  replaces?: number[];
 }
 
 /** Turns always come from the current session of the history. */
@@ -123,12 +129,20 @@ export const extractCode = (text: string): { code: string; lang: 'js' | 'json' |
 /** Recent conversation (the assistant sees its own code and the execution results). */
 const history = (limit = 12): ChatMsg[] => {
   const out: ChatMsg[] = [];
-  for (const turn of aiState.turns.slice(-limit)) {
+  const turns = aiState.turns.slice(-limit);
+  // pictures only with the last two messages that have some – they are large and the newest are what counts
+  const withPictures = new Set(
+    turns
+      .filter((turn) => turn.images?.length)
+      .slice(-2)
+      .map((turn) => turn.id),
+  );
+  for (const turn of turns) {
     if (turn.status === 'streaming') {
       continue;
     }
     if (turn.role === 'user') {
-      out.push({ role: 'user', content: turn.text });
+      out.push({ role: 'user', content: turn.text, ...(withPictures.has(turn.id) ? { images: turn.images } : {}) });
     } else {
       const code = turn.code && turn.lang !== 'obj' ? `\n\`\`\`${turn.lang ?? 'js'}\n${turn.code}\n\`\`\`` : '';
       out.push({
@@ -204,12 +218,45 @@ const sendMesh = async (editor: Editor, prompt: string) => {
   await execute(editor, turn);
 };
 
+// ------------------------------------------------------------------ changing what was built
+/** the groups of a turn that are still in the model */
+const stillThere = (editor: Editor, ids: number[] = []) => ids.filter((id) => editor.model.root.instances.has(id));
+
+/**
+ * The result a new message changes: the last JavaScript the assistant built whose groups are still in the model –
+ * null when there is none (then a message builds something new).
+ */
+export const changeTarget = (editor: Editor): AiTurn | null => {
+  for (const turn of [...aiState.turns].reverse()) {
+    if (turn.role === 'assistant' && turn.code && turn.lang === 'js' && stillThere(editor, turn.built).length) {
+      return turn;
+    }
+  }
+  return null;
+};
+
+/** the names of a turn's groups in the model – shown above the input */
+export const builtNames = (editor: Editor, turn: AiTurn) =>
+  stillThere(editor, turn.built).map((id) => {
+    const instance = editor.model.root.instances.get(id)!;
+    return instance.name || instance.definition.name;
+  });
+
+export interface SendOptions {
+  /** pictures to send along (data URLs) */
+  images?: string[];
+  /** change the last result instead of building something new next to it */
+  change?: boolean;
+}
+
 // ------------------------------------------------------------------ main entry
-export const send = async (editor: Editor, prompt: string) => {
+export const send = async (editor: Editor, prompt: string, options: SendOptions = {}) => {
   if (aiState.busy || !prompt.trim()) {
     return;
   }
-  push({ role: 'user', text: prompt.trim() });
+  const target = options.change ? changeTarget(editor) : null;
+  const replaces = target ? stillThere(editor, target.built) : undefined;
+  push({ role: 'user', text: prompt.trim(), ...(options.images?.length ? { images: options.images } : {}) });
   aiState.busy = true;
   controller = new AbortController();
   try {
@@ -222,8 +269,12 @@ export const send = async (editor: Editor, prompt: string) => {
     const thinker = isThinkingModel(aiConfig.model);
     const attempts = fast ? 2 : 3;
     for (let attempt = 0; attempt < attempts; attempt++) {
-      const turn = push({ role: 'assistant', text: '', status: 'streaming', model: aiConfig.model });
-      const system = fast ? buildFastPrompt(sceneSummary(editor, 8, true)) : buildSystemPrompt(sceneSummary(editor));
+      const turn = push({ role: 'assistant', text: '', status: 'streaming', model: aiConfig.model, replaces });
+      const change = target ? { code: target.code!, names: builtNames(editor, target) } : undefined;
+      const pictures = aiState.turns.some((candidate) => candidate.images?.length);
+      const system = fast
+        ? buildFastPrompt(sceneSummary(editor, 8, true), { change, pictures })
+        : buildSystemPrompt(sceneSummary(editor), { change, pictures });
       // fast mode: skip the reasoning (minutes on a CPU – and it would use up the 900-token cap on its own)
       const opts = fast
         ? { numCtx: 4096, numPredict: 900, temperature: 0.2, prefill: thinker ? SKIP_THINKING : undefined }
@@ -300,13 +351,26 @@ export const execute = async (editor: Editor, turn: AiTurn): Promise<boolean> =>
   if (turn.lang !== 'obj') {
     await prepareScript(turn.code);
   } // plugins prepare their s3d extensions (fonts, OpenSCAD …)
+  // a change takes out what it replaces – and running the same code again replaces what it built the last time –
+  // in the same undo step, by a first line of the script
+  const takeOut = turn.lang === 'js' ? [...new Set([...stillThere(editor, turn.replaces), ...stillThere(editor, turn.built)])] : [];
+  const code = turn.code;
   const facesBefore = editor.model.root.stats().faces;
-  const result = await runCode(editor, turn);
+  const idsBefore = new Set(editor.model.root.instances.keys());
+  const result = takeOut.length
+    ? await runCode(editor, {
+        ...turn,
+        code: `for (const id of ${JSON.stringify(takeOut)}) s3d.editor.model.root.instances.delete(id);\n${code}`,
+      })
+    : await runCode(editor, turn);
   if (result.ok) {
     const added = editor.model.root.stats().faces - facesBefore;
+    turn.built = [...editor.model.root.instances.keys()].filter((id) => !idsBefore.has(id));
     turn.undoable = true;
     turn.result =
-      t('ai.agent.result', { faces: `${added >= 0 ? '+' : ''}${added}`, ms: Math.round(result.durationMs) }) +
+      (takeOut.length
+        ? t('ai.agent.changed', { count: takeOut.length, ms: Math.round(result.durationMs) })
+        : t('ai.agent.result', { faces: `${added >= 0 ? '+' : ''}${added}`, ms: Math.round(result.durationMs) })) +
       (result.logs.length ? ' · ' + result.logs.map((log) => log.text).join(' · ') : '');
     finish(turn, 'done');
     return true;

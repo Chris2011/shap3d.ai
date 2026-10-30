@@ -45,7 +45,14 @@
         "quick5": "Arbre",
         "quick6": "Mur de pierre de 5 m de long",
         "undone": "annulé",
-        "thoughts": "Raisonnement ({count} mots)"
+        "thoughts": "Raisonnement ({count} mots)",
+        "changeLast": "Modifie le dernier résultat : {names}",
+        "changeTitle": "Activé : le message modifie ce qui a été construit en dernier (remplacé, une étape d’annulation). Désactivé : il construit quelque chose de nouveau à côté.",
+        "removePicture": "Retirer l’image",
+        "visionHint": "Le modèle doit comprendre les images (p. ex. gemma3, qwen2.5vl, llava).",
+        "attachPicture": "Joindre une image (ou la coller / glisser)",
+        "attachView": "Joindre la vue 3D actuelle",
+        "pictureFailed": "L’image n’a pas pu être lue."
       },
       "code": {
         "expand": "Déplier",
@@ -117,7 +124,8 @@
         "meshForSized": "Maillage pour « {prompt} » (taille {size})",
         "meshFor": "Maillage pour « {prompt} » (plus grand côté 1 m)",
         "result": "{faces} faces en {ms} ms",
-        "unknownError": "Erreur inconnue"
+        "unknownError": "Erreur inconnue",
+        "changed": "Modifié – remplace {count} groupe(s), en {ms} ms"
       },
       "undoLabel": "Assistant IA",
       "history": {

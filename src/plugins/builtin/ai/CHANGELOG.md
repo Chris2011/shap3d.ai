@@ -5,6 +5,8 @@
 ### Added
 
 - **Responsive model builds**: the code of the assistant runs in a Web Worker instead of the main thread – the finished model arrives as one undo step while the browser stays usable. A blinking _"building model …"_ line with a timer in the chat (and the building note in the status bar) shows while it runs, and _Run again_ on a running turn does nothing instead of starting a second build.
+- **Pictures in the chat**: attach photos or sketches (button, paste or drop) – the assistant builds what they show – or the current 3D view (camera button), to show it the result and say what to change. Needs a model that understands images; pictures are scaled down to 1024 px, shown in the chat and kept in the history (older chats lose theirs first when the storage is full).
+- **Changing instead of adding**: the next message changes the last result – the assistant gets the script that built it and rewrites it, and the old groups are replaced in the same undo step (_Changes the last result: …_ above the input, untick to build something new). _Run again_ replaces what the same code built before instead of adding a copy.
 - **Knows every plugin's script calls**: the quick prompt for small models now lists the `s3d.` calls of the active plugins too (before only the full prompt did), and the full prompt adds the plugins' own examples – so the assistant can build terrains, roads, level objects … with whatever plugins are switched on.
 - Falls back to the classic synchronous run when a script needs something only the main thread has (a plugin's `s3d.` extension) or no worker is available – and when the script builds inside an open group.
 

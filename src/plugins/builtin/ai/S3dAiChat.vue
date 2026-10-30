@@ -99,6 +99,16 @@
           class="max-w-[92%] self-end px-2.5 py-2 text-[0.8125rem]/[1.45] break-words whitespace-pre-wrap"
           :class="turn.auto ? 'bg-warn-bg text-xs text-warn' : 'bg-navy-bg text-white'"
         >
+          <div v-if="turn.images?.length" class="mb-1.5 flex flex-wrap gap-1">
+            <img
+              v-for="(picture, pictureIndex) in turn.images"
+              :key="pictureIndex"
+              :src="picture"
+              alt=""
+              class="max-h-24 max-w-full cursor-zoom-in border border-white/30 object-contain"
+              @click="zoomed = picture"
+            />
+          </div>
           {{ turn.auto ? t('ai.chat.autoFix') : turn.text
           }}<span class="mt-0.75 block text-end text-[0.625rem] opacity-70">{{ clock(turn.createdAt) }}</span>
         </div>
@@ -161,7 +171,56 @@
       </template>
     </div>
 
-    <div class="flex gap-1.5 border-t border-line px-3 pt-2 pb-1">
+    <!-- a message changes the last result (its groups are replaced) – or, switched off, builds something new -->
+    <div
+      v-if="target && !isMesh"
+      class="flex items-center gap-1.5 border-t border-line px-3 pt-1.5 text-[0.6875rem]"
+      :class="changeLast ? 'text-navy' : 'text-ink-2'"
+    >
+      <label class="flex min-w-0 cursor-pointer items-center gap-1.5" :title="t('ai.chat.changeTitle')">
+        <input v-model="changeLast" type="checkbox" />
+        <span class="truncate">{{ t('ai.chat.changeLast', { names: targetNames }) }}</span>
+      </label>
+    </div>
+    <div v-if="pictures.length" class="flex flex-wrap gap-1.5 border-t border-line px-3 pt-2">
+      <div v-for="(picture, index) in pictures" :key="index" class="relative">
+        <img :src="picture" alt="" class="h-14 max-w-24 border border-line-2 object-cover" />
+        <button
+          class="absolute -top-1.5 -right-1.5 flex size-4.5 items-center justify-center rounded-full bg-ink text-[0.625rem] text-surface"
+          :title="t('ai.chat.removePicture')"
+          @click="pictures.splice(index, 1)"
+        >
+          ✕
+        </button>
+      </div>
+      <span class="self-end text-[0.625rem] text-muted">{{ t('ai.chat.visionHint') }}</span>
+    </div>
+    <div
+      class="flex gap-1.5 border-t border-line px-3 pt-2 pb-1"
+      :class="{ 'outline-2 -outline-offset-2 outline-navy outline-dashed': dragging }"
+      @dragover.prevent="dragging = true"
+      @dragleave="dragging = false"
+      @drop.prevent="dropPictures"
+    >
+      <div v-if="!isMesh" class="flex flex-col gap-1">
+        <button
+          class="flex size-7 items-center justify-center border border-line-2 bg-surface text-navy hover:bg-hover disabled:opacity-40"
+          :title="t('ai.chat.attachPicture')"
+          :disabled="!aiConfig.configured"
+          @click="fileInput?.click()"
+        >
+          <S3dIcon name="file" :size="15" />
+        </button>
+        <button
+          class="flex size-7 items-center justify-center border border-line-2 bg-surface text-navy hover:bg-hover disabled:opacity-40"
+          :title="t('ai.chat.attachView')"
+          :disabled="!aiConfig.configured"
+          @click="attachView"
+        >
+          <S3dIcon name="camera" :size="15" />
+        </button>
+        <input ref="fileInput" type="file" accept="image/*" multiple hidden @change="pickPictures" />
+      </div>
       <textarea
         ref="ta"
         class="flex-1 resize-none border border-line-2 bg-surface px-2 py-1.5 font-sans text-[0.8125rem] outline-none focus:border-navy"
@@ -171,6 +230,7 @@
         :placeholder="isMesh ? t('ai.chat.placeholderMesh') : t('ai.chat.placeholder')"
         @keydown.stop
         @keydown.enter.exact.prevent="submit"
+        @paste="pastePictures"
       ></textarea>
       <button
         v-if="aiState.busy"
@@ -199,6 +259,11 @@
       >
     </div>
     <S3dAiWizard v-if="wizard" @close="wizard = false" />
+    <Teleport to="body">
+      <div v-if="zoomed" class="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 p-6" @click="zoomed = null">
+        <img :src="zoomed" alt="" class="max-h-full max-w-full object-contain" />
+      </div>
+    </Teleport>
     <Teleport to="body"
       ><S3dModelSearch v-if="hfSearch" @close="hfSearch = false" @use="(model) => editor.toast(t('ai.chat.modelChanged', { model }))"
     /></Teleport>
@@ -215,7 +280,8 @@ import S3dCodeBlock from './S3dCodeBlock.vue';
 import { splitFences } from '../../../scripting/highlight';
 import { useEditor } from '../../../components/keys';
 import { aiConfig, providerInfo, modeFor } from './providers';
-import { aiState, send, stop, clearChat, execute, type AiTurn } from './agent';
+import { aiState, send, stop, clearChat, execute, changeTarget, builtNames, type AiTurn } from './agent';
+import { imageFiles, pictureFromFile, pictureOfView } from './pictures';
 import {
   aiHistory,
   openSession,
@@ -289,6 +355,49 @@ const info = computed(() => providerInfo(aiConfig.provider));
 const isMesh = computed(() => modeFor(aiConfig.model) === 'mesh');
 const QUICK = computed(() => [1, 2, 3, 4, 5, 6].map((index) => t(`ai.chat.quick${index}`)));
 
+// pictures going along with the next message
+const pictures = ref<string[]>([]);
+const fileInput = shallowRef<HTMLInputElement | null>(null);
+const dragging = ref(false);
+const zoomed = ref<string | null>(null);
+const addPictures = async (files: Blob[]) => {
+  for (const file of files) {
+    try {
+      pictures.value.push(await pictureFromFile(file));
+    } catch {
+      editor.toast(t('ai.chat.pictureFailed'));
+    }
+  }
+};
+const pickPictures = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  await addPictures([...(input.files ?? [])]);
+  input.value = '';
+};
+const pastePictures = (event: ClipboardEvent) => {
+  const files = imageFiles(event.clipboardData);
+  if (files.length) {
+    event.preventDefault();
+    addPictures(files);
+  }
+};
+const dropPictures = (event: DragEvent) => {
+  dragging.value = false;
+  addPictures(imageFiles(event.dataTransfer));
+};
+const attachView = async () => {
+  pictures.value.push(await pictureOfView(editor));
+};
+
+// what the next message changes: the last result still in the model (on by default – off builds something new)
+const changeLast = ref(true);
+const target = computed(() => {
+  void editor.ui.revision;
+  void aiState.turns.length;
+  return aiState.busy ? null : changeTarget(editor);
+});
+const targetNames = computed(() => (target.value ? builtNames(editor, target.value).join(', ') : ''));
+
 const ask = (question: string) => {
   prompt.value = question;
   submit();
@@ -298,10 +407,14 @@ const submit = () => {
   if (!text.trim() || aiState.busy) {
     return;
   }
+  const images = pictures.value;
+  const change = !!target.value && changeLast.value;
   prompt.value = '';
+  pictures.value = [];
+  changeLast.value = true;
   view.value = 'chat';
   now.value = Date.now();
-  send(editor, text);
+  send(editor, text, { images, change });
 };
 const run = (turn: AiTurn) => {
   if (turn.status === 'running') {

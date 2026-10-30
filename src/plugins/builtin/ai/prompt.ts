@@ -59,7 +59,35 @@ const example = (id: string, prompt: string): string => {
  * Fast mode: a compact prompt (~700 tokens instead of ~4000) – on a CPU the prompt has to be read
  * before the first token appears, so this alone saves a lot of waiting. Only the most used calls.
  */
-export const buildFastPrompt = (scene: string): string => {
+// i18n-ignore-start – instructions for the model, not shown in the UI
+/** what the model reads when the user wants the last result changed, and when pictures come along */
+export interface PromptExtras {
+  /** the script that built the result to change, and its groups' names */
+  change?: { code: string; names: string[] };
+  /** the conversation has pictures */
+  pictures?: boolean;
+}
+
+const extrasText = ({ change, pictures }: PromptExtras = {}) =>
+  [
+    pictures
+      ? `# Bilder
+Der Nutzer kann Bilder anhängen. Ein Foto oder eine Skizze ist eine Vorlage: erkenne Form, Proportionen, Farben und Materialien und baue das Objekt nach (schätze Maße realistisch). Eine Ansicht aus Shap3D.ai zeigt das aktuelle Modell: vergleiche es mit dem Wunsch des Nutzers und korrigiere, was nicht passt.`
+      : '',
+    change
+      ? `# Änderung am bestehenden Ergebnis
+Der Nutzer will das zuletzt gebaute Ergebnis ÄNDERN (${change.names.join(', ')}), NICHT etwas Neues daneben bauen. Dieses Skript hat es gebaut:
+\`\`\`js
+${change.code}
+\`\`\`
+Gib das VOLLSTÄNDIGE geänderte Skript aus: gleiche Stelle, gleiche Namen, alles Übrige bleibt wie es war – ändere nur, was verlangt ist. Die App entfernt die alten Gruppen automatisch, bevor dein Skript läuft: lösche nichts selbst (kein s3d.clear()) und verschiebe das Ergebnis nicht auf eine freie Fläche.`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+// i18n-ignore-end
+
+export const buildFastPrompt = (scene: string, extras?: PromptExtras): string => {
   return `Du bist der 3D-Assistent von Shap3D.ai. Du baust Objekte mit einem JavaScript-Skript für die API „s3d“.
 Antworte NUR mit GENAU EINEM Codeblock \`\`\`js … \`\`\` – kein Text davor oder danach, keine Erklärung. Halte das Skript kurz (unter 40 Zeilen).
 
@@ -92,10 +120,11 @@ s3d.group('Laterne', () => {
 s3d.zoomExtents();
 \`\`\`
 
-Szene: ${scene}`;
+Szene: ${scene}
+${extrasText(extras)}`;
 };
 
-export const buildSystemPrompt = (scene: string): string => {
+export const buildSystemPrompt = (scene: string, extras?: PromptExtras): string => {
   return `Du bist „Modelliermeister“, der eingebaute 3D-Assistent von Shap3D.ai – einer SketchUp-ähnlichen Web-App. Du bist ein erfahrener Architekt, Möbeldesigner und 3D-Modellierer. Du baust alles, was der Nutzer beschreibt, indem du ein JavaScript-Skript für die eingebaute Skriptsprache „s3d“ schreibst. Die App führt dein Skript sofort aus.
 
 # So arbeitest du
@@ -122,5 +151,7 @@ ${example('table', 'Tisch mit 4 Stühlen')}
 ${example('house', 'Ein kleines Haus mit Satteldach')}
 
 # Aktuelle Szene
-${scene}`;
+${scene}
+
+${extrasText(extras)}`;
 };

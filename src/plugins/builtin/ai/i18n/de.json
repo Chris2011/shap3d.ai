@@ -45,7 +45,14 @@
         "quick5": "Baum",
         "quick6": "Steinmauer 5 m lang",
         "undone": "rückgängig gemacht",
-        "thoughts": "Gedankengang ({count} Wörter)"
+        "thoughts": "Gedankengang ({count} Wörter)",
+        "changeLast": "Ändert das letzte Ergebnis: {names}",
+        "changeTitle": "An: Die Nachricht ändert, was zuletzt gebaut wurde (es wird ersetzt, ein Rückgängig-Schritt). Aus: Sie baut etwas Neues daneben.",
+        "removePicture": "Bild entfernen",
+        "visionHint": "Das Modell muss Bilder verstehen (z. B. gemma3, qwen2.5vl, llava).",
+        "attachPicture": "Bild anhängen (oder einfügen / hineinziehen)",
+        "attachView": "Aktuelle 3D-Ansicht anhängen",
+        "pictureFailed": "Das Bild ließ sich nicht lesen."
       },
       "code": {
         "expand": "Aufklappen",
@@ -117,7 +124,8 @@
         "meshForSized": "Mesh für „{prompt}“ (Größe {size})",
         "meshFor": "Mesh für „{prompt}“ (größte Seite 1 m)",
         "result": "{faces} Flächen in {ms} ms",
-        "unknownError": "Unbekannter Fehler"
+        "unknownError": "Unbekannter Fehler",
+        "changed": "Geändert – ersetzt {count} Gruppe(n), in {ms} ms"
       },
       "undoLabel": "KI-Assistent",
       "history": {

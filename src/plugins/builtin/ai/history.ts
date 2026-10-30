@@ -53,9 +53,24 @@ watch(
         if (aiHistory.sessions.length > MAX_SESSIONS) {
           aiHistory.sessions.splice(MAX_SESSIONS);
         }
-        localStorage.setItem(KEY, JSON.stringify(aiHistory));
+        // pictures are large: when the storage is full, older chats are kept without theirs, then all are –
+        // the text of the conversations is never lost for them
+        const without = (keep: (session: AiSession) => boolean) => ({
+          ...aiHistory,
+          sessions: aiHistory.sessions.map((session) =>
+            keep(session) ? session : { ...session, turns: session.turns.map(({ images: _images, ...turn }) => turn) },
+          ),
+        });
+        for (const version of [aiHistory, without((session) => session.id === aiHistory.currentId), without(() => false)]) {
+          try {
+            localStorage.setItem(KEY, JSON.stringify(version));
+            break;
+          } catch {
+            /* quota exceeded – try with fewer pictures, else keep in memory */
+          }
+        }
       } catch {
-        /* quota exceeded – keep in memory */
+        /* storage unavailable – keep in memory */
       }
     }, 400);
   },
