@@ -27,5 +27,8 @@
     "id": "layout",
     "name": "LayOut",
     "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/layout.png"
   }
 }

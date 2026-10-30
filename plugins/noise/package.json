@@ -26,5 +26,8 @@
     "id": "noise",
     "name": "Noise",
     "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/noise.png"
   }
 }

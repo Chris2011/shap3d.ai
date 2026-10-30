@@ -27,5 +27,8 @@
     "id": "roomplanner",
     "name": "Room planner",
     "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/roomplanner.png"
   }
 }

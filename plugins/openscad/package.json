@@ -31,5 +31,8 @@
     "id": "openscad",
     "name": "OpenSCAD",
     "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/openscad.png"
   }
 }

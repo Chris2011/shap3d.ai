@@ -17,13 +17,14 @@ A package is installed in _Plugins_ from its folder (_Load plugin folder…_, th
   "author": "Jane Doe",
   "url": "https://jane.github.io/my-plugin/",
   "homepage": "https://github.com/jane/my-plugin",
-  "license": "MIT"
+  "license": "MIT",
+  "thumbnail": "thumbnail.png"
 }
 ```
 
 The CI checks the entry (fields, a unique id that is not one of this repository's, the `package.json` at `url` naming that id and a version, its main script there); a maintainer reads the code before merging. The catalog then lists the version found at `url` – publishing a new version there updates it, so the review covers the host as much as the code.
 
-`shap3d` in a package's `package.json` may also carry `name` (the name catalogs and the portal show) and `minAppVersion` (the oldest app version it works with; older apps refuse to install it) – the build copies every `shap3d` field into `dist/package.json`. How plugins are released on their own: [Development › Plugin releases](development.md#plugin-releases).
+`shap3d` in a package's `package.json` may also carry `name` (the name catalogs and the portal show) and `minAppVersion` (the oldest app version it works with; older apps refuse to install it) – the build copies every `shap3d` field into `dist/package.json`. `portal.thumbnail` (a picture in the package's folder, e.g. `docs/level.png`) is the picture the portal and _Discover_ show for a plugin of this repository – it stays out of the package; a community entry names its `thumbnail` itself (relative to its `url`). Without one the portal shows the plugin's initials. Each plugin has a page on the portal (`#/<id>`) with its README – relative links and pictures in it point into the plugin's folder in the repository (or next to a community plugin's `url`). How plugins are released on their own: [Development › Plugin releases](development.md#plugin-releases).
 
 ## The OpenSCAD plugin
 

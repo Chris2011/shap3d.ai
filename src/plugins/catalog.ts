@@ -23,6 +23,8 @@ export interface CatalogEntry {
   source?: 'official' | 'community';
   /** not released yet – built from the repository's main branch, a preview of its next version */
   preview?: boolean;
+  /** a picture of it (absolute) */
+  thumbnail?: string;
   /** the plugin folder to install from – absolute, resolved against the catalog */
   installUrl: string;
   /** the catalog it is listed in */
@@ -54,6 +56,7 @@ const readCatalog = async (catalog: string): Promise<CatalogEntry[]> => {
       minAppVersion: plugin.minAppVersion ? String(plugin.minAppVersion) : null,
       source: plugin.source === 'community' ? 'community' : 'official',
       preview: plugin.preview === true,
+      thumbnail: plugin.thumbnail ? new URL(String(plugin.thumbnail), catalog).href : undefined,
       // the newest version stays at latest/ – installing from there lets "Update" find the next one
       installUrl: new URL(String(plugin.latest ?? plugin.url), catalog).href,
       catalog,

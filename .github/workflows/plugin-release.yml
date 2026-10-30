@@ -219,7 +219,12 @@ jobs:
 
       # the index the app (Plugins › Discover) and the portal read: these plugins and the community ones
       - name: Catalog
-        run: node scripts/plugin-catalog.mjs build site newest.json "$GITHUB_REPOSITORY" previews.json
+        run: |
+          node scripts/plugin-catalog.mjs build site newest.json "$GITHUB_REPOSITORY" previews.json
+          # the thumbnails are the plugins' screenshots – scaled down for the portal's cards (ImageMagick is on the runner)
+          if command -v mogrify > /dev/null && compgen -G 'site/plugins/*/thumbnail.*' > /dev/null; then
+            mogrify -resize '800x450>' site/plugins/*/thumbnail.*
+          fi
 
       # the plugin portal (portal/ – a package of its own, Vite and Vue) as the site's start page; config.json gives
       # it the app's address (repository variable APP_URL) for its install links

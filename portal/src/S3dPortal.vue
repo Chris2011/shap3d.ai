@@ -1,12 +1,20 @@
 <template>
   <header>
-    <h1>Shap<span>3D</span>.ai Plugins</h1>
+    <h1><a href="#/">Shap<span>3D</span>.ai Plugins</a></h1>
     <p>
       Plugins for Shap3D.ai – install one with a click. Official plugins come from the Shap3D.ai repository; community plugins are built and
       published by their authors.
     </p>
+    <!-- how installing works where the portal cannot open the app itself – said once, for every plugin -->
+    <p v-if="state === 'ready' && !appUrl" class="hint">
+      To install a plugin, copy its address and paste it in Shap3D.ai under <em>Plugins › From URL…</em>
+    </p>
   </header>
-  <main>
+  <main v-if="current">
+    <S3dPluginPage :plugin="current" :app-url="appUrl" />
+  </main>
+  <main v-else>
+    <p v-if="state === 'ready' && route" class="note">There is no plugin “{{ route }}” in this catalog.</p>
     <div class="tools">
       <input v-model="search" type="search" placeholder="Search plugins …" aria-label="Search plugins" />
       <button v-for="option in FILTERS" :key="option.id" :aria-pressed="filter === option.id" @click="filter = option.id">
@@ -28,11 +36,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import S3dPluginCard from './S3dPluginCard.vue';
+import S3dPluginPage from './S3dPluginPage.vue';
 import { loadAppUrl, loadCatalog, type PortalPlugin } from './catalog';
 
-/** The plugin portal: the catalog's plugins, searchable, official and community apart. */
+/** The plugin portal: the catalog's plugins, searchable, official and community apart – and a page for each (#/<id>). */
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -55,6 +64,17 @@ const shown = computed(() => {
       (!term || `${plugin.name} ${plugin.description} ${plugin.author ?? ''}`.toLowerCase().includes(term)),
   );
 });
+
+// the page shown: #/<id> a plugin's, else the list
+const readRoute = () => decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+const route = ref(readRoute());
+const current = computed(() => plugins.value.find((plugin) => plugin.id === route.value) ?? null);
+const onHash = () => {
+  route.value = readRoute();
+  window.scrollTo(0, 0);
+};
+window.addEventListener('hashchange', onHash);
+onBeforeUnmount(() => window.removeEventListener('hashchange', onHash));
 
 onMounted(async () => {
   appUrl.value = await loadAppUrl();
@@ -81,8 +101,23 @@ h1 {
   color: var(--navy);
 }
 
+h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
 h1 span {
   color: var(--accent);
+}
+
+.hint {
+  display: inline-block;
+  margin-top: 1rem !important;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 0.85rem;
 }
 
 header p {

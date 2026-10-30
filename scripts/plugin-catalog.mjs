@@ -15,12 +15,12 @@
 //       { id: version }, unpacked the same way – marked `preview`) and the community entries (their version read from
 //       their package.json)
 //
-// A community entry: { "id", "name", "author", "url", "description"?, "homepage"?, "license"? } – `url` is the
+// A community entry: { "id", "name", "author", "url", "description"?, "homepage"?, "license"?, "thumbnail"? } – `url` is the
 // plugin's folder on a web server that allows cross-origin requests (GitHub Pages does), holding its package.json
 // as `npm run build` writes it into dist/.
 
-import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { copyFileSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { extname, join } from 'node:path';
 
 const COMMUNITY = 'plugins/community.json';
 
@@ -32,7 +32,7 @@ const ownPlugins = () =>
     .filter((entry) => entry.isDirectory() && existsSync(join('plugins', entry.name, 'package.json')))
     .map((entry) => {
       const manifest = JSON.parse(readFileSync(join('plugins', entry.name, 'package.json'), 'utf8'));
-      return { folder: entry.name, id: manifest.shap3d?.id, version: manifest.version };
+      return { folder: entry.name, id: manifest.shap3d?.id, version: manifest.version, thumbnail: manifest.portal?.thumbnail };
     })
     .filter((plugin) => plugin.id);
 
@@ -112,8 +112,17 @@ const build = async (site, newestFile, repository, previewsFile) => {
   const previews = previewsFile && existsSync(previewsFile) ? JSON.parse(readFileSync(previewsFile, 'utf8')) : {};
   const released = Object.entries(newest).map(([id, version]) => [id, version, false]);
   const unreleased = Object.entries(previews).map(([id, version]) => [id, version, true]);
+  const own = ownPlugins();
   const official = [...released, ...unreleased].map(([id, version, preview]) => {
     const manifest = JSON.parse(readFileSync(join(site, 'plugins', id, version, 'package.json'), 'utf8'));
+    // the plugin's folder in this repository: its source, the pictures its README shows, its portal thumbnail
+    const folder = own.find((plugin) => plugin.id === id)?.folder ?? id;
+    const thumbnail = own.find((plugin) => plugin.id === id)?.thumbnail;
+    let picture;
+    if (thumbnail && existsSync(join('plugins', folder, thumbnail))) {
+      picture = `${id}/thumbnail${extname(thumbnail)}`;
+      copyFileSync(join('plugins', folder, thumbnail), join(site, 'plugins', picture));
+    }
     return {
       id,
       name: manifest.shap3d?.name ?? manifest.name ?? id,
@@ -121,11 +130,15 @@ const build = async (site, newestFile, repository, previewsFile) => {
       description: manifest.description ?? '',
       license: manifest.license ?? '',
       author: manifest.author ?? 'Shap3D.ai',
-      homepage: `https://github.com/${repository}/tree/main/plugins`,
+      homepage: `https://github.com/${repository}/tree/main/plugins/${folder}`,
       minAppVersion: manifest.shap3d?.minAppVersion ?? null,
       source: 'official',
       url: `${id}/${version}/`,
       latest: `${id}/latest/`,
+      ...(picture ? { thumbnail: picture } : {}),
+      ...(existsSync(join(site, 'plugins', id, version, 'README.md')) ? { readme: `${id}/${version}/README.md` } : {}),
+      // relative links and pictures in the README point into the plugin's folder in the repository
+      readmeBase: `https://raw.githubusercontent.com/${repository}/main/plugins/${folder}/`,
       // a preview is built from main – there is no release (and no zip) for it yet
       ...(preview
         ? { preview: true }
@@ -149,6 +162,9 @@ const build = async (site, newestFile, repository, previewsFile) => {
         minAppVersion: manifest.shap3d?.minAppVersion ?? null,
         source: 'community',
         url: base,
+        ...(entry.thumbnail ? { thumbnail: new URL(entry.thumbnail, base).href } : {}),
+        ...((manifest.files ?? []).includes('README.md') ? { readme: base + 'README.md' } : {}),
+        readmeBase: base,
       });
     } catch (error) {
       console.warn(`::warning::community plugin ${entry.id}: ${error.message}`);

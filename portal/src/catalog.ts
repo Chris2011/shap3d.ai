@@ -20,6 +20,12 @@ export interface PortalPlugin {
   installUrl: string;
   /** the release's zip (official plugins) */
   zip?: string;
+  /** a picture of it (absolute) – without one the card shows its initials */
+  thumbnail?: string;
+  /** its README (absolute), shown on its page */
+  readme?: string;
+  /** where relative links and pictures in the README point (absolute) */
+  readmeBase?: string;
 }
 
 export const catalogUrl = () => new URL(new URLSearchParams(location.search).get('catalog') ?? 'plugins/index.json', location.href).href;
@@ -47,6 +53,9 @@ export const loadCatalog = async (): Promise<{ plugins: PortalPlugin[]; updated?
       // folders in the catalog are relative to it; the newest version stays at latest/, so the app can update from there
       installUrl: new URL(String(plugin.latest ?? plugin.url), url).href,
       zip: plugin.zip ? String(plugin.zip) : undefined,
+      thumbnail: plugin.thumbnail ? new URL(String(plugin.thumbnail), url).href : undefined,
+      readme: plugin.readme ? new URL(String(plugin.readme), url).href : undefined,
+      readmeBase: plugin.readmeBase ? new URL(String(plugin.readmeBase), url).href : undefined,
     })),
   };
 };
@@ -64,3 +73,39 @@ export const loadAppUrl = async (): Promise<string> => {
 /** the link that opens the app and installs a plugin there (it asks first) */
 export const installLink = (appUrl: string, plugin: PortalPlugin) =>
   `${appUrl}${appUrl.includes('?') ? '&' : '?'}install=${encodeURIComponent(plugin.installUrl)}`;
+
+/**
+ * A plugin's README as safe HTML: Markdown rendered, relative links and pictures pointed into its folder
+ * (`readmeBase`), and everything a README should not bring (scripts, event handlers …) taken out – community READMEs
+ * come from elsewhere.
+ */
+export const readmeHtml = async (plugin: PortalPlugin): Promise<string> => {
+  if (!plugin.readme) {
+    return '';
+  }
+  const response = await fetch(plugin.readme, { cache: 'no-cache' });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  const [{ marked }, { default: DOMPurify }] = await Promise.all([import('marked'), import('dompurify')]);
+  const base = plugin.readmeBase ?? plugin.readme;
+  const absolute = (href: string) => (/^([a-z]+:|#|\/\/)/i.test(href) ? href : new URL(href, base).href);
+  const html = await marked.parse(await response.text(), {
+    walkTokens: (token) => {
+      if (token.type === 'link' || token.type === 'image') {
+        token.href = absolute(token.href);
+      }
+    },
+  });
+  const clean = DOMPurify.sanitize(html);
+  // links open outside the portal
+  const template = document.createElement('template');
+  template.innerHTML = clean;
+  for (const link of template.content.querySelectorAll('a[href]')) {
+    if (!link.getAttribute('href')!.startsWith('#')) {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener');
+    }
+  }
+  return template.innerHTML;
+};

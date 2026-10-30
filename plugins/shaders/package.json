@@ -27,5 +27,8 @@
     "id": "shaders",
     "name": "Shader materials",
     "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/shaders.png"
   }
 }

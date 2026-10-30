@@ -26,5 +26,8 @@
     "id": "level",
     "name": "Level editor",
     "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/level.png"
   }
 }

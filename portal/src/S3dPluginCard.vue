@@ -1,37 +1,31 @@
 <template>
-  <article class="card">
+  <article class="card" @click="open">
+    <S3dPluginPicture :plugin="plugin" />
     <h2>
-      {{ plugin.name }}
-      <span v-if="plugin.preview" class="badge preview" title="Not released yet – built from the main branch">Preview</span>
-      <span v-if="plugin.source === 'community'" class="badge" title="Built and published by its author, listed after a review"
-        >Community</span
-      >
+      <a :href="`#/${plugin.id}`" @click.stop>{{ plugin.name }}</a>
+      <S3dPluginBadges :plugin="plugin" />
     </h2>
     <div class="meta">{{ [plugin.version, plugin.author, plugin.license].filter(Boolean).join(' · ') }}</div>
     <p>{{ plugin.description }}</p>
     <div v-if="plugin.minAppVersion" class="meta">Needs Shap3D.ai {{ plugin.minAppVersion }} or newer</div>
     <div class="actions">
-      <a v-if="appUrl" class="install" :href="installLink(appUrl, plugin)">Install</a>
-      <button v-else class="install" title="Paste it into Shap3D.ai › Plugins › From URL…" @click="copy">
-        {{ copied ? 'Copied – paste it into Plugins › From URL…' : 'Copy address' }}
-      </button>
-      <a v-if="plugin.zip" :href="plugin.zip">zip</a>
-      <a v-if="plugin.homepage" :href="plugin.homepage" target="_blank" rel="noopener">source</a>
+      <S3dInstallButton :plugin="plugin" :app-url="appUrl" />
+      <a :href="`#/${plugin.id}`" @click.stop>Details</a>
     </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { installLink, type PortalPlugin } from './catalog';
+import S3dInstallButton from './S3dInstallButton.vue';
+import S3dPluginBadges from './S3dPluginBadges.vue';
+import S3dPluginPicture from './S3dPluginPicture.vue';
+import type { PortalPlugin } from './catalog';
 
-/** one plugin of the catalog: what it is, and its install button */
+/** one plugin of the catalog: its picture, what it is, its install button – a click opens its page */
 const props = defineProps<{ plugin: PortalPlugin; appUrl: string }>();
 
-const copied = ref(false);
-const copy = async () => {
-  await navigator.clipboard.writeText(props.plugin.installUrl);
-  copied.value = true;
+const open = () => {
+  location.hash = `#/${props.plugin.id}`;
 };
 </script>
 
@@ -40,32 +34,26 @@ const copy = async () => {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  padding: 1rem;
+  padding: 0.8rem;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.card:hover {
+  border-color: var(--navy);
 }
 
 h2 {
-  margin: 0;
+  margin: 0.3rem 0 0;
   font-size: 1.05rem;
+}
+
+h2 a {
   color: var(--navy);
-}
-
-.badge {
-  margin-left: 0.35rem;
-  padding: 0 0.35rem;
-  border-radius: 4px;
-  background: var(--warn-bg);
-  color: var(--warn);
-  font-size: 0.72rem;
-  font-weight: 500;
-  vertical-align: middle;
-}
-
-.badge.preview {
-  background: var(--line);
-  color: var(--muted);
+  text-decoration: none;
 }
 
 .meta {
@@ -82,20 +70,8 @@ p {
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.75rem;
   align-items: center;
   font-size: 0.85rem;
-}
-
-.install {
-  padding: 0.45rem 0.9rem;
-  border: 0;
-  border-radius: 6px;
-  background: var(--navy);
-  color: var(--on-navy);
-  font: inherit;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
 }
 </style>

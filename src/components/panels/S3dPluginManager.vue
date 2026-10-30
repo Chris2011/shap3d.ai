@@ -102,6 +102,13 @@
     :key="entry.catalog + entry.id"
     class="mb-1.5 flex items-start gap-2 border border-line px-2.25 py-1.75"
   >
+    <img
+      v-if="entry.thumbnail"
+      :src="entry.thumbnail"
+      alt=""
+      loading="lazy"
+      class="mt-0.5 h-10 w-16 flex-none rounded-[3px] object-cover"
+    />
     <div class="min-w-0 flex-1">
       <div class="flex flex-wrap items-baseline gap-x-1.5">
         <span class="font-semibold text-navy">{{ entry.name }}</span>
