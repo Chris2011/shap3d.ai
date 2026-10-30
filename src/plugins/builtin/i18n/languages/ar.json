@@ -1536,7 +1536,8 @@
       "apiExample": "مثال API",
       "exampleBuilt": "✓ تم بناء المثال – Ctrl+Z يتراجع عنه.",
       "myScript": "سكربتي",
-      "saved": "تم حفظ السكربت"
+      "saved": "تم حفظ السكربت",
+      "pluginExamples": "{name} (ملحق)"
     },
     "examples": {
       "house": {
@@ -1572,11 +1573,11 @@
         "description": "نسخ المجموعات وتدويرها."
       },
       "json-scene": {
-        "name": "JSON: مشهد بسيط",
+        "name": "مشهد بسيط",
         "description": "تصريحي: كائنات ومواد ومجموعات."
       },
       "json-shelf": {
-        "name": "JSON: رف (مصفوفة)",
+        "name": "رف (مصفوفة)",
         "description": "«array» يكرر كائنًا مع إزاحة."
       },
       "mesh-js": {
@@ -1584,7 +1585,7 @@
         "description": "تضمين نص OBJ في السكربت وتحجيمه ووضعه عدة مرات."
       },
       "obj-chair": {
-        "name": "OBJ: كرسي (LLaMA-Mesh‏)",
+        "name": "كرسي (LLaMA-Mesh‏)",
         "description": "مخرجات LLaMA-Mesh الخام – أسطر v/f فقط. اضبط الحجم والمحاور في الأعلى."
       }
     },

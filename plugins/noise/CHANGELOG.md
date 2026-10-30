@@ -4,6 +4,7 @@
 
 ### Added
 
+- The demos (island, trees, scattering, stones, rivers and roads, junctions, roads into town, villages, erosion, facades, city, hill town, deforming) as examples in the script editor, under _Noise (plugin)_.
 - A plugin package of its own (`plugins/noise`, built with `vite build`, installed via _Plugins › Load plugin folder…_), with its own lint, format, type and text checks.
 - Seeded simplex noise in 2D and 3D with fBm, ridged multifractal and billow, domain warping and terraces.
 - Noise terrains with a live preview: size, detail, seed, scale, height, octaves, persistence, lacunarity, valleys ↔ peaks, warp, island falloff, terraces, water and snow; five presets (hills, mountains, island, canyon, dunes). They keep their settings (select one to change it in place) and their height grid in the built-in terrain plugin's format, so the Terrain tool sculpts them further.

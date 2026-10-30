@@ -391,6 +391,60 @@
       },
       "errors": {
         "gridVersion": "El plugin Terreno guarda su cuadrícula de alturas en la versión {version}, este plugin conoce la versión 1 – los terrenos hechos con ella no se pueden leer ni cambiar aquí."
+      },
+      "demos": {
+        "island": {
+          "name": "Isla de ruido",
+          "description": "Una isla de ruido fractal con agua y nieve, bosque y rocas, y un bloque rugoso por el ruido. Vacía el modelo."
+        },
+        "trees": {
+          "name": "Árboles",
+          "description": "Robles, abedules, pinos y palmeras de semillas en un prado. Vacía el modelo."
+        },
+        "scatter": {
+          "name": "Dispersión",
+          "description": "Una avenida de árboles junto a un camino sinuoso y un prado con arbustos, árboles y rocas según una máscara de ruido. Vacía el modelo."
+        },
+        "paving": {
+          "name": "Piedras",
+          "description": "Losas, adoquines y placas sobre áreas y un muro de piedra seca en una pared – de ruido celular. Vacía el modelo."
+        },
+        "routes": {
+          "name": "Ríos y carreteras",
+          "description": "Un río por los valles, una carretera sobre las colinas, un camino de grava y bosque. Vacía el modelo."
+        },
+        "junctions": {
+          "name": "Cruces",
+          "description": "Carreteras construidas una tras otra se encuentran: un cruce en T, un camino que cruza y una carretera que sigue desde un extremo. Vacía el modelo."
+        },
+        "cityroads": {
+          "name": "Carreteras a la ciudad",
+          "description": "Carreteras que continúan desde los extremos de las calles de una ciudad. Vacía el modelo."
+        },
+        "villages": {
+          "name": "Pueblos",
+          "description": "Pueblos en las laderas suaves de un valle con río, unidos por caminos de grava. Vacía el modelo."
+        },
+        "erosion": {
+          "name": "Erosión",
+          "description": "Las mismas montañas dos veces – tal cual y erosionadas por la lluvia. Vacía el modelo."
+        },
+        "facade": {
+          "name": "Fachadas",
+          "description": "Tres casas urbanas con ventanas, contraventanas, balcones y tiendas. Vacía el modelo."
+        },
+        "city": {
+          "name": "Ciudad",
+          "description": "Calles, manzanas y edificios cuya altura sigue un mapa de densidad de ruido. Vacía el modelo."
+        },
+        "hillcity": {
+          "name": "Ciudad en colina",
+          "description": "Una ciudad en un terreno con colinas – terrazas sobre muros de contención, calles que siguen el suelo. Vacía el modelo."
+        },
+        "deform": {
+          "name": "Deformar",
+          "description": "Cajas retorcidas, afiladas, dobladas y rugosas por ruido, y bloques con los shaders de ruido. Vacía el modelo."
+        }
       }
     }
   }

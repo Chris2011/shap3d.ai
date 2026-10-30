@@ -1536,7 +1536,8 @@
       "apiExample": "API-Beispiel",
       "exampleBuilt": "✓ Beispiel gebaut – Strg+Z macht es rückgängig.",
       "myScript": "Mein Skript",
-      "saved": "Skript gespeichert"
+      "saved": "Skript gespeichert",
+      "pluginExamples": "{name} (Plugin)"
     },
     "examples": {
       "house": {
@@ -1572,11 +1573,11 @@
         "description": "Gruppen kopieren und drehen."
       },
       "json-scene": {
-        "name": "JSON: Einfache Szene",
+        "name": "Einfache Szene",
         "description": "Deklarativ: Objekte, Materialien, Gruppen."
       },
       "json-shelf": {
-        "name": "JSON: Regal (Array)",
+        "name": "Regal (Array)",
         "description": "„array“ wiederholt ein Objekt mit Versatz."
       },
       "mesh-js": {
@@ -1584,7 +1585,7 @@
         "description": "OBJ-Text direkt im Skript einbetten, skalieren und mehrfach platzieren."
       },
       "obj-chair": {
-        "name": "OBJ: Stuhl (LLaMA-Mesh)",
+        "name": "Stuhl (LLaMA-Mesh)",
         "description": "Rohe LLaMA-Mesh-Ausgabe – nur v/f-Zeilen. Größe und Achsen oben einstellen."
       }
     },

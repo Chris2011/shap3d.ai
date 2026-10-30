@@ -42,6 +42,7 @@ import { MESSAGES, t, useRuntime } from './runtime';
 import { CELLS_SHADER, FACADE_SHADER, NOISE_SHADER } from './shader';
 import { injectStyles } from './styles';
 import { PANEL, openPanel } from './tabs';
+import { DEMOS } from './demos';
 
 const plugin: S3dPlugin = {
   id: 'noise',
@@ -133,6 +134,15 @@ const plugin: S3dPlugin = {
     // ------------------------------------------------------------ script functions
     // i18n-ignore-next-line – API category ids
     const CATEGORIES = { helpers: 'Hilfen', solids: 'Körper', groups: 'Gruppen & Komponenten', editing: 'Flächen bearbeiten' } as const;
+    // the demos as examples in the script editor, under the plugin's name
+    for (const demo of DEMOS) {
+      context.script.addExample({
+        id: demo.id,
+        name: `noise.demos.${demo.id}.name`,
+        description: `noise.demos.${demo.id}.description`,
+        code: demo.code,
+      });
+    }
     context.script.extend(
       'noise',
       (_api: ScriptApi, x: number, y: number, z?: number, seed = 0) => {

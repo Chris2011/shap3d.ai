@@ -9,6 +9,7 @@ import { addPanel, openPanel, showPanel, PANEL_INFO } from '../components/panelS
 import { registerIcon } from '../components/iconRegistry';
 import { ScriptApi, runScript } from '../scripting/api';
 import { API_CATALOG } from '../scripting/catalog';
+import { PLUGIN_EXAMPLES } from '../scripting/examples';
 import { registerImporter } from './fileFormats';
 import { newId, type Entities, type Instance } from '../core/model';
 import { buildMesh } from '../scripting/mesh';
@@ -251,6 +252,25 @@ export const createPluginContext = (
       // synchronous by design: plugins read the result right away (e.g. the room planner's runPlace) –
       // big builds go through runScriptAsync instead (AI chat, script editor)
       run: (code) => runScript(editor, code, plugin.name),
+      addExample: (example) => {
+        const entry = {
+          id: qualified(example.id),
+          lang: example.language ?? 'js',
+          code: example.code,
+          plugin: '',
+          name: '',
+          description: '',
+        };
+        // the texts may be keys (translated) – read them when the list is shown
+        Object.defineProperty(entry, 'plugin', { get: () => localize(plugin.name), enumerable: true });
+        Object.defineProperty(entry, 'name', { get: () => localize(example.name), enumerable: true });
+        Object.defineProperty(entry, 'description', {
+          get: () => (example.description ? localize(example.description) : ''),
+          enumerable: true,
+        });
+        PLUGIN_EXAMPLES.push(entry);
+        return track(() => removeFrom(PLUGIN_EXAMPLES, entry));
+      },
       registerLanguage: (scriptLanguage) => track(registerScriptLanguage(scriptLanguage)),
       openInEditor: (scriptLanguage, code) => {
         useScripts().open({ lang: scriptLanguage, code });

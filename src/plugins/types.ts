@@ -240,6 +240,11 @@ export interface PluginContext {
     /** adds `s3d.<name>(...)`; `implementation` receives the script API as first argument */
     extend: (name: string, implementation: (api: ScriptApi, ...args: any[]) => unknown, info?: ScriptExtension) => Disposer;
     run: (code: string) => RunResult;
+    /**
+     * an example in the script editor's list – shown while its language is chosen ('js' by default, or 'json',
+     * 'obj', a plugin language's id), grouped under the plugin's name; name and description may be message keys
+     */
+    addExample: (example: { id: string; name: string; description?: string; language?: string; code: string }) => Disposer;
     /** an extra language in the script editor (language selector, examples, help) */
     registerLanguage: (language: ScriptLanguage) => Disposer;
     /** opens the script editor with this code */

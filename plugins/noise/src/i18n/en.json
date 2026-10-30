@@ -391,6 +391,60 @@
       },
       "errors": {
         "gridVersion": "The Terrain plugin keeps its height grid in version {version}, this plugin knows version 1 – terrains made with it cannot be read or changed here."
+      },
+      "demos": {
+        "island": {
+          "name": "Noise island",
+          "description": "An island from fractal noise with water and snow, woods and rocks, and a boulder roughened by noise. Clears the model."
+        },
+        "trees": {
+          "name": "Trees",
+          "description": "Oaks, birches, pines and palms grown from seeds on a meadow. Clears the model."
+        },
+        "scatter": {
+          "name": "Scattering",
+          "description": "An avenue of trees along a winding path and a meadow with bushes, trees and rocks gathered by a noise mask. Clears the model."
+        },
+        "paving": {
+          "name": "Stones",
+          "description": "Flagstones, cobbles and slabs on areas and a dry stone wall on a wall face – from cellular noise. Clears the model."
+        },
+        "routes": {
+          "name": "Rivers and roads",
+          "description": "A river through the valleys, a road over the hills, a gravel path and woods. Clears the model."
+        },
+        "junctions": {
+          "name": "Junctions",
+          "description": "Roads built one after another meet: a T-junction, a crossing gravel path and a road going on from an end. Clears the model."
+        },
+        "cityroads": {
+          "name": "Roads into town",
+          "description": "Roads that go on from the ends of a city’s streets. Clears the model."
+        },
+        "villages": {
+          "name": "Villages",
+          "description": "Villages on the gentle slopes of a valley with a river, linked by gravel roads. Clears the model."
+        },
+        "erosion": {
+          "name": "Erosion",
+          "description": "The same mountains twice – as made and eroded by raindrops. Clears the model."
+        },
+        "facade": {
+          "name": "Facades",
+          "description": "Three town houses with windows, shutters, balconies and shops. Clears the model."
+        },
+        "city": {
+          "name": "City",
+          "description": "Streets, blocks and buildings whose heights follow a noise density map. Clears the model."
+        },
+        "hillcity": {
+          "name": "Hill town",
+          "description": "A city on a hilly terrain – terraces on retaining walls, streets following the ground. Clears the model."
+        },
+        "deform": {
+          "name": "Deforming",
+          "description": "Boxes twisted, tapered, bent and roughened by noise, and blocks with the noise shaders. Clears the model."
+        }
       }
     }
   }

@@ -410,6 +410,32 @@
           "trigger": "Placez d’abord un déclencheur."
         },
         "messageText": "Quelque chose bouge …"
+      },
+      "demos": {
+        "arena": {
+          "name": "Arène et maison",
+          "description": "Une arène avec les départs de deux équipes, un drapeau, un tremplin et des téléporteurs – et une maison à la porte verrouillée. Vide le modèle."
+        },
+        "blockout": {
+          "name": "Maquette d’un manoir",
+          "description": "Un manoir maquetté sur la grille : hall, escalier vers une galerie, pièce ouest verrouillée, couloir vers la bibliothèque, avec objets de jeu. Vide le modèle."
+        },
+        "enemies": {
+          "name": "Ennemis en ronde",
+          "description": "Un garde qui fait sa ronde par quatre points et des dormeurs qu’un déclencheur réveille – à essayer. Vide le modèle."
+        },
+        "generate": {
+          "name": "Plan généré",
+          "description": "Dix pièces reliées par des couloirs depuis une graine, avec départ, lumières, ennemis, soins, sauvegarde et but. Vide le modèle."
+        },
+        "night": {
+          "name": "Manoir de nuit",
+          "description": "Le manoir avec plafonds, presque sans jour et avec du brouillard, éclairé par une lampe vacillante et un spot qui projettent des ombres. Vide le modèle."
+        },
+        "storeys": {
+          "name": "Deux étages",
+          "description": "Un hall avec un escalier vers une galerie au-dessus de sa moitié arrière, et une clé là-haut. Vide le modèle."
+        }
       }
     }
   }

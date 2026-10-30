@@ -45,6 +45,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **Modes for plugins** (`context.modes`): next to the workspaces in the top bar, a mode keeps the 3D view but shows only its own tools in the toolbar and its own panels on the right.
 - `context.commands.run` runs the app's own commands too (e.g. `export-glb`) when the plugin has none of that name.
 - `context.panels.close()` closes the open panel (with an id only that one).
+- **Plugin examples in the script editor** (`context.script.addExample`): a plugin's demos are listed under its name; the example list shows only the examples of the chosen language (the app's, a plugin language's own, the plugins', the user's scripts).
 - **Panels that belong to a mode** (`panels.register({ inMode: true })`): their tiles show only in a mode that lists them – no tile, palette entry or command outside it, and leaving the mode closes them.
 - **Lights and atmosphere for plugins** (`context.lighting`): point lights and spots, fog, how much daylight is left and a background – while a plugin sets any, faces are drawn lit so the lights fall on them; they belong to the view, not to the model. With `shadow: true` a light casts shadows (the first four in the view), also when the model's sun shadows are off.
 - **Moving instances in the view** for plugins (`context.display.place(instance, matrix | null)`): an instance is drawn at another place without changing the model or the undo history – e.g. enemies walking in a test run; `null` puts it back.

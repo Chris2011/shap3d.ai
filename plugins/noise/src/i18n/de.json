@@ -391,6 +391,60 @@
       },
       "errors": {
         "gridVersion": "Das Terrain-Plugin speichert sein Höhenraster in Version {version}, dieses Plugin kennt Version 1 – damit gemachte Gelände lassen sich hier nicht lesen oder ändern."
+      },
+      "demos": {
+        "island": {
+          "name": "Rausch-Insel",
+          "description": "Eine Insel aus fraktalem Rauschen mit Wasser und Schnee, Wald und Felsen und einem durch Rauschen aufgerauten Block. Leert das Modell."
+        },
+        "trees": {
+          "name": "Bäume",
+          "description": "Eichen, Birken, Kiefern und Palmen aus Seeds auf einer Wiese. Leert das Modell."
+        },
+        "scatter": {
+          "name": "Streuen",
+          "description": "Eine Allee entlang eines gewundenen Wegs und eine Wiese mit Büschen, Bäumen und Steinen nach einer Rauschmaske. Leert das Modell."
+        },
+        "paving": {
+          "name": "Steine",
+          "description": "Steinplatten, Pflaster und Platten auf Flächen und eine Trockenmauer an einer Wand – aus zellularem Rauschen. Leert das Modell."
+        },
+        "routes": {
+          "name": "Flüsse und Straßen",
+          "description": "Ein Fluss durch die Täler, eine Straße über die Hügel, ein Schotterweg und Wald. Leert das Modell."
+        },
+        "junctions": {
+          "name": "Kreuzungen",
+          "description": "Nacheinander gebaute Straßen treffen sich: Einmündung, kreuzender Schotterweg und eine Straße, die an einem Ende weitergeht. Leert das Modell."
+        },
+        "cityroads": {
+          "name": "Straßen in die Stadt",
+          "description": "Straßen, die an den Enden der Stadtstraßen weitergehen. Leert das Modell."
+        },
+        "villages": {
+          "name": "Dörfer",
+          "description": "Dörfer an den sanften Hängen eines Tals mit Fluss, verbunden durch Schotterstraßen. Leert das Modell."
+        },
+        "erosion": {
+          "name": "Erosion",
+          "description": "Dieselben Berge zweimal – wie erzeugt und von Regentropfen erodiert. Leert das Modell."
+        },
+        "facade": {
+          "name": "Fassaden",
+          "description": "Drei Stadthäuser mit Fenstern, Fensterläden, Balkonen und Läden. Leert das Modell."
+        },
+        "city": {
+          "name": "Stadt",
+          "description": "Straßen, Blöcke und Gebäude, deren Höhen einer Rausch-Dichtekarte folgen. Leert das Modell."
+        },
+        "hillcity": {
+          "name": "Stadt am Hang",
+          "description": "Eine Stadt auf hügeligem Gelände – Terrassen auf Stützmauern, Straßen folgen dem Boden. Leert das Modell."
+        },
+        "deform": {
+          "name": "Verformen",
+          "description": "Quader verdreht, verjüngt, gebogen und durch Rauschen aufgeraut, dazu Blöcke mit den Rausch-Shadern. Leert das Modell."
+        }
       }
     }
   }

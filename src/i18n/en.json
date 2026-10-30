@@ -1536,7 +1536,8 @@
       "apiExample": "API example",
       "exampleBuilt": "✓ Example built – Ctrl+Z undoes it.",
       "myScript": "My script",
-      "saved": "Script saved"
+      "saved": "Script saved",
+      "pluginExamples": "{name} (plugin)"
     },
     "examples": {
       "house": {
@@ -1572,11 +1573,11 @@
         "description": "Copy and rotate groups."
       },
       "json-scene": {
-        "name": "JSON: simple scene",
+        "name": "Simple scene",
         "description": "Declarative: objects, materials, groups."
       },
       "json-shelf": {
-        "name": "JSON: shelf (array)",
+        "name": "Shelf (array)",
         "description": "“array” repeats an object with an offset."
       },
       "mesh-js": {
@@ -1584,7 +1585,7 @@
         "description": "Embed OBJ text right in the script, scale it and place it several times."
       },
       "obj-chair": {
-        "name": "OBJ: chair (LLaMA-Mesh)",
+        "name": "Chair (LLaMA-Mesh)",
         "description": "Raw LLaMA-Mesh output – only v/f lines. Set size and axes above."
       }
     },

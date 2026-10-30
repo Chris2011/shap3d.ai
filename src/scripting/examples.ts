@@ -1,3 +1,4 @@
+import { shallowReactive } from 'vue';
 import { copyLocalized } from '../i18n';
 
 export interface ScriptExample {
@@ -590,5 +591,21 @@ f 104 106 107`,
 ];
 
 export const EXAMPLES: ScriptExample[] = LIST.map((example) => copyLocalized(example, example, ['name', 'description']));
+
+/** an example a plugin brings for the script editor (`script.addExample`) – listed under the plugin's name */
+export interface PluginExample {
+  /** `<plugin>.<id>` */
+  id: string;
+  /** the plugin's name, shown as the example's group (in the current language) */
+  plugin: string;
+  /** the script language it is written in: 'js', 'json', 'obj' or a plugin language's id */
+  lang: string;
+  name: string;
+  description: string;
+  code: string;
+}
+
+/** reactive: the plugins' examples – name, description and plugin read in the current language */
+export const PLUGIN_EXAMPLES = shallowReactive<PluginExample[]>([]);
 
 /** Plain-text API overview – generated from the catalog (src/scripting/catalog.ts). */

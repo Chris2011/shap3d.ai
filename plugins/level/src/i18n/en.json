@@ -410,6 +410,32 @@
           "trigger": "Place a trigger first."
         },
         "messageText": "Something stirs …"
+      },
+      "demos": {
+        "arena": {
+          "name": "Arena and house",
+          "description": "An arena with two teams’ spawns, a flag, a jump pad and teleporters – and a house with a locked door. Clears the model."
+        },
+        "blockout": {
+          "name": "Mansion blockout",
+          "description": "A mansion blocked out on the grid: hall, stairs to a gallery, a locked west room, a corridor to the library, with game objects. Clears the model."
+        },
+        "enemies": {
+          "name": "Patrolling enemies",
+          "description": "A guard that patrols four waypoints and sleepers a trigger wakes – try it in the test run. Clears the model."
+        },
+        "generate": {
+          "name": "Generated floor plan",
+          "description": "Ten rooms linked by corridors from a seed, with start, lights, enemies, health, a save point and the goal. Clears the model."
+        },
+        "night": {
+          "name": "Mansion at night",
+          "description": "The mansion with ceilings, almost no daylight and fog, lit by a flickering lamp and a spot that cast shadows. Clears the model."
+        },
+        "storeys": {
+          "name": "Two storeys",
+          "description": "A hall with stairs up to a gallery over its back half and a key up there. Clears the model."
+        }
       }
     }
   }

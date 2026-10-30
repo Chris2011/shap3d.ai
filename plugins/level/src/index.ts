@@ -28,6 +28,7 @@ import { injectStyles } from './styles';
 import { drawLevel, drawNav } from './drawing';
 import { buildNav, shownNav, toggleNav } from './nav';
 import { createPlaceTool } from './tool';
+import { DEMOS } from './demos';
 
 const ICON =
   '<path d="M5 20V5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5.5 5h10l-2.5 3 2.5 3h-10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 20l3.5-6 3.5 6z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>';
@@ -150,6 +151,15 @@ const plugin: S3dPlugin = {
       );
     });
 
+    // the demos as examples in the script editor, under the plugin's name
+    for (const demo of DEMOS) {
+      context.script.addExample({
+        id: demo.id,
+        name: `level.demos.${demo.id}.name`,
+        description: `level.demos.${demo.id}.description`,
+        code: demo.code,
+      });
+    }
     context.script.extend('levelObject', (api, kind: string, call: PlaceCall = {}) => placeObject(api, kind, call), {
       category: 'Plugins',
       signature: 's3d.levelObject(kind, { at: [x, y, z], rotation, size: [w, d, h], props, actions, name })',

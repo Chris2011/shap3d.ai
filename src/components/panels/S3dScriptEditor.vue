@@ -15,33 +15,26 @@
           ($event.target as HTMLSelectElement).value = '';
         "
       >
+        <!-- only what is written in the chosen language: the app's examples, a plugin language's own, then those
+             the plugins bring (one group each), then the user's scripts -->
         <option value="" disabled>{{ t('scriptEditor.loadExample') }}</option>
-        <optgroup label="JavaScript">
-          <option v-for="example in EXAMPLES.filter((candidate) => candidate.lang === 'js')" :key="example.id" :value="example.id">
-            {{ example.name }}
-          </option>
+        <optgroup v-if="appExamples.length" label="Shap3D.ai">
+          <option v-for="example in appExamples" :key="example.id" :value="example.id">{{ example.name }}</option>
         </optgroup>
-        <optgroup label="JSON">
-          <option v-for="example in EXAMPLES.filter((candidate) => candidate.lang === 'json')" :key="example.id" :value="example.id">
-            {{ example.name }}
-          </option>
-        </optgroup>
-        <optgroup label="OBJ-Mesh">
-          <option v-for="example in EXAMPLES.filter((candidate) => candidate.lang === 'obj')" :key="example.id" :value="example.id">
-            {{ example.name }}
-          </option>
-        </optgroup>
-        <optgroup
-          v-for="language in SCRIPT_LANGUAGES.filter((candidate) => candidate.examples?.length)"
-          :key="language.id"
-          :label="localize(language.label)"
-        >
-          <option v-for="example in language.examples" :key="example.id" :value="`plugin:${language.id}:${example.id}`">
+        <optgroup v-if="pluginLanguage?.examples?.length" :label="localize(pluginLanguage.label)">
+          <option v-for="example in pluginLanguage.examples" :key="example.id" :value="`plugin:${pluginLanguage.id}:${example.id}`">
             {{ localize(example.name) }}
           </option>
         </optgroup>
-        <optgroup v-if="saved.length" :label="t('scriptEditor.myScripts')">
-          <option v-for="script in saved" :key="script.name" :value="'my:' + script.name">{{ script.name }}</option>
+        <optgroup
+          v-for="group in pluginExampleGroups"
+          :key="group.plugin"
+          :label="t('scriptEditor.pluginExamples', { name: group.plugin })"
+        >
+          <option v-for="example in group.examples" :key="example.id" :value="`example:${example.id}`">{{ example.name }}</option>
+        </optgroup>
+        <optgroup v-if="savedHere.length" :label="t('scriptEditor.myScripts')">
+          <option v-for="script in savedHere" :key="script.name" :value="'my:' + script.name">{{ script.name }}</option>
         </optgroup>
       </select>
       <!-- while the worker builds: a spinner and "building" in the button, a thin bar under the row – nothing moves -->
@@ -192,7 +185,7 @@ import { useScripts, type ScriptLang } from '../../composables/useScripts';
 import { ref, shallowRef, computed, nextTick, onMounted, watch } from 'vue';
 import S3dIcon from '../S3dIcon.vue';
 import { useEditor } from '../keys';
-import { EXAMPLES } from '../../scripting/examples';
+import { EXAMPLES, PLUGIN_EXAMPLES } from '../../scripting/examples';
 import S3dApiReference from './S3dApiReference.vue';
 import { runScriptAsync, runJson, type ScriptLog } from '../../scripting/api';
 import { highlight, type CodeLang } from '../../scripting/highlight';
@@ -313,6 +306,17 @@ const BUILT_IN_LANGS: readonly string[] = ['js', 'json', 'obj'];
 const isKnownLang = (id: string) => BUILT_IN_LANGS.includes(id) || !!findScriptLanguage(id);
 /** the plugin language that is selected, if any */
 const pluginLanguage = computed(() => findScriptLanguage(lang.value));
+
+// the example list shows only what is written in the chosen language
+const appExamples = computed(() => EXAMPLES.filter((example) => example.lang === lang.value));
+const pluginExampleGroups = computed(() => {
+  const groups = new Map<string, typeof PLUGIN_EXAMPLES>();
+  for (const example of PLUGIN_EXAMPLES.filter((candidate) => candidate.lang === lang.value)) {
+    groups.set(example.plugin, [...(groups.get(example.plugin) ?? []), example]);
+  }
+  return [...groups].map(([plugin, examples]) => ({ plugin, examples }));
+});
+const savedHere = computed(() => saved.value.filter((script) => script.lang === lang.value));
 const highlighted = computed(() =>
   highlight(code.value + '\n', pluginLanguage.value ? (pluginLanguage.value.highlight ?? 'js') : (lang.value as CodeLang)),
 );
@@ -413,6 +417,24 @@ const onPaste = (event: ClipboardEvent) => {
   }
 };
 const loadExample = (id: string) => {
+  if (id.startsWith('example:')) {
+    const example = PLUGIN_EXAMPLES.find((candidate) => candidate.id === id.slice('example:'.length));
+    if (!example) {
+      return;
+    }
+    lang.value = example.lang as Lang;
+    code.value = example.code;
+    currentSaved.value = null;
+    out.value = [
+      {
+        kind: 'log',
+        text: example.description
+          ? t('scriptEditor.exampleWithDescription', { name: example.name, description: example.description })
+          : t('scriptEditor.example', { name: example.name }),
+      },
+    ];
+    return;
+  }
   if (id.startsWith('plugin:')) {
     const [, languageId, exampleId] = id.split(':');
     const language = findScriptLanguage(languageId);

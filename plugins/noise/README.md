@@ -108,6 +108,8 @@ npm run build
 
 Then in Shap3D.ai: _Plugins › Load plugin folder…_ and pick the folder `plugins/noise/dist`. The panel _Noise_ opens from the tile in the right-hand bar or the command palette (_Noise terrain…_).
 
+**Demos**: the scripts in `docs/demo*.js` are also examples in the script editor (JavaScript, under _Noise (plugin)_).
+
 **Screenshots**: `npm run screenshots` renders `docs/noise.png`, `docs/noise-scatter.png`, `docs/noise-stones.png`, `docs/noise-trees.png`, `docs/noise-villages.png`, `docs/noise-routes.png`, `docs/noise-junctions.png`, `docs/noise-cityroads.png`, `docs/noise-erosion.png`, `docs/noise-facade.png`, `docs/noise-city.png`, `docs/noise-hillcity.png` and `docs/noise-deform.png` from the demos in `docs/` ([`docs/screenshots.mjs`](docs/screenshots.mjs) – Windows and Linux/macOS) with the dev server running; `--url` picks another dev server, `--only stones` one picture.
 
 ## Structure

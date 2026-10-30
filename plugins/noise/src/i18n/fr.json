@@ -391,6 +391,60 @@
       },
       "errors": {
         "gridVersion": "Le plugin Terrain enregistre sa grille d’altitudes en version {version}, ce plugin connaît la version 1 – les terrains faits avec elle ne peuvent pas être lus ni modifiés ici."
+      },
+      "demos": {
+        "island": {
+          "name": "Île de bruit",
+          "description": "Une île en bruit fractal avec eau et neige, bois et rochers, et un bloc rendu rugueux par le bruit. Vide le modèle."
+        },
+        "trees": {
+          "name": "Arbres",
+          "description": "Chênes, bouleaux, pins et palmiers issus de graines sur un pré. Vide le modèle."
+        },
+        "scatter": {
+          "name": "Dispersion",
+          "description": "Une allée d’arbres le long d’un chemin sinueux et un pré avec buissons, arbres et rochers selon un masque de bruit. Vide le modèle."
+        },
+        "paving": {
+          "name": "Pierres",
+          "description": "Dalles, pavés et carreaux sur des surfaces et un mur en pierres sèches sur un mur – du bruit cellulaire. Vide le modèle."
+        },
+        "routes": {
+          "name": "Rivières et routes",
+          "description": "Une rivière dans les vallées, une route sur les collines, un chemin de gravier et des bois. Vide le modèle."
+        },
+        "junctions": {
+          "name": "Carrefours",
+          "description": "Des routes construites l’une après l’autre se rejoignent : un T, un chemin qui croise et une route qui prolonge une extrémité. Vide le modèle."
+        },
+        "cityroads": {
+          "name": "Routes vers la ville",
+          "description": "Des routes qui prolongent les rues d’une ville. Vide le modèle."
+        },
+        "villages": {
+          "name": "Villages",
+          "description": "Des villages sur les pentes douces d’une vallée avec rivière, reliés par des routes de gravier. Vide le modèle."
+        },
+        "erosion": {
+          "name": "Érosion",
+          "description": "Les mêmes montagnes deux fois – telles quelles et érodées par la pluie. Vide le modèle."
+        },
+        "facade": {
+          "name": "Façades",
+          "description": "Trois maisons de ville avec fenêtres, volets, balcons et boutiques. Vide le modèle."
+        },
+        "city": {
+          "name": "Ville",
+          "description": "Rues, îlots et bâtiments dont la hauteur suit une carte de densité de bruit. Vide le modèle."
+        },
+        "hillcity": {
+          "name": "Ville en colline",
+          "description": "Une ville sur un terrain vallonné – terrasses sur murs de soutènement, rues qui suivent le sol. Vide le modèle."
+        },
+        "deform": {
+          "name": "Déformer",
+          "description": "Des boîtes tordues, effilées, courbées et rendues rugueuses par le bruit, et des blocs avec les shaders. Vide le modèle."
+        }
       }
     }
   }

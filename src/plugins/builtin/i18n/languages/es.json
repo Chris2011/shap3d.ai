@@ -1536,7 +1536,8 @@
       "apiExample": "Ejemplo de API",
       "exampleBuilt": "✓ Ejemplo construido – Ctrl+Z lo deshace.",
       "myScript": "Mi script",
-      "saved": "Script guardado"
+      "saved": "Script guardado",
+      "pluginExamples": "{name} (plugin)"
     },
     "examples": {
       "house": {
@@ -1572,11 +1573,11 @@
         "description": "Copiar y rotar grupos."
       },
       "json-scene": {
-        "name": "JSON: escena sencilla",
+        "name": "Escena sencilla",
         "description": "Declarativo: objetos, materiales, grupos."
       },
       "json-shelf": {
-        "name": "JSON: estantería (array)",
+        "name": "Estantería (array)",
         "description": "«array» repite un objeto con un desplazamiento."
       },
       "mesh-js": {
@@ -1584,7 +1585,7 @@
         "description": "Incrustar texto OBJ en el script, escalarlo y colocarlo varias veces."
       },
       "obj-chair": {
-        "name": "OBJ: silla (LLaMA-Mesh)",
+        "name": "Silla (LLaMA-Mesh)",
         "description": "Salida bruta de LLaMA-Mesh – solo líneas v/f. Ajusta tamaño y ejes arriba."
       }
     },

@@ -149,7 +149,7 @@ cd plugins/level
 npm run build
 ```
 
-Then _Plugins › Load plugin folder…_ in Shap3D.ai and pick `plugins/level/dist`. `npm run typecheck`, `npm run lint`, `npm run format:check` and `npm run i18n` check the package; `npm run screenshots` renders `docs/level.png` and `docs/level-house.png` from `docs/demo.js` and `docs/level-blockout.png`, `docs/level-guide.png` and `docs/level-play.png` from `docs/demo-blockout.js`, `docs/level-play-arena.png` from `docs/demo.js`, `docs/level-night.png` and `docs/level-night-play.png` from `docs/demo-night.js`, `docs/level-generated.png` and `docs/level-nav.png` from `docs/demo-generate.js`, `docs/level-storeys.png` from `docs/demo-storeys.js`, `docs/demo-enemies.js` for the walking enemies (dev server running, package built).
+Then _Plugins › Load plugin folder…_ in Shap3D.ai and pick `plugins/level/dist`. `npm run typecheck`, `npm run lint`, `npm run format:check` and `npm run i18n` check the package; the demos in `docs/demo*.js` are also examples in the script editor (JavaScript, under _Level editor (plugin)_); `npm run screenshots` renders `docs/level.png` and `docs/level-house.png` from `docs/demo.js` and `docs/level-blockout.png`, `docs/level-guide.png` and `docs/level-play.png` from `docs/demo-blockout.js`, `docs/level-play-arena.png` from `docs/demo.js`, `docs/level-night.png` and `docs/level-night-play.png` from `docs/demo-night.js`, `docs/level-generated.png` and `docs/level-nav.png` from `docs/demo-generate.js`, `docs/level-storeys.png` from `docs/demo-storeys.js`, `docs/demo-enemies.js` for the walking enemies (dev server running, package built).
 
 ## Layout
 

@@ -410,6 +410,32 @@
           "trigger": "Pon primero un disparador."
         },
         "messageText": "Algo se mueve …"
+      },
+      "demos": {
+        "arena": {
+          "name": "Arena y casa",
+          "description": "Una arena con inicios para dos equipos, bandera, plataforma de salto y teletransportes – y una casa con puerta cerrada. Vacía el modelo."
+        },
+        "blockout": {
+          "name": "Maqueta de mansión",
+          "description": "Una mansión en la cuadrícula: vestíbulo, escalera a una galería, sala oeste cerrada, pasillo a la biblioteca, con objetos de juego. Vacía el modelo."
+        },
+        "enemies": {
+          "name": "Enemigos de ronda",
+          "description": "Un guardia que recorre cuatro puntos y durmientes que despierta un disparador – pruébalo. Vacía el modelo."
+        },
+        "generate": {
+          "name": "Plano generado",
+          "description": "Diez salas unidas por pasillos desde una semilla, con inicio, luces, enemigos, salud, punto de guardado y meta. Vacía el modelo."
+        },
+        "night": {
+          "name": "Mansión de noche",
+          "description": "La mansión con techos, casi sin luz diurna y con niebla, iluminada por una lámpara parpadeante y un foco con sombras. Vacía el modelo."
+        },
+        "storeys": {
+          "name": "Dos plantas",
+          "description": "Un vestíbulo con escalera a una galería sobre su mitad trasera y una llave arriba. Vacía el modelo."
+        }
       }
     }
   }

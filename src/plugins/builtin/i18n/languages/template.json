@@ -2936,7 +2936,8 @@
       "myScript": "",
       "myScript#en": "My script",
       "saved": "",
-      "saved#en": "Script saved"
+      "saved#en": "Script saved",
+      "pluginExamples": ""
     },
     "examples": {
       "house": {

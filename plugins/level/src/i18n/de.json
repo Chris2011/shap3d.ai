@@ -410,6 +410,32 @@
           "trigger": "Erst einen Trigger setzen."
         },
         "messageText": "Irgendetwas regt sich …"
+      },
+      "demos": {
+        "arena": {
+          "name": "Arena und Haus",
+          "description": "Eine Arena mit Spawns für zwei Teams, Flagge, Jump-Pad und Teleportern – daneben ein Haus mit verschlossener Tür. Leert das Modell."
+        },
+        "blockout": {
+          "name": "Herrenhaus-Blockout",
+          "description": "Ein Herrenhaus auf dem Raster: Halle, Treppe zur Galerie, verschlossener Westraum, Gang zur Bibliothek, mit Spielobjekten. Leert das Modell."
+        },
+        "enemies": {
+          "name": "Patrouillierende Gegner",
+          "description": "Eine Wache läuft vier Wegpunkte ab, Schläfer weckt ein Trigger – im Probelauf ausprobieren. Leert das Modell."
+        },
+        "generate": {
+          "name": "Generierter Grundriss",
+          "description": "Zehn Räume mit Gängen aus einem Seed, mit Start, Lichtern, Gegnern, Gesundheit, Speicherpunkt und Ziel. Leert das Modell."
+        },
+        "night": {
+          "name": "Herrenhaus bei Nacht",
+          "description": "Das Herrenhaus mit Decken, kaum Tageslicht und Nebel, beleuchtet von einer flackernden Lampe und einem Spot mit Schatten. Leert das Modell."
+        },
+        "storeys": {
+          "name": "Zwei Etagen",
+          "description": "Eine Halle mit Treppe hinauf zu einer Galerie über ihrer hinteren Hälfte, oben ein Schlüssel. Leert das Modell."
+        }
       }
     }
   }
