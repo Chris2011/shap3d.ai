@@ -9,6 +9,7 @@ import { pluginContext, t, THREE } from './runtime';
 import { buildWorld, raycast, type Polygon, type World } from './world';
 import { levelAtmosphere, refreshPreview, resetPreview, viewAtmosphere, viewLight } from './lights';
 import { playSound, setZoneSounds, startSounds, stopSounds, type Reverb } from './sounds';
+import { useLevelState } from './state';
 
 /**
  * The test run: walk through the level as the player – with collision against the model, steps up stairs, gravity and
@@ -707,6 +708,7 @@ const shine = (state: Sim) => {
 // ------------------------------------------------------------ start and stop
 
 const startPlay = (editor: Editor) => {
+  useLevelState().guide.played = true;
   const objects = levelObjects();
   const byId = new Map(objects.map((object) => [object.id, object]));
   const spawns = objects.filter((object) => object.kind === 'spawn');

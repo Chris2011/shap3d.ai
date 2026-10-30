@@ -1,3 +1,4 @@
+import { MODE } from './names';
 import * as appVue from 'vue';
 import type * as ThreeModule from 'three';
 import type { PluginContext } from '../../../src/plugins/types';
@@ -38,4 +39,21 @@ export const pluginContext = () => {
 export const t = (key: string, params?: Record<string, unknown>) => {
   current?.i18n.language();
   return current?.i18n.t(key, params) ?? key;
+};
+
+/**
+ * A level tool taken outside the level mode (its key, the palette): the mode opens and the tool is taken again in it –
+ * entering the mode starts with its first tool, so this waits until the tool switch is over.
+ */
+export const intoLevelMode = (toolId: string, keep: () => () => void) => {
+  const context = pluginContext();
+  if (context.modes.active() === `level.${MODE}`) {
+    return;
+  }
+  const restore = keep();
+  setTimeout(() => {
+    context.modes.open(MODE);
+    context.editor.setTool(toolId);
+    restore();
+  });
 };

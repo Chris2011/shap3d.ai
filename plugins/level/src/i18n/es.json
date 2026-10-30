@@ -209,7 +209,8 @@
         "play": "Prueba del nivel",
         "playFirst": "Prueba del nivel en primera persona",
         "playThird": "Prueba del nivel desde atrás",
-        "nav": "Comprobar qué se alcanza"
+        "nav": "Comprobar qué se alcanza",
+        "guide": "Guía del nivel"
       },
       "blockout": {
         "title": "Maqueta",
@@ -324,6 +325,91 @@
         "add": "+ Archivos de sonido",
         "remove": "Quitar sonido",
         "hint": "Las zonas de sonido y la acción Reproducir sonido reproducen un sonido por su nombre – un archivo con ese nombre (sin extensión, p. ej. door-creak.ogg para door-creak). Los nombres sin archivo suenan con un sustituto en la prueba."
+      },
+      "guide": {
+        "title": "Guía",
+        "progress": "{done} de {count}",
+        "intro": "Paso a paso hacia un primer nivel jugable. Cada paso se marca solo en cuanto el modelo lo muestra – el orden es libre.",
+        "back": "‹ Atrás",
+        "next": "Siguiente ›",
+        "actions": {
+          "room": "Dibujar una sala (K)",
+          "corridor": "Dibujar un pasillo",
+          "generate": "Generar un plano…",
+          "spawn": "Poner el inicio (J)",
+          "enemy": "Poner un enemigo",
+          "waypoint": "Poner puntos de ruta",
+          "trigger": "Poner un disparador",
+          "door": "Poner una puerta",
+          "pickup": "Poner un objeto",
+          "light": "Poner una luz",
+          "atmosphere": "Luz diurna y niebla…",
+          "check": "Comprobar el nivel",
+          "play": "▶ Prueba (P)",
+          "glb": "Exportar glTF",
+          "json": "Exportar archivo de nivel",
+          "templates": "Plantillas de motor…",
+          "path": "Dar su ruta al enemigo…",
+          "message": "Añadir un mensaje al disparador",
+          "editActions": "Editar las acciones del disparador…"
+        },
+        "steps": {
+          "blockout": {
+            "title": "Maquetar las salas",
+            "text": "Dibuja salas como rectángulo en la cuadrícula, pasillos con clic en su inicio y su fin, escaleras en el sentido en que suben. Altura del suelo, altura y techos vienen del panel Maqueta. ¿Sin tiempo? Genera un plano desde una semilla.",
+            "done": "El nivel tiene maqueta – cambia o quita piezas en el panel Maqueta."
+          },
+          "spawn": {
+            "title": "Poner el inicio del jugador",
+            "text": "Un clic en un suelo pone el punto de inicio; R lo gira 45° antes del clic. La flecha muestra hacia dónde mira.",
+            "done": "Hay un inicio."
+          },
+          "enemies": {
+            "title": "Enemigos y su ronda",
+            "text": "Pon un enemigo y luego puntos de ruta para su ronda. Dales el mismo nombre de ruta y un orden, y esa ruta al enemigo en el panel Nivel – en la prueba la recorre, ve y persigue al jugador.",
+            "done": "El nivel tiene enemigos."
+          },
+          "logic": {
+            "title": "Que pasen cosas",
+            "text": "Un disparador es una caja en la que entra el jugador. Selecciónalo y añade acciones en el panel Nivel: abrir una puerta, traer enemigos, encender una luz, cambiar la cámara, mostrar un mensaje. Cierra una puerta con llave y que un objeto dé la llave.",
+            "done": "Algo en el nivel dispara acciones."
+          },
+          "light": {
+            "title": "Iluminar",
+            "text": "Pon luces (omnidireccionales o focos; color, alcance, parpadeo, sombras) y ajusta el ambiente en el panel Nivel: menos luz diurna, niebla. «Mostrar al editar» lo muestra en la vista; la prueba siempre.",
+            "done": "El nivel tiene luces o un ambiente propio."
+          },
+          "check": {
+            "title": "Comprobar",
+            "text": "Las comprobaciones listan lo que haría tropezar a un motor de juego; la cuadrícula de paso muestra en verde adónde llega el jugador desde el inicio. Un clic en un problema selecciona su objeto.",
+            "done": "Sin problemas, todo es alcanzable."
+          },
+          "play": {
+            "title": "Jugar",
+            "text": "Recorre el nivel: WASD, ratón para mirar, Espacio salta, E usa, F linterna, V cambia la vista, Esc termina. Los enemigos caminan, los disparadores actúan, las puertas se abren.",
+            "done": "Has jugado el nivel."
+          },
+          "export": {
+            "title": "Llevarlo al motor de juego",
+            "text": "Exporta el modelo como glTF y el archivo de nivel al lado – los objetos de juego con propiedades, acciones y cuadrícula de paso. El panel Nivel tiene plantillas para Godot, Unity y Unreal que los construyen en el motor.",
+            "done": "Exportado."
+          }
+        },
+        "heading": "Tu primer nivel",
+        "checks": {
+          "enemy": "Un enemigo puesto",
+          "waypoints": "Puntos de ruta puestos",
+          "path": "Un enemigo recorre una ruta de puntos",
+          "trigger": "Un disparador puesto",
+          "action": "Un disparador u objeto lanza una acción",
+          "problems": "Sin problemas en las comprobaciones",
+          "reach": "Cuadrícula de paso: todo alcanzable"
+        },
+        "needs": {
+          "enemy": "Pon primero un enemigo.",
+          "trigger": "Pon primero un disparador."
+        },
+        "messageText": "Algo se mueve …"
       }
     }
   }

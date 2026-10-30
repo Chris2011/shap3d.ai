@@ -19,6 +19,8 @@ export interface PanelInfo {
   component?: Component;
   /** false = no tile in the right-hand bar (plugin panels open via menu, palette or plugin manager) */
   tile?: boolean;
+  /** only inside a mode that lists it – no tile, palette entry or command outside */
+  inMode?: boolean;
 }
 
 /** Right-hand panels (order = order of the tiles); reactive so plugins can add and remove panels. */

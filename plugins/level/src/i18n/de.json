@@ -209,7 +209,8 @@
         "play": "Level-Probelauf",
         "playFirst": "Level-Probelauf aus der Ego-Sicht",
         "playThird": "Level-Probelauf von hinten",
-        "nav": "Erreichbarkeit prüfen"
+        "nav": "Erreichbarkeit prüfen",
+        "guide": "Level-Anleitung"
       },
       "blockout": {
         "title": "Blockout",
@@ -324,6 +325,91 @@
         "add": "+ Sounddateien",
         "remove": "Sound entfernen",
         "hint": "Klangzonen und die Aktion „Klang abspielen“ spielen einen Sound über seinen Namen – eine Datei dieses Namens (ohne Endung, z. B. door-creak.ogg für door-creak). Namen ohne Datei spielen im Probelauf einen Platzhalter."
+      },
+      "guide": {
+        "title": "Anleitung",
+        "progress": "{done} von {count}",
+        "intro": "Schritt für Schritt zum ersten spielbaren Level. Jeder Schritt hakt sich selbst ab, sobald das Modell ihn zeigt – die Reihenfolge ist frei.",
+        "back": "‹ Zurück",
+        "next": "Weiter ›",
+        "actions": {
+          "room": "Raum zeichnen (K)",
+          "corridor": "Gang zeichnen",
+          "generate": "Grundriss generieren …",
+          "spawn": "Start setzen (J)",
+          "enemy": "Gegner setzen",
+          "waypoint": "Wegpunkte setzen",
+          "trigger": "Trigger setzen",
+          "door": "Tür setzen",
+          "pickup": "Pickup setzen",
+          "light": "Licht setzen",
+          "atmosphere": "Tageslicht und Nebel …",
+          "check": "Level prüfen",
+          "play": "▶ Probelauf (P)",
+          "glb": "glTF exportieren",
+          "json": "Level-Datei exportieren",
+          "templates": "Engine-Vorlagen …",
+          "path": "Dem Gegner seinen Pfad geben …",
+          "message": "Meldung an den Trigger hängen",
+          "editActions": "Aktionen des Triggers bearbeiten …"
+        },
+        "steps": {
+          "blockout": {
+            "title": "Räume blocken",
+            "text": "Räume zeichnest du als Rechteck auf dem Raster, Gänge mit Klick auf Anfang und Ende, Treppen in Laufrichtung nach oben. Bodenhöhe, Raumhöhe und Decken kommen aus dem Blockout-Panel. Keine Zeit? Grundriss aus einem Seed generieren.",
+            "done": "Das Level hat einen Blockout – Teile änderst oder entfernst du im Blockout-Panel."
+          },
+          "spawn": {
+            "title": "Start des Spielers setzen",
+            "text": "Klick auf einen Boden setzt den Startpunkt; R dreht ihn vor dem Klick um 45°. Der Pfeil zeigt die Blickrichtung.",
+            "done": "Es gibt einen Start."
+          },
+          "enemies": {
+            "title": "Gegner und ihre Runde",
+            "text": "Setze einen Gegner, dann Wegpunkte für seine Runde. Gib den Wegpunkten denselben Pfadnamen und eine Reihenfolge, dem Gegner im Level-Panel diesen Pfad – im Probelauf läuft er ihn ab, sieht und verfolgt den Spieler.",
+            "done": "Das Level hat Gegner."
+          },
+          "logic": {
+            "title": "Etwas passieren lassen",
+            "text": "Ein Trigger ist ein Kasten, in den der Spieler läuft. Wähle ihn aus und füge im Level-Panel Aktionen hinzu: Tür öffnen, Gegner kommen lassen, Licht oder Kamera schalten, Meldung zeigen. Schließ eine Tür ab und lass ein Pickup den Schlüssel geben.",
+            "done": "Im Level löst etwas Aktionen aus."
+          },
+          "light": {
+            "title": "Ausleuchten",
+            "text": "Setze Lichter (rundum oder Spot; Farbe, Reichweite, Flackern, Schatten) und stell im Level-Panel die Stimmung ein: weniger Tageslicht, Nebel. „Beim Bearbeiten zeigen“ zeigt es in der Ansicht, der Probelauf immer.",
+            "done": "Das Level hat Lichter oder eine eigene Stimmung."
+          },
+          "check": {
+            "title": "Prüfen",
+            "text": "Die Prüfungen zeigen, worüber eine Game-Engine stolpern würde; das Laufraster zeigt grün, wohin der Spieler vom Start aus kommt. Klick auf ein Problem wählt sein Objekt aus.",
+            "done": "Keine Probleme, alles erreichbar."
+          },
+          "play": {
+            "title": "Spielen",
+            "text": "Lauf durchs Level: WASD, Maus zum Schauen, Leertaste springt, E benutzt, F Taschenlampe, V wechselt die Ansicht, Esc beendet. Gegner laufen, Trigger lösen aus, Türen gehen auf.",
+            "done": "Du hast das Level gespielt."
+          },
+          "export": {
+            "title": "In die Game-Engine bringen",
+            "text": "Exportiere das Modell als glTF und die Level-Datei daneben – die Spielobjekte mit Eigenschaften, Aktionen und Laufraster. Im Level-Panel gibt es Vorlagen für Godot, Unity und Unreal, die sie in der Engine aufbauen.",
+            "done": "Exportiert."
+          }
+        },
+        "heading": "Dein erstes Level",
+        "checks": {
+          "enemy": "Gegner gesetzt",
+          "waypoints": "Wegpunkte gesetzt",
+          "path": "Ein Gegner läuft einen Pfad aus Wegpunkten ab",
+          "trigger": "Trigger gesetzt",
+          "action": "Ein Trigger oder Pickup löst eine Aktion aus",
+          "problems": "Keine Probleme in den Prüfungen",
+          "reach": "Laufraster: alles erreichbar"
+        },
+        "needs": {
+          "enemy": "Erst einen Gegner setzen.",
+          "trigger": "Erst einen Trigger setzen."
+        },
+        "messageText": "Irgendetwas regt sich …"
       }
     }
   }

@@ -9,6 +9,7 @@ import { PEOPLE } from '../core/people';
 import { MATERIAL_LIBRARY, categoryLabel } from '../core/materialLibrary';
 import { ScriptApi } from '../scripting/api';
 import { openPanel, PANEL_INFO, togglePanel } from '../components/panelState';
+import { activeMode } from '../plugins/uiExtensions';
 import type { PlaceTool } from '../tools/place';
 import { t } from '../i18n';
 
@@ -130,7 +131,11 @@ export const paletteItems = (editor: Editor): PaletteItem[] => {
   }
 
   // panels
-  for (const panel of PANEL_INFO.filter((candidate) => candidate.tile !== false)) {
+  // a panel that belongs to a mode only while that mode is on
+  const modePanels = activeMode()?.panels ?? [];
+  for (const panel of PANEL_INFO.filter(
+    (candidate) => candidate.tile !== false && (!candidate.inMode || modePanels.includes(candidate.id)),
+  )) {
     // tile-less (plugin) panels come with their own command
     out.push({
       id: 'p:' + panel.id,

@@ -9,6 +9,7 @@
 // No other plugin is needed – a terrain from the noise plugin is just geometry under the objects.
 import type { S3dPlugin } from '../../../src/plugins/types';
 import S3dBlockoutPanel from './S3dBlockoutPanel.vue';
+import S3dLevelGuide from './S3dLevelGuide.vue';
 import S3dLevelPanel from './S3dLevelPanel.vue';
 import S3dPlayHud from './S3dPlayHud.vue';
 import { createPlayTool, isPlaying, startIn, stopPlay } from './play';
@@ -19,7 +20,7 @@ import { createBlockTool } from './blocktool';
 import { exportedLevelFile, levelFile, levelJson } from './exporter';
 import { TEMPLATES } from './templates';
 import { KINDS } from './kinds';
-import { BLOCKOUT_PANEL, BLOCK_TOOL_ID, EXPORTER, MODE, PANEL, PLACE_TOOL_ID, PLAY_TOOL_ID } from './names';
+import { BLOCKOUT_PANEL, BLOCK_TOOL_ID, EXPORTER, GUIDE_PANEL, MODE, PANEL, PLACE_TOOL_ID, PLAY_TOOL_ID } from './names';
 import { LEVEL_FORMAT, levelObjects, placeObject, repairIds, selectedObjects, validLevelData, type PlaceCall } from './objects';
 import { MESSAGES, t, useRuntime } from './runtime';
 import { useLevelState } from './state';
@@ -56,7 +57,16 @@ const plugin: S3dPlugin = {
     // the format of level objects, so other plugins (an exporter, a checker) can read them without this one
     context.data.formats.register({ ...LEVEL_FORMAT, label: 'level.plugin.name', validate: validLevelData });
 
-    context.panels.register({ id: PANEL, label: 'level.panel.title', icon: 'level', width: 320, component: S3dLevelPanel, tile: 'first' });
+    // the level's panels live in the level mode only – it is opened with the switch in the top bar or a command
+    context.panels.register({
+      id: PANEL,
+      label: 'level.panel.title',
+      icon: 'level',
+      width: 320,
+      component: S3dLevelPanel,
+      tile: 'first',
+      inMode: true,
+    });
     context.tools.register({ id: 'place', name: 'level.tool.name', icon: 'level', key: 'J', create: (editor) => createPlaceTool(editor) });
     context.panels.register({
       id: BLOCKOUT_PANEL,
@@ -65,6 +75,16 @@ const plugin: S3dPlugin = {
       width: 320,
       component: S3dBlockoutPanel,
       tile: 'first',
+      inMode: true,
+    });
+    context.panels.register({
+      id: GUIDE_PANEL,
+      label: 'level.guide.title',
+      icon: 'level',
+      width: 320,
+      component: S3dLevelGuide,
+      tile: 'first',
+      inMode: true,
     });
     context.tools.register({
       id: 'block',
@@ -100,8 +120,13 @@ const plugin: S3dPlugin = {
       label: 'level.mode',
       icon: 'level',
       tools: ['select', BLOCK_TOOL_ID, PLACE_TOOL_ID, PLAY_TOOL_ID, 'move', 'rotate', 'scale', 'eraser', 'orbit', 'pan', 'tape'],
-      panels: [`level.${PANEL}`, `level.${BLOCKOUT_PANEL}`, 'entityinfo', 'outliner', 'tags', 'scenes'],
-      enter: () => context.panels.open(PANEL),
+      panels: [`level.${GUIDE_PANEL}`, `level.${PANEL}`, `level.${BLOCKOUT_PANEL}`, 'entityinfo', 'outliner', 'tags', 'scenes'],
+      // the first time the guide, then the objects
+      enter: () => {
+        const seen = context.storage.get('guideSeen', false);
+        context.panels.open(seen ? PANEL : GUIDE_PANEL);
+        context.storage.set('guideSeen', true);
+      },
       leave: () => {
         useLevelState().placing = null;
       },
@@ -277,6 +302,16 @@ const plugin: S3dPlugin = {
     // another model: its walking grid is checked when asked for
     context.events.onNewModel(() => toggleNav(false));
     context.commands.register({
+      id: 'guide',
+      label: 'level.commands.guide',
+      icon: 'level',
+      keywords: 'guide tutorial wizard help first level anleitung assistent hilfe erstes', // i18n-ignore – search words
+      run: () => {
+        context.modes.open(MODE);
+        context.panels.open(GUIDE_PANEL);
+      },
+    });
+    context.commands.register({
       id: 'nav',
       label: 'level.commands.nav',
       icon: 'level',
@@ -303,8 +338,10 @@ const plugin: S3dPlugin = {
         label: `level.commands.place.${kind}`,
         icon: 'level',
         run: (editor) => {
-          useLevelState().placing = kind;
+          // into the level mode first – entering it takes its first tool
+          context.modes.open(MODE);
           editor.setTool(PLACE_TOOL_ID);
+          useLevelState().placing = kind;
         },
       });
     }

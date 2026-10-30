@@ -3,7 +3,7 @@ import type { Overlay } from '../../../src/engine/overlay';
 import { pieceRects, type BlockPiece } from '@shap3d/procgen';
 import { blockoutData, runBlock } from './blockout';
 import { BLOCK_TOOL_ID } from './names';
-import { pluginContext, t, THREE } from './runtime';
+import { intoLevelMode, pluginContext, t, THREE } from './runtime';
 import { useLevelState } from './state';
 
 /**
@@ -31,6 +31,10 @@ export const createBlockTool = (editor: Editor) => {
     status() {
       const kind = t(`level.blockout.kinds.${state.block.kind}`);
       return this.start ? t('level.blockout.statusSecond', { kind }) : t('level.blockout.statusFirst', { kind });
+    }
+
+    activate() {
+      intoLevelMode(BLOCK_TOOL_ID, () => () => undefined);
     }
 
     deactivate() {

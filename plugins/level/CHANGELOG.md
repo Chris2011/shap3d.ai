@@ -4,6 +4,7 @@
 
 ### Added
 
+- A guide through a first level (on the first visit of the level mode and as a command): eight steps from the blockout to the export, each with buttons that start it, ticking themselves off from the model (with their parts), with a progress bar. The guide, the Level and the Blockout panel show in the level mode only; taking a level tool outside it opens the mode.
 - A plugin package of its own (`plugins/level`, built with `vite build`, installed via _Plugins › Load plugin folder…_), with its own lint, format, type and text checks.
 - Blockout: rooms, corridors (bending once) and stairs on a grid – also on floors above each other (a gallery over a hall, stairs up into it), drawn with the block tool (key K) or the Blockout panel, built into one group with floors, walls and optional ceilings – corridors open into rooms at their ends, rooms side by side share one wall, level doors cut doorways (and snap onto the walls' lines); the pieces listed to change or remove; `s3d.levelBlock()`, `s3d.levelBlockEdit()` and `s3d.levelBlockout()`.
 - Level objects as components of the model, in four groups – players and enemies (spawn, enemy, waypoint), volumes scaled with the Scale tool (trigger, hazard, sound zone), items and doors (pickup, door with lock and key, save point), cameras and movement (fixed camera with its view drawn, jump pad, teleporter) – each placed object with its own id and properties as plugin data on the instance.

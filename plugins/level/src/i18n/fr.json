@@ -209,7 +209,8 @@
         "play": "Essai du niveau",
         "playFirst": "Essai du niveau en vue subjective",
         "playThird": "Essai du niveau vu de dos",
-        "nav": "Vérifier ce qui est accessible"
+        "nav": "Vérifier ce qui est accessible",
+        "guide": "Guide du niveau"
       },
       "blockout": {
         "title": "Maquette",
@@ -324,6 +325,91 @@
         "add": "+ Fichiers son",
         "remove": "Retirer le son",
         "hint": "Les zones sonores et l’action Jouer un son jouent un son par son nom – un fichier de ce nom (sans extension, p. ex. door-creak.ogg pour door-creak). Les noms sans fichier jouent un son de remplacement pendant l’essai."
+      },
+      "guide": {
+        "title": "Guide",
+        "progress": "{done} sur {count}",
+        "intro": "Pas à pas vers un premier niveau jouable. Chaque étape se coche d’elle-même dès que le modèle la montre – l’ordre est libre.",
+        "back": "‹ Retour",
+        "next": "Suivant ›",
+        "actions": {
+          "room": "Dessiner une pièce (K)",
+          "corridor": "Dessiner un couloir",
+          "generate": "Générer un plan…",
+          "spawn": "Placer le départ (J)",
+          "enemy": "Placer un ennemi",
+          "waypoint": "Placer des points de passage",
+          "trigger": "Placer un déclencheur",
+          "door": "Placer une porte",
+          "pickup": "Placer un objet",
+          "light": "Placer une lumière",
+          "atmosphere": "Lumière du jour et brouillard…",
+          "check": "Vérifier le niveau",
+          "play": "▶ Essai (P)",
+          "glb": "Exporter en glTF",
+          "json": "Exporter le fichier de niveau",
+          "templates": "Modèles pour moteurs…",
+          "path": "Donner son chemin à l’ennemi…",
+          "message": "Ajouter un message au déclencheur",
+          "editActions": "Modifier les actions du déclencheur…"
+        },
+        "steps": {
+          "blockout": {
+            "title": "Maquetter les pièces",
+            "text": "Dessinez les pièces en rectangle sur la grille, les couloirs en cliquant leur début et leur fin, les escaliers dans le sens de la montée. Hauteur du sol, hauteur et plafonds viennent du panneau Maquette. Pressé ? Générez un plan depuis une graine.",
+            "done": "Le niveau a une maquette – modifiez ou retirez des pièces dans le panneau Maquette."
+          },
+          "spawn": {
+            "title": "Placer le départ du joueur",
+            "text": "Un clic sur un sol place le point de départ ; R le tourne de 45° avant le clic. La flèche montre la direction du regard.",
+            "done": "Il y a un départ."
+          },
+          "enemies": {
+            "title": "Ennemis et leur ronde",
+            "text": "Placez un ennemi, puis des points de passage pour sa ronde. Donnez-leur le même nom de chemin et un ordre, et ce chemin à l’ennemi dans le panneau Niveau – pendant l’essai il le parcourt, voit et poursuit le joueur.",
+            "done": "Le niveau a des ennemis."
+          },
+          "logic": {
+            "title": "Faire réagir le niveau",
+            "text": "Un déclencheur est une boîte où le joueur entre. Sélectionnez-le et ajoutez des actions dans le panneau Niveau : ouvrir une porte, faire venir des ennemis, allumer une lumière, changer de caméra, afficher un message. Verrouillez une porte et faites donner sa clé par un objet.",
+            "done": "Quelque chose déclenche des actions."
+          },
+          "light": {
+            "title": "Éclairer",
+            "text": "Placez des lumières (omni ou spots ; couleur, portée, scintillement, ombres) et réglez l’ambiance dans le panneau Niveau : moins de jour, brouillard. « Afficher en édition » la montre dans la vue, l’essai toujours.",
+            "done": "Le niveau a des lumières ou une ambiance."
+          },
+          "check": {
+            "title": "Vérifier",
+            "text": "Les vérifications listent ce qui gênerait un moteur de jeu ; la grille de marche montre en vert où le joueur va depuis le départ. Un clic sur un problème sélectionne son objet.",
+            "done": "Aucun problème, tout est accessible."
+          },
+          "play": {
+            "title": "Jouer",
+            "text": "Parcourez le niveau : ZQSD/WASD, la souris pour regarder, Espace saute, E utilise, F lampe, V change de vue, Échap termine. Les ennemis marchent, les déclencheurs agissent, les portes s’ouvrent.",
+            "done": "Vous avez joué le niveau."
+          },
+          "export": {
+            "title": "Passer au moteur de jeu",
+            "text": "Exportez le modèle en glTF et le fichier de niveau à côté – les objets de jeu avec propriétés, actions et grille de marche. Le panneau Niveau propose des modèles pour Godot, Unity et Unreal qui les construisent dans le moteur.",
+            "done": "Exporté."
+          }
+        },
+        "heading": "Votre premier niveau",
+        "checks": {
+          "enemy": "Un ennemi placé",
+          "waypoints": "Points de passage placés",
+          "path": "Un ennemi suit un chemin de points de passage",
+          "trigger": "Un déclencheur placé",
+          "action": "Un déclencheur ou un objet lance une action",
+          "problems": "Aucun problème dans les vérifications",
+          "reach": "Grille de marche : tout est accessible"
+        },
+        "needs": {
+          "enemy": "Placez d’abord un ennemi.",
+          "trigger": "Placez d’abord un déclencheur."
+        },
+        "messageText": "Quelque chose bouge …"
       }
     }
   }

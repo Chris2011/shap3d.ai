@@ -178,13 +178,14 @@ export const createPluginContext = (
             width: panel.width ?? 300,
             flush: panel.flush,
             component,
-            tile: !!panel.tile,
+            tile: !!panel.tile || !!panel.inMode,
+            inMode: !!panel.inMode,
           },
           ['label'],
         );
         track(addPanel(info, panel.tile === 'first'));
         // a tile is found in the palette like the built-in panels; without one a menu/palette entry opens the panel
-        if (panel.tile) {
+        if (panel.tile || panel.inMode) {
           return () => {};
         }
         const command = {

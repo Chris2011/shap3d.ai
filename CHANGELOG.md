@@ -34,7 +34,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ### Added
 
-- **Asynchronous script builds**: JavaScript scripts (`s3d.…`, from the script editor, the AI assistant or the remote API) run in a Web Worker. The finished model arrives as one undo step and the status bar shows *"Script is building the model …"* while it builds – the browser stays responsive even with scripts of thousands of faces, where it froze before. Scripts that need a plugin's `s3d.` extension (e.g. `s3d.text3d`), that build inside an open group, or that have no worker (old webview, CSP) run as before on the main thread. The script editor shows the build indicator too and keeps its Run button disabled until the build is in.
+- **Asynchronous script builds**: JavaScript scripts (`s3d.…`, from the script editor, the AI assistant or the remote API) run in a Web Worker. The finished model arrives as one undo step and the status bar shows _"Script is building the model …"_ while it builds – the browser stays responsive even with scripts of thousands of faces, where it froze before. Scripts that need a plugin's `s3d.` extension (e.g. `s3d.text3d`), that build inside an open group, or that have no worker (old webview, CSP) run as before on the main thread. The script editor shows the build indicator too and keeps its Run button disabled until the build is in.
 - **Workspaces for plugins**: a plugin can add a workspace next to the 3D model (`context.workspaces`). The top bar then shows a switch _Model | …_; the active workspace fills the window below the top bar.
 - **Views rendered on demand** for plugins (`context.render`): a camera, style, hidden tags, size and an optional drawing scale give an image or vector lines with hidden lines removed – without changing the viewport.
 - **Plugin data on the model** (`context.data.getModel` / `setModel`), saved in the `.shap3d.json` – next to the data on groups and components.
@@ -45,6 +45,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **Modes for plugins** (`context.modes`): next to the workspaces in the top bar, a mode keeps the 3D view but shows only its own tools in the toolbar and its own panels on the right.
 - `context.commands.run` runs the app's own commands too (e.g. `export-glb`) when the plugin has none of that name.
 - `context.panels.close()` closes the open panel (with an id only that one).
+- **Panels that belong to a mode** (`panels.register({ inMode: true })`): their tiles show only in a mode that lists them – no tile, palette entry or command outside it, and leaving the mode closes them.
 - **Lights and atmosphere for plugins** (`context.lighting`): point lights and spots, fog, how much daylight is left and a background – while a plugin sets any, faces are drawn lit so the lights fall on them; they belong to the view, not to the model. With `shadow: true` a light casts shadows (the first four in the view), also when the model's sun shadows are off.
 - **Moving instances in the view** for plugins (`context.display.place(instance, matrix | null)`): an instance is drawn at another place without changing the model or the undo history – e.g. enemies walking in a test run; `null` puts it back.
 - Screenshot scenes: `&command=<id>` runs commands after the scene.

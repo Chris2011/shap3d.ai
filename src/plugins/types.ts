@@ -83,6 +83,11 @@ export interface PluginPanel {
   mount?: (element: HTMLElement) => void | Disposer;
   /** a tile in the right-hand bar: 'first' (top) or 'last'; without one, a command "Label…" opens the panel */
   tile?: 'first' | 'last';
+  /**
+   * only inside a mode that lists it (`modes.register({ panels })`): its tile is there, and nowhere else – no tile,
+   * palette entry or command outside the mode; leaving the mode closes it
+   */
+  inMode?: boolean;
   /** no padding and no scrolling – the component lays itself out (chat, editor) */
   flush?: boolean;
 }

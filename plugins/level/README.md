@@ -22,6 +22,10 @@ The plugin is a package of its own with its own `package.json` and is **not** pa
 
 ## Features
 
+- **Guide** (the first time the level mode opens, or the command _Level guide_): eight steps to a first playable level – blockout, start, enemies and their round, triggers and doors, light, checks, test run, export. Each step says what to do, has buttons that start it (the right tool with the right kind, a panel, the check) and ticks itself off once the model shows it is done, its parts listed with their own ticks (e.g. a trigger placed · an action on it); buttons add a message to the trigger or open the enemy's path and the trigger's actions; a bar shows how far the level is. The guide, the Level and the Blockout panel live in the level mode only – it opens with the switch _Model | Level_ in the top bar, the commands, or by taking a level tool (J, K).
+
+  ![The guide: five of nine steps done on a blocked-out mansion, the step about light open with its buttons](docs/level-guide.png)
+
 - **Blockout** (_Blockout_ panel or the _Draw blockout_ tool, key **K**) – rooms, corridors and stairs on a grid of 0.5 m (or 0.25, 1, 2 m), built into one group with floors, walls and – where wanted – ceilings:
   - _Room_: drag a rectangle (or click two corners) at the chosen floor height; its room height and an optional ceiling come from the panel.
   - _Corridor_: click its start and its end – it bends once when they are not in line (along x first, **Shift** along y first); its width from the panel. Where a corridor runs into a room, the room opens; along a room's side the wall stays.
@@ -145,7 +149,7 @@ cd plugins/level
 npm run build
 ```
 
-Then _Plugins › Load plugin folder…_ in Shap3D.ai and pick `plugins/level/dist`. `npm run typecheck`, `npm run lint`, `npm run format:check` and `npm run i18n` check the package; `npm run screenshots` renders `docs/level.png` and `docs/level-house.png` from `docs/demo.js` and `docs/level-blockout.png` and `docs/level-play.png` from `docs/demo-blockout.js`, `docs/level-play-arena.png` from `docs/demo.js`, `docs/level-night.png` and `docs/level-night-play.png` from `docs/demo-night.js`, `docs/level-generated.png` and `docs/level-nav.png` from `docs/demo-generate.js`, `docs/level-storeys.png` from `docs/demo-storeys.js`, `docs/demo-enemies.js` for the walking enemies (dev server running, package built).
+Then _Plugins › Load plugin folder…_ in Shap3D.ai and pick `plugins/level/dist`. `npm run typecheck`, `npm run lint`, `npm run format:check` and `npm run i18n` check the package; `npm run screenshots` renders `docs/level.png` and `docs/level-house.png` from `docs/demo.js` and `docs/level-blockout.png`, `docs/level-guide.png` and `docs/level-play.png` from `docs/demo-blockout.js`, `docs/level-play-arena.png` from `docs/demo.js`, `docs/level-night.png` and `docs/level-night-play.png` from `docs/demo-night.js`, `docs/level-generated.png` and `docs/level-nav.png` from `docs/demo-generate.js`, `docs/level-storeys.png` from `docs/demo-storeys.js`, `docs/demo-enemies.js` for the walking enemies (dev server running, package built).
 
 ## Layout
 
@@ -170,6 +174,7 @@ src/
   play.ts              the test run: walking, views, the level's logic
   S3dPlayHud.vue       the test run's display
   S3dLevelPanel.vue    the Level panel
+  S3dLevelGuide.vue    the guide through a first level
   state.ts, names.ts   what panel and tool share
   runtime.ts           what the plugin takes from the app at run time
   styles.ts            the panel's styles

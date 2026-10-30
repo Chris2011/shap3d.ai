@@ -88,7 +88,7 @@ const PANELS = computed(() => PANEL_INFO.map((panel) => ({ ...panel, comp: markR
 // a plugin's mode shows only its own panels
 const tiles = computed(() => {
   const only = activeMode()?.panels;
-  return PANELS.value.filter((panel) => panel.tile !== false && (!only || only.includes(panel.id)));
+  return PANELS.value.filter((panel) => panel.tile !== false && (only ? only.includes(panel.id) : !panel.inMode));
 });
 const current = computed(() => PANELS.value.find((panel) => panel.id === openPanel.value));
 </script>

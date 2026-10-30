@@ -12,6 +12,7 @@ const SHOTS = [
   { name: 'level', file: 'demo.js', command: 'level.open', camera: '-2,-26,24', target: '3,1,0' },
   { name: 'level-house', file: 'demo.js', command: 'level.open', camera: '22,-17,17', target: '30,1,0' },
   { name: 'level-blockout', file: 'demo-blockout.js', command: 'level.blockout', camera: '3,-17,26', target: '9,7,1' },
+  { name: 'level-guide', file: 'demo-blockout.js', command: 'level.guide', camera: '3,-17,26', target: '9,7,1' },
   // the test run: through the hall's fixed camera, and from behind on the arena
   { name: 'level-play', file: 'demo-blockout.js', command: 'level.play', camera: '0,0,10', target: '1,1,0' },
   { name: 'level-play-arena', file: 'demo.js', command: 'level.play-third', camera: '0,0,10', target: '1,1,0' },

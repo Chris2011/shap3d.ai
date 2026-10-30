@@ -193,7 +193,8 @@ const installFromFile = async () => {
   await install(await file.text());
 };
 
-const panelsOf = (id: string) => PANEL_INFO.filter((panel) => panel.id.startsWith(id + '.'));
+// panels that belong to a mode open there, not from here
+const panelsOf = (id: string) => PANEL_INFO.filter((panel) => panel.id.startsWith(id + '.') && !panel.inMode);
 /** Chromium remembers the folder (for "Update"); other browsers use the folder input */
 const installFromFolderButton = () => {
   if (folders.supported) {

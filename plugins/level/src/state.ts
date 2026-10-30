@@ -21,6 +21,8 @@ interface LevelState {
   };
   /** the walking grid while it is shown (raw – not reactive) and the model's revision it was built for */
   nav: { grid: NavGrid; revision: number } | null;
+  /** what the guide cannot read from the model: a test run started, the level exported (this session) */
+  guide: { played: boolean; exported: boolean };
 }
 
 // made on first use – the app's Vue (behind `vue` in the package build) is only there once the plugin is active
@@ -33,4 +35,5 @@ export const useLevelState = () =>
     revision: 0,
     block: { kind: 'room', floor: 0, height: 3, ceiling: false, width: 2, rise: 3 },
     nav: null,
+    guide: { played: false, exported: false },
   }) as LevelState);

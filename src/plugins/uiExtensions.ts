@@ -1,6 +1,6 @@
 import { markRaw, reactive, shallowReactive, type Component } from 'vue';
 import type { Editor } from '../engine/editor';
-import { openPanel } from '../components/panelState';
+import { openPanel, PANEL_INFO } from '../components/panelState';
 
 /** Context-menu entries contributed by plugins (shown for the current selection). */
 export interface ContextMenuEntry {
@@ -103,6 +103,10 @@ export const switchView = (editor: Editor, id: string | null) => {
     modeState.active = null;
     previous.leave?.(editor);
     editor.setTool('select');
+    // a panel that only belongs to that mode closes with it
+    if (PANEL_INFO.some((panel) => panel.id === openPanel.value && panel.inMode)) {
+      openPanel.value = null;
+    }
   }
   workspaceState.active = mode || !id ? null : id;
   if (mode && previous !== mode) {

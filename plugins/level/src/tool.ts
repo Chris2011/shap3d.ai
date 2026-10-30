@@ -4,7 +4,7 @@ import { blockoutData, blockoutGroup } from './blockout';
 import { KINDS } from './kinds';
 import { PLACE_TOOL_ID } from './names';
 import { kindOf, runPlace, selectObjects } from './objects';
-import { pluginContext, t, THREE } from './runtime';
+import { intoLevelMode, pluginContext, t, THREE } from './runtime';
 import { useLevelState } from './state';
 
 /**
@@ -28,6 +28,16 @@ export const createPlaceTool = (editor: Editor) => {
 
     status() {
       return state.placing ? t('level.tool.statusPlacing', { kind: t(`level.kinds.${state.placing}`) }) : t('level.tool.status');
+    }
+
+    activate() {
+      // the kind chosen goes along into the mode
+      intoLevelMode(PLACE_TOOL_ID, () => {
+        const kind = state.placing;
+        return () => {
+          state.placing = kind;
+        };
+      });
     }
 
     deactivate() {

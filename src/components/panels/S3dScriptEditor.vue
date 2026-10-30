@@ -57,10 +57,17 @@
           class="size-3.5 flex-none animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
         ></span>
         <S3dIcon v-else name="play" :size="14" />
-        <!-- both labels in one cell: the button keeps the width of the longer one -->
+        <!-- the label shown, over both labels drawn invisibly by CSS: the button keeps the width of the longer one
+             (only the shown label is text – the screenshot scenes find the button by it) -->
         <span class="grid">
-          <span class="[grid-area:1/1]" :class="{ invisible: running }">{{ t('scriptEditor.run') }}</span>
-          <span class="[grid-area:1/1]" :class="{ invisible: !running }">{{ t('scriptEditor.executing') }}</span>
+          <span
+            v-for="label in [t('scriptEditor.run'), t('scriptEditor.executing')]"
+            :key="label"
+            class="invisible [grid-area:1/1] after:content-[attr(data-label)]"
+            :data-label="label"
+            aria-hidden="true"
+          ></span>
+          <span class="[grid-area:1/1]">{{ running ? t('scriptEditor.executing') : t('scriptEditor.run') }}</span>
         </span>
       </button>
       <div

@@ -209,7 +209,8 @@
         "play": "Level test run",
         "playFirst": "Level test run in first person",
         "playThird": "Level test run from behind",
-        "nav": "Check what can be reached"
+        "nav": "Check what can be reached",
+        "guide": "Level guide"
       },
       "blockout": {
         "title": "Blockout",
@@ -324,6 +325,91 @@
         "add": "+ Sound files",
         "remove": "Remove sound",
         "hint": "Sound zones and the action Play sound play a sound by its name – a file of that name (without its extension, e.g. door-creak.ogg for door-creak). Names without a file play a stand-in in the test run."
+      },
+      "guide": {
+        "title": "Guide",
+        "progress": "{done} of {count}",
+        "intro": "Step by step to a first playable level. Each step ticks itself off once the model shows it – you can do them in any order.",
+        "back": "‹ Back",
+        "next": "Next ›",
+        "actions": {
+          "room": "Draw a room (K)",
+          "corridor": "Draw a corridor",
+          "generate": "Generate a floor plan…",
+          "spawn": "Place the start (J)",
+          "enemy": "Place an enemy",
+          "waypoint": "Place waypoints",
+          "trigger": "Place a trigger",
+          "door": "Place a door",
+          "pickup": "Place a pickup",
+          "light": "Place a light",
+          "atmosphere": "Daylight and fog…",
+          "check": "Check the level",
+          "play": "▶ Test run (P)",
+          "glb": "Export glTF",
+          "json": "Export level file",
+          "templates": "Engine templates…",
+          "path": "Give the enemy its path…",
+          "message": "Add a message to the trigger",
+          "editActions": "Edit the trigger’s actions…"
+        },
+        "steps": {
+          "blockout": {
+            "title": "Block out the rooms",
+            "text": "Draw rooms by dragging a rectangle on the grid, corridors by clicking their start and end, stairs the way they go up. Floor height, room height and ceilings come from the Blockout panel. No time? Generate a floor plan from a seed.",
+            "done": "The level has a blockout – change or remove pieces in the Blockout panel."
+          },
+          "spawn": {
+            "title": "Place the player’s start",
+            "text": "Click on a floor to place the spawn point; R turns it by 45° before the click. The arrow shows where the player looks.",
+            "done": "There is a start."
+          },
+          "enemies": {
+            "title": "Add enemies and their round",
+            "text": "Place an enemy, then waypoints for its round. Give the waypoints the same path name and an order, and the enemy that path in the Level panel – in the test run it walks it, sees and follows the player.",
+            "done": "The level has enemies."
+          },
+          "logic": {
+            "title": "Make things happen",
+            "text": "A trigger is a box the player walks into. Select it and add actions in the Level panel: open a door, let enemies come, switch a light or the camera, show a message. Lock a door and let a pickup give its key.",
+            "done": "Something in the level sets off actions."
+          },
+          "light": {
+            "title": "Light it",
+            "text": "Place lights (all around or spots; colour, reach, flickering, shadows) and set the mood in the Level panel: less daylight, fog. “Show while editing” shows it in the view; the test run always does.",
+            "done": "The level has lights or a mood of its own."
+          },
+          "check": {
+            "title": "Check it",
+            "text": "The checks list what a game engine would trip over; the walking grid shows in green where the player gets to from the start. Click a problem to select its object.",
+            "done": "No problems, everything can be reached."
+          },
+          "play": {
+            "title": "Play it",
+            "text": "Walk through the level: WASD, mouse to look, Space jumps, E uses, F torch, V switches the view, Esc ends. Enemies walk, triggers go off, doors open.",
+            "done": "You ran the level."
+          },
+          "export": {
+            "title": "Take it into a game engine",
+            "text": "Export the model as glTF and the level file next to it – the game objects with their properties, actions and the walking grid. The Level panel has templates for Godot, Unity and Unreal that build them in the engine.",
+            "done": "Exported."
+          }
+        },
+        "heading": "Your first level",
+        "checks": {
+          "enemy": "An enemy placed",
+          "waypoints": "Waypoints placed",
+          "path": "An enemy walks a path of waypoints",
+          "trigger": "A trigger placed",
+          "action": "A trigger or pickup sets off an action",
+          "problems": "No problems in the checks",
+          "reach": "Walking grid: everything can be reached"
+        },
+        "needs": {
+          "enemy": "Place an enemy first.",
+          "trigger": "Place a trigger first."
+        },
+        "messageText": "Something stirs …"
       }
     }
   }
