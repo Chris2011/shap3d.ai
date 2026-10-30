@@ -1,6 +1,8 @@
 <template>
   <header>
-    <h1><a href="#/">Shap<span>3D</span>.ai Plugins</a></h1>
+    <h1>
+      <a href="#/" :aria-label="`${BRAND.name} Plugins`"><S3dLogo /><span class="section">Plugins</span></a>
+    </h1>
     <p>
       Plugins for Shap3D.ai – install one with a click. Official plugins come from the Shap3D.ai repository; community plugins are built and
       published by their authors.
@@ -38,7 +40,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import S3dPluginCard from './S3dPluginCard.vue';
+import S3dLogo from './S3dLogo.vue';
 import S3dPluginPage from './S3dPluginPage.vue';
+import { BRAND } from './brand';
 import { loadAppUrl, loadCatalog, type PortalPlugin } from './catalog';
 
 /** The plugin portal: the catalog's plugins, searchable, official and community apart – and a page for each (#/<id>). */
@@ -102,12 +106,19 @@ h1 {
 }
 
 h1 a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   color: inherit;
   text-decoration: none;
 }
 
-h1 span {
-  color: var(--accent);
+/* "Plugins" next to the logo, in the page's text colour – the logo stays as it is */
+h1 .section {
+  font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 1.6rem;
+  color: var(--muted);
 }
 
 .hint {
