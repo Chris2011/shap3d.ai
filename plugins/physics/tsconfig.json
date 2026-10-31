@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // Rapier's declarations use Symbol.dispose (ESNext) – they are its own business
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}

@@ -64,7 +64,36 @@ interface StoredPlugin {
   code: string;
   enabled: boolean;
   package?: PackageInfo;
+  /** fingerprint of the code and package files (see fingerprint) – missing for plugins installed before it existed */
+  hash?: string;
 }
+
+/**
+ * A fingerprint of a plugin's code and package files (53-bit, after cyrb53): a new build differs even when its
+ * version stays the same. Not cryptographic – crypto.subtle is missing outside secure contexts (http on the LAN).
+ */
+export const fingerprint = async (code: string, assets: PluginAssets = {}) => {
+  let first = 0xdeadbeef,
+    second = 0x41c6ce57;
+  const add = (bytes: Uint8Array) => {
+    for (let index = 0; index < bytes.length; index++) {
+      first = Math.imul(first ^ bytes[index], 2654435761);
+      second = Math.imul(second ^ bytes[index], 1597334677);
+    }
+  };
+  const encoder = new TextEncoder();
+  add(encoder.encode(code));
+  for (const path of Object.keys(assets).sort()) {
+    add(encoder.encode(`\n${path}\n`));
+    add(new Uint8Array(await assets[path].arrayBuffer()));
+  }
+  first = Math.imul(first ^ (first >>> 16), 2246822507) ^ Math.imul(second ^ (second >>> 13), 3266489909);
+  second = Math.imul(second ^ (second >>> 16), 2246822507) ^ Math.imul(first ^ (first >>> 13), 3266489909);
+  return (4294967296 * (2097151 & second) + (first >>> 0)).toString(36);
+};
+
+/** what installPlugin did: a new plugin, a replaced copy, or nothing (the same code and files are installed) */
+export type InstallStatus = 'installed' | 'updated' | 'unchanged';
 
 export interface PluginEntry {
   id: string;
@@ -269,9 +298,11 @@ const startPlugins = async () => {
 /**
  * Installs (or updates) a plugin from its source code and switches it on. With `keepNewer` an installed copy of a
  * newer version stays (a bundle does not downgrade a plugin installed on its own); the result then says `kept`.
+ * An installed copy is compared by its content, not only its version: a new build with the same version replaces it
+ * (`status: 'updated'`), the very same code and files running already are left alone (`'unchanged'`).
  */
 export const installPlugin = async (code: string, packageFiles?: { info: PackageInfo; assets: PluginAssets }, keepNewer = false) => {
-  const plugin: S3dPlugin & { kept?: boolean } = await evaluate(code);
+  const plugin: S3dPlugin & { kept?: boolean; status?: InstallStatus; previousVersion?: string } = await evaluate(code);
   if (isBuiltin(plugin.id)) {
     throw new Error(t('plugins.errors.builtinReplace', { id: plugin.id }));
   }
@@ -280,7 +311,19 @@ export const installPlugin = async (code: string, packageFiles?: { info: Package
     plugin.kept = true;
     return plugin;
   }
+  const hash = await fingerprint(code, packageFiles?.assets);
   const existing = stored.value.find((item) => item.id === plugin.id);
+  plugin.previousVersion = installedVersion;
+  if (
+    existing?.hash === hash &&
+    existing.enabled &&
+    entryOf(plugin.id)?.active &&
+    JSON.stringify(existing.package ?? null) === JSON.stringify(packageFiles?.info ?? null)
+  ) {
+    plugin.status = 'unchanged';
+    return plugin;
+  }
+  plugin.status = existing ? 'updated' : 'installed';
   if (existing) {
     deactivate(plugin.id);
   }
@@ -289,7 +332,7 @@ export const installPlugin = async (code: string, packageFiles?: { info: Package
   } else if (existing?.package) {
     await deleteAssets(plugin.id);
   }
-  const item: StoredPlugin = { id: plugin.id, code, enabled: true, package: packageFiles?.info };
+  const item: StoredPlugin = { id: plugin.id, code, enabled: true, package: packageFiles?.info, hash };
   stored.value = existing ? stored.value.map((other) => (other.id === plugin.id ? item : other)) : [...stored.value, item];
   const entry = entryOf(plugin.id);
   if (entry) {
@@ -300,6 +343,9 @@ export const installPlugin = async (code: string, packageFiles?: { info: Package
   await activate(plugin);
   return plugin;
 };
+
+/** what installPlugin returns: the plugin, and whether it was installed, updated, left alone or kept */
+export type InstalledPlugin = Awaited<ReturnType<typeof installPlugin>>;
 
 /** a plugin package read from a folder, not yet installed */
 export interface PluginPackage {
@@ -454,7 +500,7 @@ export const newerAtSource = async (id: string): Promise<string | null> => {
 /** Code and package info of an installed package plugin (to compare with a newer folder). */
 export const installedPackage = (id: string) => {
   const item = stored.value.find((candidate) => candidate.id === id);
-  return item?.package ? { code: item.code, info: item.package } : undefined;
+  return item?.package ? { code: item.code, info: item.package, hash: item.hash } : undefined;
 };
 
 export const setPluginEnabled = async (id: string, enabled: boolean) => {

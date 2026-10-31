@@ -1,0 +1,380 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "physics": {
+      "plugin": {
+        "name": "Physics",
+        "description": "Groups and components as rigid bodies that fall, bounce, slide and collide – hinges, sliders, motors with programs, ropes and springs for robot arms and machines, thrust, lift and air for things that fly, water that floats bodies, a liquid and a wind tunnel – without changing the model."
+      },
+      "panel": {
+        "title": "Physics",
+        "simulation": "Simulation",
+        "time": "{time} s",
+        "start": "Start",
+        "pause": "Pause",
+        "resume": "Go on",
+        "step": "Step",
+        "reset": "Reset",
+        "keep": "Keep",
+        "keepHint": "Writes the places the bodies have now into the model (one undo step)",
+        "loading": "Loading the physics engine …",
+        "counts": "{bodies} bodies · {joints} joints",
+        "drops": "{count} drops",
+        "startHint": "Make groups or components bodies, then start – the model stays as it is. Reset and Keep work once it has started.",
+        "show": "Show:",
+        "shows": {
+          "joints": "Joints",
+          "forces": "Forces",
+          "trails": "Trails",
+          "flow": "Flow"
+        },
+        "type": "Kind",
+        "bodies": "Bodies",
+        "regions": "Regions",
+        "material": "Material",
+        "shape": "Shape",
+        "mass": "Mass (kg)",
+        "fromDensity": "from its material",
+        "density": "Density (kg/m³)",
+        "friction": "Friction",
+        "bounce": "Bounce",
+        "startVelocity": "Start speed (m/s)",
+        "velocity": "Speed (m/s)",
+        "startSpin": "Start turn (°/s)",
+        "spin": "Turn (°/s)",
+        "period": "Back and forth (s, 0 = on and on)",
+        "forces": "Forces",
+        "force": "Force (N, model axes)",
+        "thrust": "Thrust (N, own axes)",
+        "lift": "Lift (N per (m/s)²)",
+        "drag": "Air drag (N per (m/s)²)",
+        "auto": "auto",
+        "joints": "Joints",
+        "jointKind": "Joint",
+        "jointTo": "Holds on to",
+        "toParent": "The group it lies in",
+        "toWorld": "The world",
+        "anchor": "Anchor (own coordinates, m)",
+        "axis": "Axis (own coordinates)",
+        "otherEnd": "Other end",
+        "minAngle": "From (°)",
+        "maxAngle": "To (°)",
+        "minWay": "From (m)",
+        "maxWay": "To (m)",
+        "motor": "Motor",
+        "length": "Length (m)",
+        "stiffness": "Stiffness (N/m)",
+        "damping": "Damping (N·s/m)",
+        "program": "Program (seconds:value, …)",
+        "programHint": "0:0, 2:90, 4:0",
+        "now": "Now {value}{unit} – drive it:",
+        "removeJoint": "Remove joint",
+        "jointHint": "Choose a joint, take the joint tool and click a face of the body (a hinge turns around the face's normal), then the body it holds on to – or empty space for the world.",
+        "spacing": "Drop size (m)",
+        "viscosity": "Viscosity (0 … 1)",
+        "resolution": "Cells along its length",
+        "tunnelWind": "Wind (m/s)",
+        "current": "Current (m/s)",
+        "selectHint": "Select a group or component to make it a body, a region or to give it joints.",
+        "list": "Bodies and regions",
+        "listEmpty": "No bodies yet.",
+        "stepHint": "Pauses and goes a tenth of a second further – watch it step by step",
+        "resetHint": "Back to the start: the bodies show where the model has them"
+      },
+      "settings": {
+        "gravity": "Gravity (m/s²)",
+        "speed": "Speed",
+        "wind": "Wind (m/s)",
+        "air": "Air drag",
+        "ground": "Ground at height 0"
+      },
+      "types": {
+        "none": "No body",
+        "dynamic": "Dynamic",
+        "static": "Static",
+        "kinematic": "Moving (kinematic)",
+        "off": "Ignored",
+        "water": "Water",
+        "liquid": "Liquid",
+        "tunnel": "Wind tunnel"
+      },
+      "typeHints": {
+        "none": "Plain groups are part of the still world everything collides with.",
+        "dynamic": "Falls, bounces, slides and is pushed – by gravity, forces, joints and other bodies.",
+        "static": "Stays where it is; others collide with its exact faces.",
+        "kinematic": "Moves and turns at its own speed and pushes what is in its way – a lift, a turntable, a piston.",
+        "off": "Not part of the simulation: nothing collides with it.",
+        "water": "Its box is water up to its top: bodies float by their density and drift with the current.",
+        "liquid": "Its box is filled with drops at the start that flow around and over everything.",
+        "tunnel": "Its box is a wind tunnel: the air flows around everything in it, shown by smoke lines."
+      },
+      "materials": {
+        "wood": "Wood",
+        "steel": "Steel",
+        "stone": "Stone",
+        "rubber": "Rubber",
+        "ice": "Ice",
+        "plastic": "Plastic",
+        "foam": "Foam",
+        "custom": "Own values"
+      },
+      "shapes": {
+        "auto": "Automatic",
+        "hull": "One convex hull",
+        "box": "Box",
+        "sphere": "Sphere",
+        "cylinder": "Cylinder",
+        "mesh": "Exact faces (still and moving bodies)"
+      },
+      "joints": {
+        "hinge": "Hinge",
+        "slider": "Slider",
+        "ball": "Ball joint",
+        "fixed": "Fixed",
+        "rope": "Rope",
+        "spring": "Spring"
+      },
+      "motor": {
+        "off": "None",
+        "position": "To a position",
+        "speed": "At a speed",
+        "target": "Target (° or m)",
+        "speedValue": "Speed (°/s or m/s)",
+        "strength": "Strength"
+      },
+      "tools": {
+        "pull": "Pull bodies",
+        "pullStatus": "Drag a body while the simulation runs – it follows on a spring.",
+        "joint": "Joint",
+        "jointStatusFirst": "{kind}: click a face of the body that gets the joint.",
+        "jointStatusSecond": "{kind}: click the body it holds on to – the same body for the group it lies in, empty space for the world. Esc cancels.",
+        "pullMiss": "No dynamic body there – press on a body that falls (not a static one) and drag",
+        "jointAdded": "{kind} on {name}, held by {to} – set it up in the Physics panel"
+      },
+      "commands": {
+        "start": "Start or pause the simulation",
+        "pause": "Pause the simulation",
+        "reset": "Reset the simulation",
+        "step": "Simulation one step further",
+        "keep": "Keep the places of the simulation",
+        "open": "Physics…",
+        "dynamic": "Make selection dynamic bodies",
+        "static": "Make selection static bodies",
+        "none": "Make selection plain groups",
+        "pull": "Pull bodies",
+        "joint": "Add a joint",
+        "guide": "Physics guide"
+      },
+      "undo": {
+        "body": "Physics body",
+        "joint": "Joint",
+        "keep": "Keep simulation",
+        "settings": "Physics settings"
+      },
+      "errors": {
+        "load": "The physics engine could not be loaded: {error}",
+        "noTarget": "No group or component \"{target}\" found",
+        "unknownType": "Unknown kind \"{type}\" – known: {types}",
+        "unknownJoint": "Unknown joint \"{kind}\" – known: {kinds}",
+        "vector": "\"{name}\" must be three numbers [x, y, z]",
+        "nothingSelected": "Select groups or components first",
+        "jointOnGroup": "A joint needs a group or component – click one of its faces"
+      },
+      "script": {
+        "body": "Makes a group or component a body (dynamic, static, kinematic, off) or a region (water, liquid, tunnel) with its material, shape, start speed and forces – or changes it. Returns the instance id.",
+        "joint": "Adds a joint to a body: hinge, slider, ball, fixed, rope or spring – to another group, the group it lies in or the world, with limits, a motor and a program. Points and axes in model coordinates.",
+        "settings": "Gravity, wind, air drag, the ground and the speed of the simulation – returns the settings.",
+        "start": "Starts the simulation once the script is done – `at` seconds simulated at once, `pause` to stay there.",
+        "bodies": "Every body and region in the model with its data.",
+        "remove": "Makes a body a plain group again."
+      },
+      "demos": {
+        "playground": {
+          "name": "Playground",
+          "description": "Crates, balls, a ramp with ice and wood, dominoes and a pendulum"
+        },
+        "robot": {
+          "name": "Robot arm",
+          "description": "Four hinges with motors following a program sweep crates off a table"
+        },
+        "machines": {
+          "name": "Machines",
+          "description": "A turntable, a lift, a piston on a slider, a chain on ball joints and a fixed joint"
+        },
+        "crane": {
+          "name": "Ropes and springs",
+          "description": "A wrecking ball, a spring, a door on a hinge and a cradle of balls"
+        },
+        "flight": {
+          "name": "Flight",
+          "description": "A rocket, a glider, a drone, a cannon ball and a sheet in the wind"
+        },
+        "water": {
+          "name": "Water",
+          "description": "A pool: foam and wood float, steel sinks, a boat rides on it"
+        },
+        "liquid": {
+          "name": "Dam break",
+          "description": "A block of liquid collapses and flows around a pillar"
+        },
+        "tunnel": {
+          "name": "Wind tunnel",
+          "description": "The flow around a car, a pillar and a wall – and a ball blown away"
+        }
+      },
+      "mode": "Physics",
+      "guide": {
+        "title": "Physics guide",
+        "open": "How does it work? Open the guide",
+        "heading": "Your first simulation",
+        "progress": "{done} of {count}",
+        "intro": "Step by step through the plugin. Every step ticks itself off once you have done it – the buttons do it for you or take the right tool.",
+        "back": "Back",
+        "next": "Next",
+        "actions": {
+          "practice": "Build a practice scene",
+          "selectAll": "Select all groups",
+          "dynamic": "Selection → dynamic",
+          "hinge": "Take the hinge tool",
+          "editJoint": "Open the joint in the panel"
+        },
+        "checks": {
+          "selected": "Groups selected",
+          "stepped": "Gone a step further",
+          "reset": "Reset to the start"
+        },
+        "practice": {
+          "crate": "Crate",
+          "ball": "Ball",
+          "door": "Door"
+        },
+        "steps": {
+          "practice": {
+            "title": "Something to try it on",
+            "text": "Physics works on groups and components. Build a practice scene – three crates, a ball and a door (it replaces the model) – or use your own groups.",
+            "done": "There are groups in the model."
+          },
+          "bodies": {
+            "title": "Make them bodies",
+            "text": "Only bodies take part. Select the groups (or click “Select all groups”), then “Selection → dynamic” – or in the Physics panel under “What should it do?” click “Falls”: they fall, bounce and collide. Below it you choose what they are made of.",
+            "done": "There is a dynamic body."
+          },
+          "start": {
+            "title": "Start",
+            "text": "Start the simulation – here, in the Physics panel or from the command palette. The first time the engine loads for a moment.\nThe model itself does not change: the bodies are only shown where they are.",
+            "done": "It has run."
+          },
+          "controls": {
+            "title": "Pause, step, reset",
+            "text": "Pause stops it where it is, Go on continues. Step pauses and goes a tenth of a second further – press it a few times. Reset puts everything back to the start (only while it runs or is paused).",
+            "done": "Stepped and reset."
+          },
+          "pull": {
+            "title": "Pull bodies",
+            "text": "Take the Pull tool (it starts the simulation), then press the mouse button on a falling body and drag: it follows the pointer on a spring, as if on a rubber band. Static bodies cannot be pulled.\nIn the physics mode the tool is in the toolbar on the left.",
+            "done": "A body was pulled."
+          },
+          "joint": {
+            "title": "A hinge",
+            "text": "Take the hinge tool. 1st click: a face of the body that gets the hinge – the hinge turns around that face’s normal, so for a door click its top face, near the end where it should hang (it snaps to the corner, a dot shows it). 2nd click: empty space (the hinge holds on to the world) or another body.\nThen start: the door swings instead of falling over.",
+            "done": "There is a joint."
+          },
+          "motor": {
+            "title": "A motor",
+            "text": "Open the joint in the Physics panel: in the simple view tick “Motor” next to the hinge – it turns on and on. The advanced view has a target in degrees, a speed or a program such as 0:0, 2:90, 4:0 (seconds:degrees, repeated), and a slider to drive it by hand while it runs.",
+            "done": "A joint has a motor."
+          },
+          "keep": {
+            "title": "Keep the places",
+            "text": "Let things fall into place, then Keep: the places the bodies have now are written into the model – one undo step. Useful to scatter crates or let a pile settle.",
+            "done": "Places kept."
+          },
+          "more": {
+            "title": "More: the demos",
+            "text": "The demos show what else it can do – robot arms on programs, ropes and springs, flight, water, a liquid and a wind tunnel. Each one opens in the script editor; Run builds it (it replaces the model) and starts it. All are in the script editor’s examples under Physics.",
+            "done": "You have seen the demos."
+          }
+        }
+      },
+      "basic": {
+        "simple": "Simple",
+        "advanced": "Advanced",
+        "status": {
+          "ready": "Ready – press Start.",
+          "running": "Running · {time} s",
+          "paused": "Paused at {time} s"
+        },
+        "slowMotion": "Slow motion",
+        "nothing": "Click an object to say what it should do. It has to be a group or component.",
+        "loose": "These are loose faces – physics needs a group.",
+        "makeGroup": "Make a group",
+        "bodyCount": "{count} bodies in the model",
+        "selected": "{count} objects",
+        "what": "What should it do?",
+        "kinds": {
+          "dynamic": "Falls",
+          "static": "Stays put",
+          "off": "Ignore"
+        },
+        "kindHints": {
+          "dynamic": "falls, bounces, rolls",
+          "static": "others bounce off it",
+          "off": "passes through"
+        },
+        "otherKind": "It has a kind from the advanced view (moving, water …) – change it there.",
+        "madeOf": "What is it made of?",
+        "materialHints": {
+          "wood": "normal",
+          "steel": "heavy",
+          "stone": "heavy, rough",
+          "rubber": "bounces",
+          "ice": "slides",
+          "plastic": "light",
+          "foam": "very light"
+        },
+        "attach": "What holds it?",
+        "attachHint": "Nothing – it falls freely. Attach it to the world or to another object:",
+        "attachKinds": {
+          "hinge": "Hinge (like a door)",
+          "rope": "Hang on a rope",
+          "spring": "Hang on a spring",
+          "fixed": "Glue on"
+        },
+        "attachSteps": "1. Click a face of this object near where it should hold (it snaps to a corner or the middle).\n2. Click empty space to hold on to the world, or another object.\nEsc cancels.",
+        "jointTo": "{kind} → {to}",
+        "motor": "Motor",
+        "remove": "Remove",
+        "more": "Water, wind, liquids, motor programs and exact values are in the advanced view.",
+        "toAdvanced": "Show the advanced view",
+        "push": "Push at the start",
+        "pushes": {
+          "none": "None",
+          "up": "Up",
+          "away": "Away",
+          "left": "Left",
+          "right": "Right",
+          "spin": "Spin"
+        },
+        "strong": "Strong",
+        "pushHint": "Directions as you see it now: away is into the view.",
+        "pushed": "It starts moving – the blue arrow shows where.",
+        "attachStepsHinge": "1. Click the object near the edge it should hang on – the hinge stands upright there (a dot shows where).\n2. Click empty space to hold it on the world, or another object (a frame).\nEsc cancels."
+      },
+      "timeline": {
+        "label": "Timeline",
+        "position": "{time} / {end} s",
+        "empty": "Start it – what happens is recorded here, and you can drag back to any moment.",
+        "rewound": "An earlier moment – Go on or Step simulates again from here."
+      },
+      "record": {
+        "start": "Record video",
+        "stop": "Stop and save ({time})",
+        "hint": "Records the 3D view as a video (MP4 or WebM) – it starts the simulation if it is not running",
+        "saved": "Saved: {file}",
+        "unsupported": "This browser cannot record videos"
+      }
+    }
+  }
+}

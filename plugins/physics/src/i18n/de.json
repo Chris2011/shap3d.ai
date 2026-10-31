@@ -1,0 +1,380 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "physics": {
+      "plugin": {
+        "name": "Physik",
+        "description": "Gruppen und Komponenten als Starrkörper, die fallen, prallen, rutschen und zusammenstoßen – Scharniere, Schieber, Motoren mit Programmen, Seile und Federn für Roboterarme und Maschinen, Schub, Auftrieb und Luft für Fliegendes, Wasser, das Körper trägt, eine Flüssigkeit und ein Windkanal – ohne das Modell zu verändern."
+      },
+      "panel": {
+        "title": "Physik",
+        "simulation": "Simulation",
+        "time": "{time} s",
+        "start": "Start",
+        "pause": "Pause",
+        "resume": "Weiter",
+        "step": "Schritt",
+        "reset": "Zurücksetzen",
+        "keep": "Übernehmen",
+        "keepHint": "Schreibt die jetzigen Lagen der Körper ins Modell (ein Rückgängig-Schritt)",
+        "loading": "Physik-Engine wird geladen …",
+        "counts": "{bodies} Körper · {joints} Gelenke",
+        "drops": "{count} Tropfen",
+        "startHint": "Gruppen oder Komponenten zu Körpern machen, dann starten – das Modell bleibt, wie es ist. Zurücksetzen und Übernehmen gehen, sobald sie gestartet ist.",
+        "show": "Zeigen:",
+        "shows": {
+          "joints": "Gelenke",
+          "forces": "Kräfte",
+          "trails": "Spuren",
+          "flow": "Strömung"
+        },
+        "type": "Art",
+        "bodies": "Körper",
+        "regions": "Bereiche",
+        "material": "Material",
+        "shape": "Form",
+        "mass": "Masse (kg)",
+        "fromDensity": "aus dem Material",
+        "density": "Dichte (kg/m³)",
+        "friction": "Reibung",
+        "bounce": "Sprungkraft",
+        "startVelocity": "Startgeschwindigkeit (m/s)",
+        "velocity": "Geschwindigkeit (m/s)",
+        "startSpin": "Startdrehung (°/s)",
+        "spin": "Drehung (°/s)",
+        "period": "Hin und her (s, 0 = immer weiter)",
+        "forces": "Kräfte",
+        "force": "Kraft (N, Modellachsen)",
+        "thrust": "Schub (N, eigene Achsen)",
+        "lift": "Auftrieb (N pro (m/s)²)",
+        "drag": "Luftwiderstand (N pro (m/s)²)",
+        "auto": "auto",
+        "joints": "Gelenke",
+        "jointKind": "Gelenk",
+        "jointTo": "Hält sich an",
+        "toParent": "Die Gruppe, in der es liegt",
+        "toWorld": "Die Welt",
+        "anchor": "Anker (eigene Koordinaten, m)",
+        "axis": "Achse (eigene Koordinaten)",
+        "otherEnd": "Anderes Ende",
+        "minAngle": "Von (°)",
+        "maxAngle": "Bis (°)",
+        "minWay": "Von (m)",
+        "maxWay": "Bis (m)",
+        "motor": "Motor",
+        "length": "Länge (m)",
+        "stiffness": "Steifigkeit (N/m)",
+        "damping": "Dämpfung (N·s/m)",
+        "program": "Programm (Sekunden:Wert, …)",
+        "programHint": "0:0, 2:90, 4:0",
+        "now": "Jetzt {value}{unit} – steuern:",
+        "removeJoint": "Gelenk entfernen",
+        "jointHint": "Gelenk wählen, das Gelenk-Werkzeug nehmen und eine Fläche des Körpers anklicken (ein Scharnier dreht sich um ihre Normale), dann den Körper, an dem es hängt – oder ins Leere für die Welt.",
+        "spacing": "Tropfengröße (m)",
+        "viscosity": "Zähigkeit (0 … 1)",
+        "resolution": "Zellen entlang der Länge",
+        "tunnelWind": "Wind (m/s)",
+        "current": "Strömung (m/s)",
+        "selectHint": "Eine Gruppe oder Komponente auswählen, um sie zum Körper oder Bereich zu machen oder ihr Gelenke zu geben.",
+        "list": "Körper und Bereiche",
+        "listEmpty": "Noch keine Körper.",
+        "stepHint": "Hält an und rechnet eine Zehntelsekunde weiter – so lässt es sich Schritt für Schritt ansehen",
+        "resetHint": "Zurück zum Anfang: die Körper stehen wieder, wo das Modell sie hat"
+      },
+      "settings": {
+        "gravity": "Schwerkraft (m/s²)",
+        "speed": "Tempo",
+        "wind": "Wind (m/s)",
+        "air": "Luftwiderstand",
+        "ground": "Boden auf Höhe 0"
+      },
+      "types": {
+        "none": "Kein Körper",
+        "dynamic": "Dynamisch",
+        "static": "Statisch",
+        "kinematic": "Bewegt (kinematisch)",
+        "off": "Ignoriert",
+        "water": "Wasser",
+        "liquid": "Flüssigkeit",
+        "tunnel": "Windkanal"
+      },
+      "typeHints": {
+        "none": "Einfache Gruppen gehören zur ruhenden Welt, mit der alles zusammenstößt.",
+        "dynamic": "Fällt, prallt, rutscht und wird geschoben – von Schwerkraft, Kräften, Gelenken und anderen Körpern.",
+        "static": "Bleibt, wo es ist; andere stoßen mit seinen genauen Flächen zusammen.",
+        "kinematic": "Bewegt und dreht sich mit eigener Geschwindigkeit und schiebt, was im Weg ist – ein Aufzug, ein Drehteller, ein Kolben.",
+        "off": "Nicht Teil der Simulation: nichts stößt mit ihm zusammen.",
+        "water": "Sein Quader ist Wasser bis zu seiner Oberseite: Körper schwimmen nach ihrer Dichte und treiben mit der Strömung.",
+        "liquid": "Sein Quader wird beim Start mit Tropfen gefüllt, die um und über alles fließen.",
+        "tunnel": "Sein Quader ist ein Windkanal: Die Luft strömt um alles darin, gezeigt durch Rauchlinien."
+      },
+      "materials": {
+        "wood": "Holz",
+        "steel": "Stahl",
+        "stone": "Stein",
+        "rubber": "Gummi",
+        "ice": "Eis",
+        "plastic": "Kunststoff",
+        "foam": "Schaumstoff",
+        "custom": "Eigene Werte"
+      },
+      "shapes": {
+        "auto": "Automatisch",
+        "hull": "Eine konvexe Hülle",
+        "box": "Quader",
+        "sphere": "Kugel",
+        "cylinder": "Zylinder",
+        "mesh": "Genaue Flächen (ruhende und bewegte Körper)"
+      },
+      "joints": {
+        "hinge": "Scharnier",
+        "slider": "Schieber",
+        "ball": "Kugelgelenk",
+        "fixed": "Fest",
+        "rope": "Seil",
+        "spring": "Feder"
+      },
+      "motor": {
+        "off": "Keiner",
+        "position": "Auf eine Stellung",
+        "speed": "Mit einer Geschwindigkeit",
+        "target": "Ziel (° oder m)",
+        "speedValue": "Geschwindigkeit (°/s oder m/s)",
+        "strength": "Stärke"
+      },
+      "tools": {
+        "pull": "Körper ziehen",
+        "pullStatus": "Einen Körper ziehen, während die Simulation läuft – er folgt an einer Feder.",
+        "joint": "Gelenk",
+        "jointStatusFirst": "{kind}: eine Fläche des Körpers anklicken, der das Gelenk bekommt.",
+        "jointStatusSecond": "{kind}: den Körper anklicken, an dem es hängt – denselben für die Gruppe, in der es liegt, ins Leere für die Welt. Esc bricht ab.",
+        "pullMiss": "Dort ist kein dynamischer Körper – auf einen Körper drücken, der fällt (keinen statischen), und ziehen",
+        "jointAdded": "{kind} an {name}, gehalten von {to} – im Physik-Panel einstellen"
+      },
+      "commands": {
+        "start": "Simulation starten oder anhalten",
+        "pause": "Simulation anhalten",
+        "reset": "Simulation zurücksetzen",
+        "step": "Simulation einen Schritt weiter",
+        "keep": "Lagen der Simulation übernehmen",
+        "open": "Physik…",
+        "dynamic": "Auswahl zu dynamischen Körpern machen",
+        "static": "Auswahl zu statischen Körpern machen",
+        "none": "Auswahl zu einfachen Gruppen machen",
+        "pull": "Körper ziehen",
+        "joint": "Gelenk hinzufügen",
+        "guide": "Physik-Anleitung"
+      },
+      "undo": {
+        "body": "Physik-Körper",
+        "joint": "Gelenk",
+        "keep": "Simulation übernehmen",
+        "settings": "Physik-Einstellungen"
+      },
+      "errors": {
+        "load": "Die Physik-Engine konnte nicht geladen werden: {error}",
+        "noTarget": "Keine Gruppe oder Komponente „{target}“ gefunden",
+        "unknownType": "Unbekannte Art „{type}“ – bekannt: {types}",
+        "unknownJoint": "Unbekanntes Gelenk „{kind}“ – bekannt: {kinds}",
+        "vector": "„{name}“ muss aus drei Zahlen [x, y, z] bestehen",
+        "nothingSelected": "Zuerst Gruppen oder Komponenten auswählen",
+        "jointOnGroup": "Ein Gelenk braucht eine Gruppe oder Komponente – eine ihrer Flächen anklicken"
+      },
+      "script": {
+        "body": "Macht eine Gruppe oder Komponente zum Körper (dynamic, static, kinematic, off) oder Bereich (water, liquid, tunnel) mit Material, Form, Startgeschwindigkeit und Kräften – oder ändert ihn. Gibt die Instanz-ID zurück.",
+        "joint": "Fügt einem Körper ein Gelenk hinzu: hinge, slider, ball, fixed, rope oder spring – an eine andere Gruppe, die Gruppe, in der er liegt, oder die Welt, mit Grenzen, Motor und Programm. Punkte und Achsen in Modellkoordinaten.",
+        "settings": "Schwerkraft, Wind, Luftwiderstand, Boden und Tempo der Simulation – gibt die Einstellungen zurück.",
+        "start": "Startet die Simulation, sobald das Skript fertig ist – `at` Sekunden gleich vorausrechnen, `pause` dort anhalten.",
+        "bodies": "Alle Körper und Bereiche des Modells mit ihren Daten.",
+        "remove": "Macht einen Körper wieder zur einfachen Gruppe."
+      },
+      "demos": {
+        "playground": {
+          "name": "Spielplatz",
+          "description": "Kisten, Bälle, eine Rampe mit Eis und Holz, Dominosteine und ein Pendel"
+        },
+        "robot": {
+          "name": "Roboterarm",
+          "description": "Vier Scharniere mit Motoren nach Programm fegen Kisten vom Tisch"
+        },
+        "machines": {
+          "name": "Maschinen",
+          "description": "Ein Drehteller, ein Aufzug, ein Kolben am Schieber, eine Kette an Kugelgelenken und ein festes Gelenk"
+        },
+        "crane": {
+          "name": "Seile und Federn",
+          "description": "Eine Abrissbirne, eine Feder, eine Tür am Scharnier und ein Kugelstoßpendel"
+        },
+        "flight": {
+          "name": "Fliegen",
+          "description": "Eine Rakete, ein Segelflieger, eine Drohne, eine Kanonenkugel und ein Blatt im Wind"
+        },
+        "water": {
+          "name": "Wasser",
+          "description": "Ein Becken: Schaumstoff und Holz schwimmen, Stahl sinkt, ein Boot fährt darauf"
+        },
+        "liquid": {
+          "name": "Dammbruch",
+          "description": "Ein Block Flüssigkeit fällt zusammen und fließt um einen Pfeiler"
+        },
+        "tunnel": {
+          "name": "Windkanal",
+          "description": "Die Strömung um ein Auto, einen Pfeiler und eine Mauer – und ein weggewehter Ball"
+        }
+      },
+      "mode": "Physik",
+      "guide": {
+        "title": "Physik-Anleitung",
+        "open": "Wie geht das? Anleitung öffnen",
+        "heading": "Deine erste Simulation",
+        "progress": "{done} von {count}",
+        "intro": "Schritt für Schritt durch das Plugin. Jeder Schritt hakt sich selbst ab, sobald du ihn gemacht hast – die Knöpfe machen es für dich oder nehmen das passende Werkzeug.",
+        "back": "Zurück",
+        "next": "Weiter",
+        "actions": {
+          "practice": "Übungsszene bauen",
+          "selectAll": "Alle Gruppen auswählen",
+          "dynamic": "Auswahl → dynamisch",
+          "hinge": "Scharnier-Werkzeug nehmen",
+          "editJoint": "Gelenk im Panel öffnen"
+        },
+        "checks": {
+          "selected": "Gruppen ausgewählt",
+          "stepped": "Einen Schritt weiter gegangen",
+          "reset": "Auf den Anfang zurückgesetzt"
+        },
+        "practice": {
+          "crate": "Kiste",
+          "ball": "Ball",
+          "door": "Tür"
+        },
+        "steps": {
+          "practice": {
+            "title": "Etwas zum Ausprobieren",
+            "text": "Physik wirkt auf Gruppen und Komponenten. Bau eine Übungsszene – drei Kisten, ein Ball und eine Tür (sie ersetzt das Modell) – oder nimm deine eigenen Gruppen.",
+            "done": "Im Modell sind Gruppen."
+          },
+          "bodies": {
+            "title": "Zu Körpern machen",
+            "text": "Nur Körper machen mit. Wähle die Gruppen aus (oder „Alle Gruppen auswählen“), dann „Auswahl → dynamisch“ – oder im Physik-Panel unter „Was soll es tun?“ auf „Fällt“: sie fallen, prallen und stoßen zusammen. Darunter wählst du, woraus sie sind.",
+            "done": "Es gibt einen dynamischen Körper."
+          },
+          "start": {
+            "title": "Starten",
+            "text": "Starte die Simulation – hier, im Physik-Panel oder über die Befehlspalette. Beim ersten Mal lädt die Engine kurz.\nDas Modell selbst ändert sich nicht: die Körper werden nur dort gezeigt, wo sie gerade sind.",
+            "done": "Sie ist gelaufen."
+          },
+          "controls": {
+            "title": "Anhalten, Schritt, Zurücksetzen",
+            "text": "Pause hält sie an, Weiter läuft weiter. Schritt hält an und rechnet eine Zehntelsekunde weiter – drück ihn ein paar Mal. Zurücksetzen stellt alles an den Anfang (nur, wenn sie läuft oder angehalten ist).",
+            "done": "Geschritten und zurückgesetzt."
+          },
+          "pull": {
+            "title": "Körper ziehen",
+            "text": "Nimm das Ziehen-Werkzeug (es startet die Simulation), drück dann die Maustaste auf einen fallenden Körper und zieh: er folgt dem Zeiger an einer Feder, wie an einem Gummiband. Statische Körper lassen sich nicht ziehen.\nIm Physik-Modus ist das Werkzeug links in der Werkzeugleiste.",
+            "done": "Ein Körper wurde gezogen."
+          },
+          "joint": {
+            "title": "Ein Scharnier",
+            "text": "Nimm das Scharnier-Werkzeug. 1. Klick: eine Fläche des Körpers, der das Scharnier bekommt – es dreht sich um die Senkrechte dieser Fläche, für eine Tür also auf ihre Oberseite, nah an dem Ende, an dem sie hängen soll (es rastet an der Ecke ein, ein Punkt zeigt es). 2. Klick: ins Leere (das Scharnier hält sich an der Welt fest) oder auf einen anderen Körper.\nDann starten: die Tür schwingt, statt umzufallen.",
+            "done": "Es gibt ein Gelenk."
+          },
+          "motor": {
+            "title": "Ein Motor",
+            "text": "Öffne das Gelenk im Physik-Panel: in der einfachen Ansicht neben dem Scharnier „Motor“ anhaken – es dreht sich immer weiter. Die erweiterte Ansicht hat ein Ziel in Grad, eine Geschwindigkeit oder ein Programm wie 0:0, 2:90, 4:0 (Sekunden:Grad, wiederholt) und einen Regler, der es während des Laufs von Hand steuert.",
+            "done": "Ein Gelenk hat einen Motor."
+          },
+          "keep": {
+            "title": "Lagen übernehmen",
+            "text": "Lass die Dinge an ihren Platz fallen, dann Übernehmen: die jetzigen Lagen der Körper werden ins Modell geschrieben – ein Rückgängig-Schritt. Praktisch, um Kisten zu verstreuen oder einen Haufen sich setzen zu lassen.",
+            "done": "Lagen übernommen."
+          },
+          "more": {
+            "title": "Mehr: die Demos",
+            "text": "Die Demos zeigen, was sonst noch geht – Roboterarme mit Programm, Seile und Federn, Fliegen, Wasser, Flüssigkeit und ein Windkanal. Jede öffnet sich im Skript-Editor; Ausführen baut sie (ersetzt das Modell) und startet sie. Alle stehen in den Beispielen des Skript-Editors unter Physik.",
+            "done": "Du hast die Demos gesehen."
+          }
+        }
+      },
+      "basic": {
+        "simple": "Einfach",
+        "advanced": "Erweitert",
+        "status": {
+          "ready": "Bereit – drück Start.",
+          "running": "Läuft · {time} s",
+          "paused": "Angehalten bei {time} s"
+        },
+        "slowMotion": "Zeitlupe",
+        "nothing": "Klick ein Objekt an, um zu sagen, was es tun soll. Es muss eine Gruppe oder Komponente sein.",
+        "loose": "Das sind lose Flächen – Physik braucht eine Gruppe.",
+        "makeGroup": "Zu Gruppe machen",
+        "bodyCount": "{count} Körper im Modell",
+        "selected": "{count} Objekte",
+        "what": "Was soll es tun?",
+        "kinds": {
+          "dynamic": "Fällt",
+          "static": "Steht fest",
+          "off": "Ignorieren"
+        },
+        "kindHints": {
+          "dynamic": "fällt, prallt, rollt",
+          "static": "andere prallen ab",
+          "off": "man fällt hindurch"
+        },
+        "otherKind": "Es hat eine Art aus der erweiterten Ansicht (bewegt, Wasser …) – dort ändern.",
+        "madeOf": "Woraus ist es?",
+        "materialHints": {
+          "wood": "normal",
+          "steel": "schwer",
+          "stone": "schwer, rau",
+          "rubber": "hüpft",
+          "ice": "rutscht",
+          "plastic": "leicht",
+          "foam": "sehr leicht"
+        },
+        "attach": "Woran hängt es?",
+        "attachHint": "Nichts – es fällt frei. Befestige es an der Welt oder an einem anderen Objekt:",
+        "attachKinds": {
+          "hinge": "Scharnier (wie eine Tür)",
+          "rope": "An ein Seil hängen",
+          "spring": "An eine Feder hängen",
+          "fixed": "Festkleben"
+        },
+        "attachSteps": "1. Klick auf eine Fläche dieses Objekts nah an der Stelle, an der es hängen soll (es rastet an einer Ecke oder der Mitte ein).\n2. Klick ins Leere, um es an der Welt festzuhalten, oder auf ein anderes Objekt.\nEsc bricht ab.",
+        "jointTo": "{kind} → {to}",
+        "motor": "Motor",
+        "remove": "Entfernen",
+        "more": "Wasser, Wind, Flüssigkeiten, Motor-Programme und genaue Werte gibt es in der erweiterten Ansicht.",
+        "toAdvanced": "Erweiterte Ansicht zeigen",
+        "push": "Anstoßen beim Start",
+        "pushes": {
+          "none": "Keiner",
+          "up": "Hoch",
+          "away": "Nach hinten",
+          "left": "Links",
+          "right": "Rechts",
+          "spin": "Drehen"
+        },
+        "strong": "Kräftig",
+        "pushHint": "Richtungen so, wie du gerade schaust: nach hinten heißt in die Ansicht hinein.",
+        "pushed": "Es startet in Bewegung – der blaue Pfeil zeigt wohin.",
+        "attachStepsHinge": "1. Klick das Objekt nah an der Kante an, an der es hängen soll – dort steht das Scharnier senkrecht (ein Punkt zeigt es).\n2. Klick ins Leere, um es an der Welt festzuhalten, oder auf ein anderes Objekt (einen Rahmen).\nEsc bricht ab."
+      },
+      "timeline": {
+        "label": "Zeitleiste",
+        "position": "{time} / {end} s",
+        "empty": "Starte sie – was passiert, wird hier aufgezeichnet, und du kannst zu jedem Moment zurückziehen.",
+        "rewound": "Ein früherer Moment – Weiter oder Schritt rechnet ab hier neu."
+      },
+      "record": {
+        "start": "Video aufnehmen",
+        "stop": "Stoppen und speichern ({time})",
+        "hint": "Nimmt die 3D-Ansicht als Video auf (MP4 oder WebM) – startet die Simulation, falls sie nicht läuft",
+        "saved": "Gespeichert: {file}",
+        "unsupported": "Dieser Browser kann keine Videos aufnehmen"
+      }
+    }
+  }
+}

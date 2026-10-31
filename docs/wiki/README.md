@@ -23,6 +23,7 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
   - Shader materials – [overview](plugin-packages.md#the-shader-materials-plugin) · [README](../../plugins/shaders/README.md)
   - Noise – [overview](plugin-packages.md#the-noise-plugin) · [README](../../plugins/noise/README.md)
   - Level editor – [overview](plugin-packages.md#the-level-editor-plugin) · [README](../../plugins/level/README.md)
+  - Physics – [overview](plugin-packages.md#the-physics-plugin) · [README](../../plugins/physics/README.md)
 
 ## Working on the project
 

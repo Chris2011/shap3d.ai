@@ -193,6 +193,7 @@ import {
   removePlugin,
   pluginSource,
   EXAMPLE_PLUGINS,
+  type InstalledPlugin,
 } from '../../plugins/registry';
 import { t, localize, formatNumber } from '../../i18n';
 import { loadCatalogs, ownCatalogs, type CatalogEntry } from '../../plugins/catalog';
@@ -238,7 +239,29 @@ onBeforeUnmount(() => {
   window.removeEventListener('focus', checkFolders);
 });
 
-const install = async (code: string | File[] | (() => Promise<{ id: string; name: string } | null>)) => {
+/** what installing did to one plugin, in a sentence – a new build of an installed plugin says "updated" */
+const resultText = (plugin: InstalledPlugin) => {
+  const name = localize(plugin.name);
+  const entry = plugins.find((candidate) => candidate.id === plugin.id);
+  const version = entry?.version ?? plugin.version ?? '';
+  if (plugin.kept) {
+    return `${name} (${t('pluginManager.keptNewer')})`;
+  }
+  if (entry?.error) {
+    return t('pluginManager.installedButFailed', { name, error: entry.error });
+  }
+  if (plugin.status === 'unchanged') {
+    return t('plugins.folders.upToDate', { name, version });
+  }
+  if (plugin.status === 'updated') {
+    return plugin.previousVersion && version && plugin.previousVersion !== version
+      ? t('plugins.folders.updated', { name, from: plugin.previousVersion, to: version })
+      : t('plugins.folders.updatedSameVersion', { name, version });
+  }
+  return t('pluginManager.installedActive', { name });
+};
+
+const install = async (code: string | File[] | (() => Promise<InstalledPlugin | null>)) => {
   busy.value = true;
   message.value = null;
   try {
@@ -246,12 +269,12 @@ const install = async (code: string | File[] | (() => Promise<{ id: string; name
       // a folder may hold a bundle of several plugins
       const installed = await installPluginPackages(code);
       if (installed.length > 1) {
-        const failed = installed.find((plugin) => plugins.find((candidate) => candidate.id === plugin.id)?.error);
+        const failed = installed.some((plugin) => plugins.find((candidate) => candidate.id === plugin.id)?.error);
         message.value = {
-          text: t('pluginManager.installedBundle', {
-            names: installed.map((plugin) => localize(plugin.name) + (plugin.kept ? ` (${t('pluginManager.keptNewer')})` : '')).join(', '),
-          }),
-          error: !!failed,
+          text: installed.every((plugin) => plugin.kept || plugin.status === 'installed')
+            ? t('pluginManager.installedBundle', { names: installed.map(resultText).join(', ') })
+            : installed.map(resultText).join(' '),
+          error: failed,
         };
         return;
       }
@@ -261,10 +284,7 @@ const install = async (code: string | File[] | (() => Promise<{ id: string; name
     if (!plugin) {
       return;
     } // folder picker cancelled
-    const entry = plugins.find((candidate) => candidate.id === plugin.id);
-    message.value = entry?.error
-      ? { text: t('pluginManager.installedButFailed', { name: localize(plugin.name), error: entry.error }), error: true }
-      : { text: t('pluginManager.installedActive', { name: localize(plugin.name) }), error: false };
+    message.value = { text: resultText(plugin), error: !!plugins.find((candidate) => candidate.id === plugin.id)?.error };
   } catch (error: any) {
     message.value = { text: t('pluginManager.loadFailed', { error: error?.message ?? error }), error: true };
   } finally {

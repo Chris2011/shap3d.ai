@@ -1,0 +1,36 @@
+{
+  "name": "s3d-plugin-physics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Physics on the model for Shap3D.ai: groups and components become rigid bodies that fall, bounce, slide and collide; hinges, sliders, motors with programs and ropes for robot arms and machines; thrust, drag and wind for things that fly; water that floats bodies, a particle liquid and a wind tunnel that shows the flow around objects – with Rapier as WebAssembly, without changing the model.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "screenshots": "node docs/screenshots.mjs"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "0.21.0"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "physics",
+    "name": "Physics",
+    "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/physics.png"
+  }
+}

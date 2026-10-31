@@ -104,15 +104,15 @@ const requestedPackages = params
  */
 const installPackage = async (folder: string) => {
   const base = `/plugins/${folder}/dist/`;
-  const response = await fetch(base + 'package.json');
+  // always the current build: an installed copy is replaced when its files differ (installPlugin compares them),
+  // and nothing may come from a cache – the browser keeps an imported module per URL, so each load asks with its own
+  const fresh = `t=${Date.now()}`;
+  const response = await fetch(base + 'package.json', { cache: 'no-store' });
   if (!response.ok) {
     throw new Error(`plugins/${folder}/dist fehlt – dort zuerst npm run build ausführen`);
   }
   const manifestText = await response.text();
-  const manifest = JSON.parse(manifestText) as { files?: string[]; shap3d?: { id?: string } };
-  if (plugins.some((entry) => entry.id === manifest.shap3d?.id && entry.active)) {
-    return;
-  }
+  const manifest = JSON.parse(manifestText) as { files?: string[] };
   const asFile = (path: string, content: BlobPart) => {
     const entry = new File([content], path);
     Object.defineProperty(entry, 'webkitRelativePath', { value: `dist/${path}` });
@@ -120,8 +120,8 @@ const installPackage = async (folder: string) => {
   };
   const read = async (path: string): Promise<BlobPart> =>
     path.endsWith('.js')
-      ? ((await import(/* @vite-ignore */ `${base}${path}?raw`)) as { default: string }).default
-      : await (await fetch(base + path)).arrayBuffer();
+      ? ((await import(/* @vite-ignore */ `${base}${path}?raw&${fresh}`)) as { default: string }).default
+      : await (await fetch(base + path, { cache: 'no-store' })).arrayBuffer();
   const files = await Promise.all(
     (manifest.files ?? []).filter((path) => path !== 'package.json').map(async (path) => asFile(path, await read(path))),
   );

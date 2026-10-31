@@ -1,0 +1,380 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "physics": {
+      "plugin": {
+        "name": "Physique",
+        "description": "Groupes et composants comme corps rigides qui tombent, rebondissent, glissent et se heurtent – charnières, glissières, moteurs avec programmes, cordes et ressorts pour bras robotisés et machines, poussée, portance et air pour ce qui vole, eau qui fait flotter, un liquide et une soufflerie – sans modifier le modèle."
+      },
+      "panel": {
+        "title": "Physique",
+        "simulation": "Simulation",
+        "time": "{time} s",
+        "start": "Démarrer",
+        "pause": "Pause",
+        "resume": "Continuer",
+        "step": "Pas",
+        "reset": "Réinitialiser",
+        "keep": "Conserver",
+        "keepHint": "Écrit les positions actuelles des corps dans le modèle (une étape d’annulation)",
+        "loading": "Chargement du moteur physique …",
+        "counts": "{bodies} corps · {joints} liaisons",
+        "drops": "{count} gouttes",
+        "startHint": "Faites des groupes ou composants des corps, puis démarrez – le modèle reste tel quel. Réinitialiser et Conserver marchent une fois démarré.",
+        "show": "Afficher :",
+        "shows": {
+          "joints": "Liaisons",
+          "forces": "Forces",
+          "trails": "Traces",
+          "flow": "Écoulement"
+        },
+        "type": "Type",
+        "bodies": "Corps",
+        "regions": "Zones",
+        "material": "Matériau",
+        "shape": "Forme",
+        "mass": "Masse (kg)",
+        "fromDensity": "selon le matériau",
+        "density": "Densité (kg/m³)",
+        "friction": "Frottement",
+        "bounce": "Rebond",
+        "startVelocity": "Vitesse initiale (m/s)",
+        "velocity": "Vitesse (m/s)",
+        "startSpin": "Rotation initiale (°/s)",
+        "spin": "Rotation (°/s)",
+        "period": "Aller-retour (s, 0 = sans fin)",
+        "forces": "Forces",
+        "force": "Force (N, axes du modèle)",
+        "thrust": "Poussée (N, axes propres)",
+        "lift": "Portance (N par (m/s)²)",
+        "drag": "Traînée (N par (m/s)²)",
+        "auto": "auto",
+        "joints": "Liaisons",
+        "jointKind": "Liaison",
+        "jointTo": "Tenu par",
+        "toParent": "Le groupe qui le contient",
+        "toWorld": "Le monde",
+        "anchor": "Ancre (coordonnées propres, m)",
+        "axis": "Axe (coordonnées propres)",
+        "otherEnd": "Autre extrémité",
+        "minAngle": "De (°)",
+        "maxAngle": "À (°)",
+        "minWay": "De (m)",
+        "maxWay": "À (m)",
+        "motor": "Moteur",
+        "length": "Longueur (m)",
+        "stiffness": "Raideur (N/m)",
+        "damping": "Amortissement (N·s/m)",
+        "program": "Programme (secondes:valeur, …)",
+        "programHint": "0:0, 2:90, 4:0",
+        "now": "Maintenant {value}{unit} – piloter :",
+        "removeJoint": "Supprimer la liaison",
+        "jointHint": "Choisissez une liaison, prenez l’outil Liaison et cliquez une face du corps (une charnière tourne autour de sa normale), puis le corps qui le tient – ou le vide pour le monde.",
+        "spacing": "Taille des gouttes (m)",
+        "viscosity": "Viscosité (0 … 1)",
+        "resolution": "Cellules sur la longueur",
+        "tunnelWind": "Vent (m/s)",
+        "current": "Courant (m/s)",
+        "selectHint": "Sélectionnez un groupe ou composant pour en faire un corps, une zone ou lui donner des liaisons.",
+        "list": "Corps et zones",
+        "listEmpty": "Aucun corps pour l’instant.",
+        "stepHint": "Met en pause et avance d’un dixième de seconde – pour regarder pas à pas",
+        "resetHint": "Retour au départ : les corps reviennent là où le modèle les place"
+      },
+      "settings": {
+        "gravity": "Gravité (m/s²)",
+        "speed": "Vitesse",
+        "wind": "Vent (m/s)",
+        "air": "Résistance de l’air",
+        "ground": "Sol à la hauteur 0"
+      },
+      "types": {
+        "none": "Pas un corps",
+        "dynamic": "Dynamique",
+        "static": "Statique",
+        "kinematic": "Mobile (cinématique)",
+        "off": "Ignoré",
+        "water": "Eau",
+        "liquid": "Liquide",
+        "tunnel": "Soufflerie"
+      },
+      "typeHints": {
+        "none": "Les groupes simples font partie du monde immobile contre lequel tout se heurte.",
+        "dynamic": "Tombe, rebondit, glisse et est poussé – par la gravité, les forces, les liaisons et les autres corps.",
+        "static": "Reste en place ; les autres se heurtent à ses faces exactes.",
+        "kinematic": "Se déplace et tourne à sa propre vitesse et pousse ce qui gêne – un ascenseur, un plateau tournant, un piston.",
+        "off": "Hors de la simulation : rien ne le heurte.",
+        "water": "Sa boîte est de l’eau jusqu’à son sommet : les corps flottent selon leur densité et dérivent avec le courant.",
+        "liquid": "Sa boîte est remplie au départ de gouttes qui s’écoulent autour et par-dessus tout.",
+        "tunnel": "Sa boîte est une soufflerie : l’air contourne tout ce qu’elle contient, montré par des filets de fumée."
+      },
+      "materials": {
+        "wood": "Bois",
+        "steel": "Acier",
+        "stone": "Pierre",
+        "rubber": "Caoutchouc",
+        "ice": "Glace",
+        "plastic": "Plastique",
+        "foam": "Mousse",
+        "custom": "Valeurs propres"
+      },
+      "shapes": {
+        "auto": "Automatique",
+        "hull": "Une enveloppe convexe",
+        "box": "Boîte",
+        "sphere": "Sphère",
+        "cylinder": "Cylindre",
+        "mesh": "Faces exactes (corps immobiles et mobiles)"
+      },
+      "joints": {
+        "hinge": "Charnière",
+        "slider": "Glissière",
+        "ball": "Rotule",
+        "fixed": "Fixe",
+        "rope": "Corde",
+        "spring": "Ressort"
+      },
+      "motor": {
+        "off": "Aucun",
+        "position": "Vers une position",
+        "speed": "À une vitesse",
+        "target": "Cible (° ou m)",
+        "speedValue": "Vitesse (°/s ou m/s)",
+        "strength": "Force"
+      },
+      "tools": {
+        "pull": "Tirer les corps",
+        "pullStatus": "Faites glisser un corps pendant la simulation – il suit au bout d’un ressort.",
+        "joint": "Liaison",
+        "jointStatusFirst": "{kind} : cliquez une face du corps qui reçoit la liaison.",
+        "jointStatusSecond": "{kind} : cliquez le corps qui le tient – le même pour le groupe qui le contient, le vide pour le monde. Échap annule.",
+        "pullMiss": "Pas de corps dynamique ici – appuyez sur un corps qui tombe (pas statique) et faites glisser",
+        "jointAdded": "{kind} sur {name}, tenu par {to} – à régler dans le panneau Physique"
+      },
+      "commands": {
+        "start": "Démarrer ou mettre en pause la simulation",
+        "pause": "Mettre la simulation en pause",
+        "reset": "Réinitialiser la simulation",
+        "step": "Simulation d’un pas",
+        "keep": "Conserver les positions de la simulation",
+        "open": "Physique…",
+        "dynamic": "Faire de la sélection des corps dynamiques",
+        "static": "Faire de la sélection des corps statiques",
+        "none": "Faire de la sélection des groupes simples",
+        "pull": "Tirer les corps",
+        "joint": "Ajouter une liaison",
+        "guide": "Guide de physique"
+      },
+      "undo": {
+        "body": "Corps physique",
+        "joint": "Liaison",
+        "keep": "Conserver la simulation",
+        "settings": "Réglages physiques"
+      },
+      "errors": {
+        "load": "Le moteur physique n’a pas pu être chargé : {error}",
+        "noTarget": "Aucun groupe ou composant « {target} » trouvé",
+        "unknownType": "Type inconnu « {type} » – connus : {types}",
+        "unknownJoint": "Liaison inconnue « {kind} » – connues : {kinds}",
+        "vector": "« {name} » doit être trois nombres [x, y, z]",
+        "nothingSelected": "Sélectionnez d’abord des groupes ou composants",
+        "jointOnGroup": "Une liaison demande un groupe ou composant – cliquez une de ses faces"
+      },
+      "script": {
+        "body": "Fait d’un groupe ou composant un corps (dynamic, static, kinematic, off) ou une zone (water, liquid, tunnel) avec matériau, forme, vitesse initiale et forces – ou le modifie. Renvoie l’id de l’instance.",
+        "joint": "Ajoute une liaison à un corps : hinge, slider, ball, fixed, rope ou spring – vers un autre groupe, le groupe qui le contient ou le monde, avec limites, moteur et programme. Points et axes en coordonnées du modèle.",
+        "settings": "Gravité, vent, traînée, sol et vitesse de la simulation – renvoie les réglages.",
+        "start": "Démarre la simulation une fois le script terminé – `at` secondes simulées d’emblée, `pause` pour s’y arrêter.",
+        "bodies": "Tous les corps et zones du modèle avec leurs données.",
+        "remove": "Refait d’un corps un groupe simple."
+      },
+      "demos": {
+        "playground": {
+          "name": "Terrain de jeu",
+          "description": "Caisses, balles, une rampe avec glace et bois, des dominos et un pendule"
+        },
+        "robot": {
+          "name": "Bras robotisé",
+          "description": "Quatre charnières motorisées suivant un programme balaient des caisses d’une table"
+        },
+        "machines": {
+          "name": "Machines",
+          "description": "Un plateau tournant, un ascenseur, un piston sur glissière, une chaîne sur rotules et une liaison fixe"
+        },
+        "crane": {
+          "name": "Cordes et ressorts",
+          "description": "Un boulet de démolition, un ressort, une porte sur charnière et un pendule de Newton"
+        },
+        "flight": {
+          "name": "Vol",
+          "description": "Une fusée, un planeur, un drone, un boulet de canon et une feuille dans le vent"
+        },
+        "water": {
+          "name": "Eau",
+          "description": "Un bassin : mousse et bois flottent, l’acier coule, un bateau y navigue"
+        },
+        "liquid": {
+          "name": "Rupture de barrage",
+          "description": "Un bloc de liquide s’effondre et contourne un pilier"
+        },
+        "tunnel": {
+          "name": "Soufflerie",
+          "description": "L’écoulement autour d’une voiture, d’un pilier et d’un mur – et un ballon emporté"
+        }
+      },
+      "mode": "Physique",
+      "guide": {
+        "title": "Guide de physique",
+        "open": "Comment ça marche ? Ouvrir le guide",
+        "heading": "Votre première simulation",
+        "progress": "{done} sur {count}",
+        "intro": "Pas à pas à travers le plugin. Chaque étape se coche seule une fois faite – les boutons le font pour vous ou prennent le bon outil.",
+        "back": "Retour",
+        "next": "Suivant",
+        "actions": {
+          "practice": "Créer une scène d’essai",
+          "selectAll": "Sélectionner tous les groupes",
+          "dynamic": "Sélection → dynamique",
+          "hinge": "Prendre l’outil charnière",
+          "editJoint": "Ouvrir la liaison dans le panneau"
+        },
+        "checks": {
+          "selected": "Groupes sélectionnés",
+          "stepped": "Avancé d’un pas",
+          "reset": "Remis au départ"
+        },
+        "practice": {
+          "crate": "Caisse",
+          "ball": "Balle",
+          "door": "Porte"
+        },
+        "steps": {
+          "practice": {
+            "title": "De quoi essayer",
+            "text": "La physique agit sur les groupes et composants. Créez une scène d’essai – trois caisses, une balle et une porte (elle remplace le modèle) – ou utilisez vos groupes.",
+            "done": "Le modèle contient des groupes."
+          },
+          "bodies": {
+            "title": "En faire des corps",
+            "text": "Seuls les corps participent. Sélectionnez les groupes (ou « Sélectionner tous les groupes »), puis « Sélection → dynamique » – ou dans le panneau Physique sous « Que doit-il faire ? » cliquez « Tombe » : ils tombent, rebondissent et se heurtent. En dessous, choisissez leur matériau.",
+            "done": "Il y a un corps dynamique."
+          },
+          "start": {
+            "title": "Démarrer",
+            "text": "Démarrez la simulation – ici, dans le panneau Physique ou par la palette de commandes. La première fois, le moteur se charge un instant.\nLe modèle ne change pas : les corps sont seulement affichés là où ils sont.",
+            "done": "Elle a tourné."
+          },
+          "controls": {
+            "title": "Pause, pas, réinitialiser",
+            "text": "Pause l’arrête là où elle est, Continuer reprend. Pas met en pause et avance d’un dixième de seconde – appuyez plusieurs fois. Réinitialiser remet tout au départ (seulement en cours ou en pause).",
+            "done": "Avancé et réinitialisé."
+          },
+          "pull": {
+            "title": "Tirer les corps",
+            "text": "Prenez l’outil Tirer (il démarre la simulation), puis appuyez sur un corps qui tombe et faites glisser : il suit le pointeur au bout d’un ressort, comme un élastique. Les corps statiques ne se tirent pas.\nEn mode physique, l’outil est dans la barre d’outils à gauche.",
+            "done": "Un corps a été tiré."
+          },
+          "joint": {
+            "title": "Une charnière",
+            "text": "Prenez l’outil charnière. 1er clic : une face du corps qui reçoit la charnière – elle tourne autour de la normale de cette face ; pour une porte, cliquez sa face du dessus près du bout où elle doit pendre (elle s’accroche au coin, un point le montre). 2e clic : le vide (tenue par le monde) ou un autre corps.\nPuis démarrez : la porte pivote au lieu de tomber.",
+            "done": "Il y a une liaison."
+          },
+          "motor": {
+            "title": "Un moteur",
+            "text": "Ouvrez la liaison dans le panneau Physique : dans la vue simple, cochez « Moteur » à côté de la charnière – elle tourne sans fin. La vue avancée offre une cible en degrés, une vitesse ou un programme comme 0:0, 2:90, 4:0 (secondes:degrés, répété) et un curseur pour la piloter en cours.",
+            "done": "Une liaison a un moteur."
+          },
+          "keep": {
+            "title": "Conserver les positions",
+            "text": "Laissez les choses tomber en place, puis Conserver : les positions actuelles sont écrites dans le modèle – une étape d’annulation. Utile pour disperser des caisses ou laisser un tas se poser.",
+            "done": "Positions conservées."
+          },
+          "more": {
+            "title": "Plus : les démos",
+            "text": "Les démos montrent le reste – bras robotisés programmés, cordes et ressorts, vol, eau, liquide et soufflerie. Chacune s’ouvre dans l’éditeur de scripts ; Exécuter la construit (remplace le modèle) et la démarre. Toutes sont dans les exemples sous Physique.",
+            "done": "Vous avez vu les démos."
+          }
+        }
+      },
+      "basic": {
+        "simple": "Simple",
+        "advanced": "Avancé",
+        "status": {
+          "ready": "Prêt – appuyez sur Démarrer.",
+          "running": "En cours · {time} s",
+          "paused": "En pause à {time} s"
+        },
+        "slowMotion": "Ralenti",
+        "nothing": "Cliquez un objet pour dire ce qu’il doit faire. Ce doit être un groupe ou un composant.",
+        "loose": "Ce sont des faces libres – la physique a besoin d’un groupe.",
+        "makeGroup": "Créer un groupe",
+        "bodyCount": "{count} corps dans le modèle",
+        "selected": "{count} objets",
+        "what": "Que doit-il faire ?",
+        "kinds": {
+          "dynamic": "Tombe",
+          "static": "Reste fixe",
+          "off": "Ignorer"
+        },
+        "kindHints": {
+          "dynamic": "tombe, rebondit, roule",
+          "static": "les autres rebondissent",
+          "off": "on passe au travers"
+        },
+        "otherKind": "Il a un type de la vue avancée (mobile, eau …) – modifiez-le là-bas.",
+        "madeOf": "En quoi est-il ?",
+        "materialHints": {
+          "wood": "normal",
+          "steel": "lourd",
+          "stone": "lourd, rugueux",
+          "rubber": "rebondit",
+          "ice": "glisse",
+          "plastic": "léger",
+          "foam": "très léger"
+        },
+        "attach": "Qu’est-ce qui le tient ?",
+        "attachHint": "Rien – il tombe librement. Attachez-le au monde ou à un autre objet :",
+        "attachKinds": {
+          "hinge": "Charnière (comme une porte)",
+          "rope": "Suspendre à une corde",
+          "spring": "Suspendre à un ressort",
+          "fixed": "Coller"
+        },
+        "attachSteps": "1. Cliquez une face de cet objet près de l’endroit où il doit tenir (il s’accroche à un coin ou au milieu).\n2. Cliquez le vide pour le tenir au monde, ou un autre objet.\nÉchap annule.",
+        "jointTo": "{kind} → {to}",
+        "motor": "Moteur",
+        "remove": "Retirer",
+        "more": "Eau, vent, liquides, programmes de moteur et valeurs exactes sont dans la vue avancée.",
+        "toAdvanced": "Afficher la vue avancée",
+        "push": "Pousser au départ",
+        "pushes": {
+          "none": "Aucune",
+          "up": "Haut",
+          "away": "Au loin",
+          "left": "Gauche",
+          "right": "Droite",
+          "spin": "Tourner"
+        },
+        "strong": "Fort",
+        "pushHint": "Directions telles que vous regardez : au loin, c’est vers le fond de la vue.",
+        "pushed": "Il part en mouvement – la flèche bleue montre où.",
+        "attachStepsHinge": "1. Cliquez l’objet près du bord où il doit pendre – la charnière s’y dresse verticalement (un point le montre).\n2. Cliquez le vide pour le tenir au monde, ou un autre objet (un cadre).\nÉchap annule."
+      },
+      "timeline": {
+        "label": "Chronologie",
+        "position": "{time} / {end} s",
+        "empty": "Démarrez – ce qui se passe est enregistré ici et vous pouvez revenir à tout instant.",
+        "rewound": "Un instant antérieur – Continuer ou Pas recalcule à partir d’ici."
+      },
+      "record": {
+        "start": "Enregistrer une vidéo",
+        "stop": "Arrêter et enregistrer ({time})",
+        "hint": "Enregistre la vue 3D en vidéo (MP4 ou WebM) – démarre la simulation si elle ne tourne pas",
+        "saved": "Enregistré : {file}",
+        "unsupported": "Ce navigateur ne peut pas enregistrer de vidéos"
+      }
+    }
+  }
+}

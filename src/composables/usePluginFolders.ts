@@ -1,5 +1,5 @@
 import { reactive, ref, shallowRef } from 'vue';
-import { plugins, installPluginPackages, installedPackage, readPluginPackages, type PluginPackage } from '../plugins/registry';
+import { plugins, fingerprint, installPluginPackages, installedPackage, readPluginPackages, type PluginPackage } from '../plugins/registry';
 import { saveFolderHandle, loadFolderHandle, listFolderHandles } from '../plugins/assetStore';
 import {
   supportsFolderHandles,
@@ -15,17 +15,21 @@ export interface FolderResult {
   error: boolean;
 }
 
-/** true when the folder holds something other than the installed copy */
-const differs = (id: string, candidate: PluginPackage) => {
+/** true when the folder holds something other than the installed copy (compared by content, see fingerprint) */
+const differs = async (id: string, candidate: PluginPackage) => {
   const installed = installedPackage(id);
   if (!installed) {
     return true;
   }
+  if (installed.info.version !== candidate.info.version) {
+    return true;
+  }
+  if (installed.hash) {
+    return installed.hash !== (await fingerprint(candidate.code, candidate.assets));
+  }
+  // installed before fingerprints existed
   return (
-    installed.code !== candidate.code ||
-    installed.info.version !== candidate.info.version ||
-    installed.info.files !== candidate.info.files ||
-    installed.info.bytes !== candidate.info.bytes
+    installed.code !== candidate.code || installed.info.files !== candidate.info.files || installed.info.bytes !== candidate.info.bytes
   );
 };
 
@@ -121,7 +125,7 @@ export const usePluginFolders = () => {
         pluginPackage = await packageFor(id, handle);
       }
       const newVersion = pluginPackage.info.version;
-      if (!differs(id, pluginPackage)) {
+      if (!(await differs(id, pluginPackage))) {
         await saveFolderHandle(id, handle!); // the user may have picked a new place for the same package
         delete updateHints[id];
         upToDate[id] = true;
@@ -172,7 +176,7 @@ export const usePluginFolders = () => {
           continue;
         }
         const pluginPackage = await packageFor(id, handle);
-        if (!differs(id, pluginPackage)) {
+        if (!(await differs(id, pluginPackage))) {
           delete updateHints[id];
           upToDate[id] = true;
           continue;

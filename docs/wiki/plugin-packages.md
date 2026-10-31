@@ -202,3 +202,32 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/level/dist`.
 - The data format `level.object` and `s3d.levelObject`, `s3d.levelObjects` and `s3d.levelFile` for scripts.
 
 More in [its README](../../plugins/level/README.md).
+
+## The physics plugin
+
+The package in [`plugins/physics/`](../../plugins/physics) simulates the model's groups and components as rigid bodies with [Rapier](https://rapier.rs) (WebAssembly, shipped next to `plugin.js` and loaded on the first start). It needs no other plugin and does not change the model while it runs – `display.place` shows the bodies where they are. Built like the others:
+
+```bash
+cd plugins/physics
+npm install
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/physics/dist`.
+
+![Physics: a pyramid of crates hit by balls, an ice block sliding down a ramp, dominoes and a pendulum, with the Physics panel](../../plugins/physics/docs/physics.png)
+
+![A robot arm on four hinges with motors following a program, sweeping crates off a table](../../plugins/physics/docs/physics-robot.png)
+
+![A wind tunnel: smoke lines show the air flowing around a car, a pillar and a wall](../../plugins/physics/docs/physics-tunnel.png)
+
+- **Simple and advanced**: the panel opens in a simple view – _Falls_ / _Stays put_ / _Ignore_, the material as tiles, a push at the start, and hinge, rope, spring or glue with a one-click motor; _Advanced_ has every value. A **physics mode** (_Model | Physics_) and an eight-step **guide** with a practice scene get beginners going.
+- **Timeline and video**: drag back to any moment of what was simulated, go on from there; record the view as MP4/WebM.
+- **Bodies**: dynamic, static, moving (kinematic) or ignored – with material, mass, shape (convex hulls per part, box, sphere, cylinder, exact faces), start speed and turn; loose faces and plain groups are the still world, a ground at height 0 catches what falls.
+- **Joints**: hinges and sliders with limits and motors driven by a position, a speed or a program over time (a robot arm), ball joints, fixed joints, ropes and springs – set up with the _Joint_ tool or in the panel, driven by hand while it runs.
+- **Forces**: a constant force, thrust that turns with the body, lift of a wing, air drag and wind.
+- **Regions**: water that floats bodies by their density, a liquid of drops, and a wind tunnel with smoke lines coloured by speed.
+- **Start, pause, step, reset and keep** (the places into the model as one undo step), the _Pull_ tool to drag bodies while it runs, trails of moving bodies.
+- The data format `physics.body` and `s3d.physicsBody`, `s3d.physicsJoint`, `s3d.physicsSettings` and `s3d.physicsStart` for scripts, with eight demos as examples.
+
+More in [its README](../../plugins/physics/README.md).

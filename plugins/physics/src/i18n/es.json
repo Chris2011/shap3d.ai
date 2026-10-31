@@ -1,0 +1,380 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "physics": {
+      "plugin": {
+        "name": "Física",
+        "description": "Grupos y componentes como cuerpos rígidos que caen, rebotan, se deslizan y chocan – bisagras, correderas, motores con programas, cuerdas y muelles para brazos robóticos y máquinas, empuje, sustentación y aire para lo que vuela, agua que hace flotar, un líquido y un túnel de viento – sin cambiar el modelo."
+      },
+      "panel": {
+        "title": "Física",
+        "simulation": "Simulación",
+        "time": "{time} s",
+        "start": "Iniciar",
+        "pause": "Pausa",
+        "resume": "Seguir",
+        "step": "Paso",
+        "reset": "Reiniciar",
+        "keep": "Conservar",
+        "keepHint": "Escribe en el modelo las posiciones actuales de los cuerpos (un paso de deshacer)",
+        "loading": "Cargando el motor de física …",
+        "counts": "{bodies} cuerpos · {joints} uniones",
+        "drops": "{count} gotas",
+        "startHint": "Convierte grupos o componentes en cuerpos y luego inicia – el modelo queda como está. Reiniciar y Conservar funcionan una vez iniciada.",
+        "show": "Mostrar:",
+        "shows": {
+          "joints": "Uniones",
+          "forces": "Fuerzas",
+          "trails": "Trayectorias",
+          "flow": "Flujo"
+        },
+        "type": "Tipo",
+        "bodies": "Cuerpos",
+        "regions": "Zonas",
+        "material": "Material",
+        "shape": "Forma",
+        "mass": "Masa (kg)",
+        "fromDensity": "según el material",
+        "density": "Densidad (kg/m³)",
+        "friction": "Fricción",
+        "bounce": "Rebote",
+        "startVelocity": "Velocidad inicial (m/s)",
+        "velocity": "Velocidad (m/s)",
+        "startSpin": "Giro inicial (°/s)",
+        "spin": "Giro (°/s)",
+        "period": "Ida y vuelta (s, 0 = sin fin)",
+        "forces": "Fuerzas",
+        "force": "Fuerza (N, ejes del modelo)",
+        "thrust": "Empuje (N, ejes propios)",
+        "lift": "Sustentación (N por (m/s)²)",
+        "drag": "Resistencia del aire (N por (m/s)²)",
+        "auto": "auto",
+        "joints": "Uniones",
+        "jointKind": "Unión",
+        "jointTo": "Sujeto a",
+        "toParent": "El grupo que lo contiene",
+        "toWorld": "El mundo",
+        "anchor": "Anclaje (coordenadas propias, m)",
+        "axis": "Eje (coordenadas propias)",
+        "otherEnd": "Otro extremo",
+        "minAngle": "Desde (°)",
+        "maxAngle": "Hasta (°)",
+        "minWay": "Desde (m)",
+        "maxWay": "Hasta (m)",
+        "motor": "Motor",
+        "length": "Longitud (m)",
+        "stiffness": "Rigidez (N/m)",
+        "damping": "Amortiguación (N·s/m)",
+        "program": "Programa (segundos:valor, …)",
+        "programHint": "0:0, 2:90, 4:0",
+        "now": "Ahora {value}{unit} – controlar:",
+        "removeJoint": "Quitar la unión",
+        "jointHint": "Elige una unión, toma la herramienta Unión y haz clic en una cara del cuerpo (una bisagra gira alrededor de su normal), luego en el cuerpo que lo sujeta – o en el vacío para el mundo.",
+        "spacing": "Tamaño de gota (m)",
+        "viscosity": "Viscosidad (0 … 1)",
+        "resolution": "Celdas a lo largo",
+        "tunnelWind": "Viento (m/s)",
+        "current": "Corriente (m/s)",
+        "selectHint": "Selecciona un grupo o componente para convertirlo en cuerpo o zona o darle uniones.",
+        "list": "Cuerpos y zonas",
+        "listEmpty": "Aún no hay cuerpos.",
+        "stepHint": "Pausa y avanza una décima de segundo – para verlo paso a paso",
+        "resetHint": "Vuelve al inicio: los cuerpos regresan a donde los tiene el modelo"
+      },
+      "settings": {
+        "gravity": "Gravedad (m/s²)",
+        "speed": "Velocidad",
+        "wind": "Viento (m/s)",
+        "air": "Resistencia del aire",
+        "ground": "Suelo a altura 0"
+      },
+      "types": {
+        "none": "Sin cuerpo",
+        "dynamic": "Dinámico",
+        "static": "Estático",
+        "kinematic": "Móvil (cinemático)",
+        "off": "Ignorado",
+        "water": "Agua",
+        "liquid": "Líquido",
+        "tunnel": "Túnel de viento"
+      },
+      "typeHints": {
+        "none": "Los grupos simples forman parte del mundo quieto contra el que todo choca.",
+        "dynamic": "Cae, rebota, se desliza y es empujado – por la gravedad, fuerzas, uniones y otros cuerpos.",
+        "static": "Se queda donde está; los demás chocan con sus caras exactas.",
+        "kinematic": "Se mueve y gira a su propia velocidad y empuja lo que está en su camino – un ascensor, una plataforma giratoria, un pistón.",
+        "off": "Fuera de la simulación: nada choca con él.",
+        "water": "Su caja es agua hasta arriba: los cuerpos flotan según su densidad y derivan con la corriente.",
+        "liquid": "Su caja se llena al inicio de gotas que fluyen alrededor y por encima de todo.",
+        "tunnel": "Su caja es un túnel de viento: el aire fluye alrededor de todo lo que hay dentro, mostrado con líneas de humo."
+      },
+      "materials": {
+        "wood": "Madera",
+        "steel": "Acero",
+        "stone": "Piedra",
+        "rubber": "Goma",
+        "ice": "Hielo",
+        "plastic": "Plástico",
+        "foam": "Espuma",
+        "custom": "Valores propios"
+      },
+      "shapes": {
+        "auto": "Automática",
+        "hull": "Una envolvente convexa",
+        "box": "Caja",
+        "sphere": "Esfera",
+        "cylinder": "Cilindro",
+        "mesh": "Caras exactas (cuerpos quietos y móviles)"
+      },
+      "joints": {
+        "hinge": "Bisagra",
+        "slider": "Corredera",
+        "ball": "Rótula",
+        "fixed": "Fija",
+        "rope": "Cuerda",
+        "spring": "Muelle"
+      },
+      "motor": {
+        "off": "Ninguno",
+        "position": "A una posición",
+        "speed": "A una velocidad",
+        "target": "Objetivo (° o m)",
+        "speedValue": "Velocidad (°/s o m/s)",
+        "strength": "Fuerza"
+      },
+      "tools": {
+        "pull": "Tirar de cuerpos",
+        "pullStatus": "Arrastra un cuerpo mientras corre la simulación – lo sigue con un muelle.",
+        "joint": "Unión",
+        "jointStatusFirst": "{kind}: haz clic en una cara del cuerpo que recibe la unión.",
+        "jointStatusSecond": "{kind}: haz clic en el cuerpo que lo sujeta – el mismo para el grupo que lo contiene, el vacío para el mundo. Esc cancela.",
+        "pullMiss": "No hay un cuerpo dinámico ahí – pulsa sobre un cuerpo que cae (no uno estático) y arrastra",
+        "jointAdded": "{kind} en {name}, sujeto a {to} – ajústalo en el panel Física"
+      },
+      "commands": {
+        "start": "Iniciar o pausar la simulación",
+        "pause": "Pausar la simulación",
+        "reset": "Reiniciar la simulación",
+        "step": "Simulación un paso más",
+        "keep": "Conservar las posiciones de la simulación",
+        "open": "Física…",
+        "dynamic": "Convertir la selección en cuerpos dinámicos",
+        "static": "Convertir la selección en cuerpos estáticos",
+        "none": "Convertir la selección en grupos simples",
+        "pull": "Tirar de cuerpos",
+        "joint": "Añadir una unión",
+        "guide": "Guía de física"
+      },
+      "undo": {
+        "body": "Cuerpo físico",
+        "joint": "Unión",
+        "keep": "Conservar la simulación",
+        "settings": "Ajustes de física"
+      },
+      "errors": {
+        "load": "No se pudo cargar el motor de física: {error}",
+        "noTarget": "No se encontró ningún grupo o componente «{target}»",
+        "unknownType": "Tipo desconocido «{type}» – conocidos: {types}",
+        "unknownJoint": "Unión desconocida «{kind}» – conocidas: {kinds}",
+        "vector": "«{name}» debe ser tres números [x, y, z]",
+        "nothingSelected": "Selecciona primero grupos o componentes",
+        "jointOnGroup": "Una unión necesita un grupo o componente – haz clic en una de sus caras"
+      },
+      "script": {
+        "body": "Convierte un grupo o componente en cuerpo (dynamic, static, kinematic, off) o zona (water, liquid, tunnel) con material, forma, velocidad inicial y fuerzas – o lo cambia. Devuelve el id de la instancia.",
+        "joint": "Añade una unión a un cuerpo: hinge, slider, ball, fixed, rope o spring – a otro grupo, al grupo que lo contiene o al mundo, con límites, motor y programa. Puntos y ejes en coordenadas del modelo.",
+        "settings": "Gravedad, viento, resistencia del aire, suelo y velocidad de la simulación – devuelve los ajustes.",
+        "start": "Inicia la simulación cuando termina el script – `at` segundos simulados de golpe, `pause` para quedarse ahí.",
+        "bodies": "Todos los cuerpos y zonas del modelo con sus datos.",
+        "remove": "Vuelve a convertir un cuerpo en un grupo simple."
+      },
+      "demos": {
+        "playground": {
+          "name": "Patio de juegos",
+          "description": "Cajas, pelotas, una rampa con hielo y madera, fichas de dominó y un péndulo"
+        },
+        "robot": {
+          "name": "Brazo robótico",
+          "description": "Cuatro bisagras con motores que siguen un programa barren cajas de una mesa"
+        },
+        "machines": {
+          "name": "Máquinas",
+          "description": "Una plataforma giratoria, un ascensor, un pistón en corredera, una cadena con rótulas y una unión fija"
+        },
+        "crane": {
+          "name": "Cuerdas y muelles",
+          "description": "Una bola de demolición, un muelle, una puerta con bisagra y un péndulo de Newton"
+        },
+        "flight": {
+          "name": "Vuelo",
+          "description": "Un cohete, un planeador, un dron, una bala de cañón y una lámina al viento"
+        },
+        "water": {
+          "name": "Agua",
+          "description": "Una piscina: la espuma y la madera flotan, el acero se hunde, un barco navega"
+        },
+        "liquid": {
+          "name": "Rotura de presa",
+          "description": "Un bloque de líquido se derrumba y fluye alrededor de un pilar"
+        },
+        "tunnel": {
+          "name": "Túnel de viento",
+          "description": "El flujo alrededor de un coche, un pilar y un muro – y una pelota que se lleva el viento"
+        }
+      },
+      "mode": "Física",
+      "guide": {
+        "title": "Guía de física",
+        "open": "¿Cómo funciona? Abrir la guía",
+        "heading": "Tu primera simulación",
+        "progress": "{done} de {count}",
+        "intro": "Paso a paso por el plugin. Cada paso se marca solo cuando lo has hecho – los botones lo hacen por ti o toman la herramienta adecuada.",
+        "back": "Atrás",
+        "next": "Siguiente",
+        "actions": {
+          "practice": "Crear una escena de práctica",
+          "selectAll": "Seleccionar todos los grupos",
+          "dynamic": "Selección → dinámica",
+          "hinge": "Tomar la herramienta bisagra",
+          "editJoint": "Abrir la unión en el panel"
+        },
+        "checks": {
+          "selected": "Grupos seleccionados",
+          "stepped": "Avanzado un paso",
+          "reset": "Reiniciado al inicio"
+        },
+        "practice": {
+          "crate": "Caja",
+          "ball": "Pelota",
+          "door": "Puerta"
+        },
+        "steps": {
+          "practice": {
+            "title": "Algo para probar",
+            "text": "La física actúa sobre grupos y componentes. Crea una escena de práctica – tres cajas, una pelota y una puerta (sustituye el modelo) – o usa tus propios grupos.",
+            "done": "Hay grupos en el modelo."
+          },
+          "bodies": {
+            "title": "Convertirlos en cuerpos",
+            "text": "Solo participan los cuerpos. Selecciona los grupos (o «Seleccionar todos los grupos») y luego «Selección → dinámica» – o en el panel Física, en «¿Qué debe hacer?», pulsa «Cae»: caen, rebotan y chocan. Debajo eliges de qué son.",
+            "done": "Hay un cuerpo dinámico."
+          },
+          "start": {
+            "title": "Iniciar",
+            "text": "Inicia la simulación – aquí, en el panel Física o desde la paleta de comandos. La primera vez el motor tarda un momento en cargar.\nEl modelo no cambia: los cuerpos solo se muestran donde están.",
+            "done": "Se ha ejecutado."
+          },
+          "controls": {
+            "title": "Pausa, paso, reiniciar",
+            "text": "Pausa la detiene donde está, Seguir continúa. Paso pausa y avanza una décima de segundo – púlsalo varias veces. Reiniciar lo devuelve todo al inicio (solo si está en marcha o en pausa).",
+            "done": "Avanzado y reiniciado."
+          },
+          "pull": {
+            "title": "Tirar de cuerpos",
+            "text": "Toma la herramienta Tirar (inicia la simulación), pulsa sobre un cuerpo que cae y arrastra: sigue al puntero con un muelle, como una goma. Los cuerpos estáticos no se pueden tirar.\nEn el modo física la herramienta está en la barra de la izquierda.",
+            "done": "Se ha tirado de un cuerpo."
+          },
+          "joint": {
+            "title": "Una bisagra",
+            "text": "Toma la herramienta bisagra. 1.er clic: una cara del cuerpo que recibe la bisagra – gira alrededor de la normal de esa cara; para una puerta, su cara superior cerca del extremo donde debe colgar (se ajusta a la esquina, un punto lo muestra). 2.º clic: el vacío (sujeta al mundo) u otro cuerpo.\nLuego inicia: la puerta gira en vez de caerse.",
+            "done": "Hay una unión."
+          },
+          "motor": {
+            "title": "Un motor",
+            "text": "Abre la unión en el panel Física: en la vista sencilla marca «Motor» junto a la bisagra – gira sin parar. La vista avanzada tiene un objetivo en grados, una velocidad o un programa como 0:0, 2:90, 4:0 (segundos:grados, repetido) y un deslizador para moverla a mano mientras corre.",
+            "done": "Una unión tiene motor."
+          },
+          "keep": {
+            "title": "Conservar las posiciones",
+            "text": "Deja que las cosas caigan en su sitio y luego Conservar: las posiciones actuales se escriben en el modelo – un paso de deshacer. Útil para esparcir cajas o dejar que un montón se asiente.",
+            "done": "Posiciones conservadas."
+          },
+          "more": {
+            "title": "Más: las demos",
+            "text": "Las demos muestran lo demás – brazos robóticos con programa, cuerdas y muelles, vuelo, agua, líquido y túnel de viento. Cada una se abre en el editor de scripts; Ejecutar la construye (sustituye el modelo) y la inicia. Todas están en los ejemplos bajo Física.",
+            "done": "Has visto las demos."
+          }
+        }
+      },
+      "basic": {
+        "simple": "Sencillo",
+        "advanced": "Avanzado",
+        "status": {
+          "ready": "Listo – pulsa Iniciar.",
+          "running": "En marcha · {time} s",
+          "paused": "En pausa en {time} s"
+        },
+        "slowMotion": "Cámara lenta",
+        "nothing": "Haz clic en un objeto para decir qué debe hacer. Tiene que ser un grupo o componente.",
+        "loose": "Son caras sueltas – la física necesita un grupo.",
+        "makeGroup": "Crear un grupo",
+        "bodyCount": "{count} cuerpos en el modelo",
+        "selected": "{count} objetos",
+        "what": "¿Qué debe hacer?",
+        "kinds": {
+          "dynamic": "Cae",
+          "static": "Se queda fijo",
+          "off": "Ignorar"
+        },
+        "kindHints": {
+          "dynamic": "cae, rebota, rueda",
+          "static": "los demás rebotan",
+          "off": "se atraviesa"
+        },
+        "otherKind": "Tiene un tipo de la vista avanzada (móvil, agua …) – cámbialo allí.",
+        "madeOf": "¿De qué es?",
+        "materialHints": {
+          "wood": "normal",
+          "steel": "pesado",
+          "stone": "pesado, áspero",
+          "rubber": "rebota",
+          "ice": "resbala",
+          "plastic": "ligero",
+          "foam": "muy ligero"
+        },
+        "attach": "¿Qué lo sujeta?",
+        "attachHint": "Nada – cae libremente. Sujétalo al mundo o a otro objeto:",
+        "attachKinds": {
+          "hinge": "Bisagra (como una puerta)",
+          "rope": "Colgar de una cuerda",
+          "spring": "Colgar de un muelle",
+          "fixed": "Pegar"
+        },
+        "attachSteps": "1. Haz clic en una cara de este objeto cerca de donde debe sujetarse (se ajusta a una esquina o al centro).\n2. Haz clic en el vacío para sujetarlo al mundo, o en otro objeto.\nEsc cancela.",
+        "jointTo": "{kind} → {to}",
+        "motor": "Motor",
+        "remove": "Quitar",
+        "more": "Agua, viento, líquidos, programas de motor y valores exactos están en la vista avanzada.",
+        "toAdvanced": "Mostrar la vista avanzada",
+        "push": "Empujar al inicio",
+        "pushes": {
+          "none": "Ninguno",
+          "up": "Arriba",
+          "away": "Hacia atrás",
+          "left": "Izquierda",
+          "right": "Derecha",
+          "spin": "Girar"
+        },
+        "strong": "Fuerte",
+        "pushHint": "Direcciones tal como miras ahora: hacia atrás es hacia el fondo de la vista.",
+        "pushed": "Arranca en movimiento – la flecha azul muestra hacia dónde.",
+        "attachStepsHinge": "1. Haz clic en el objeto cerca del borde del que debe colgar – ahí la bisagra queda vertical (un punto lo muestra).\n2. Haz clic en el vacío para sujetarlo al mundo, o en otro objeto (un marco).\nEsc cancela."
+      },
+      "timeline": {
+        "label": "Línea de tiempo",
+        "position": "{time} / {end} s",
+        "empty": "Iníciala – lo que pasa se graba aquí y puedes volver a cualquier momento.",
+        "rewound": "Un momento anterior – Seguir o Paso vuelve a calcular desde aquí."
+      },
+      "record": {
+        "start": "Grabar vídeo",
+        "stop": "Detener y guardar ({time})",
+        "hint": "Graba la vista 3D como vídeo (MP4 o WebM) – inicia la simulación si no está en marcha",
+        "saved": "Guardado: {file}",
+        "unsupported": "Este navegador no puede grabar vídeos"
+      }
+    }
+  }
+}

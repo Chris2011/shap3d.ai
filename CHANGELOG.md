@@ -63,6 +63,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - Smeared rulers, labels and measures at the right and bottom of the 3D view when the page is zoomed out (a pixel ratio below 1): the overlay is now cleared completely before every frame.
 - The tiles on the right no longer run off low screens: they scroll between the top bar and the status bar and get a little smaller on low windows.
 - _Update_ in the plugin manager only shows for a plugin from a folder when the folder holds a new build (or can't be read without asking) – and it goes away after the update. The folders are checked again when the window gets the focus back, e.g. after `npm run build`.
+- A new build of an installed plugin package replaces it even when its version stays the same: loading the folder (or zip) again compares the code and files, not only the version, and says _updated_ – or _up to date_ when nothing changed. `?package=<folder>` in the screenshot mode always installs the current `dist` instead of keeping an installed copy.
 
 _(Languages 1.0.3; LayOut package 1.0.0 – sheets for plans with 2D tools and floor plan symbols, built on these; Room planner package 1.0.0 – furnish a room with snapping, measures and a shopping list; Shader materials package 1.0.0 – wood, marble, granite, terrazzo, rust, brick, checker and concrete as shaders, built on these)_
 

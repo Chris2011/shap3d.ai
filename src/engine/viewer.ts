@@ -148,6 +148,8 @@ interface ProfileRec {
   end: THREE.Vector3;
   normals: THREE.Vector3[];
   faded: boolean;
+  /** the built group the edge belongs to – it moves with it when its instance is shown elsewhere (display places) */
+  built?: { group: THREE.Group; world: THREE.Matrix4 };
 }
 
 const sunDirection = (hour: number, month: number): THREE.Vector3 => {
@@ -400,8 +402,13 @@ export class Viewer {
       const faded = activeKey !== '' && !inContext;
       const context: PickContext = { path, entities: ents, world };
       const faceMe = path.length ? path[path.length - 1].definition.faceMe : false;
+      const firstProfile = this.profiles.length;
       const grp = this.buildEntities(ents, context, inheritMat, faded, hiddenTags, showHidden, faceMe);
-      this.builtGroups.push({ group: grp, path, world: world.clone() });
+      const built = { group: grp, path, world: world.clone() };
+      this.builtGroups.push(built);
+      for (let index = firstProfile; index < this.profiles.length; index++) {
+        this.profiles[index].built = built;
+      }
       if (faceMe) {
         this.faceMe.push({ group: grp, world: world.clone() });
       }
@@ -821,8 +828,11 @@ export class Viewer {
       this.displayPlaces.delete(instance);
     }
     this.applyDisplayPlaces(instance);
+    this.displayRevision++;
     this.needsRender = true;
   }
+  /** bumped when a display place changes – the profile edges follow then */
+  private displayRevision = 0;
 
   /** puts the groups below the instances shown elsewhere there (only those of `only`, when given) */
   private applyDisplayPlaces(only?: Instance) {
@@ -874,7 +884,12 @@ export class Viewer {
   /** Thick silhouette ("profile") edges depend on the view: recompute when the camera moved. */
   private updateProfiles() {
     const cam = this.rig.camera as THREE.PerspectiveCamera;
-    const key = cam.matrixWorld.elements.map((value) => value.toFixed(4)).join(',') + this.rig.isOrtho + this.profiles.length;
+    const key =
+      cam.matrixWorld.elements.map((value) => value.toFixed(4)).join(',') +
+      this.rig.isOrtho +
+      this.profiles.length +
+      '/' +
+      this.displayRevision;
     if (key === this.profileKey) {
       return;
     }
@@ -891,15 +906,28 @@ export class Viewer {
     const eye = cam.position;
     const fwd = this.rig.forward();
     const pos: number[] = [];
+    // edges of groups shown elsewhere (display places) move with them: by the group's matrix against the built one
+    const shifts = new Map<THREE.Group, THREE.Matrix4 | null>();
+    const shiftOf = (built: NonNullable<ProfileRec['built']>) => {
+      if (!shifts.has(built.group)) {
+        const moved = !built.group.matrix.equals(built.world);
+        shifts.set(built.group, moved ? built.group.matrix.clone().multiply(built.world.clone().invert()) : null);
+      }
+      return shifts.get(built.group)!;
+    };
     for (const profile of this.profiles) {
       if (profile.faded) {
         continue;
       }
-      const mid = profile.start.clone().add(profile.end).multiplyScalar(0.5);
+      const shift = profile.built && this.displayPlaces.size ? shiftOf(profile.built) : null;
+      const start = shift ? profile.start.clone().applyMatrix4(shift) : profile.start;
+      const end = shift ? profile.end.clone().applyMatrix4(shift) : profile.end;
+      const normals = shift ? profile.normals.map((normal) => normal.clone().transformDirection(shift)) : profile.normals;
+      const mid = start.clone().add(end).multiplyScalar(0.5);
       const toEye = this.rig.isOrtho ? fwd.clone().negate() : eye.clone().sub(mid);
-      const facing = profile.normals.map((normal) => normal.dot(toEye) > 0);
+      const facing = normals.map((normal) => normal.dot(toEye) > 0);
       if (facing.length === 1 || facing[0] !== facing[1]) {
-        pos.push(profile.start.x, profile.start.y, profile.start.z, profile.end.x, profile.end.y, profile.end.z);
+        pos.push(start.x, start.y, start.z, end.x, end.y, end.z);
       }
     }
     if (!pos.length) {
