@@ -88,6 +88,43 @@
       @input="set('groundColor', val($event))"
     />
   </div>
+  <div class="s3d-section-title">{{ t('styles.ambientOcclusion') }}</div>
+  <label class="s3d-check"
+    ><input type="checkbox" :checked="styleSettings.ao" @change="set('ao', !styleSettings.ao)" /> {{ t('styles.aoShow') }}</label
+  >
+  <div class="s3d-row">
+    <span class="s3d-label">{{ t('styles.aoDistance') }}</span
+    ><input
+      class="min-w-0 flex-1"
+      type="range"
+      min="0.05"
+      max="3"
+      step="0.05"
+      :value="styleSettings.aoDistance"
+      @input="set('aoDistance', +val($event))"
+    /><span class="w-16 text-end tabular-nums">{{ aoDistanceText }}</span>
+  </div>
+  <div class="s3d-row">
+    <span class="s3d-label">{{ t('styles.aoIntensity') }}</span
+    ><input
+      class="min-w-0 flex-1"
+      type="range"
+      min="0"
+      max="2"
+      step="0.05"
+      :value="styleSettings.aoIntensity"
+      @input="set('aoIntensity', +val($event))"
+    /><span class="w-16 text-end tabular-nums">{{ aoIntensityText }}</span>
+  </div>
+  <div class="s3d-row">
+    <span class="s3d-label">{{ t('styles.aoColor') }}</span
+    ><input
+      class="h-6.5 w-11 rounded-[3px] border border-edge bg-surface p-px"
+      type="color"
+      :value="styleSettings.aoColor"
+      @input="set('aoColor', val($event))"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -96,6 +133,7 @@ import S3dSegmentedControl from '../ui/S3dSegmentedControl.vue';
 import { useEditor } from '../keys';
 import { DEFAULT_STYLE, type StyleSettings, type FaceStyle } from '../../core/document';
 import { useModel } from '../../composables/useModel';
+import { formatLength } from '../../core/units';
 import { t } from '../../i18n';
 
 const editor = useEditor();
@@ -106,6 +144,9 @@ const set = <K extends keyof StyleSettings>(key: K, value: StyleSettings[K]) => 
   editor.ui.saved = false;
   editor.invalidate();
 };
+// read as values – `styleSettings` stays the same object, so it does not update text that shows a setting
+const aoDistanceText = useModel(() => formatLength(editor.model.settings.style.aoDistance, editor.model.settings.units));
+const aoIntensityText = useModel(() => `${Math.round(editor.model.settings.style.aoIntensity * 100)} %`);
 const FACES = computed((): { value: FaceStyle; label: string }[] => [
   { value: 'wireframe', label: t('styles.wireframe') },
   { value: 'hiddenline', label: t('styles.hiddenline') },
@@ -149,11 +190,15 @@ const PRESETS: { id: string; s: StyleSettings }[] = [
   { id: 'night', s: { ...DEFAULT_STYLE, skyColor: '#1f2a44', groundColor: '#2c2f33', edgeColor: '#111111' } },
   { id: 'white', s: { ...DEFAULT_STYLE, sky: false, ground: false, skyColor: '#ffffff', groundColor: '#ffffff' } },
 ];
+/** presets leave the ambient occlusion as it is */
+const OCCLUSION_KEYS: (keyof StyleSettings)[] = ['ao', 'aoDistance', 'aoIntensity', 'aoColor'];
+const presetEntries = (preset: { s: StyleSettings }) =>
+  Object.entries(preset.s).filter(([key]) => !OCCLUSION_KEYS.includes(key as keyof StyleSettings));
 const active = useModel(() => {
   const current = styleSettings.value;
-  return PRESETS.find((preset) => Object.entries(preset.s).every(([k, value]) => (current as any)[k] === value))?.id;
+  return PRESETS.find((preset) => presetEntries(preset).every(([k, value]) => (current as any)[k] === value))?.id;
 });
 const apply = (preset: { s: StyleSettings }) => {
-  editor.commit('undo.style', () => Object.assign(editor.model.settings.style, preset.s));
+  editor.commit('undo.style', () => Object.assign(editor.model.settings.style, Object.fromEntries(presetEntries(preset))));
 };
 </script>

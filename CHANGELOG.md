@@ -33,6 +33,14 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ## [Unreleased]
 
+### Added
+
+- **Ambient occlusion** as a style setting: _Styles › Ambient occlusion_ darkens inner corners and the ground where objects stand on it – with distance, intensity and colour, saved in the model's style (and in scenes). It works in the viewport, in scene thumbnails, in exports and in views rendered for plugins (`context.render.image`, e.g. the animation plugin's films). Glass does not cast it; style presets leave it as it is. Own shaders in the core (no new library).
+
+### Changed
+
+- **Mode switch centred**: the switch _Model | …_ (plugin modes and workspaces such as physics or layout) sits on its own at the top centre, apart from the bar with the model name, undo and redo; the active mode is filled in blue.
+
 ## [0.10.0] – 2026-11-01
 
 ### Added

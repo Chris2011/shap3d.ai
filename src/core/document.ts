@@ -98,6 +98,13 @@ export interface StyleSettings {
   sky: boolean;
   ground: boolean;
   edgeColor: string;
+  /** ambient occlusion: corners and contact points darken */
+  ao: boolean;
+  /** reach of the occlusion in metres */
+  aoDistance: number;
+  /** strength of the occlusion (1 = normal, 0 … 2) */
+  aoIntensity: number;
+  aoColor: string;
 }
 
 export interface ModelSettings {
@@ -129,6 +136,10 @@ export const DEFAULT_STYLE: StyleSettings = {
   sky: true,
   ground: true,
   edgeColor: '#000000',
+  ao: false,
+  aoDistance: 0.5,
+  aoIntensity: 1,
+  aoColor: '#000000',
 };
 
 // i18n-ignore-start – material names are model content

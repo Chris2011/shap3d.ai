@@ -20,14 +20,6 @@
     >
       {{ modelName }}
     </div>
-    <!-- model | workspaces of plugins (e.g. the layout plugin's sheets) -->
-    <S3dSegmentedControl
-      v-if="WORKSPACES.length || MODES.length"
-      class="mx-1.5 w-auto [&_button]:px-2"
-      :model-value="workspaceState.active ?? modeState.active ?? ''"
-      :options="workspaceOptions"
-      @update:model-value="switchWorkspace"
-    />
     <button
       v-for="(button, i) in buttonsAt('name')"
       :key="i"
@@ -79,6 +71,28 @@
     </button>
   </div>
 
+  <!-- model | modes and workspaces of plugins (e.g. the layout plugin's sheets) – centred, the active one coloured -->
+  <div
+    v-if="WORKSPACES.length || MODES.length"
+    class="s3d-panel absolute top-0 left-1/2 z-30 flex h-11 -translate-x-1/2 items-center px-1.5"
+    role="radiogroup"
+  >
+    <div class="flex gap-0.5 rounded bg-hover p-0.5">
+      <button
+        v-for="option in workspaceOptions"
+        :key="option.value"
+        type="button"
+        role="radio"
+        :aria-checked="option.value === activeWorkspace"
+        class="flex h-8 items-center gap-1 rounded-[3px] border-0 px-2.5 text-xs whitespace-nowrap"
+        :class="option.value === activeWorkspace ? 'bg-blue font-bold text-white shadow-sm' : 'bg-transparent text-ink hover:bg-surface'"
+        @click="switchWorkspace(option.value)"
+      >
+        <S3dIcon v-if="option.icon" :name="option.icon" :size="14" />{{ option.label }}
+      </button>
+    </div>
+  </div>
+
   <div ref="exportBox" class="s3d-panel absolute top-0 right-0 z-30 flex h-11 items-center gap-2 px-2">
     <button
       class="h-7 rounded-[2px] border-0 bg-navy-bg px-2.5 text-[0.8125rem] font-bold tracking-[0.01875rem] text-white hover:bg-[#0b3457]"
@@ -107,7 +121,6 @@ import S3dMainMenu from './S3dMainMenu.vue';
 import { useEditor } from './keys';
 import { runCommand } from '../engine/commands';
 import { MODES, TOP_BAR_BUTTONS, WORKSPACES, modeState, switchView, workspaceState } from '../plugins/uiExtensions';
-import S3dSegmentedControl from './ui/S3dSegmentedControl.vue';
 import S3dThemeButton from './S3dThemeButton.vue';
 import { useModel } from '../composables/useModel';
 import { t, localize } from '../i18n';
@@ -118,6 +131,7 @@ const workspaceOptions = computed(() => [
   ...MODES.map((mode) => ({ value: mode.id, label: localize(mode.label), icon: mode.icon })),
   ...WORKSPACES.map((workspace) => ({ value: workspace.id, label: localize(workspace.label), icon: workspace.icon })),
 ]);
+const activeWorkspace = computed(() => workspaceState.active ?? modeState.active ?? '');
 const switchWorkspace = (id: string) => switchView(editor, id || null);
 const TB_BASE = 'flex h-9 items-center justify-center border-0 p-0 hover:enabled:bg-hover disabled:cursor-default disabled:opacity-35';
 const TOOLBAR_BUTTON = `${TB_BASE} w-9 text-navy`;

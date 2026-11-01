@@ -15,6 +15,7 @@ import { theme, onThemeChange } from '../theme';
 import { meshView } from './meshView';
 import { measureView } from './measureView';
 import { GroundGrid } from './gridView';
+import { AmbientOcclusion } from './ambientOcclusion';
 
 /**
  * Night scene: the model's sky/ground colours are pushed towards a night sky, faces get moonlight and
@@ -230,6 +231,7 @@ export class Viewer {
   sun = new THREE.DirectionalLight(0xffffff, 1.5);
   shadowGround: THREE.Mesh;
   grid = new GroundGrid();
+  private ambientOcclusion: AmbientOcclusion | null = null;
   overlay: Overlay;
   model!: Model;
   edges: EdgeRec[] = [];
@@ -334,6 +336,7 @@ export class Viewer {
     this.disposed = true;
     this.stopImageListener();
     cancelAnimationFrame(this.raf);
+    this.ambientOcclusion?.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
   }
@@ -1376,7 +1379,32 @@ export class Viewer {
     this.renderer.clear();
     this.renderer.render(this.bgScene, this.bgCam);
     this.renderer.render(this.scene, cam);
+    if (style?.ao && style.faceStyle !== 'wireframe' && !style.xray) {
+      this.renderOcclusion(cam);
+    }
     this.overlay.draw();
+  }
+
+  /** darkens corners and contact points over the frame – opaque faces cast it, glass does not */
+  private renderOcclusion(cam: THREE.Camera) {
+    const style = this.model.settings.style;
+    const meshes: THREE.Object3D[] = this.pickMeshes.filter((mesh) => !(mesh.material as THREE.Material).transparent);
+    // the ground catches occlusion from what stands on it, seen from above (shown only with shadows otherwise)
+    const groundVisible = this.shadowGround.visible;
+    if (style.ground && !this.pluginLighting.background() && (cam.position.z > 0 || this.rig.isOrtho)) {
+      meshes.push(this.shadowGround);
+      this.shadowGround.visible = true;
+    }
+    this.ambientOcclusion ??= new AmbientOcclusion();
+    try {
+      this.ambientOcclusion.render(this.renderer, this.scene, cam, meshes, this.clipPlanes, {
+        distance: style.aoDistance,
+        intensity: style.aoIntensity,
+        color: style.aoColor,
+      });
+    } finally {
+      this.shadowGround.visible = groundVisible;
+    }
   }
 
   // ------------------------------------------------------------ picking helpers
