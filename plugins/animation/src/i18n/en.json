@@ -1,0 +1,384 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "animation": {
+      "plugin": {
+        "name": "Animation",
+        "description": "Make films of the model: keyframes on groups, materials, cameras, lights and the sun, a timeline with a dope sheet and a graph editor, camera moves, paths, look-at, shots – rendered as a video or PNG images at a fixed frame rate."
+      },
+      "mode": "Animation",
+      "panel": {
+        "title": "Animation",
+        "scene": "Scene",
+        "frameOf": "Frame {frame} of {end}",
+        "showTimeline": "Show the timeline",
+        "hideTimeline": "Hide the timeline",
+        "showPaths": "Motion paths",
+        "showCameras": "Cameras",
+        "object": "Selected: {name}",
+        "noObject": "Nothing selected",
+        "selectHint": "Select a group or component to animate it – its values become keys at the frame shown.",
+        "position": "Position (its pivot, m)",
+        "rotation": "Rotation",
+        "scale": "Scale",
+        "color": "Colour",
+        "pivot": "Turns and scales about",
+        "path": "Follows a path",
+        "pathHint": "A path is a group that holds only lines – draw them with the Line or Arc tool and make them a group.",
+        "follow": "Turn along it",
+        "front": "Front {axis}",
+        "lookAt": "Looks at",
+        "parentHint": "A group inside another one moves with it – animate the outer one for the whole, the inner ones for their parts.",
+        "none": "– none –",
+        "clearObject": "Remove its animation",
+        "cameras": "Cameras",
+        "addCamera": "Camera from view",
+        "addCameraHint": "A new camera where the view is now, keyed at this frame",
+        "keyCamera": "Key from view",
+        "keyCameraHint": "Keys the camera where the view is now",
+        "viewCamera": "Look through",
+        "remove": "Remove",
+        "cameraLooksAt": "Looks at",
+        "itsTarget": "its target point",
+        "cameraPath": "Flies along",
+        "noCameras": "No camera yet – the film is seen through the view as it is.",
+        "shots": "Shots (cuts between cameras)",
+        "addShot": "Shot at frame {frame}",
+        "addShotHint": "From this frame on the film is seen through the next camera",
+        "lights": "Lights",
+        "materials": "Material colours",
+        "chooseMaterial": "Choose a material …",
+        "materialHint": "Every face with the material changes – its opacity shows on parts made mostly of it."
+      },
+      "basic": {
+        "simple": "Simple",
+        "advanced": "Advanced",
+        "toStart": "Back to the start",
+        "keyTitle": "Make something move",
+        "keySteps": "1. Select a group and go to a frame in the timeline.\n2. Put it where it should be (Move, Rotate, Scale).\n3. Press I – a key. Go to a later frame, move it again, press I again.",
+        "keyHere": "Key here (I)",
+        "autoKey": "Key every change",
+        "selectFirst": "Select a group or component first.",
+        "notKeyed": "Moved but not keyed yet – press I, or it jumps back when the frame changes.",
+        "recipes": "Ready-made movements",
+        "recipesHint": "From the frame shown – change them later in the timeline.",
+        "choosePath": "Choose a path …",
+        "noPath": "No path yet (a group of lines)",
+        "followPath": "Follow",
+        "clear": "Remove the animation of the selection",
+        "camera": "Camera",
+        "cameraHere": "Camera here",
+        "cameraKey": "Key the camera",
+        "cameraHereHint": "where the view is now",
+        "more": "Cameras, shots, lights, the sun, curves and every value:",
+        "toAdvanced": "Advanced view"
+      },
+      "timeline": {
+        "toStart": "To the start (Home)",
+        "toEnd": "To the end (End)",
+        "previousKey": "Previous key (↓)",
+        "nextKey": "Next key (↑)",
+        "previousFrame": "One frame back (←)",
+        "nextFrame": "One frame on (→)",
+        "play": "Play",
+        "pause": "Pause",
+        "frame": "Frame",
+        "key": "Key",
+        "keyHint": "Keys the selected groups where they are – the camera when nothing is selected (I)",
+        "autoKey": "Auto key",
+        "autoKeyHint": "Every move, turn or scale of a group becomes a key at the frame shown",
+        "lookThrough": "Through camera",
+        "lookThroughHint": "The 3D view looks through the camera of the shot at this frame",
+        "start": "Start",
+        "end": "End",
+        "fps": "fps",
+        "loop": "Play again from the start",
+        "dope": "Dope sheet",
+        "graph": "Graph",
+        "fit": "Fit",
+        "fitHint": "Shows the whole scene from start to end",
+        "close": "Close the timeline",
+        "resize": "Drag to make it taller or lower",
+        "summary": "Animated",
+        "allKeys": "All keys",
+        "empty": "Nothing animated yet. Select a group and press I – or choose a ready-made movement in the Animation panel."
+      },
+      "graph": {
+        "normalize": "Normalise",
+        "empty": "Tick channels on the left – or select an animated group."
+      },
+      "field": {
+        "key": "Key this value at this frame",
+        "unkey": "Remove the key at this frame"
+      },
+      "interp": {
+        "constant": "Constant (holds, then jumps)",
+        "linear": "Linear",
+        "bezier": "Bézier (smooth, with handles)",
+        "ease-in": "Ease in (starts slowly)",
+        "ease-out": "Ease out (ends slowly)",
+        "ease-in-out": "Ease in and out",
+        "back": "Back (overshoots)",
+        "bounce": "Bounce",
+        "elastic": "Elastic (springs)"
+      },
+      "menu": {
+        "autoHandles": "Smooth handles",
+        "flatHandles": "Flat handles (ease)",
+        "cycle": "Repeat this channel",
+        "noCycle": "Stop repeating",
+        "delete": "Delete keys"
+      },
+      "channels": {
+        "x": "X position",
+        "y": "Y position",
+        "z": "Z position",
+        "rx": "X rotation",
+        "ry": "Y rotation",
+        "rz": "Z rotation",
+        "sx": "X scale",
+        "sy": "Y scale",
+        "sz": "Z scale",
+        "visible": "Visible",
+        "r": "Red",
+        "g": "Green",
+        "b": "Blue",
+        "opacity": "Opacity",
+        "path": "Along the path",
+        "hour": "Hour",
+        "daylight": "Daylight",
+        "camera": {
+          "x": "X position",
+          "y": "Y position",
+          "z": "Z position",
+          "tx": "X target",
+          "ty": "Y target",
+          "tz": "Z target",
+          "lens": "Lens (mm)",
+          "path": "Along the path"
+        },
+        "light": {
+          "x": "X position",
+          "y": "Y position",
+          "z": "Z position",
+          "tx": "X target",
+          "ty": "Y target",
+          "tz": "Z target",
+          "intensity": "Brightness",
+          "r": "Red",
+          "g": "Green",
+          "b": "Blue"
+        }
+      },
+      "pivot": {
+        "center": "the middle of its box",
+        "bottom": "the middle of its bottom",
+        "origin": "its own origin"
+      },
+      "camera": {
+        "name": "Camera {number}"
+      },
+      "sun": {
+        "title": "Sun",
+        "hint": "The hour moves the sun across the sky (the model's month), daylight dims it – for sunsets and nights."
+      },
+      "light": {
+        "point": "Lamp",
+        "spot": "Spot",
+        "pointName": "Lamp {number}",
+        "spotName": "Spot {number}",
+        "range": "Range (m)",
+        "shadow": "Casts shadows",
+        "here": "Key where the view is",
+        "hereHint": "A spot at the eye, shining at the target – a lamp above the target"
+      },
+      "material": {
+        "row": "Material {name}"
+      },
+      "recipes": {
+        "spin": { "name": "Spin", "hint": "once round, start to end" },
+        "bounce": { "name": "Bounce", "hint": "up and down each second" },
+        "swing": { "name": "Swing", "hint": "like a pendulum" },
+        "pulse": { "name": "Pulse", "hint": "grows and shrinks" },
+        "fadeIn": { "name": "Fade in", "hint": "within a second" },
+        "fadeOut": { "name": "Fade out", "hint": "within a second" },
+        "appear": { "name": "Appear", "hint": "from this frame on" },
+        "hide": { "name": "Disappear", "hint": "from this frame on" },
+        "orbit": { "name": "Fly around", "hint": "once round the model", "camera": "Around {number}" },
+        "dolly": { "name": "Fly closer", "hint": "from the view towards the model", "camera": "Closer {number}" }
+      },
+      "render": {
+        "title": "Film",
+        "size": "Size",
+        "sizes": {
+          "hd": "HD 1280 × 720",
+          "fullhd": "Full HD 1920 × 1080",
+          "square": "Square 1080 × 1080",
+          "portrait": "Upright 1080 × 1920",
+          "view": "As the 3D view"
+        },
+        "format": "Save as",
+        "video": "Video ({type})",
+        "png": "PNG images (ZIP)",
+        "overlay": "With the drawing over the view (labels, other plugins)",
+        "summary": "{frames} frames · {seconds} s at {fps} fps · {width} × {height}",
+        "noCamera": "No camera yet: the film is seen through the view as it is now.",
+        "start": "Render the film",
+        "cancel": "Stop",
+        "phase": {
+          "frames": "Drawing the frames … {percent} %",
+          "video": "Making the video … {percent} %",
+          "zip": "Packing the images … {percent} %"
+        },
+        "saved": "Saved {file}",
+        "savedImages": "{count} images saved in {file}",
+        "cancelled": "Rendering stopped",
+        "failed": "Rendering failed: {message}",
+        "unsupported": "This browser cannot record video – save PNG images instead."
+      },
+      "commands": {
+        "play": "Play / pause the animation",
+        "start": "Animation: to the start",
+        "timeline": "Animation timeline",
+        "open": "Animation panel",
+        "guide": "Animation guide",
+        "key": "Insert keyframe",
+        "autoKey": "Auto keying",
+        "camera": "Animation camera from view",
+        "lookThrough": "Look through the animation camera",
+        "render": "Render the animation as a video",
+        "shot": "Show the animation panel and timeline"
+      },
+      "undo": {
+        "key": "Keyframe",
+        "delete": "Delete keyframes",
+        "move": "Move keyframes",
+        "interpolation": "Keyframe curve",
+        "handles": "Keyframe handles",
+        "edit": "Change keyframe",
+        "camera": "Animation camera",
+        "light": "Animation light",
+        "shot": "Shot",
+        "range": "Animation range",
+        "path": "Follow a path",
+        "lookAt": "Look at",
+        "pivot": "Pivot",
+        "clear": "Remove animation"
+      },
+      "errors": {
+        "noTarget": "No group or component \"{target}\" found",
+        "vector": "{name} must be three numbers, e.g. [0, 0, 1]",
+        "interpolation": "Unknown curve \"{value}\" – use one of {values}",
+        "keys": "Keys are a list of [frame, value] (or [frame, value, curve])",
+        "noCamera": "No animation camera \"{name}\"",
+        "noLight": "No animation light \"{name}\"",
+        "noMaterial": "No material \"{name}\" in the model",
+        "axis": "Unknown axis \"{value}\" – use +x, -x, +y or -y"
+      },
+      "script": {
+        "animate": "Keys a group or component at a frame: where its pivot is (at), its turn in degrees (rotate), its scale, whether it is visible, its colour and opacity – with a curve (interp). Returns its id.",
+        "animateKeys": "Sets the keys of one channel at once – of a group, 'sun', { camera }, { light } or { material } – optionally repeated (cycle).",
+        "animatePath": "Makes a group follow the lines of another group, from its start at frame `from` to its end at `to`, turned along it.",
+        "animateLookAt": "Turns a group so its front always points at another one (null: no more).",
+        "animateCamera": "A camera (made on first use of its name, with a shot if it is the first), keyed at a frame: position, target, lens; or looking at a group, or flying along a path. Returns its name.",
+        "animateShot": "From this frame on the film is seen through that camera.",
+        "animateSun": "The sun's hour (0 … 24) and the daylight (0 … 1) at a frame.",
+        "animateLight": "A lamp or a spot (made on first use of its name), keyed at a frame: position, target, brightness, colour.",
+        "animateMaterial": "A material's colour and opacity at a frame.",
+        "animateScene": "The frame rate and the first and last frame; returns them.",
+        "animatePlay": "Once the script is done: shows a frame, plays, looks through the camera.",
+        "animateRender": "Once the script is done: renders the film as a video or PNG images.",
+        "animateClear": "Removes a group's animation – or, without one, the whole animation."
+      },
+      "demos": {
+        "showcase": {
+          "name": "A little film",
+          "description": "A car on a winding road, a bouncing ball, a windmill, a sunset and two cameras that cut between each other."
+        },
+        "robot": {
+          "name": "Robot arm",
+          "description": "Parts inside parts: each joint turns about its pivot and carries the rest along."
+        },
+        "camera": {
+          "name": "Camera flight",
+          "description": "A camera flies along a curve around a house, looks at it and zooms in; the sun sets, a lamp goes on."
+        },
+        "colors": {
+          "name": "Colours and fades",
+          "description": "Blocks pop up one after another, change colour in a wave and fade out; a glass pane frosts over."
+        }
+      },
+      "guide": {
+        "title": "Animation guide",
+        "open": "Guide",
+        "heading": "Your first animation",
+        "progress": "{done} of {count}",
+        "intro": "Step by step from a first movement to a film – each step ticks itself off once you have done it.",
+        "back": "Back",
+        "next": "Next",
+        "practice": {
+          "box": "Box",
+          "ball": "Ball"
+        },
+        "actions": {
+          "practice": "Load a practice scene",
+          "select": "Select a group",
+          "toStart": "To the first frame",
+          "key": "Key it (I)",
+          "toMiddle": "To the middle frame",
+          "move": "Move tool",
+          "graph": "Open the graph editor",
+          "render": "Open the Film section"
+        },
+        "checks": {
+          "selected": "A group is selected",
+          "atStart": "The timeline is at the first frame",
+          "later": "The timeline is at a later frame"
+        },
+        "steps": {
+          "practice": {
+            "title": "Something to animate",
+            "text": "Animation moves groups and components. Load a practice scene with a box and a ball – or use your own model.",
+            "done": "There is something to animate."
+          },
+          "first": {
+            "title": "The first key",
+            "text": "A key remembers where something is at a frame. Select the box, go to the first frame (the timeline under the 3D view) and press I.",
+            "done": "The box has its first key – a diamond in the timeline."
+          },
+          "second": {
+            "title": "A second key, somewhere else",
+            "text": "Go to a later frame, move the box with the Move tool and press I again. Between the two keys the box moves by itself.",
+            "done": "Two keys – the box moves between them."
+          },
+          "play": {
+            "title": "Play it",
+            "text": "Press Play (or Space while the mouse is over the timeline). Drag in the ruler of the timeline to see any frame.",
+            "done": "It plays."
+          },
+          "graph": {
+            "title": "Smooth curves",
+            "text": "Switch the timeline to Graph: the movement as curves over time. Drag a key, right-click it for its curve – ease in and out, bounce, constant …",
+            "done": "You have seen the curves."
+          },
+          "camera": {
+            "title": "A camera",
+            "text": "Turn the view to a nice angle and add a camera from it. 'Through camera' shows what it sees; move the view at another frame and key the camera again for a camera move.",
+            "done": "The film has a camera."
+          },
+          "render": {
+            "title": "The film",
+            "text": "In the Film section of the Animation panel choose a size and render – as a video or as PNG images, at the frame rate set, however slow the computer is.",
+            "done": "Your first film is rendered."
+          },
+          "more": {
+            "title": "More to try",
+            "text": "The demos show paths, parts inside parts, camera flights, the sun, lights and colours – open one in the script editor and run it."
+          }
+        }
+      }
+    }
+  }
+}

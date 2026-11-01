@@ -36,6 +36,13 @@ export interface PluginAtmosphere {
   background?: string;
 }
 
+/** the sun for now: its hour and month (where it stands, where shadows fall) and how bright it is (0 … 1) */
+export interface PluginSun {
+  hour?: number;
+  month?: number;
+  daylight?: number;
+}
+
 /** three.js wants candela: this turns "1 = a bright lamp" into it */
 const CANDELA = 30;
 /** how many plugin lights cast shadows at most (a point light renders its shadow six times) */
@@ -46,10 +53,13 @@ export class PluginLighting {
   private sets = new Map<string, THREE.Light[]>();
   atmosphere: PluginAtmosphere | null = null;
   private atmosphereOwner: string | null = null;
+  /** a plugin's sun, over the model's shadow settings */
+  sun: PluginSun | null = null;
+  private sunOwner: string | null = null;
 
-  /** are the faces to be drawn lit (lights or an atmosphere set)? */
+  /** are the faces to be drawn lit (lights, an atmosphere or a sun set)? */
   active() {
-    return !!this.atmosphere || [...this.sets.values()].some((lights) => lights.length > 0);
+    return !!this.atmosphere || !!this.sun || [...this.sets.values()].some((lights) => lights.length > 0);
   }
 
   /** does any light cast shadows (the view needs its shadow map then)? */
@@ -131,6 +141,14 @@ export class PluginLighting {
     }
     this.atmosphere = atmosphere ? { ...atmosphere } : null;
     this.atmosphereOwner = atmosphere ? owner : null;
+  }
+
+  setSun(owner: string, sun: PluginSun | null) {
+    if (!sun && this.sunOwner !== owner) {
+      return;
+    }
+    this.sun = sun ? { ...sun } : null;
+    this.sunOwner = sun ? owner : null;
   }
 
   /** the fog for the scene, or null */

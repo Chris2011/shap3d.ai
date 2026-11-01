@@ -43,11 +43,15 @@ export interface EdgeRec {
   end: THREE.Vector3;
   edgeId: number;
   context: PickContext;
+  /** its ends in the entities' own coordinates – start and end follow when the group is shown elsewhere */
+  local: [THREE.Vector3, THREE.Vector3];
 }
 export interface VertRec {
   position: THREE.Vector3;
   vertexId: number;
   context: PickContext;
+  /** in the entities' own coordinates */
+  local: THREE.Vector3;
 }
 export interface FaceHit {
   point: THREE.Vector3;
@@ -184,6 +188,19 @@ const createRenderer = (canvas: HTMLCanvasElement): THREE.WebGLRenderer => {
   throw new WebGLUnavailableError(String((last as Error)?.message ?? last));
 };
 
+/** an instance shown for now in another colour (CSS), see-through (0 … 1, multiplies with its own) or hidden */
+export interface DisplayLook {
+  color?: string;
+  opacity?: number;
+  hidden?: boolean;
+}
+
+/** a material shown for now in another colour (CSS) or opacity (0 … 1) wherever it is used */
+export interface DisplayMaterialLook {
+  color?: string;
+  opacity?: number;
+}
+
 export class WebGLUnavailableError extends Error {
   override name = 'WebGLUnavailableError';
 }
@@ -202,9 +219,14 @@ export class Viewer {
   /** lights and atmosphere plugins bring (a level's lamps, fog, darkness) */
   pluginLighting = new PluginLighting();
   /** every built group with the instances above it and the place it was built at – for places shown for now */
-  private builtGroups: { group: THREE.Group; path: Instance[]; world: THREE.Matrix4 }[] = [];
+  private builtGroups: { group: THREE.Group; path: Instance[]; world: THREE.Matrix4; context: PickContext }[] = [];
+  /** edge and vertex records are behind a display place that changed – brought up to date before they are used */
+  private recordsStale = false;
   /** instances shown at another place for now (a test run's moving enemies) – the model is not changed */
   private displayPlaces = new Map<Instance, THREE.Matrix4>();
+  /** instances and materials shown in another look for now – the model is not changed */
+  private displayLooks = new Map<Instance, DisplayLook>();
+  private displayMaterials = new Map<string, DisplayMaterialLook>();
   sun = new THREE.DirectionalLight(0xffffff, 1.5);
   shadowGround: THREE.Mesh;
   grid = new GroundGrid();
@@ -360,7 +382,6 @@ export class Viewer {
   // ------------------------------------------------------------ build
   rebuild(state: ViewState) {
     const model = this.model;
-    const style = model.settings.style;
     // dispose old
     this.content.traverse((object) => {
       const mesh = object as THREE.Mesh;
@@ -404,7 +425,7 @@ export class Viewer {
       const faceMe = path.length ? path[path.length - 1].definition.faceMe : false;
       const firstProfile = this.profiles.length;
       const grp = this.buildEntities(ents, context, inheritMat, faded, hiddenTags, showHidden, faceMe);
-      const built = { group: grp, path, world: world.clone() };
+      const built = { group: grp, path, world: world.clone(), context };
       this.builtGroups.push(built);
       for (let index = firstProfile; index < this.profiles.length; index++) {
         this.profiles[index].built = built;
@@ -421,8 +442,28 @@ export class Viewer {
     };
     walk(model.root, [], new THREE.Matrix4(), undefined);
 
-    // shadows & lighting
-    const sunDir = sunDirection(model.settings.shadowHour, model.settings.shadowMonth);
+    this.applyLighting();
+    this.scene.fog = this.pluginLighting.fog();
+    this.axes.visible = model.settings.axes;
+
+    this.applyDisplayPlaces();
+    this.applyDisplayLooks();
+    this.content.updateMatrixWorld(true);
+    this.buildGuides();
+    this.rebuildHighlight(state);
+    this.needsRender = true;
+  }
+
+  /**
+   * the sun (from the model's shadow settings or a plugin's sun), the room light and the shadows – done while the
+   * view is built and again when a plugin moves its sun, which needs no new build
+   */
+  applyLighting() {
+    const model = this.model;
+    const style = model.settings.style;
+    // a plugin's sun (an animation's sunset) – else the model's
+    const pluginSun = this.pluginLighting.sun;
+    const sunDir = sunDirection(pluginSun?.hour ?? model.settings.shadowHour, pluginSun?.month ?? model.settings.shadowMonth);
     const box = model.bounds();
     const center = box.isEmpty() ? new THREE.Vector3() : box.getCenter(new THREE.Vector3());
     const radius = box.isEmpty() ? 10 : Math.max(10, box.getBoundingSphere(new THREE.Sphere()).radius * 1.5);
@@ -459,23 +500,24 @@ export class Viewer {
     }
     // a plugin's atmosphere: less daylight (night, a dark house) and fog
     const daylight = this.pluginLighting.daylight();
-    this.ambient.intensity *= daylight;
-    this.sun.intensity *= daylight;
-    this.scene.fog = this.pluginLighting.fog();
-    this.axes.visible = model.settings.axes;
-
-    this.applyDisplayPlaces();
-    this.content.updateMatrixWorld(true);
-    this.buildGuides();
-    this.rebuildHighlight(state);
+    this.ambient.intensity *= daylight * (0.25 + 0.75 * (pluginSun?.daylight ?? 1));
+    this.sun.intensity *= daylight * (pluginSun?.daylight ?? 1);
+    // a plugin's sun near the horizon fades out, below it is gone
+    if (pluginSun?.hour !== undefined) {
+      const height = sunDirection(pluginSun.hour, pluginSun.month ?? model.settings.shadowMonth).z;
+      const night = pluginSun.hour < 4 || pluginSun.hour > 22;
+      this.sun.intensity *= night ? 0 : Math.min(1, Math.max(0, (height - 0.05) / 0.2) + 0.15);
+    }
     this.needsRender = true;
   }
 
   private colorOf(name: string | undefined, fallback: string): { color: THREE.Color; opacity: number } {
     // "#rrggbb" names are handled by Model.material()
     const material = this.model.material(name);
+    // a material's opacity shown for now decides which mesh its faces go into (opaque or see-through)
+    const shown = material ? this.displayMaterials.get(material.name)?.opacity : undefined;
     return material
-      ? { color: new THREE.Color(material.color), opacity: material.opacity }
+      ? { color: new THREE.Color(material.color), opacity: shown ?? material.opacity }
       : { color: new THREE.Color(fallback), opacity: 1 };
   }
 
@@ -504,10 +546,23 @@ export class Viewer {
       backColors: number[];
       triangles: number[];
       opacities: number[];
+      /** each triangle's material on its front and its back (for materials shown in another colour) */
+      frontMaterials: (string | undefined)[];
+      backMaterials: (string | undefined)[];
       map?: THREE.Texture;
       surface?: SurfaceSetup;
     };
-    const bucket = (): Bucket => ({ positions: [], normals: [], uvs: [], frontColors: [], backColors: [], triangles: [], opacities: [] });
+    const bucket = (): Bucket => ({
+      positions: [],
+      normals: [],
+      uvs: [],
+      frontColors: [],
+      backColors: [],
+      triangles: [],
+      opacities: [],
+      frontMaterials: [],
+      backMaterials: [],
+    });
     const opaque = bucket(),
       trans = bucket();
     const textured = new Map<string, Bucket>();
@@ -577,6 +632,10 @@ export class Viewer {
         }
         target.triangles.push(face.id);
         target.opacities.push(frontLook.opacity);
+        target.frontMaterials.push(mono ? undefined : (face.material ?? inheritMat));
+        target.backMaterials.push(
+          mono ? undefined : (face.backMaterial ?? (face.material || inheritMat ? (face.material ?? inheritMat) : undefined)),
+        );
       }
     }
     const xray = style.xray || faded;
@@ -631,9 +690,16 @@ export class Viewer {
       const back = new THREE.Mesh(geometry, makeMaterial(THREE.BackSide));
       (front.material as any).userData.owned = true;
       (back.material as any).userData.owned = true;
+      front.userData.materials = data.frontMaterials;
+      back.userData.materials = data.backMaterials;
       for (const mesh of [front, back]) {
         mesh.userData.ctx = context;
         mesh.userData.tri = data.triangles;
+        // what display looks start from
+        mesh.userData.faded = faded;
+        mesh.userData.baseColors = (mesh.geometry.getAttribute('color').array as Float32Array).slice();
+        const built = mesh.material as THREE.Material;
+        mesh.userData.base = { opacity: built.opacity, transparent: built.transparent, depthWrite: built.depthWrite };
         mesh.castShadow = !transparent;
         mesh.receiveShadow = true;
         mesh.matrixAutoUpdate = false;
@@ -669,7 +735,7 @@ export class Viewer {
       const worldStart = start.clone().applyMatrix4(context.world),
         worldEnd = end.clone().applyMatrix4(context.world);
       if (!faceMe) {
-        this.edges.push({ start: worldStart, end: worldEnd, edgeId: edge.id, context: context });
+        this.edges.push({ start: worldStart, end: worldEnd, edgeId: edge.id, context: context, local: [start.clone(), end.clone()] });
       }
       if (edge.soft && !showHidden) {
         continue;
@@ -693,7 +759,12 @@ export class Viewer {
     }
     if (!faceMe) {
       for (const vertex of ents.vertices.values()) {
-        this.verts.push({ position: vertex.position.clone().applyMatrix4(context.world), vertexId: vertex.id, context: context });
+        this.verts.push({
+          position: vertex.position.clone().applyMatrix4(context.world),
+          vertexId: vertex.id,
+          context: context,
+          local: vertex.position.clone(),
+        });
       }
     }
     if (meshView.on && !faceMe) {
@@ -834,26 +905,152 @@ export class Viewer {
   /** bumped when a display place changes – the profile edges follow then */
   private displayRevision = 0;
 
-  /** puts the groups below the instances shown elsewhere there (only those of `only`, when given) */
-  private applyDisplayPlaces(only?: Instance) {
+  /**
+   * Shows an instance (and everything in it) in another colour, see-through or hidden for now – null gives it its
+   * own look back. Applied to the built meshes, so the view is not built again.
+   */
+  lookForDisplay(instance: Instance, look: DisplayLook | null) {
+    if (look) {
+      this.displayLooks.set(instance, { ...look });
+    } else if (!this.displayLooks.delete(instance)) {
+      return;
+    }
+    this.applyDisplayLooks();
+    this.highlightStale = true;
+    this.needsRender = true;
+  }
+
+  /**
+   * Shows a material in another colour or opacity for now, wherever it is used – null gives it its own back. Returns
+   * true when the view has to be built again (its opacity changed: faces may go into another mesh); a colour alone
+   * is put onto the built meshes.
+   */
+  materialForDisplay(name: string, look: DisplayMaterialLook | null): boolean {
+    const before = this.displayMaterials.get(name);
+    if (look) {
+      this.displayMaterials.set(name, { ...look });
+    } else if (!this.displayMaterials.delete(name)) {
+      return false;
+    }
+    if (before?.opacity !== look?.opacity) {
+      return true;
+    }
+    this.applyDisplayLooks();
+    this.needsRender = true;
+    return false;
+  }
+
+  /** the looks shown for now on the built meshes: colours, opacity and hidden groups – from what the build made */
+  private applyDisplayLooks() {
+    const materialColors = new Map<string, THREE.Color>();
+    for (const [name, look] of this.displayMaterials) {
+      if (look.color) {
+        materialColors.set(name, new THREE.Color(look.color));
+      }
+    }
+    const white = new THREE.Color(1, 1, 1);
     for (const built of this.builtGroups) {
-      const index = only ? built.path.indexOf(only) : built.path.findIndex((instance) => this.displayPlaces.has(instance));
-      if (index < 0) {
+      const looks = built.path.map((instance) => this.displayLooks.get(instance)).filter((look) => !!look);
+      if (!looks.length && !materialColors.size && !built.group.userData.looked) {
         continue;
       }
-      const instance = built.path[index];
-      const place = this.displayPlaces.get(instance);
-      // the group's place is parent · instance · rest – the instance's own matrix swapped for the one shown
-      const parent = new THREE.Matrix4();
-      for (let at = 0; at < index; at++) {
-        parent.multiply(built.path[at].matrix);
+      built.group.userData.looked = looks.length > 0 || materialColors.size > 0;
+      built.group.visible = !looks.some((look) => look.hidden);
+      // the innermost colour wins, opacities multiply
+      const tintColor = [...looks].reverse().find((look) => look.color)?.color;
+      const tint = tintColor ? new THREE.Color(tintColor) : null;
+      const opacity = Math.min(
+        1,
+        Math.max(
+          0,
+          looks.reduce((product, look) => product * (look.opacity ?? 1), 1),
+        ),
+      );
+      for (const child of built.group.children) {
+        const mesh = child as THREE.Mesh;
+        if (!mesh.isMesh || !mesh.userData.baseColors) {
+          continue;
+        }
+        const faded = (color: THREE.Color) => (mesh.userData.faded ? color.clone().lerp(white, 0.6) : color);
+        const attribute = mesh.geometry.getAttribute('color') as THREE.BufferAttribute;
+        const colors = attribute.array as Float32Array;
+        colors.set(mesh.userData.baseColors);
+        if (tint) {
+          const shown = faded(tint);
+          for (let index = 0; index < colors.length; index += 3) {
+            colors[index] = shown.r;
+            colors[index + 1] = shown.g;
+            colors[index + 2] = shown.b;
+          }
+        } else if (materialColors.size) {
+          (mesh.userData.materials as (string | undefined)[]).forEach((name, triangle) => {
+            const color = name !== undefined ? materialColors.get(name) : undefined;
+            if (color) {
+              const shown = faded(color);
+              for (let corner = 0; corner < 3; corner++) {
+                colors.set([shown.r, shown.g, shown.b], (triangle * 3 + corner) * 3);
+              }
+            }
+          });
+        }
+        attribute.needsUpdate = true;
+        const material = mesh.material as THREE.Material;
+        const base = mesh.userData.base as { opacity: number; transparent: boolean; depthWrite: boolean };
+        const transparent = base.transparent || opacity < 1;
+        if (material.transparent !== transparent) {
+          material.needsUpdate = true;
+        }
+        material.transparent = transparent;
+        material.opacity = base.opacity * opacity;
+        material.depthWrite = opacity < 1 ? false : base.depthWrite;
+        if ('uniforms' in material && (material as THREE.ShaderMaterial).uniforms.opacity) {
+          (material as THREE.ShaderMaterial).uniforms.opacity.value = material.opacity;
+        }
       }
-      const world = place
-        ? parent.clone().multiply(place).multiply(instance.matrix.clone().invert()).multiply(parent.clone().invert()).multiply(built.world)
-        : built.world;
+    }
+  }
+
+  /** the edge and vertex records (for picking and snapping) where their groups are shown now */
+  pickRecords() {
+    if (this.recordsStale) {
+      this.recordsStale = false;
+      // new vectors: the profile records share the built ones
+      for (const record of this.edges) {
+        record.start = record.local[0].clone().applyMatrix4(record.context.world);
+        record.end = record.local[1].clone().applyMatrix4(record.context.world);
+      }
+      for (const record of this.verts) {
+        record.position = record.local.clone().applyMatrix4(record.context.world);
+      }
+    }
+    return { edges: this.edges, verts: this.verts };
+  }
+
+  /** an instance's matrix in its parent as the view shows it – its display place, else the model's */
+  shownMatrix(instance: Instance) {
+    return this.displayPlaces.get(instance) ?? instance.matrix;
+  }
+
+  /**
+   * puts the groups below the instances shown elsewhere there (only those below `only`, when given): every instance
+   * on the way down counts with the place it is shown at, so a group inside a moved group moves along and adds its own
+   */
+  private applyDisplayPlaces(only?: Instance) {
+    for (const built of this.builtGroups) {
+      if (only ? !built.path.includes(only) : !built.path.some((instance) => this.displayPlaces.has(instance))) {
+        continue;
+      }
+      const world = new THREE.Matrix4();
+      for (const instance of built.path) {
+        world.multiply(this.shownMatrix(instance));
+      }
       built.group.matrix.copy(world);
       built.group.updateMatrixWorld(true);
+      // picks in the group (faces, edges, vertices) are where it is shown
+      built.context.world.copy(world);
+      this.recordsStale = true;
     }
+    this.highlightStale = true;
   }
 
   private updateFaceMe() {
@@ -974,6 +1171,9 @@ export class Viewer {
     }
   }
 
+  /** the selection the outline was last drawn for – drawn again when a display place moves what it outlines */
+  private highlightState: ViewState | null = null;
+  private highlightStale = false;
   rebuildHighlight(state: ViewState) {
     this.highlight.traverse((object) => {
       const mesh = object as THREE.Mesh;
@@ -984,9 +1184,12 @@ export class Viewer {
     this.highlight.clear();
     this.lineMats = this.lineMats.filter((material) => !material.userData.hl);
     const ctxEnts = state.activePath.length ? state.activePath[state.activePath.length - 1].definition.entities : this.model.root;
+    this.highlightState = state;
+    this.highlightStale = false;
+    // groups shown elsewhere (display places) are outlined where they are shown
     const world = new THREE.Matrix4();
     for (const instance of state.activePath) {
-      world.multiply(instance.matrix);
+      world.multiply(this.shownMatrix(instance));
     }
     const pos: number[] = [];
     const linePositions: number[] = [];
@@ -1019,7 +1222,7 @@ export class Viewer {
       if (selectedRef.kind === 'instance') {
         const instance = ctxEnts.instances.get(selectedRef.id);
         if (instance) {
-          boxes.push(instance.definition.entities.bounds(new THREE.Box3(), instance.matrix.clone()));
+          boxes.push(instance.definition.entities.bounds(new THREE.Box3(), this.shownMatrix(instance).clone()));
         }
       }
     }
@@ -1039,7 +1242,7 @@ export class Viewer {
       if (entityRef.kind === 'instance') {
         const instance = ctxEnts.instances.get(entityRef.id);
         if (instance) {
-          const box = instance.definition.entities.bounds(new THREE.Box3(), instance.matrix.clone());
+          const box = instance.definition.entities.bounds(new THREE.Box3(), this.shownMatrix(instance).clone());
           this.boxLines(box, hoverPositions);
         }
       }
@@ -1118,6 +1321,9 @@ export class Viewer {
   // ------------------------------------------------------------ render
   render() {
     this.needsRender = false;
+    if (this.highlightStale && this.highlightState) {
+      this.rebuildHighlight(this.highlightState);
+    }
     const style = this.model?.settings.style;
     const cam = this.rig.camera as THREE.PerspectiveCamera;
     cam.updateMatrixWorld();
@@ -1194,7 +1400,7 @@ export class Viewer {
   pickFace(x: number, y: number, filter?: (context: PickContext, faceId: number) => boolean): FaceHit | null {
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(this.ndc(x, y), this.rig.camera);
-    const vis = this.pickMeshes.filter((mesh) => mesh.visible);
+    const vis = this.pickMeshes.filter((mesh) => mesh.visible && mesh.parent?.visible !== false);
     const hits = raycaster.intersectObjects(vis, false);
     for (const hit of hits) {
       if (this.clipPlanes.some((plane) => plane.distanceToPoint(hit.point) < -1e-6)) {
@@ -1262,7 +1468,7 @@ export class Viewer {
       depth - Math.max(0.002, (this.rig.isOrtho ? point.distanceTo((this.rig.camera as THREE.Camera).position) : depth) * 0.002);
     for (const mesh of this.pickMeshes) {
       const material = mesh.material as THREE.Material;
-      if (!mesh.visible || material.transparent) {
+      if (!mesh.visible || mesh.parent?.visible === false || material.transparent) {
         continue;
       }
       if (ignore) {
@@ -1362,7 +1568,7 @@ export class Viewer {
 
   pickVertex(x: number, y: number, tolPx = 10, filter?: (vertex: VertRec) => boolean): { rec: VertRec; dist: number } | null {
     let best: { rec: VertRec; dist: number } | null = null;
-    for (const vertex of this.verts) {
+    for (const vertex of this.pickRecords().verts) {
       if (filter && !filter(vertex)) {
         continue;
       }

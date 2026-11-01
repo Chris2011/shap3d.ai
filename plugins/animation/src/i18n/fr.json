@@ -1,0 +1,384 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "animation": {
+      "plugin": {
+        "name": "Animation",
+        "description": "Faites des films du modèle : images clés sur les groupes, matériaux, caméras, lumières et le soleil, une timeline avec feuille d’exposition et éditeur de graphe, travellings, trajectoires, visées, plans – rendus en vidéo ou en images PNG à fréquence fixe."
+      },
+      "mode": "Animation",
+      "panel": {
+        "title": "Animation",
+        "scene": "Scène",
+        "frameOf": "Image {frame} sur {end}",
+        "showTimeline": "Afficher la timeline",
+        "hideTimeline": "Masquer la timeline",
+        "showPaths": "Trajectoires",
+        "showCameras": "Caméras",
+        "object": "Sélection : {name}",
+        "noObject": "Rien de sélectionné",
+        "selectHint": "Sélectionnez un groupe ou un composant pour l’animer – ses valeurs deviennent des clés à l’image affichée.",
+        "position": "Position (son pivot, m)",
+        "rotation": "Rotation",
+        "scale": "Échelle",
+        "color": "Couleur",
+        "pivot": "Tourne et s’agrandit autour de",
+        "path": "Suit une trajectoire",
+        "pathHint": "Une trajectoire est un groupe fait seulement de lignes – tracez-les avec l’outil Ligne ou Arc et faites-en un groupe.",
+        "follow": "Tourner avec",
+        "front": "Avant {axis}",
+        "lookAt": "Regarde",
+        "parentHint": "Un groupe dans un autre bouge avec lui – animez l’extérieur pour l’ensemble, les intérieurs pour leurs parties.",
+        "none": "– aucun –",
+        "clearObject": "Supprimer son animation",
+        "cameras": "Caméras",
+        "addCamera": "Caméra depuis la vue",
+        "addCameraHint": "Une nouvelle caméra là où est la vue, avec une clé à cette image",
+        "keyCamera": "Clé depuis la vue",
+        "keyCameraHint": "Pose une clé de la caméra là où est la vue",
+        "viewCamera": "Regarder à travers",
+        "remove": "Supprimer",
+        "cameraLooksAt": "Regarde",
+        "itsTarget": "son point cible",
+        "cameraPath": "Vole le long de",
+        "noCameras": "Pas encore de caméra – le film montre la vue telle quelle.",
+        "shots": "Plans (coupes entre caméras)",
+        "addShot": "Plan à l’image {frame}",
+        "addShotHint": "À partir de cette image, le film passe par la caméra suivante",
+        "lights": "Lumières",
+        "materials": "Couleurs des matériaux",
+        "chooseMaterial": "Choisir un matériau …",
+        "materialHint": "Toutes les faces avec ce matériau changent – son opacité s’applique aux parties qui en sont surtout faites."
+      },
+      "basic": {
+        "simple": "Simple",
+        "advanced": "Avancé",
+        "toStart": "Retour au début",
+        "keyTitle": "Faire bouger quelque chose",
+        "keySteps": "1. Sélectionnez un groupe et allez à une image dans la timeline.\n2. Placez-le où il doit être (Déplacer, Pivoter, Échelle).\n3. Appuyez sur I – une clé. Allez plus loin, bougez-le à nouveau, appuyez encore sur I.",
+        "keyHere": "Clé ici (I)",
+        "autoKey": "Clé à chaque changement",
+        "selectFirst": "Sélectionnez d’abord un groupe ou un composant.",
+        "notKeyed": "Déplacé mais sans clé – appuyez sur I, sinon il revient quand l’image change.",
+        "recipes": "Mouvements tout faits",
+        "recipesHint": "À partir de l’image affichée – modifiables ensuite dans la timeline.",
+        "choosePath": "Choisir une trajectoire …",
+        "noPath": "Pas de trajectoire (un groupe de lignes)",
+        "followPath": "Suivre",
+        "clear": "Supprimer l’animation de la sélection",
+        "camera": "Caméra",
+        "cameraHere": "Caméra ici",
+        "cameraKey": "Clé de la caméra",
+        "cameraHereHint": "là où est la vue",
+        "more": "Caméras, plans, lumières, soleil, courbes et chaque valeur :",
+        "toAdvanced": "Vue avancée"
+      },
+      "timeline": {
+        "toStart": "Au début (Début)",
+        "toEnd": "À la fin (Fin)",
+        "previousKey": "Clé précédente (↓)",
+        "nextKey": "Clé suivante (↑)",
+        "previousFrame": "Une image en arrière (←)",
+        "nextFrame": "Une image en avant (→)",
+        "play": "Lire",
+        "pause": "Pause",
+        "frame": "Image",
+        "key": "Clé",
+        "keyHint": "Pose des clés pour les groupes sélectionnés là où ils sont – pour la caméra si rien n’est sélectionné (I)",
+        "autoKey": "Clé auto",
+        "autoKeyHint": "Chaque déplacement, rotation ou mise à l’échelle d’un groupe devient une clé à l’image affichée",
+        "lookThrough": "Par la caméra",
+        "lookThroughHint": "La vue 3D regarde par la caméra du plan à cette image",
+        "start": "Début",
+        "end": "Fin",
+        "fps": "i/s",
+        "loop": "Rejouer depuis le début",
+        "dope": "Feuille d’expo",
+        "graph": "Graphe",
+        "fit": "Ajuster",
+        "fitHint": "Montre toute la scène du début à la fin",
+        "close": "Fermer la timeline",
+        "resize": "Glisser pour l’agrandir ou la réduire",
+        "summary": "Animé",
+        "allKeys": "Toutes les clés",
+        "empty": "Rien d’animé. Sélectionnez un groupe et appuyez sur I – ou choisissez un mouvement tout fait dans le panneau Animation."
+      },
+      "graph": {
+        "normalize": "Normaliser",
+        "empty": "Cochez des canaux à gauche – ou sélectionnez un groupe animé."
+      },
+      "field": {
+        "key": "Poser une clé de cette valeur à cette image",
+        "unkey": "Supprimer la clé à cette image"
+      },
+      "interp": {
+        "constant": "Constante (tient, puis saute)",
+        "linear": "Linéaire",
+        "bezier": "Bézier (douce, avec poignées)",
+        "ease-in": "Départ lent",
+        "ease-out": "Arrivée lente",
+        "ease-in-out": "Départ et arrivée lents",
+        "back": "Retour (dépasse)",
+        "bounce": "Rebond",
+        "elastic": "Élastique (ressort)"
+      },
+      "menu": {
+        "autoHandles": "Poignées douces",
+        "flatHandles": "Poignées plates (adouci)",
+        "cycle": "Répéter ce canal",
+        "noCycle": "Ne plus répéter",
+        "delete": "Supprimer les clés"
+      },
+      "channels": {
+        "x": "Position X",
+        "y": "Position Y",
+        "z": "Position Z",
+        "rx": "Rotation X",
+        "ry": "Rotation Y",
+        "rz": "Rotation Z",
+        "sx": "Échelle X",
+        "sy": "Échelle Y",
+        "sz": "Échelle Z",
+        "visible": "Visible",
+        "r": "Rouge",
+        "g": "Vert",
+        "b": "Bleu",
+        "opacity": "Opacité",
+        "path": "Le long de la trajectoire",
+        "hour": "Heure",
+        "daylight": "Lumière du jour",
+        "camera": {
+          "x": "Position X",
+          "y": "Position Y",
+          "z": "Position Z",
+          "tx": "Cible X",
+          "ty": "Cible Y",
+          "tz": "Cible Z",
+          "lens": "Focale (mm)",
+          "path": "Le long de la trajectoire"
+        },
+        "light": {
+          "x": "Position X",
+          "y": "Position Y",
+          "z": "Position Z",
+          "tx": "Cible X",
+          "ty": "Cible Y",
+          "tz": "Cible Z",
+          "intensity": "Luminosité",
+          "r": "Rouge",
+          "g": "Vert",
+          "b": "Bleu"
+        }
+      },
+      "pivot": {
+        "center": "le centre de sa boîte",
+        "bottom": "le centre de sa base",
+        "origin": "sa propre origine"
+      },
+      "camera": {
+        "name": "Caméra {number}"
+      },
+      "sun": {
+        "title": "Soleil",
+        "hint": "L’heure déplace le soleil dans le ciel (au mois du modèle), la lumière du jour l’atténue – pour les couchers de soleil et les nuits."
+      },
+      "light": {
+        "point": "Lampe",
+        "spot": "Spot",
+        "pointName": "Lampe {number}",
+        "spotName": "Spot {number}",
+        "range": "Portée (m)",
+        "shadow": "Projette des ombres",
+        "here": "Clé là où est la vue",
+        "hereHint": "Un spot à l’œil, dirigé vers la cible – une lampe au-dessus de la cible"
+      },
+      "material": {
+        "row": "Matériau {name}"
+      },
+      "recipes": {
+        "spin": { "name": "Tourner", "hint": "un tour, du début à la fin" },
+        "bounce": { "name": "Rebondir", "hint": "monte et descend chaque seconde" },
+        "swing": { "name": "Balancer", "hint": "comme un pendule" },
+        "pulse": { "name": "Pulser", "hint": "grandit et rétrécit" },
+        "fadeIn": { "name": "Apparition en fondu", "hint": "en une seconde" },
+        "fadeOut": { "name": "Disparition en fondu", "hint": "en une seconde" },
+        "appear": { "name": "Apparaître", "hint": "à partir de cette image" },
+        "hide": { "name": "Disparaître", "hint": "à partir de cette image" },
+        "orbit": { "name": "Tourner autour", "hint": "un tour du modèle", "camera": "Autour {number}" },
+        "dolly": { "name": "S’approcher", "hint": "de la vue vers le modèle", "camera": "Plus près {number}" }
+      },
+      "render": {
+        "title": "Film",
+        "size": "Taille",
+        "sizes": {
+          "hd": "HD 1280 × 720",
+          "fullhd": "Full HD 1920 × 1080",
+          "square": "Carré 1080 × 1080",
+          "portrait": "Vertical 1080 × 1920",
+          "view": "Comme la vue 3D"
+        },
+        "format": "Enregistrer en",
+        "video": "Vidéo ({type})",
+        "png": "Images PNG (ZIP)",
+        "overlay": "Avec le dessin par-dessus la vue (étiquettes, autres plugins)",
+        "summary": "{frames} images · {seconds} s à {fps} i/s · {width} × {height}",
+        "noCamera": "Pas encore de caméra : le film montre la vue telle qu’elle est.",
+        "start": "Rendre le film",
+        "cancel": "Arrêter",
+        "phase": {
+          "frames": "Dessin des images … {percent} %",
+          "video": "Création de la vidéo … {percent} %",
+          "zip": "Emballage des images … {percent} %"
+        },
+        "saved": "{file} enregistré",
+        "savedImages": "{count} images enregistrées dans {file}",
+        "cancelled": "Rendu arrêté",
+        "failed": "Échec du rendu : {message}",
+        "unsupported": "Ce navigateur ne peut pas enregistrer de vidéo – enregistrez plutôt des images PNG."
+      },
+      "commands": {
+        "play": "Lire / mettre en pause l’animation",
+        "start": "Animation : au début",
+        "timeline": "Timeline d’animation",
+        "open": "Panneau Animation",
+        "guide": "Guide de l’animation",
+        "key": "Insérer une image clé",
+        "autoKey": "Clé automatique",
+        "camera": "Caméra d’animation depuis la vue",
+        "lookThrough": "Regarder par la caméra d’animation",
+        "render": "Rendre l’animation en vidéo",
+        "shot": "Afficher le panneau Animation et la timeline"
+      },
+      "undo": {
+        "key": "Image clé",
+        "delete": "Supprimer des images clés",
+        "move": "Déplacer des images clés",
+        "interpolation": "Courbe des images clés",
+        "handles": "Poignées des images clés",
+        "edit": "Modifier une image clé",
+        "camera": "Caméra d’animation",
+        "light": "Lumière d’animation",
+        "shot": "Plan",
+        "range": "Plage d’animation",
+        "path": "Suivre une trajectoire",
+        "lookAt": "Regarder",
+        "pivot": "Pivot",
+        "clear": "Supprimer l’animation"
+      },
+      "errors": {
+        "noTarget": "Aucun groupe ou composant « {target} » trouvé",
+        "vector": "{name} doit être trois nombres, p. ex. [0, 0, 1]",
+        "interpolation": "Courbe inconnue « {value} » – utilisez {values}",
+        "keys": "Les clés sont une liste de [image, valeur] (ou [image, valeur, courbe])",
+        "noCamera": "Pas de caméra d’animation « {name} »",
+        "noLight": "Pas de lumière d’animation « {name} »",
+        "noMaterial": "Pas de matériau « {name} » dans le modèle",
+        "axis": "Axe inconnu « {value} » – utilisez +x, -x, +y ou -y"
+      },
+      "script": {
+        "animate": "Pose des clés sur un groupe ou composant à une image : où est son pivot (at), sa rotation en degrés (rotate), son échelle, sa visibilité, sa couleur et son opacité – avec une courbe (interp). Renvoie son id.",
+        "animateKeys": "Pose toutes les clés d’un canal d’un coup – d’un groupe, 'sun', { camera }, { light } ou { material } – éventuellement répétées (cycle).",
+        "animatePath": "Fait suivre à un groupe les lignes d’un autre groupe, de son début à l’image `from` à sa fin à `to`, en tournant avec.",
+        "animateLookAt": "Tourne un groupe pour que son avant pointe toujours vers un autre (null : plus du tout).",
+        "animateCamera": "Une caméra (créée au premier usage de son nom, avec un plan si c’est la première), avec une clé à une image : position, cible, focale ; ou regardant un groupe, ou volant le long d’une trajectoire. Renvoie son nom.",
+        "animateShot": "À partir de cette image, le film passe par cette caméra.",
+        "animateSun": "L’heure du soleil (0 … 24) et la lumière du jour (0 … 1) à une image.",
+        "animateLight": "Une lampe ou un spot (créé au premier usage du nom), avec une clé à une image : position, cible, luminosité, couleur.",
+        "animateMaterial": "La couleur et l’opacité d’un matériau à une image.",
+        "animateScene": "La fréquence d’images, la première et la dernière image ; les renvoie.",
+        "animatePlay": "Une fois le script fini : montre une image, lit, regarde par la caméra.",
+        "animateRender": "Une fois le script fini : rend le film en vidéo ou en images PNG.",
+        "animateClear": "Supprime l’animation d’un groupe – ou, sans argument, toute l’animation."
+      },
+      "demos": {
+        "showcase": {
+          "name": "Un petit film",
+          "description": "Une voiture sur une route sinueuse, une balle qui rebondit, un moulin, un coucher de soleil et deux caméras qui alternent."
+        },
+        "robot": {
+          "name": "Bras robot",
+          "description": "Des pièces dans des pièces : chaque articulation tourne autour de son pivot et entraîne le reste."
+        },
+        "camera": {
+          "name": "Vol de caméra",
+          "description": "Une caméra vole sur une courbe autour d’une maison, la regarde et zoome ; le soleil se couche, une lampe s’allume."
+        },
+        "colors": {
+          "name": "Couleurs et fondus",
+          "description": "Des cubes apparaissent l’un après l’autre, changent de couleur en vague et s’effacent ; une vitre devient dépolie."
+        }
+      },
+      "guide": {
+        "title": "Guide de l’animation",
+        "open": "Guide",
+        "heading": "Votre première animation",
+        "progress": "{done} sur {count}",
+        "intro": "Pas à pas, d’un premier mouvement à un film – chaque étape se coche dès que vous l’avez faite.",
+        "back": "Retour",
+        "next": "Suivant",
+        "practice": {
+          "box": "Cube",
+          "ball": "Balle"
+        },
+        "actions": {
+          "practice": "Charger une scène d’exercice",
+          "select": "Sélectionner un groupe",
+          "toStart": "À la première image",
+          "key": "Poser une clé (I)",
+          "toMiddle": "À l’image du milieu",
+          "move": "Outil Déplacer",
+          "graph": "Ouvrir l’éditeur de graphe",
+          "render": "Ouvrir la section Film"
+        },
+        "checks": {
+          "selected": "Un groupe est sélectionné",
+          "atStart": "La timeline est à la première image",
+          "later": "La timeline est à une image plus loin"
+        },
+        "steps": {
+          "practice": {
+            "title": "Quelque chose à animer",
+            "text": "L’animation fait bouger des groupes et des composants. Chargez une scène d’exercice avec un cube et une balle – ou prenez votre propre modèle.",
+            "done": "Il y a quelque chose à animer."
+          },
+          "first": {
+            "title": "La première clé",
+            "text": "Une clé retient où se trouve quelque chose à une image. Sélectionnez le cube, allez à la première image (timeline sous la vue 3D) et appuyez sur I.",
+            "done": "Le cube a sa première clé – un losange dans la timeline."
+          },
+          "second": {
+            "title": "Une deuxième clé, ailleurs",
+            "text": "Allez à une image plus loin, déplacez le cube avec l’outil Déplacer et appuyez encore sur I. Entre les deux clés, le cube bouge tout seul.",
+            "done": "Deux clés – le cube bouge entre elles."
+          },
+          "play": {
+            "title": "Lire",
+            "text": "Appuyez sur Lire (ou Espace quand la souris est sur la timeline). Glissez dans la règle de la timeline pour voir n’importe quelle image.",
+            "done": "Ça tourne."
+          },
+          "graph": {
+            "title": "Courbes douces",
+            "text": "Passez la timeline en Graphe : le mouvement en courbes dans le temps. Faites glisser une clé, clic droit pour sa courbe – départ et arrivée lents, rebond, constante …",
+            "done": "Vous avez vu les courbes."
+          },
+          "camera": {
+            "title": "Une caméra",
+            "text": "Placez la vue sous un bel angle et créez-en une caméra. « Par la caméra » montre ce qu’elle voit ; changez la vue à une autre image et posez une nouvelle clé de caméra – un travelling.",
+            "done": "Le film a une caméra."
+          },
+          "render": {
+            "title": "Le film",
+            "text": "Dans la section Film du panneau Animation, choisissez une taille et rendez – en vidéo ou en images PNG, à la fréquence réglée, même si l’ordinateur est lent.",
+            "done": "Votre premier film est rendu."
+          },
+          "more": {
+            "title": "À essayer encore",
+            "text": "Les démos montrent les trajectoires, des pièces dans des pièces, des vols de caméra, le soleil, les lumières et les couleurs – ouvrez-en une dans l’éditeur de scripts et lancez-la."
+          }
+        }
+      }
+    }
+  }
+}

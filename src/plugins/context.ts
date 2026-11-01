@@ -402,6 +402,16 @@ export const createPluginContext = (
         return track(() => removeFrom(editor.onNewModel, listener));
       },
       onDataChange: (listener) => track(onDataChange(editor, listener)),
+      onUndoStep: (listener) => {
+        // before the data changes are announced, so what the listener writes is announced in the same step
+        editor.settling.unshift(listener);
+        return track(() => {
+          const index = editor.settling.indexOf(listener);
+          if (index >= 0) {
+            editor.settling.splice(index, 1);
+          }
+        });
+      },
     },
 
     storage: {
@@ -482,6 +492,7 @@ export const createPluginContext = (
         const was = state();
         lighting().setLights(plugin.id, []);
         lighting().setAtmosphere(plugin.id, null);
+        lighting().setSun(plugin.id, null);
         changed(was);
         editor.invalidate();
       });
@@ -496,17 +507,38 @@ export const createPluginContext = (
           // daylight and fog are applied while the view is built
           editor.invalidate();
         },
+        sun: (sun) => {
+          const was = state();
+          lighting().setSun(plugin.id, sun);
+          // moving the sun needs no new build – lit faces on or off do
+          editor.viewer.applyLighting();
+          changed(was);
+        },
       };
     })(),
 
     display: (() => {
       const placed = new Set<Instance>();
-      // the plugin's places go back when it stops
+      const looked = new Set<Instance>();
+      const materials = new Set<string>();
+      // the plugin's places and looks go back when it stops
       track(() => {
         for (const instance of placed) {
           editor.viewer.placeForDisplay(instance, null);
         }
         placed.clear();
+        for (const instance of looked) {
+          editor.viewer.lookForDisplay(instance, null);
+        }
+        looked.clear();
+        let rebuild = false;
+        for (const name of materials) {
+          rebuild = editor.viewer.materialForDisplay(name, null) || rebuild;
+        }
+        materials.clear();
+        if (rebuild) {
+          editor.invalidate();
+        }
       });
       return {
         place: (instance, matrix) => {
@@ -516,6 +548,24 @@ export const createPluginContext = (
             placed.delete(instance);
           }
           editor.viewer.placeForDisplay(instance, matrix);
+        },
+        look: (instance, look) => {
+          if (look) {
+            looked.add(instance);
+          } else {
+            looked.delete(instance);
+          }
+          editor.viewer.lookForDisplay(instance, look);
+        },
+        material: (name, look) => {
+          if (look) {
+            materials.add(name);
+          } else {
+            materials.delete(name);
+          }
+          if (editor.viewer.materialForDisplay(name, look)) {
+            editor.invalidate();
+          }
         },
       };
     })(),

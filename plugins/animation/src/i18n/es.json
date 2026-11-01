@@ -1,0 +1,384 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "animation": {
+      "plugin": {
+        "name": "Animación",
+        "description": "Haz películas del modelo: fotogramas clave en grupos, materiales, cámaras, luces y el sol, una línea de tiempo con hoja de claves y editor de gráficos, movimientos de cámara, trayectorias, miradas, planos – renderizado como vídeo o imágenes PNG a una frecuencia fija."
+      },
+      "mode": "Animación",
+      "panel": {
+        "title": "Animación",
+        "scene": "Escena",
+        "frameOf": "Fotograma {frame} de {end}",
+        "showTimeline": "Mostrar la línea de tiempo",
+        "hideTimeline": "Ocultar la línea de tiempo",
+        "showPaths": "Trayectorias",
+        "showCameras": "Cámaras",
+        "object": "Seleccionado: {name}",
+        "noObject": "Nada seleccionado",
+        "selectHint": "Selecciona un grupo o componente para animarlo – sus valores se vuelven claves en el fotograma mostrado.",
+        "position": "Posición (su pivote, m)",
+        "rotation": "Rotación",
+        "scale": "Escala",
+        "color": "Color",
+        "pivot": "Gira y escala alrededor de",
+        "path": "Sigue una trayectoria",
+        "pathHint": "Una trayectoria es un grupo solo de líneas – dibújalas con la herramienta Línea o Arco y conviértelas en grupo.",
+        "follow": "Girar con ella",
+        "front": "Frente {axis}",
+        "lookAt": "Mira a",
+        "parentHint": "Un grupo dentro de otro se mueve con él – anima el exterior para el conjunto, los interiores para sus partes.",
+        "none": "– ninguno –",
+        "clearObject": "Quitar su animación",
+        "cameras": "Cámaras",
+        "addCamera": "Cámara desde la vista",
+        "addCameraHint": "Una cámara nueva donde está la vista, con clave en este fotograma",
+        "keyCamera": "Clave desde la vista",
+        "keyCameraHint": "Pone una clave de la cámara donde está la vista",
+        "viewCamera": "Mirar a través",
+        "remove": "Quitar",
+        "cameraLooksAt": "Mira a",
+        "itsTarget": "su punto objetivo",
+        "cameraPath": "Vuela a lo largo de",
+        "noCameras": "Aún no hay cámara – la película muestra la vista tal cual.",
+        "shots": "Planos (cortes entre cámaras)",
+        "addShot": "Plano en el fotograma {frame}",
+        "addShotHint": "Desde este fotograma la película se ve por la siguiente cámara",
+        "lights": "Luces",
+        "materials": "Colores de materiales",
+        "chooseMaterial": "Elige un material …",
+        "materialHint": "Cambia cada cara con el material – su opacidad se ve en las partes hechas sobre todo de él."
+      },
+      "basic": {
+        "simple": "Sencillo",
+        "advanced": "Avanzado",
+        "toStart": "Volver al inicio",
+        "keyTitle": "Haz que algo se mueva",
+        "keySteps": "1. Selecciona un grupo y ve a un fotograma en la línea de tiempo.\n2. Ponlo donde deba estar (Mover, Rotar, Escalar).\n3. Pulsa I – una clave. Ve a un fotograma posterior, muévelo otra vez, pulsa I otra vez.",
+        "keyHere": "Clave aquí (I)",
+        "autoKey": "Clave en cada cambio",
+        "selectFirst": "Selecciona primero un grupo o componente.",
+        "notKeyed": "Movido pero sin clave – pulsa I, o volverá al cambiar de fotograma.",
+        "recipes": "Movimientos listos",
+        "recipesHint": "Desde el fotograma mostrado – cámbialos luego en la línea de tiempo.",
+        "choosePath": "Elige una trayectoria …",
+        "noPath": "Sin trayectoria (un grupo de líneas)",
+        "followPath": "Seguir",
+        "clear": "Quitar la animación de la selección",
+        "camera": "Cámara",
+        "cameraHere": "Cámara aquí",
+        "cameraKey": "Clave de la cámara",
+        "cameraHereHint": "donde está la vista",
+        "more": "Cámaras, planos, luces, el sol, curvas y cada valor:",
+        "toAdvanced": "Vista avanzada"
+      },
+      "timeline": {
+        "toStart": "Al inicio (Inicio)",
+        "toEnd": "Al final (Fin)",
+        "previousKey": "Clave anterior (↓)",
+        "nextKey": "Clave siguiente (↑)",
+        "previousFrame": "Un fotograma atrás (←)",
+        "nextFrame": "Un fotograma adelante (→)",
+        "play": "Reproducir",
+        "pause": "Pausa",
+        "frame": "Fotograma",
+        "key": "Clave",
+        "keyHint": "Pone claves a los grupos seleccionados donde están – a la cámara si no hay nada seleccionado (I)",
+        "autoKey": "Clave auto",
+        "autoKeyHint": "Cada movimiento, giro o escala de un grupo se vuelve una clave en el fotograma mostrado",
+        "lookThrough": "Por la cámara",
+        "lookThroughHint": "La vista 3D mira por la cámara del plano en este fotograma",
+        "start": "Inicio",
+        "end": "Fin",
+        "fps": "fps",
+        "loop": "Repetir desde el inicio",
+        "dope": "Hoja de claves",
+        "graph": "Gráfico",
+        "fit": "Ajustar",
+        "fitHint": "Muestra toda la escena del inicio al final",
+        "close": "Cerrar la línea de tiempo",
+        "resize": "Arrastra para hacerla más alta o más baja",
+        "summary": "Animado",
+        "allKeys": "Todas las claves",
+        "empty": "Aún no hay nada animado. Selecciona un grupo y pulsa I – o elige un movimiento listo en el panel Animación."
+      },
+      "graph": {
+        "normalize": "Normalizar",
+        "empty": "Marca canales a la izquierda – o selecciona un grupo animado."
+      },
+      "field": {
+        "key": "Poner clave de este valor en este fotograma",
+        "unkey": "Quitar la clave de este fotograma"
+      },
+      "interp": {
+        "constant": "Constante (mantiene, luego salta)",
+        "linear": "Lineal",
+        "bezier": "Bézier (suave, con tiradores)",
+        "ease-in": "Empieza despacio",
+        "ease-out": "Termina despacio",
+        "ease-in-out": "Empieza y termina despacio",
+        "back": "Retroceso (se pasa)",
+        "bounce": "Rebote",
+        "elastic": "Elástico (muelle)"
+      },
+      "menu": {
+        "autoHandles": "Tiradores suaves",
+        "flatHandles": "Tiradores planos (suavizado)",
+        "cycle": "Repetir este canal",
+        "noCycle": "Dejar de repetir",
+        "delete": "Borrar claves"
+      },
+      "channels": {
+        "x": "Posición X",
+        "y": "Posición Y",
+        "z": "Posición Z",
+        "rx": "Rotación X",
+        "ry": "Rotación Y",
+        "rz": "Rotación Z",
+        "sx": "Escala X",
+        "sy": "Escala Y",
+        "sz": "Escala Z",
+        "visible": "Visible",
+        "r": "Rojo",
+        "g": "Verde",
+        "b": "Azul",
+        "opacity": "Opacidad",
+        "path": "A lo largo de la trayectoria",
+        "hour": "Hora",
+        "daylight": "Luz del día",
+        "camera": {
+          "x": "Posición X",
+          "y": "Posición Y",
+          "z": "Posición Z",
+          "tx": "Objetivo X",
+          "ty": "Objetivo Y",
+          "tz": "Objetivo Z",
+          "lens": "Distancia focal (mm)",
+          "path": "A lo largo de la trayectoria"
+        },
+        "light": {
+          "x": "Posición X",
+          "y": "Posición Y",
+          "z": "Posición Z",
+          "tx": "Objetivo X",
+          "ty": "Objetivo Y",
+          "tz": "Objetivo Z",
+          "intensity": "Brillo",
+          "r": "Rojo",
+          "g": "Verde",
+          "b": "Azul"
+        }
+      },
+      "pivot": {
+        "center": "el centro de su caja",
+        "bottom": "el centro de su base",
+        "origin": "su propio origen"
+      },
+      "camera": {
+        "name": "Cámara {number}"
+      },
+      "sun": {
+        "title": "Sol",
+        "hint": "La hora mueve el sol por el cielo (en el mes del modelo), la luz del día lo atenúa – para atardeceres y noches."
+      },
+      "light": {
+        "point": "Lámpara",
+        "spot": "Foco",
+        "pointName": "Lámpara {number}",
+        "spotName": "Foco {number}",
+        "range": "Alcance (m)",
+        "shadow": "Proyecta sombras",
+        "here": "Clave donde está la vista",
+        "hereHint": "Un foco en el ojo, apuntando al objetivo – una lámpara sobre el objetivo"
+      },
+      "material": {
+        "row": "Material {name}"
+      },
+      "recipes": {
+        "spin": { "name": "Girar", "hint": "una vuelta, del inicio al final" },
+        "bounce": { "name": "Botar", "hint": "sube y baja cada segundo" },
+        "swing": { "name": "Balancear", "hint": "como un péndulo" },
+        "pulse": { "name": "Latir", "hint": "crece y encoge" },
+        "fadeIn": { "name": "Aparecer gradualmente", "hint": "en un segundo" },
+        "fadeOut": { "name": "Desvanecer", "hint": "en un segundo" },
+        "appear": { "name": "Aparecer", "hint": "desde este fotograma" },
+        "hide": { "name": "Desaparecer", "hint": "desde este fotograma" },
+        "orbit": { "name": "Volar alrededor", "hint": "una vuelta al modelo", "camera": "Alrededor {number}" },
+        "dolly": { "name": "Acercarse", "hint": "de la vista hacia el modelo", "camera": "Más cerca {number}" }
+      },
+      "render": {
+        "title": "Película",
+        "size": "Tamaño",
+        "sizes": {
+          "hd": "HD 1280 × 720",
+          "fullhd": "Full HD 1920 × 1080",
+          "square": "Cuadrado 1080 × 1080",
+          "portrait": "Vertical 1080 × 1920",
+          "view": "Como la vista 3D"
+        },
+        "format": "Guardar como",
+        "video": "Vídeo ({type})",
+        "png": "Imágenes PNG (ZIP)",
+        "overlay": "Con el dibujo sobre la vista (etiquetas, otros plugins)",
+        "summary": "{frames} fotogramas · {seconds} s a {fps} fps · {width} × {height}",
+        "noCamera": "Aún no hay cámara: la película muestra la vista tal como está.",
+        "start": "Renderizar la película",
+        "cancel": "Detener",
+        "phase": {
+          "frames": "Dibujando los fotogramas … {percent} %",
+          "video": "Creando el vídeo … {percent} %",
+          "zip": "Empaquetando las imágenes … {percent} %"
+        },
+        "saved": "{file} guardado",
+        "savedImages": "{count} imágenes guardadas en {file}",
+        "cancelled": "Renderizado detenido",
+        "failed": "Falló el renderizado: {message}",
+        "unsupported": "Este navegador no puede grabar vídeo – guarda imágenes PNG en su lugar."
+      },
+      "commands": {
+        "play": "Reproducir / pausar la animación",
+        "start": "Animación: al inicio",
+        "timeline": "Línea de tiempo de animación",
+        "open": "Panel Animación",
+        "guide": "Guía de animación",
+        "key": "Insertar fotograma clave",
+        "autoKey": "Clave automática",
+        "camera": "Cámara de animación desde la vista",
+        "lookThrough": "Mirar por la cámara de animación",
+        "render": "Renderizar la animación como vídeo",
+        "shot": "Mostrar el panel Animación y la línea de tiempo"
+      },
+      "undo": {
+        "key": "Fotograma clave",
+        "delete": "Borrar fotogramas clave",
+        "move": "Mover fotogramas clave",
+        "interpolation": "Curva de fotogramas clave",
+        "handles": "Tiradores de fotogramas clave",
+        "edit": "Cambiar fotograma clave",
+        "camera": "Cámara de animación",
+        "light": "Luz de animación",
+        "shot": "Plano",
+        "range": "Rango de animación",
+        "path": "Seguir una trayectoria",
+        "lookAt": "Mirar a",
+        "pivot": "Pivote",
+        "clear": "Quitar animación"
+      },
+      "errors": {
+        "noTarget": "No se encontró ningún grupo o componente \"{target}\"",
+        "vector": "{name} debe ser tres números, p. ej. [0, 0, 1]",
+        "interpolation": "Curva desconocida \"{value}\" – usa {values}",
+        "keys": "Las claves son una lista de [fotograma, valor] (o [fotograma, valor, curva])",
+        "noCamera": "No hay cámara de animación \"{name}\"",
+        "noLight": "No hay luz de animación \"{name}\"",
+        "noMaterial": "No hay material \"{name}\" en el modelo",
+        "axis": "Eje desconocido \"{value}\" – usa +x, -x, +y o -y"
+      },
+      "script": {
+        "animate": "Pone claves a un grupo o componente en un fotograma: dónde está su pivote (at), su giro en grados (rotate), su escala, si es visible, su color y opacidad – con una curva (interp). Devuelve su id.",
+        "animateKeys": "Pone todas las claves de un canal de una vez – de un grupo, 'sun', { camera }, { light } o { material } – opcionalmente repetidas (cycle).",
+        "animatePath": "Hace que un grupo siga las líneas de otro grupo, desde su inicio en el fotograma `from` hasta su final en `to`, girando con ellas.",
+        "animateLookAt": "Gira un grupo para que su frente apunte siempre a otro (null: ya no).",
+        "animateCamera": "Una cámara (creada al usar su nombre por primera vez, con un plano si es la primera), con clave en un fotograma: posición, objetivo, focal; o mirando a un grupo, o volando por una trayectoria. Devuelve su nombre.",
+        "animateShot": "Desde este fotograma la película se ve por esa cámara.",
+        "animateSun": "La hora del sol (0 … 24) y la luz del día (0 … 1) en un fotograma.",
+        "animateLight": "Una lámpara o un foco (creado al usar el nombre por primera vez), con clave en un fotograma: posición, objetivo, brillo, color.",
+        "animateMaterial": "El color y la opacidad de un material en un fotograma.",
+        "animateScene": "La frecuencia y el primer y último fotograma; los devuelve.",
+        "animatePlay": "Cuando el script termina: muestra un fotograma, reproduce, mira por la cámara.",
+        "animateRender": "Cuando el script termina: renderiza la película como vídeo o imágenes PNG.",
+        "animateClear": "Quita la animación de un grupo – o, sin argumento, toda la animación."
+      },
+      "demos": {
+        "showcase": {
+          "name": "Una pequeña película",
+          "description": "Un coche por una carretera sinuosa, una pelota que bota, un molino, un atardecer y dos cámaras que se alternan."
+        },
+        "robot": {
+          "name": "Brazo robot",
+          "description": "Piezas dentro de piezas: cada articulación gira sobre su pivote y arrastra al resto."
+        },
+        "camera": {
+          "name": "Vuelo de cámara",
+          "description": "Una cámara vuela por una curva alrededor de una casa, la mira y hace zoom; se pone el sol, se enciende una lámpara."
+        },
+        "colors": {
+          "name": "Colores y fundidos",
+          "description": "Unos bloques aparecen uno tras otro, cambian de color en ola y se desvanecen; un cristal se vuelve esmerilado."
+        }
+      },
+      "guide": {
+        "title": "Guía de animación",
+        "open": "Guía",
+        "heading": "Tu primera animación",
+        "progress": "{done} de {count}",
+        "intro": "Paso a paso, de un primer movimiento a una película – cada paso se marca solo cuando lo has hecho.",
+        "back": "Atrás",
+        "next": "Siguiente",
+        "practice": {
+          "box": "Caja",
+          "ball": "Pelota"
+        },
+        "actions": {
+          "practice": "Cargar una escena de práctica",
+          "select": "Seleccionar un grupo",
+          "toStart": "Al primer fotograma",
+          "key": "Poner clave (I)",
+          "toMiddle": "Al fotograma del medio",
+          "move": "Herramienta Mover",
+          "graph": "Abrir el editor de gráficos",
+          "render": "Abrir la sección Película"
+        },
+        "checks": {
+          "selected": "Hay un grupo seleccionado",
+          "atStart": "La línea de tiempo está en el primer fotograma",
+          "later": "La línea de tiempo está en un fotograma posterior"
+        },
+        "steps": {
+          "practice": {
+            "title": "Algo que animar",
+            "text": "La animación mueve grupos y componentes. Carga una escena de práctica con una caja y una pelota – o usa tu propio modelo.",
+            "done": "Hay algo que animar."
+          },
+          "first": {
+            "title": "La primera clave",
+            "text": "Una clave recuerda dónde está algo en un fotograma. Selecciona la caja, ve al primer fotograma (línea de tiempo bajo la vista 3D) y pulsa I.",
+            "done": "La caja tiene su primera clave – un rombo en la línea de tiempo."
+          },
+          "second": {
+            "title": "Una segunda clave, en otro sitio",
+            "text": "Ve a un fotograma posterior, mueve la caja con la herramienta Mover y pulsa I otra vez. Entre las dos claves la caja se mueve sola.",
+            "done": "Dos claves – la caja se mueve entre ellas."
+          },
+          "play": {
+            "title": "Reprodúcelo",
+            "text": "Pulsa Reproducir (o Espacio con el ratón sobre la línea de tiempo). Arrastra en la regla de la línea de tiempo para ver cualquier fotograma.",
+            "done": "Se reproduce."
+          },
+          "graph": {
+            "title": "Curvas suaves",
+            "text": "Cambia la línea de tiempo a Gráfico: el movimiento como curvas en el tiempo. Arrastra una clave, clic derecho para su curva – empezar y terminar despacio, rebote, constante …",
+            "done": "Has visto las curvas."
+          },
+          "camera": {
+            "title": "Una cámara",
+            "text": "Gira la vista a un buen ángulo y crea una cámara desde ella. «Por la cámara» muestra lo que ve; cambia la vista en otro fotograma y vuelve a poner clave a la cámara – un movimiento de cámara.",
+            "done": "La película tiene una cámara."
+          },
+          "render": {
+            "title": "La película",
+            "text": "En la sección Película del panel Animación elige un tamaño y renderiza – como vídeo o como imágenes PNG, a la frecuencia indicada, por lento que sea el ordenador.",
+            "done": "Tu primera película está renderizada."
+          },
+          "more": {
+            "title": "Más para probar",
+            "text": "Las demos muestran trayectorias, piezas dentro de piezas, vuelos de cámara, el sol, luces y colores – abre una en el editor de scripts y ejecútala."
+          }
+        }
+      }
+    }
+  }
+}

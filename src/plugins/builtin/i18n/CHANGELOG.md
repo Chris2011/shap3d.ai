@@ -4,7 +4,7 @@
 
 Nothing yet.
 
-## [1.0.3] – 2026-10-25 · Shap3D.ai (unreleased)
+## [1.0.3] – 2026-10-25 · Shap3D.ai 0.10.0
 
 ### Added
 

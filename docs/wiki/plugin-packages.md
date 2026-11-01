@@ -231,3 +231,29 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/physics/dist`.
 - The data format `physics.body` and `s3d.physicsBody`, `s3d.physicsJoint`, `s3d.physicsSettings` and `s3d.physicsStart` for scripts, with eight demos as examples.
 
 More in [its README](../../plugins/physics/README.md).
+
+## The animation plugin
+
+The package in [`plugins/animation/`](../../plugins/animation) makes films of the model with keyframes, the way Blender does – on groups and components, materials, cameras, lights and the sun. It needs no other plugin and no library, and does not change the model: the 3D view shows the animation on top of it (`display.place`, `lighting`). Built like the others:
+
+```bash
+cd plugins/animation
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/animation/dist`.
+
+![A little film: a car on a road with its motion path, a bouncing ball, a windmill and two cameras – the timeline under the 3D view and the Animation panel](../../plugins/animation/docs/animation.png)
+
+![A camera flight around a house at dusk, seen through the camera: a lamp and glowing windows](../../plugins/animation/docs/animation-camera.png)
+
+- **Simple and advanced**: the panel opens in a simple view – Play, three steps to a first movement, ready-made movements (spin, bounce, swing, pulse, fades, appear, follow a path), a camera from the view or one that flies around the model, and the film; _Advanced_ has every value with a key diamond. An **animation mode** (_Model | Animation_) and an eight-step **guide** with a practice scene get beginners going.
+- **Keys**: the I key (the selected groups, or the camera), auto-keying of every move, turn or scale with the app's tools.
+- **Timeline**: play, scrub, frame rate, start and end, shots on the ruler; a **dope sheet** to pick, move and delete keys and a **graph editor** with keys and Bézier handles to drag – constant, linear, Bézier, easings, back, bounce, elastic, repeating channels.
+- **Paths, look-at and parents**: a group or a camera follows another group's edges, turns towards a group; groups inside groups move with them, each about its own pivot.
+- **Cameras and shots**: cameras keyed by position, target and lens, shots that cut between them, looking through the shot's camera.
+- **Sun, lights and colours**: the sun's hour and daylight, lamps and spots, a group's colour, opacity and visibility, a material's colour.
+- **Rendering**: frame by frame at a fixed frame rate through the shot's camera – a video (MP4 or WebM via `MediaRecorder`) or PNG images in a ZIP, at HD, Full HD, square, upright or the view's size.
+- The data formats `animation.object` and `animation.scene` and `s3d.animate`, `s3d.animateKeys`, `s3d.animatePath`, `s3d.animateLookAt`, `s3d.animateCamera`, `s3d.animateShot`, `s3d.animateSun`, `s3d.animateLight`, `s3d.animateMaterial`, `s3d.animateScene`, `s3d.animatePlay`, `s3d.animateRender` and `s3d.animateClear` for scripts, with four demos as examples.
+
+More in [its README](../../plugins/animation/README.md).

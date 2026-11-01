@@ -103,7 +103,7 @@ const depthBuffer = (editor: Editor, width: number, height: number) => {
   const material = new THREE.MeshDepthMaterial({ depthPacking: THREE.BasicDepthPacking, side: THREE.DoubleSide });
   material.clippingPlanes = viewer.clipPlanes;
   const layer = 7;
-  const meshes = viewer.pickMeshes.filter((mesh) => mesh.visible);
+  const meshes = viewer.pickMeshes.filter((mesh) => mesh.visible && mesh.parent?.visible !== false);
   for (const mesh of meshes) {
     mesh.layers.enable(layer);
   }
@@ -231,7 +231,7 @@ const traceLines = (editor: Editor, camera: THREE.PerspectiveCamera | THREE.Orth
 
   const edges: ViewLine[] = [];
   const profiles: ViewLine[] = [];
-  for (const record of viewer.edges) {
+  for (const record of viewer.pickRecords().edges) {
     const entities = record.context.entities;
     const edge = entities.edges.get(record.edgeId);
     if (!edge) {

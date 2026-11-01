@@ -1,0 +1,34 @@
+{
+  "name": "s3d-plugin-animation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Animation for Shap3D.ai: keyframes on groups and components, materials, cameras, lights and the sun; a timeline with a dope sheet and a graph editor; camera moves, objects that follow a path or look at a target, shots that cut between cameras – rendered as a video or a PNG sequence at a fixed frame rate, without changing the model.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "screenshots": "node docs/screenshots.mjs"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "animation",
+    "name": "Animation",
+    "main": "plugin.js",
+    "minAppVersion": "0.10.0"
+  },
+  "portal": {
+    "thumbnail": "docs/animation.png"
+  }
+}

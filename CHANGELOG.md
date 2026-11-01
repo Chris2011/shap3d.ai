@@ -7,30 +7,33 @@ Versions before 0.7.0 were not tagged at the time; they are reconstructed from t
 
 The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC](plugins/ifc), [LayOut](plugins/layout), [Room planner](plugins/roomplanner), [Shader materials](plugins/shaders)) have their own version numbers. A plugin's version only goes up when the plugin itself changes – new features (including whole new languages) raise the minor version, fixes and translations of a few new texts the patch version. The new version is given in brackets at the entry, e.g. _(AI assistant 1.2.0)_; every plugin has its own changelog with the details (linked in the table below).
 
-| Version                   | Date       | In one sentence                                                          |
-| ------------------------- | ---------- | ------------------------------------------------------------------------ |
-| [0.9.0](#090--2026-10-25) | 2026-10-25 | Scene tabs, outliner by tags, guide points – and IFC as a plugin package |
-| [0.8.0](#080--2026-10-22) | 2026-10-22 | Native desktop app with Tauri – executable and installers                |
-| [0.7.0](#070--2026-10-22) | 2026-10-22 | Remote control: REST API, Swagger UI and MCP server, plus Docker         |
-| [0.6.0](#060--2026-10-20) | 2026-10-20 | Code completion and five languages                                       |
-| [0.5.0](#050--2026-10-19) | 2026-10-19 | Plugin system – terrain, imports, AI and 3D text become plugins          |
-| [0.4.0](#040--2026-10-18) | 2026-10-18 | Welcome tour, command palette, rulers, Tailwind and VueUse               |
-| [0.3.0](#030--2026-10-16) | 2026-10-16 | First version in this repository                                         |
+| Version                     | Date       | In one sentence                                                                          |
+| --------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
+| [0.10.0](#0100--2026-11-01) | 2026-11-01 | A bigger plugin API – workspaces, modes, lights, display, data – and scripts in a worker |
+| [0.9.0](#090--2026-10-25)   | 2026-10-25 | Scene tabs, outliner by tags, guide points – and IFC as a plugin package                 |
+| [0.8.0](#080--2026-10-22)   | 2026-10-22 | Native desktop app with Tauri – executable and installers                                |
+| [0.7.0](#070--2026-10-22)   | 2026-10-22 | Remote control: REST API, Swagger UI and MCP server, plus Docker                         |
+| [0.6.0](#060--2026-10-20)   | 2026-10-20 | Code completion and five languages                                                       |
+| [0.5.0](#050--2026-10-19)   | 2026-10-19 | Plugin system – terrain, imports, AI and 3D text become plugins                          |
+| [0.4.0](#040--2026-10-18)   | 2026-10-18 | Welcome tour, command palette, rulers, Tailwind and VueUse                               |
+| [0.3.0](#030--2026-10-16)   | 2026-10-16 | First version in this repository                                                         |
 
 Plugin versions per app version (**bold** = new version, plain = unchanged, – = not there yet):
 
-| Plugin                                                                 | 0.5.0     | 0.6.0     | 0.7.0     | 0.8.0     | 0.9.0     |
-| ---------------------------------------------------------------------- | --------- | --------- | --------- | --------- | --------- |
+| Plugin                                                                 | 0.5.0     | 0.6.0     | 0.7.0     | 0.8.0     | 0.9.0     | 0.10.0    |
+| ---------------------------------------------------------------------- | --------- | --------- | --------- | --------- | --------- | --------- |
 | [AI assistant](src/plugins/builtin/ai/CHANGELOG.md) (`ai`)             | **1.0.0** | **1.1.0** | **1.2.0** |
 | [Terrain](src/plugins/builtin/terrain/CHANGELOG.md) (`terrain`)        | **1.0.0** | **1.1.0** |
 | [Import formats](src/plugins/builtin/imports/CHANGELOG.md) (`imports`) | **1.0.0** | **1.1.0** |
 | [3D text](src/plugins/builtin/text3d/CHANGELOG.md) (`text3d`)          | **1.0.0** | **1.1.0** |
-| [Languages](src/plugins/builtin/i18n/CHANGELOG.md) (`i18n`)            | –         | **1.0.0** | **1.0.1** | **1.0.2** |
+| [Languages](src/plugins/builtin/i18n/CHANGELOG.md) (`i18n`)            | –         | **1.0.0** | **1.0.1** | **1.0.2** | 1.0.2     | **1.0.3** |
 | [Remote API](src/plugins/builtin/remote/CHANGELOG.md) (`remote`)       | –         | –         | **1.0.0** |
 | [OpenSCAD](plugins/openscad/CHANGELOG.md) (package)                    | **1.2.0** | **1.4.0** | **1.4.1** |
-| [IFC](plugins/ifc/CHANGELOG.md) (package)                              | –         | –         | –         | –         | **1.0.0** |
+| [IFC](plugins/ifc/CHANGELOG.md) (package)                              | –         | –         | –         | –         | **1.0.0** | 1.0.0     |
 
 ## [Unreleased]
+
+## [0.10.0] – 2026-11-01
 
 ### Added
 
@@ -53,6 +56,8 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **Panels that belong to a mode** (`panels.register({ inMode: true })`): their tiles show only in a mode that lists them – no tile, palette entry or command outside it, and leaving the mode closes them.
 - **Lights and atmosphere for plugins** (`context.lighting`): point lights and spots, fog, how much daylight is left and a background – while a plugin sets any, faces are drawn lit so the lights fall on them; they belong to the view, not to the model. With `shadow: true` a light casts shadows (the first four in the view), also when the model's sun shadows are off.
 - **Moving instances in the view** for plugins (`context.display.place(instance, matrix | null)`): an instance is drawn at another place without changing the model or the undo history – e.g. enemies walking in a test run; `null` puts it back.
+- **Looks in the view** for plugins: `context.display.look(instance, { color, opacity, hidden } | null)` shows an instance with everything in it in another colour, see-through or hidden, `context.display.material(name, { color, opacity } | null)` a material – without changing the model, put onto the built meshes so nothing is built again (a material's opacity builds the view once). `context.lighting.sun({ hour, month, daylight } | null)` moves the sun and dims it for the view (a sunset) without a new build.
+- **The end of every undo step** for plugins (`context.events.onUndoStep`): called after a command, a script or a tool's move, still inside the step – what the listener changes (e.g. keys that follow what a tool did) is undone with it.
 - Screenshot scenes: `&command=<id>` runs commands after the scene.
 - **Shader materials** for plugins (`context.materials.registerShader`): a plugin brings a surface function in GLSL with parameters; a material that uses it is drawn with it in the 3D view, with and without shadows, in scene previews and in rendered views. In the Materials panel the shaders are listed with the textures and their parameters become sliders and colour pickers, the swatches show the pattern. Without the plugin the material shows its colour again – the shader and its parameters stay in the model. Scripts: `s3d.material(name, colour, { shader, params })`.
 - **Own image textures**: _Own image…_ in the texture list of the Materials panel loads a picture (PNG, JPEG, WebP, GIF, BMP) into the material. It is saved in the model (larger than 2048 px it is scaled down first) and drawn as it is, not tinted. Width and height (the height follows the picture's proportions), offset along and across the face and rotation can be set – offset and rotation work for the built-in textures too.
@@ -60,6 +65,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ### Fixed
 
+- Instances inside an instance shown elsewhere (`display.place`) are drawn where their parent is shown, with their own place added – before, the innermost place won and its parents' places were left out. The selection outline, the hover box and the dashed box of the open group follow places shown; snapping to their corners and edges, picking and drawing inside an open group work where they are shown; hidden groups can no longer be picked.
 - Smeared rulers, labels and measures at the right and bottom of the 3D view when the page is zoomed out (a pixel ratio below 1): the overlay is now cleared completely before every frame.
 - The tiles on the right no longer run off low screens: they scroll between the top bar and the status bar and get a little smaller on low windows.
 - _Update_ in the plugin manager only shows for a plugin from a folder when the folder holds a new build (or can't be read without asking) – and it goes away after the update. The folders are checked again when the window gets the focus back, e.g. after `npm run build`.
@@ -190,8 +196,9 @@ First version in this repository:
 - **Terrain editor**, **polygon inspector** (exact resolution, more or fewer polygons), **dark mode** and **night scene**.
 - Import of SKP, OBJ, STL and glTF/GLB files; export as GLB, glTF, STL, OBJ, PNG and the native `.shap3d.json`.
 
-[Unreleased]: https://github.com/Chris2011/shap3d.ai/compare/53dc278...HEAD
-[0.9.0]: https://github.com/Chris2011/shap3d.ai/compare/53dc278...HEAD
+[Unreleased]: https://github.com/Chris2011/shap3d.ai/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/Chris2011/shap3d.ai/compare/v0.9.0...v0.10.0
+[0.9.0]: https://github.com/Chris2011/shap3d.ai/compare/53dc278...v0.9.0
 [0.8.0]: https://github.com/Chris2011/shap3d.ai/compare/15aab26...53dc278
 [0.7.0]: https://github.com/Chris2011/shap3d.ai/compare/753a191...15aab26
 [0.6.0]: https://github.com/Chris2011/shap3d.ai/compare/8f34310...753a191

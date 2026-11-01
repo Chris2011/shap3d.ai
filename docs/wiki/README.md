@@ -24,6 +24,7 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
   - Noise – [overview](plugin-packages.md#the-noise-plugin) · [README](../../plugins/noise/README.md)
   - Level editor – [overview](plugin-packages.md#the-level-editor-plugin) · [README](../../plugins/level/README.md)
   - Physics – [overview](plugin-packages.md#the-physics-plugin) · [README](../../plugins/physics/README.md)
+  - Animation – [overview](plugin-packages.md#the-animation-plugin) · [README](../../plugins/animation/README.md)
 
 ## Working on the project
 

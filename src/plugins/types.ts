@@ -8,7 +8,8 @@ import type { RunResult, ScriptApi } from '../scripting/api';
 import type { ScriptLanguage, ScriptCompletion, CompletionProvider } from '../scripting/languages';
 import type { Definition, Entities, Instance } from '../core/model';
 import type { DataChange, DataTarget, PluginDataFormat } from './pluginData';
-import type { PluginAtmosphere, PluginLight } from '../engine/pluginLighting';
+import type { PluginAtmosphere, PluginLight, PluginSun } from '../engine/pluginLighting';
+import type { DisplayLook, DisplayMaterialLook } from '../engine/viewer';
 import type { ApiCategory } from '../scripting/catalog';
 import type { ContextMenuEntry, TopBarButton } from './uiExtensions';
 import type { ViewRequest, ViewLines } from '../engine/viewRender';
@@ -20,7 +21,8 @@ export type { ScriptCompletion, CompletionRequest, CompletionKind, CompletionPro
 export type { CodeFormat, CodeScene, CodeGroup, CodeFace, CodeOptions } from '../scripting/codeExport';
 export type { ViewRequest, ViewLines, ViewLine } from '../engine/viewRender';
 export type { DataChange, DataTarget, PluginDataFormat } from './pluginData';
-export type { PluginLight, PluginAtmosphere } from '../engine/pluginLighting';
+export type { PluginLight, PluginAtmosphere, PluginSun } from '../engine/pluginLighting';
+export type { DisplayLook, DisplayMaterialLook } from '../engine/viewer';
 
 /**
  * A Shap3D.ai plugin: an ES module whose default export is this object.
@@ -295,6 +297,11 @@ export interface PluginContext {
      * of the undo step the change was made in, still inside it, so what the listener changes is undone with it
      */
     onDataChange: (listener: (change: DataChange) => void) => Disposer;
+    /**
+     * the end of every undo step (a command, a script, a tool's move – not undo, redo or opening a model), still inside
+     * it: what the listener changes (e.g. plugin data that follows what a tool did) is undone with the step
+     */
+    onUndoStep: (listener: () => void) => Disposer;
   };
   /** JSON storage, namespaced per plugin */
   storage: {
@@ -354,11 +361,25 @@ export interface PluginContext {
     set: (lights: PluginLight[]) => void;
     /** fog, daylight (0 … 1) and background – null gives the view back to the model's style */
     atmosphere: (atmosphere: PluginAtmosphere | null) => void;
+    /**
+     * the sun for now – its hour and month (where it stands and its shadows fall) and how bright it is (0 … 1; the
+     * room light dims less) – over the model's shadow settings, e.g. every frame of a sunset; faces are drawn lit
+     * while it is set. null gives the model's sun back.
+     */
+    sun: (sun: PluginSun | null) => void;
   };
   /** what the 3D view shows for now, without changing the model */
   display: {
-    /** shows an instance at another place (its matrix in its parent) – e.g. moving enemies in a test run; null puts it back */
+    /**
+     * shows an instance at another place (its matrix in its parent) – e.g. moving enemies in a test run; null puts it
+     * back. Inside an instance shown elsewhere it moves along: the parent counts with the place it is shown at.
+     * The selection outline follows.
+     */
     place: (instance: Instance, matrix: InstanceType<typeof THREE.Matrix4> | null) => void;
+    /** shows an instance with everything in it in another colour, see-through or hidden – null gives its own look back */
+    look: (instance: Instance, look: DisplayLook | null) => void;
+    /** shows a material in another colour or opacity wherever it is used – null gives its own back */
+    material: (name: string, look: DisplayMaterialLook | null) => void;
   };
   /**
    * A view of the model rendered on demand – camera, style, hidden tags, size and an optional drawing scale

@@ -169,10 +169,11 @@ export class Editor {
   get entities(): Entities {
     return this.activePath.length ? this.activePath[this.activePath.length - 1].definition.entities : this.model.root;
   }
+  /** from the open group's coordinates to the model's – where the view shows it (a plugin's display place), so picks match */
   get contextMatrix(): THREE.Matrix4 {
     const matrix = new THREE.Matrix4();
     for (const instance of this.activePath) {
-      matrix.multiply(instance.matrix);
+      matrix.multiply(this.viewer.shownMatrix(instance));
     }
     return matrix;
   }
@@ -690,16 +691,16 @@ export class Editor {
 
   // ------------------------------------------------------------ overlay
   private drawOverlay(overlay: Overlay) {
-    // open-group bounding box (dashed)
+    // open-group bounding box (dashed) – where the view shows the group (a plugin's display place)
     if (this.activePath.length) {
       const inst = this.activePath[this.activePath.length - 1];
       const parent = new THREE.Matrix4();
       for (const instance of this.activePath.slice(0, -1)) {
-        parent.multiply(instance.matrix);
+        parent.multiply(this.viewer.shownMatrix(instance));
       }
       const box = inst.definition.entities.bounds(new THREE.Box3());
       if (!box.isEmpty()) {
-        const matrix = parent.clone().multiply(inst.matrix);
+        const matrix = parent.clone().multiply(this.viewer.shownMatrix(inst));
         const corners = [0, 1, 2, 3, 4, 5, 6, 7].map((i) =>
           new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(
             matrix,

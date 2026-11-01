@@ -362,7 +362,7 @@ export class InferenceEngine {
     const viewer = this.viewer;
     const found: { rec: EdgeRec; dist: number }[] = [];
     const mouse = new THREE.Vector2(x, y);
-    for (const edgeRec of viewer.edges) {
+    for (const edgeRec of viewer.pickRecords().edges) {
       if (filter && !filter(edgeRec)) {
         continue;
       }
