@@ -912,6 +912,10 @@ export class Viewer {
    * Shows an instance (and everything in it) in another colour, see-through or hidden for now – null gives it its
    * own look back. Applied to the built meshes, so the view is not built again.
    */
+  /** the look an instance is shown with for now (`lookForDisplay`), or null */
+  shownLook(instance: Instance): DisplayLook | null {
+    return this.displayLooks.get(instance) ?? null;
+  }
   lookForDisplay(instance: Instance, look: DisplayLook | null) {
     if (look) {
       this.displayLooks.set(instance, { ...look });

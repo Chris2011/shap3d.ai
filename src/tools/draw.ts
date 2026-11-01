@@ -1,10 +1,12 @@
 import * as THREE from 'three';
-import type { PEvt } from '../engine/editor';
+import type { Editor, PEvt } from '../engine/editor';
+import type { EdgeRec } from '../engine/viewer';
+import type { Entities } from '../core/model';
 import type { Overlay } from '../engine/overlay';
 import { PointTool, planeFromInference, planeAxes, onPlane } from './base';
 import { parseLengthList } from '../core/units';
-import { AXIS_COLOR, MAGENTA } from '../engine/inference';
-import type { PlaneRef } from '../core/geometry';
+import { AXIS_COLOR, MAGENTA, snapping } from '../engine/inference';
+import { type PlaneRef, lineLineClosest } from '../core/geometry';
 import { t, formatDecimal } from '../i18n';
 
 type V3 = THREE.Vector3;
@@ -195,6 +197,9 @@ export class FreehandTool extends PointTool {
   }
 }
 
+/** along one of the model axes – aligning to such an edge changes nothing */
+const isAxisAligned = (direction: V3) => [direction.x, direction.y, direction.z].some((value) => Math.abs(Math.abs(value) - 1) < 1e-6);
+
 // ===================================================================== Rectangle
 export class RectangleTool extends PointTool {
   id = 'rectangle';
@@ -210,8 +215,28 @@ export class RectangleTool extends PointTool {
   special = '';
   pressed = false;
   last: { corner: V3; normal: V3; basisU: V3; basisV: V3 } | null = null;
+  /** the sides follow an edge instead of the model axes */
+  aligned = false;
   status() {
     return this.corner ? t('tools.status.rectangleCorner') : t('tools.status.rectangleStart');
+  }
+  /** sides along `direction` (an edge lying in the plane) – or, without one, along the model axes */
+  align(direction: V3 | null) {
+    const normal = this.plane!.normal;
+    if (direction && Math.abs(direction.clone().normalize().dot(normal)) < 0.01) {
+      const along = direction.clone().addScaledVector(normal, -direction.dot(normal)).normalize();
+      if (!isAxisAligned(along)) {
+        this.basisU = along;
+        this.basisV = normal.clone().cross(along).normalize();
+        this.aligned = true;
+        return true;
+      }
+    }
+    const axes = planeAxes(normal);
+    this.basisU = axes.basisU;
+    this.basisV = axes.basisV;
+    this.aligned = false;
+    return false;
   }
   busy() {
     return !!this.corner;
@@ -226,11 +251,16 @@ export class RectangleTool extends PointTool {
     if (!this.corner) {
       const inference = this.pick(pointer, null);
       const plane = planeFromInference(inference);
+      // on an edge or corner of a face under the cursor: in that face's plane, not on the ground
+      const faceHit = plane.fromFace ? null : this.editor.viewer.pickFace(pointer.x, pointer.y);
+      if (faceHit && Math.abs(inference.point.clone().sub(faceHit.point).dot(faceHit.normal)) < 1e-6) {
+        plane.normal = faceHit.normal.clone().normalize();
+      }
       this.corner = inference.point.clone();
       this.plane = { point: plane.point, normal: plane.normal };
-      const axes = planeAxes(plane.normal);
-      this.basisU = axes.basisU;
-      this.basisV = axes.basisV;
+      // started on an edge: the rectangle follows it
+      const edge = inference.edge && (inference.kind === 'edge' || inference.kind === 'midpoint') ? inference.edge : null;
+      this.align(edge ? edge.end.clone().sub(edge.start) : null);
       this.pressed = true;
       this.width = this.height = 0;
       return;
@@ -256,7 +286,7 @@ export class RectangleTool extends PointTool {
     this.special = '';
     const absWidth = Math.abs(this.width),
       absHeight = Math.abs(this.height);
-    if (absWidth > 1e-4 && absHeight > 1e-4) {
+    if (snapping.value && absWidth > 1e-4 && absHeight > 1e-4) {
       if (Math.abs(absWidth - absHeight) / Math.max(absWidth, absHeight) < 0.035) {
         this.height = Math.sign(this.height) * absWidth;
         this.special = t('tools.hints.square');
@@ -273,6 +303,18 @@ export class RectangleTool extends PointTool {
       }
     }
     this.editor.setVcb(`${this.editor.fmt(absWidth)}, ${this.editor.fmt(absHeight)}`);
+  }
+  onKey(keyEvent: KeyboardEvent, down: boolean) {
+    // down arrow while drawing: along the edge hovered last (in the plane), again: back to the axes
+    if (keyEvent.key === 'ArrowDown' && down && this.corner && this.plane) {
+      const edge = this.editor.infer.trackedEdge;
+      if (this.aligned || !edge || !this.align(edge.end.clone().sub(edge.start))) {
+        this.align(null);
+      }
+      this.width = this.height = 0;
+      return true;
+    }
+    return super.onKey(keyEvent, down);
   }
   corners(corner: V3, basisU: V3, basisV: V3, width: number, height: number) {
     return [
@@ -327,7 +369,7 @@ export class RectangleTool extends PointTool {
   draw(overlay: Overlay) {
     if (this.corner) {
       const pts = this.corners(this.corner, this.basisU, this.basisV, this.width, this.height);
-      overlay.polyline(pts, '#0000ff', 1.4, true);
+      overlay.polyline(pts, this.aligned ? MAGENTA : '#0000ff', 1.4, true);
       if (this.special) {
         overlay.line(pts[0], pts[2], '#888', 1, [4, 3]);
         overlay.tooltip(this.editor.mouse.x, this.editor.mouse.y, this.special);
@@ -588,6 +630,82 @@ const signedAngle = (fromVec: V3, toVec: V3, normal: V3) => {
   return Math.atan2(fromVec.clone().cross(toVec).dot(normal), fromVec.dot(toVec));
 };
 
+/** A rounded corner: the arc starts and ends `distance` away from `corner`, along its two edges. */
+interface Fillet {
+  corner: V3;
+  distance: number;
+}
+
+/** The vertex two edges of the context being edited share – in model coordinates. */
+const sharedCorner = (editor: Editor, first: EdgeRec, second: EdgeRec): V3 | null => {
+  const ents = editor.entities;
+  if (first.context.entities !== ents || second.context.entities !== ents || first.edgeId === second.edgeId) {
+    return null;
+  }
+  const edgeA = ents.edges.get(first.edgeId),
+    edgeB = ents.edges.get(second.edgeId);
+  const shared = edgeA && edgeB ? [edgeA.start, edgeA.end].find((vertex) => vertex === edgeB.start || vertex === edgeB.end) : undefined;
+  return shared === undefined ? null : editor.toWorld(ents.positionOf(shared));
+};
+
+/**
+ * The vertices of the arc (or circle segment chain) an edge belongs to, in order: equally long edges turning by the
+ * same angle in one plane. Null when the edge is no part of such a chain.
+ */
+const arcChain = (ents: Entities, edgeId: number): number[] | null => {
+  const edge = ents.edges.get(edgeId);
+  if (!edge) {
+    return null;
+  }
+  const length = ents.edgeLength(edge);
+  const visited = new Set([edge.start, edge.end]);
+  const extend = (from: number, to: number) => {
+    const out: number[] = [];
+    let previous = from,
+      at = to;
+    for (;;) {
+      const next = ents
+        .edgesOfVertex(at)
+        .filter((other) => other.start !== previous && other.end !== previous)
+        .map((other) => (other.start === at ? other.end : other.start));
+      if (next.length !== 1 || visited.has(next[0])) {
+        return out;
+      }
+      if (Math.abs(ents.positionOf(at).distanceTo(ents.positionOf(next[0])) - length) > length * 1e-3) {
+        return out;
+      }
+      visited.add(next[0]);
+      out.push(next[0]);
+      previous = at;
+      at = next[0];
+    }
+  };
+  const forward = extend(edge.start, edge.end);
+  const chain = [...extend(edge.end, edge.start).reverse(), edge.start, edge.end, ...forward];
+  if (chain.length < 3) {
+    return null;
+  }
+  const points = chain.map((vertex) => ents.positionOf(vertex));
+  const turn = (i: number) =>
+    points[i + 1]
+      .clone()
+      .sub(points[i])
+      .angleTo(points[i + 2].clone().sub(points[i + 1]));
+  const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[1])).normalize();
+  const firstTurn = turn(0);
+  for (let i = 0; i + 2 < points.length; i++) {
+    const segmentNormal = points[i + 1]
+      .clone()
+      .sub(points[i])
+      .cross(points[i + 2].clone().sub(points[i + 1]))
+      .normalize();
+    if (firstTurn < 1e-4 || Math.abs(turn(i) - firstTurn) > 1e-3 || segmentNormal.dot(normal) < 1 - 1e-6) {
+      return null;
+    }
+  }
+  return chain;
+};
+
 /** 2-point arc: start, end, bulge (SketchUp default arc tool). */
 export class Arc2Tool extends PointTool {
   id = 'arc2';
@@ -601,6 +719,15 @@ export class Arc2Tool extends PointTool {
   segments = 12;
   current: V3 | null = null;
   half = false;
+  /** the edge the start point lies on – a second point on a neighbouring edge rounds their corner */
+  startEdge: EdgeRec | null = null;
+  /** end point offered at the start's distance from the corner, along the neighbouring edge */
+  filletEnd: { point: V3; fillet: Fillet } | null = null;
+  fillet: Fillet | null = null;
+  /** the bulge sits where the arc touches both edges: the corner is cut off */
+  tangent = false;
+  /** distance of the last rounded corner – double-clicking another corner rounds it the same */
+  lastFillet: number | null = null;
   status() {
     return !this.start ? t('tools.status.arc2Start') : !this.end ? t('tools.status.pickEnd') : t('tools.status.arc2Bulge');
   }
@@ -610,14 +737,58 @@ export class Arc2Tool extends PointTool {
   cancel() {
     this.start = this.end = null;
     this.current = null;
+    this.startEdge = null;
+    this.filletEnd = null;
+    this.fillet = null;
+    this.tangent = false;
     this.editor.setVcb('', 'vcb.length');
+  }
+  /** the bulge of the arc that touches both edges of the corner */
+  tangentBulge(): number {
+    const { corner } = this.fillet!;
+    const toStart = this.start!.clone().sub(corner).normalize(),
+      toEnd = this.end!.clone().sub(corner).normalize();
+    const half = toStart.angleTo(toEnd) / 2;
+    const distance = this.fillet!.distance;
+    const radius = distance * Math.tan(half);
+    const center = corner.clone().addScaledVector(toStart.clone().add(toEnd).normalize(), distance / Math.cos(half));
+    const mid = this.start!.clone().add(this.end!).multiplyScalar(0.5);
+    const sagitta = radius - center.distanceTo(mid);
+    return sagitta * Math.sign(this.bulgeDir().dot(corner.clone().sub(mid)) || 1);
+  }
+  /** the end point sits on the neighbouring edge: the arc lies in the corner's plane */
+  setFillet(fillet: Fillet) {
+    this.fillet = fillet;
+    const normal = this.start!.clone().sub(fillet.corner).cross(this.end!.clone().sub(fillet.corner));
+    if (normal.lengthSq() > 1e-18) {
+      this.normal = normal.normalize();
+    }
   }
   onMove(pointer: PEvt) {
     if (!this.end) {
       const inference = this.pick(pointer, this.start);
       this.current = inference.point.clone();
+      this.filletEnd = null;
+      // on an edge next to the start's edge: the point as far from the corner as the start snaps
+      if (this.start && this.startEdge && inference.edge && snapping.value) {
+        const corner = sharedCorner(this.editor, this.startEdge, inference.edge);
+        if (corner) {
+          const distance = corner.distanceTo(this.start);
+          const far = inference.edge.start.distanceTo(corner) < 1e-9 ? inference.edge.end : inference.edge.start;
+          const point = corner.clone().addScaledVector(far.clone().sub(corner).normalize(), distance);
+          const screenPos = this.editor.viewer.project(point);
+          if (
+            distance > 1e-6 &&
+            distance <= far.distanceTo(corner) + 1e-9 &&
+            Math.hypot(screenPos.x - pointer.x, screenPos.y - pointer.y) < 12
+          ) {
+            this.filletEnd = { point, fillet: { corner, distance } };
+            this.current = point.clone();
+          }
+        }
+      }
       if (this.start) {
-        this.editor.setVcb(this.editor.fmt(this.start.distanceTo(inference.point)));
+        this.editor.setVcb(this.editor.fmt(this.start.distanceTo(this.current)));
       }
       return;
     }
@@ -631,9 +802,18 @@ export class Arc2Tool extends PointTool {
     const bulgeDir = this.bulgeDir();
     this.bulge = hit.sub(mid).dot(bulgeDir);
     const halfChord = this.start!.distanceTo(this.end) / 2;
-    this.half = Math.abs(Math.abs(this.bulge) - halfChord) < halfChord * 0.04;
+    this.half = snapping.value && Math.abs(Math.abs(this.bulge) - halfChord) < halfChord * 0.04;
     if (this.half) {
       this.bulge = Math.sign(this.bulge) * halfChord;
+    }
+    this.tangent = false;
+    if (this.fillet && snapping.value) {
+      const tangent = this.tangentBulge();
+      if (Math.abs(this.bulge - tangent) < Math.max(halfChord * 0.06, this.editor.viewer.worldPerPixel(mid) * 10)) {
+        this.bulge = tangent;
+        this.tangent = true;
+        this.half = false;
+      }
     }
     this.editor.setVcb(this.editor.fmt(Math.abs(this.bulge)));
   }
@@ -644,16 +824,25 @@ export class Arc2Tool extends PointTool {
     if (!this.start) {
       const inference = this.pick(pointer, null);
       this.start = inference.point.clone();
+      this.startEdge = inference.kind === 'edge' && inference.edge ? inference.edge : null;
       const plane = planeFromInference(inference);
       this.normal = plane.normal;
       return;
     }
     if (!this.end) {
+      const filletEnd = this.filletEnd;
       const inference = this.pick(pointer, this.start);
-      if (inference.point.distanceTo(this.start) < 1e-5) {
+      const point = filletEnd ? filletEnd.point : inference.point;
+      if (point.distanceTo(this.start) < 1e-5) {
         return;
       }
-      this.end = inference.point.clone();
+      this.end = point.clone();
+      if (filletEnd) {
+        this.setFillet(filletEnd.fillet);
+        this.filletEnd = null;
+        this.editor.ui.vcbLabel = 'vcb.bulge';
+        return;
+      }
       const chordDir = this.end.clone().sub(this.start).normalize();
       if (Math.abs(chordDir.dot(this.normal)) > 1e-3) {
         this.normal = chordDir.clone().cross(new THREE.Vector3(0, 0, 1));
@@ -697,12 +886,146 @@ export class Arc2Tool extends PointTool {
   finish() {
     const pts = this.points();
     const editor = this.editor;
-    editor.commit(this.name, () => {
+    const fillet = this.fillet && Math.abs(this.bulge - this.tangentBulge()) < 1e-9 ? this.fillet : null;
+    const start = this.start!,
+      end = this.end!;
+    editor.commit(fillet ? 'undo.roundCorner' : this.name, () => {
       for (let i = 0; i < pts.length - 1; i++) {
         editor.entities.addLine(editor.toLocal(pts[i]), editor.toLocal(pts[i + 1]));
       }
+      if (fillet) {
+        this.cutCorner(editor.toLocal(start), editor.toLocal(end), editor.toLocal(fillet.corner));
+      }
     });
+    if (fillet) {
+      this.lastFillet = fillet.distance;
+    }
     this.cancel();
+  }
+  /** the piece between the arc and the corner goes – only where the corner's edges bound nothing else */
+  cutCorner(start: V3, end: V3, corner: V3) {
+    const ents = this.editor.entities;
+    const startVertex = ents.findVertex(start),
+      endVertex = ents.findVertex(end),
+      cornerVertex = ents.findVertex(corner);
+    if (startVertex === undefined || endVertex === undefined || cornerVertex === undefined) {
+      return;
+    }
+    const legs = [ents.edgeBetween(startVertex, cornerVertex), ents.edgeBetween(cornerVertex, endVertex)];
+    if (legs.some((leg) => !leg || ents.facesOfEdge(leg.id).length > 1)) {
+      return;
+    }
+    for (const leg of legs) {
+      ents.eraseEdge(leg!.id, false);
+    }
+  }
+  /** double-click: on a corner it is rounded like the last one, on an arc its corner comes back */
+  onDblClick(pointer: PEvt) {
+    this.cancel();
+    const editor = this.editor;
+    const ents = editor.entities;
+    const vertexHit = editor.viewer.pickVertex(pointer.x, pointer.y, 10, (vertex) => vertex.context.entities === ents);
+    if (vertexHit) {
+      // a point inside an arc belongs to the arc, not to a corner
+      const legs = ents.edgesOfVertex(vertexHit.rec.vertexId);
+      const chain = legs.length === 2 ? arcChain(ents, legs[0].id) : null;
+      if (chain && chain.indexOf(vertexHit.rec.vertexId) > 0 && chain.indexOf(vertexHit.rec.vertexId) < chain.length - 1) {
+        this.unround(legs[0].id);
+        return;
+      }
+      if (this.lastFillet) {
+        this.roundCorner(vertexHit.rec.vertexId, this.lastFillet);
+      }
+      return;
+    }
+    const edgeHit = editor.viewer.pickEdge(pointer.x, pointer.y, 6, (edge) => edge.context.entities === ents);
+    if (edgeHit) {
+      this.unround(edgeHit.rec.edgeId);
+    }
+  }
+  /** a corner of exactly two edges, rounded with the arc that leaves both `distance` away from it */
+  roundCorner(cornerVertex: number, distance: number) {
+    const editor = this.editor;
+    const ents = editor.entities;
+    const legs = ents.edgesOfVertex(cornerVertex);
+    if (legs.length !== 2) {
+      editor.toast(t('toast.roundCornerTwoEdges'));
+      return;
+    }
+    const corner = ents.positionOf(cornerVertex);
+    const [toStart, toEnd] = legs.map((leg) =>
+      ents
+        .positionOf(leg.start === cornerVertex ? leg.end : leg.start)
+        .clone()
+        .sub(corner),
+    );
+    if (
+      toStart.length() < distance + 1e-9 ||
+      toEnd.length() < distance + 1e-9 ||
+      toStart.clone().normalize().cross(toEnd.clone().normalize()).length() < 1e-6
+    ) {
+      editor.toast(t('toast.roundCornerTooShort'));
+      return;
+    }
+    this.start = editor.toWorld(corner.clone().addScaledVector(toStart.normalize(), distance));
+    this.end = editor.toWorld(corner.clone().addScaledVector(toEnd.normalize(), distance));
+    this.setFillet({ corner: editor.toWorld(corner), distance: this.start.distanceTo(editor.toWorld(corner)) });
+    this.bulge = this.tangentBulge();
+    this.finish();
+  }
+  /** an arc between two straight edges goes, the edges meet in their corner again */
+  unround(edgeId: number) {
+    const editor = this.editor;
+    const ents = editor.entities;
+    const chain = arcChain(ents, edgeId);
+    if (!chain) {
+      return;
+    }
+    /** the straight edge before the arc's end: its direction towards the corner */
+    const leadIn = (end: number, inner: number) => {
+      const others = ents.edgesOfVertex(end).filter((edge) => edge.start !== inner && edge.end !== inner);
+      if (others.length !== 1) {
+        return null;
+      }
+      const far = others[0].start === end ? others[0].end : others[0].start;
+      return ents.positionOf(end).clone().sub(ents.positionOf(far));
+    };
+    const first = chain[0],
+      last = chain[chain.length - 1];
+    const firstDir = leadIn(first, chain[1]),
+      lastDir = leadIn(last, chain[chain.length - 2]);
+    const firstPos = ents.positionOf(first).clone(),
+      lastPos = ents.positionOf(last).clone();
+    const crossing = firstDir && lastDir ? lineLineClosest(firstPos, firstDir, lastPos, lastDir) : null;
+    const arcEdges = chain.slice(1).map((vertex, i) => ents.edgeBetween(chain[i], vertex)!);
+    if (
+      !crossing ||
+      crossing.s <= 1e-9 ||
+      crossing.t <= 1e-9 ||
+      crossing.c1.distanceTo(crossing.c2) > 1e-6 * Math.max(1, firstPos.distanceTo(lastPos)) ||
+      arcEdges.some((edge) => !edge || ents.facesOfEdge(edge.id).length > 1)
+    ) {
+      editor.toast(t('toast.unroundNoCorner'));
+      return;
+    }
+    const corner = crossing.c1;
+    editor.commit('undo.unroundCorner', () => {
+      const face = arcEdges.map((edge) => ents.facesOfEdge(edge.id)[0]).find(Boolean);
+      const look = face ? { material: face.material, backMaterial: face.backMaterial, tag: face.tag } : null;
+      for (const edge of arcEdges) {
+        ents.eraseEdge(edge.id, false);
+      }
+      ents.addLine(firstPos, corner);
+      ents.addLine(corner, lastPos);
+      const cornerVertex = ents.findVertex(corner);
+      const leg = cornerVertex === undefined ? undefined : ents.edgeBetween(first, cornerVertex);
+      if (look && leg) {
+        for (const newFace of ents.facesOfEdge(leg.id)) {
+          Object.assign(newFace, look);
+        }
+      }
+      ents.healCollinear([first, last]);
+    });
   }
   onVcb(text: string) {
     const segMatch = text.trim().match(/^(\d+)\s*s$/i);
@@ -732,13 +1055,20 @@ export class Arc2Tool extends PointTool {
       overlay.line(this.start, this.current, '#000', 1);
     }
     if (this.end) {
-      overlay.polyline(this.points(), this.half ? '#c000c0' : '#000', 1.5);
+      overlay.polyline(this.points(), this.half ? '#c000c0' : this.tangent ? '#00a8c8' : '#000', 1.5);
       if (this.half) {
         overlay.tooltip(this.editor.mouse.x, this.editor.mouse.y, t('tools.hints.halfCircle'));
+      } else if (this.tangent) {
+        overlay.tooltip(this.editor.mouse.x, this.editor.mouse.y, t('tools.hints.roundCorner'));
       }
     }
     if (!this.end) {
-      this.drawInference(overlay);
+      if (this.filletEnd) {
+        overlay.marker(this.filletEnd.point, 'midpoint');
+        overlay.tooltip(this.editor.mouse.x, this.editor.mouse.y, t('tools.hints.sameDistance'));
+      } else {
+        this.drawInference(overlay);
+      }
     }
   }
 }

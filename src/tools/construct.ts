@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Tool, type PEvt } from '../engine/editor';
 import type { Overlay } from '../engine/overlay';
 import { PointTool, onPlane } from './base';
-import { AXES } from '../engine/inference';
+import { AXES, snapping } from '../engine/inference';
 import { newId } from '../core/model';
 import { formatAngle } from '../core/units';
 import { t, formatDecimal } from '../i18n';
@@ -231,7 +231,7 @@ export class ProtractorTool extends PointTool {
         toHit = hit.sub(this.center);
       let ang = Math.atan2(fromRef.clone().cross(toHit).dot(this.normal), fromRef.dot(toHit));
       const snapped = (Math.round(ang / (Math.PI / 12)) * Math.PI) / 12;
-      if (Math.abs(ang - snapped) < 0.04) {
+      if (snapping.value && Math.abs(ang - snapped) < 0.04) {
         ang = snapped;
       }
       this.angle = ang;

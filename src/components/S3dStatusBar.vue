@@ -3,6 +3,15 @@
     <button class="s3d-iconbtn size-6.5" :title="t('statusbar.help')" @click="editor.ui.dialog = { kind: 'help' }">
       <S3dIcon name="help" :size="18" />
     </button>
+    <button
+      class="s3d-iconbtn size-6.5"
+      :class="{ active: snapping }"
+      :title="t(snapping ? 'statusbar.snappingOn' : 'statusbar.snappingOff')"
+      :aria-pressed="snapping"
+      @click="runCommand(editor, 'toggleSnapping')"
+    >
+      <S3dIcon name="magnet" :size="18" />
+    </button>
     <span class="mx-0.5 h-4 w-px bg-edge"></span>
     <div ref="devBox" class="relative">
       <button
@@ -66,6 +75,8 @@ import { nav, wheelAction, ACTION_LABEL, type NavAction } from '../engine/naviga
 import { useTemplateRef } from 'vue';
 import { usePopover } from '../composables/usePopover';
 import { useEditor } from './keys';
+import { snapping } from '../engine/inference';
+import { runCommand } from '../engine/commands';
 import { useSelection } from '../composables/useModel';
 import { t, localize, shortcutLabel } from '../i18n';
 

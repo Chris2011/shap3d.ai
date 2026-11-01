@@ -106,7 +106,8 @@
       "view-right": "Derecha",
       "view-back": "Posterior",
       "view-left": "Izquierda",
-      "view-bottom": "Inferior"
+      "view-bottom": "Inferior",
+      "toggleSnapping": "Ajuste"
     },
     "names": {
       "model": "Modelo",
@@ -187,7 +188,10 @@
       "script": "Script",
       "insertMesh": "Insertar malla",
       "fewerPolygons": "Menos polígonos",
-      "tagsToScenes": "Etiquetas a escenas"
+      "tagsToScenes": "Etiquetas a escenas",
+      "nudge": "Mover con las flechas",
+      "roundCorner": "Redondear esquina",
+      "unroundCorner": "Recuperar esquina"
     },
     "toast": {
       "nothingSelected": "No hay nada seleccionado",
@@ -205,7 +209,12 @@
       "loadFailed": "Error al cargar",
       "locked": "Bloqueado",
       "selectFirst": "Selecciona primero objetos.",
-      "noValidPath": "No hay ninguna trayectoria válida seleccionada."
+      "noValidPath": "No hay ninguna trayectoria válida seleccionada.",
+      "snappingOn": "Ajuste activado (F3)",
+      "snappingOff": "Ajuste desactivado – los puntos quedan donde está el cursor (F3)",
+      "roundCornerTwoEdges": "Solo se puede redondear una esquina de exactamente dos aristas.",
+      "roundCornerTooShort": "Las aristas de esta esquina son demasiado cortas para ese redondeo.",
+      "unroundNoCorner": "Este arco no está entre dos aristas rectas que se unen en una esquina."
     },
     "confirm": {
       "discardChanges": "¿Descartar los cambios no guardados?",
@@ -272,8 +281,8 @@
         "lineEnd": "Haz clic para fijar el punto final o escribe una longitud. | Flechas = bloquear la dirección de inferencia. Mayús = bloquear la inferencia.",
         "lineStart": "Haz clic para fijar el primer punto. | Flechas = bloquear la dirección de inferencia.",
         "freehand": "Haz clic y arrastra para dibujar una curva a mano alzada.",
-        "rectangleCorner": "Haz clic para fijar la esquina opuesta o escribe largo y ancho (p. ej. 2000; 1500).",
-        "rectangleStart": "Haz clic para fijar la primera esquina.",
+        "rectangleCorner": "Haz clic para fijar la esquina opuesta o escribe largo y ancho (p. ej. 2000; 1500). | Flecha abajo = a lo largo de la última arista tocada, otra vez = a lo largo de los ejes.",
+        "rectangleStart": "Haz clic para fijar la primera esquina. | Si empieza en una arista, el rectángulo se alinea con ella.",
         "rotrect1": "Elige la primera esquina.",
         "rotrect2": "Elige la segunda esquina (longitud y dirección).",
         "rotrect3": "Elige el ancho y el ángulo.",
@@ -281,7 +290,7 @@
         "polygonRadius": "Elige o escribe el radio. ({count} lados; «12s» cambia el número)",
         "circleCenter": "Elige el centro. Escribe p. ej. «48s» para cambiar los segmentos.",
         "polygonCenter": "Elige el centro. Escribe p. ej. «8s» para cambiar los lados.",
-        "arc2Start": "Elige el punto inicial del arco.",
+        "arc2Start": "Elige el punto inicial del arco. | Puntos en dos aristas de una esquina la redondean. Doble clic en una esquina = redondearla como la última, en un arco = recuperar su esquina.",
         "pickEnd": "Elige el punto final.",
         "arc2Bulge": "Elige o escribe la flecha del arco.",
         "pickCenter": "Elige el centro.",
@@ -297,7 +306,7 @@
         "offsetPick": "Elige una cara para la equidistancia.",
         "moveTarget": "Haz clic para fijar el punto de destino o escribe una distancia. | Ctrl = copia sí/no. Flechas = bloquear la dirección de inferencia.",
         "moveTargetCopy": "Haz clic para fijar el punto de destino o escribe una distancia. (copia) | Ctrl = copia sí/no. Flechas = bloquear la dirección de inferencia.",
-        "moveStart": "Haz clic para fijar el punto inicial. | Ctrl = copia sí/no.",
+        "moveStart": "Haz clic para fijar el punto inicial. Las cruces rojas en la caja de un grupo lo rotan. | Ctrl = copia sí/no.",
         "rotateCenter": "Elige el centro de rotación. Las flechas alinean el transportador.",
         "rotateStart": "Elige el punto inicial del ángulo de rotación.",
         "rotateAngle": "Elige o escribe el ángulo de rotación. Ctrl = copia.",
@@ -332,7 +341,10 @@
         "halfCircle": "Semicírculo",
         "scaleUniform": "Escalar uniformemente",
         "scaleTwoAxes": "Escalar dos ejes",
-        "scaleOneAxis": "Escalar un eje"
+        "scaleOneAxis": "Escalar un eje",
+        "rotateGrip": "Rotar",
+        "roundCorner": "Redondear esquina",
+        "sameDistance": "Misma distancia a la esquina"
       }
     },
     "editor": {
@@ -363,7 +375,9 @@
       "parallel": "Paralelo a la arista",
       "perpendicular": "Perpendicular a la arista",
       "extension": "En la prolongación de la arista",
-      "fromPoint": "Desde el punto"
+      "fromPoint": "Desde el punto",
+      "radiusOnFace": "Desde el radio en la cara",
+      "onProfile": "En el contorno"
     },
     "measure": {
       "grid": "Cuadrícula"
@@ -531,7 +545,9 @@
       "pinch": "Pellizcar con dos dedos",
       "middleDrag": "Arrastrar con el botón central",
       "middleButton": "Botón central",
-      "building": "El script construye el modelo …"
+      "building": "El script construye el modelo …",
+      "snappingOn": "Ajuste activado – a puntos, aristas, ejes y ángulos redondos (F3)",
+      "snappingOff": "Ajuste desactivado – haz clic para activarlo (F3)"
     },
     "contextMenu": {
       "editGroup": "Editar grupo/componente",

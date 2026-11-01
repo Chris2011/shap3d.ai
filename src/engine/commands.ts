@@ -7,6 +7,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { sceneToEntities } from './importMesh';
+import { snapping } from './inference';
 import type { Editor } from './editor';
 import { theme, setTheme, setScene } from '../theme';
 import { openTour } from '../components/tour';
@@ -951,6 +952,17 @@ const COMMAND_LIST: CommandDefinition[] = [
       editor.commit('commands.deleteGuides', () => {
         editor.model.guides = [];
       }),
+  },
+  {
+    id: 'toggleSnapping',
+    shortcut: 'F3',
+    group: 'edit',
+    run: (editor) => {
+      snapping.value = !snapping.value;
+      editor.toast(t(snapping.value ? 'toast.snappingOn' : 'toast.snappingOff'));
+      editor.redraw();
+    },
+    checked: () => snapping.value,
   },
   { id: 'selectAll', shortcut: 'Ctrl+A', group: 'edit', run: (editor) => editor.selectAll() },
   { id: 'selectNone', shortcut: 'Ctrl+T', group: 'edit', run: (editor) => editor.clearSelection() },

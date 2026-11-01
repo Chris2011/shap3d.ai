@@ -93,6 +93,7 @@ const ICONS: Record<string, string> = {
   subtract: `<circle cx="9" cy="12" r="5.5" fill="#bbdefb" ${STROKE}/><circle cx="15" cy="12" r="5.5" style="fill:var(--s3d-icon-fill)" ${STROKE}/>`,
   axes: `<path d="M5 19V5" ${STROKE_BLUE}/><path d="M5 19h14" ${STROKE_RED}/><path d="M5 19l10-8" ${STROKE_GREEN}/>`,
   person: `<circle cx="12" cy="5" r="2.2" ${STROKE}/><path d="M12 7.5v7M8 10.5h8M12 14.5l-3 6.5M12 14.5l3 6.5" ${STROKE}/>`,
+  magnet: `<path d="M6 4v7a6 6 0 0 0 12 0V4h-4v7a2 2 0 0 1-4 0V4z" style="fill:var(--s3d-icon-fill)" ${STROKE}/><path d="M6 7.5h4M14 7.5h4" ${STROKE_RED}/>`,
   help: `<circle cx="12" cy="12" r="8.5" ${STROKE}/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.7" ${STROKE}/><circle cx="12" cy="17" r="1" fill="currentColor"/>`,
   trackpad: `<rect x="3.5" y="5" width="17" height="13" rx="2" ${STROKE}/><path d="M3.5 15h17M12 15v3" ${STROKE}/><circle cx="9.5" cy="9.5" r="1.2" fill="currentColor"/><circle cx="14.5" cy="9.5" r="1.2" fill="currentColor"/>`,
   sparkle: `<path d="M10 3 L11.6 8.4 L17 10 L11.6 11.6 L10 17 L8.4 11.6 L3 10 L8.4 8.4 Z" fill="#1e9bd7" stroke="#1e9bd7" stroke-width="1"/><path d="M18 13 L18.8 15.2 L21 16 L18.8 16.8 L18 19 L17.2 16.8 L15 16 L17.2 15.2 Z" fill="#0e416c"/><path d="M17.5 3 L18 4.5 L19.5 5 L18 5.5 L17.5 7 L17 5.5 L15.5 5 L17 4.5 Z" fill="#0e416c"/>`,

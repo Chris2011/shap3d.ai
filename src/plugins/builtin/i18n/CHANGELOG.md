@@ -1,8 +1,10 @@
 # Changelog – Languages
 
-## [Unreleased]
+## [1.0.4] – Unreleased
 
-Nothing yet.
+### Added
+
+- German, French, Spanish and Arabic texts for ambient occlusion in the Styles panel for the rotation grips of the Move tool (tooltip and status line), for switching snapping on and off, for moving with the arrow keys for rounding corners with the 2-point arc for rectangles aligned with an edge for leaning against a face when rotating and for moving from an outline edge.
 
 ## [1.0.3] – 2026-10-25 · Shap3D.ai 0.10.0
 

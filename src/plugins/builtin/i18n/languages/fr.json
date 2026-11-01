@@ -106,7 +106,8 @@
       "view-right": "Droite",
       "view-back": "Arrière",
       "view-left": "Gauche",
-      "view-bottom": "Dessous"
+      "view-bottom": "Dessous",
+      "toggleSnapping": "Accrochage"
     },
     "names": {
       "model": "Modèle",
@@ -187,7 +188,10 @@
       "script": "Script",
       "insertMesh": "Insérer un maillage",
       "fewerPolygons": "Moins de polygones",
-      "tagsToScenes": "Balises vers scènes"
+      "tagsToScenes": "Balises vers scènes",
+      "nudge": "Déplacer avec les flèches",
+      "roundCorner": "Arrondir le coin",
+      "unroundCorner": "Rétablir le coin"
     },
     "toast": {
       "nothingSelected": "Rien n’est sélectionné",
@@ -205,7 +209,12 @@
       "loadFailed": "Échec du chargement",
       "locked": "Verrouillé",
       "selectFirst": "Sélectionnez d’abord des objets.",
-      "noValidPath": "Aucun chemin valide sélectionné."
+      "noValidPath": "Aucun chemin valide sélectionné.",
+      "snappingOn": "Accrochage activé (F3)",
+      "snappingOff": "Accrochage désactivé – les points restent sous le curseur (F3)",
+      "roundCornerTwoEdges": "Seul un coin formé d’exactement deux arêtes peut être arrondi.",
+      "roundCornerTooShort": "Les arêtes de ce coin sont trop courtes pour cet arrondi.",
+      "unroundNoCorner": "Cet arc ne se trouve pas entre deux arêtes droites qui se rejoignent en un coin."
     },
     "confirm": {
       "discardChanges": "Abandonner les modifications non enregistrées ?",
@@ -272,8 +281,8 @@
         "lineEnd": "Cliquez pour définir l’extrémité ou saisissez une longueur. | Flèches = verrouiller la direction d’inférence. Maj = verrouiller l’inférence.",
         "lineStart": "Cliquez pour définir la première extrémité. | Flèches = verrouiller la direction d’inférence.",
         "freehand": "Cliquez et faites glisser pour dessiner une courbe à main levée.",
-        "rectangleCorner": "Cliquez pour définir le coin opposé ou saisissez longueur et largeur (p. ex. 2000; 1500).",
-        "rectangleStart": "Cliquez pour définir le premier coin.",
+        "rectangleCorner": "Cliquez pour définir le coin opposé ou saisissez longueur et largeur (p. ex. 2000; 1500). | Flèche bas = le long de la dernière arête touchée, encore = le long des axes.",
+        "rectangleStart": "Cliquez pour définir le premier coin. | Commencé sur une arête, le rectangle s’aligne sur elle.",
         "rotrect1": "Choisissez le premier coin.",
         "rotrect2": "Choisissez le deuxième coin (longueur et direction).",
         "rotrect3": "Choisissez la largeur et l’angle.",
@@ -281,7 +290,7 @@
         "polygonRadius": "Choisissez ou saisissez le rayon. ({count} côtés ; « 12s » modifie le nombre)",
         "circleCenter": "Choisissez le centre. Saisissez p. ex. « 48s » pour modifier les segments.",
         "polygonCenter": "Choisissez le centre. Saisissez p. ex. « 8s » pour modifier les côtés.",
-        "arc2Start": "Choisissez le point de départ de l’arc.",
+        "arc2Start": "Choisissez le point de départ de l’arc. | Des points sur deux arêtes d’un coin l’arrondissent. Double-clic sur un coin = l’arrondir comme le dernier, sur un arc = rétablir son coin.",
         "pickEnd": "Choisissez le point final.",
         "arc2Bulge": "Choisissez ou saisissez le renflement.",
         "pickCenter": "Choisissez le centre.",
@@ -297,7 +306,7 @@
         "offsetPick": "Choisissez une face à décaler.",
         "moveTarget": "Cliquez pour définir le point d’arrivée ou saisissez une distance. | Ctrl = copie activée/désactivée. Flèches = verrouiller la direction d’inférence.",
         "moveTargetCopy": "Cliquez pour définir le point d’arrivée ou saisissez une distance. (copie) | Ctrl = copie activée/désactivée. Flèches = verrouiller la direction d’inférence.",
-        "moveStart": "Cliquez pour définir le point de départ. | Ctrl = copie activée/désactivée.",
+        "moveStart": "Cliquez pour définir le point de départ. Les croix rouges sur la boîte d'un groupe le font pivoter. | Ctrl = copie activée/désactivée.",
         "rotateCenter": "Choisissez le centre de rotation. Les flèches alignent le rapporteur.",
         "rotateStart": "Choisissez le point de départ de l’angle de rotation.",
         "rotateAngle": "Choisissez ou saisissez l’angle de rotation. Ctrl = copie.",
@@ -332,7 +341,10 @@
         "halfCircle": "Demi-cercle",
         "scaleUniform": "Échelle uniforme",
         "scaleTwoAxes": "Échelle sur deux axes",
-        "scaleOneAxis": "Échelle sur un axe"
+        "scaleOneAxis": "Échelle sur un axe",
+        "rotateGrip": "Faire pivoter",
+        "roundCorner": "Arrondir le coin",
+        "sameDistance": "Même distance du coin"
       }
     },
     "editor": {
@@ -363,7 +375,9 @@
       "parallel": "Parallèle à l’arête",
       "perpendicular": "Perpendiculaire à l’arête",
       "extension": "Sur le prolongement de l’arête",
-      "fromPoint": "Depuis le point"
+      "fromPoint": "Depuis le point",
+      "radiusOnFace": "Du rayon sur la face",
+      "onProfile": "Sur le contour"
     },
     "measure": {
       "grid": "Grille"
@@ -531,7 +545,9 @@
       "pinch": "Pincer à deux doigts",
       "middleDrag": "Glisser avec le bouton du milieu",
       "middleButton": "Bouton du milieu",
-      "building": "Le script construit le modèle …"
+      "building": "Le script construit le modèle …",
+      "snappingOn": "Accrochage activé – aux points, arêtes, axes et angles ronds (F3)",
+      "snappingOff": "Accrochage désactivé – cliquez pour l'activer (F3)"
     },
     "contextMenu": {
       "editGroup": "Modifier le groupe/composant",

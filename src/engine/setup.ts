@@ -3,7 +3,7 @@ import { Editor } from './editor';
 import { workspaceState } from '../plugins/uiExtensions';
 import { SelectTool, LassoTool, EraserTool, PaintTool, SampleTool } from '../tools/select';
 import { LineTool, FreehandTool, RectangleTool, RotatedRectangleTool, CircleTool, Arc2Tool, ArcCenterTool, Arc3Tool } from '../tools/draw';
-import { PushPullTool, OffsetTool, MoveTool, RotateTool, ScaleTool, FollowMeTool } from '../tools/modify';
+import { PushPullTool, OffsetTool, MoveTool, RotateTool, ScaleTool, FollowMeTool, nudgeSelection } from '../tools/modify';
 import {
   TapeTool,
   ProtractorTool,
@@ -219,6 +219,16 @@ export const installKeyboard = (editor: Editor, focusVcb: (initial: string) => v
       return;
     }
     if (key === 'Enter' && editor.ui.vcbValue && editor.ui.vcbEditing) {
+      return;
+    }
+    // arrow keys move the selection when the tool has no use for them (e.g. Select)
+    if (key.startsWith('Arrow') && !editor.tool.busy() && nudgeSelection(editor, key, keyEvent.shiftKey, keyEvent.altKey)) {
+      keyEvent.preventDefault();
+      return;
+    }
+    if (key === 'F3') {
+      runCommand(editor, 'toggleSnapping');
+      keyEvent.preventDefault();
       return;
     }
     if (keyEvent.altKey && key.toLowerCase() === 'k') {

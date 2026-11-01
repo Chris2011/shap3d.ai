@@ -106,7 +106,8 @@
       "view-right": "Right",
       "view-back": "Back",
       "view-left": "Left",
-      "view-bottom": "Bottom"
+      "view-bottom": "Bottom",
+      "toggleSnapping": "Snapping"
     },
     "names": {
       "model": "Model",
@@ -187,7 +188,10 @@
       "script": "Script",
       "insertMesh": "Insert mesh",
       "fewerPolygons": "Fewer polygons",
-      "tagsToScenes": "Tags to scenes"
+      "tagsToScenes": "Tags to scenes",
+      "nudge": "Move with arrow keys",
+      "roundCorner": "Round corner",
+      "unroundCorner": "Corner back"
     },
     "toast": {
       "nothingSelected": "Nothing selected",
@@ -205,7 +209,12 @@
       "loadFailed": "Loading failed",
       "locked": "Locked",
       "selectFirst": "Select objects first.",
-      "noValidPath": "No valid path selected."
+      "noValidPath": "No valid path selected.",
+      "snappingOn": "Snapping on (F3)",
+      "snappingOff": "Snapping off – points stay where the cursor is (F3)",
+      "roundCornerTwoEdges": "Only a corner of exactly two edges can be rounded.",
+      "roundCornerTooShort": "The edges of this corner are too short for that rounding.",
+      "unroundNoCorner": "This arc does not lie between two straight edges that meet in a corner."
     },
     "confirm": {
       "discardChanges": "Discard unsaved changes?",
@@ -272,8 +281,8 @@
         "lineEnd": "Click to set the end point, or type a length. | Arrow keys = lock inference direction on/off. Shift = lock inference.",
         "lineStart": "Click to set the first end point. | Arrow keys = lock inference direction on/off.",
         "freehand": "Click and drag to draw a freehand curve.",
-        "rectangleCorner": "Click to set the opposite corner, or type length and width (e.g. 2000; 1500).",
-        "rectangleStart": "Click to set the first corner.",
+        "rectangleCorner": "Click to set the opposite corner, or type length and width (e.g. 2000; 1500). | Down arrow = along the edge touched last, again = along the axes.",
+        "rectangleStart": "Click to set the first corner. | Starting on an edge aligns the rectangle with it.",
         "rotrect1": "Pick the first corner.",
         "rotrect2": "Pick the second corner (length and direction).",
         "rotrect3": "Pick the width and the angle.",
@@ -281,7 +290,7 @@
         "polygonRadius": "Pick or type the radius. ({count} sides; “12s” changes the number)",
         "circleCenter": "Pick the centre. Type e.g. “48s” to change the segments.",
         "polygonCenter": "Pick the centre. Type e.g. “8s” to change the sides.",
-        "arc2Start": "Pick the start point of the arc.",
+        "arc2Start": "Pick the start point of the arc. | Points on two edges of a corner round it. Double-click a corner = round it like the last one, an arc = its corner back.",
         "pickEnd": "Pick the end point.",
         "arc2Bulge": "Pick or type the bulge.",
         "pickCenter": "Pick the centre.",
@@ -297,7 +306,7 @@
         "offsetPick": "Pick a face to offset.",
         "moveTarget": "Click to set the target point, or type a distance. | Ctrl = copy on/off. Arrow keys = lock inference direction.",
         "moveTargetCopy": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = lock inference direction.",
-        "moveStart": "Click to set the start point. | Ctrl = copy on/off.",
+        "moveStart": "Click to set the start point. Red crosses on a group's box rotate it. | Ctrl = copy on/off.",
         "rotateCenter": "Pick the centre of rotation. Arrow keys align the protractor.",
         "rotateStart": "Pick the start point of the rotation angle.",
         "rotateAngle": "Pick or type the rotation angle. Ctrl = copy.",
@@ -332,7 +341,10 @@
         "halfCircle": "Half circle",
         "scaleUniform": "Scale uniformly",
         "scaleTwoAxes": "Scale two axes",
-        "scaleOneAxis": "Scale one axis"
+        "scaleOneAxis": "Scale one axis",
+        "rotateGrip": "Rotate",
+        "roundCorner": "Round corner",
+        "sameDistance": "Same distance from the corner"
       }
     },
     "editor": {
@@ -363,7 +375,9 @@
       "parallel": "Parallel to edge",
       "perpendicular": "Perpendicular to edge",
       "extension": "On edge extension",
-      "fromPoint": "From point"
+      "fromPoint": "From point",
+      "radiusOnFace": "From radius on face",
+      "onProfile": "On outline"
     },
     "measure": {
       "grid": "Grid"
@@ -531,7 +545,9 @@
       "twoFingers": "Two fingers",
       "pinch": "Pinch with two fingers",
       "middleDrag": "Drag middle button",
-      "middleButton": "Middle button"
+      "middleButton": "Middle button",
+      "snappingOn": "Snapping on – to points, edges, axes and round angles (F3)",
+      "snappingOff": "Snapping off – click to switch it on (F3)"
     },
     "contextMenu": {
       "editGroup": "Edit group/component",

@@ -2,12 +2,13 @@ import * as THREE from 'three';
 import type { VertRec, EdgeRec, FaceHit } from '../engine/viewer';
 import type { Editor, PEvt } from '../engine/editor';
 import type { Overlay } from '../engine/overlay';
-import type { EntityRef, Entities } from '../core/model';
+import type { EntityRef, Entities, Instance } from '../core/model';
 import { PointTool, onPlane, planeAxes } from './base';
-import { AXES, AXIS_COLOR, closestOnLineToRay } from '../engine/inference';
+import { AXES, AXIS_COLOR, closestOnLineToRay, snapping } from '../engine/inference';
 import { parseArray, parseLengthList, formatAngle } from '../core/units';
-import { offsetPolygon, polygonNormal, planeBasis, to2D, pointInPolygon2D, distPointSegment2D } from '../core/geometry';
+import { offsetPolygon, polygonNormal, planeBasis, to2D, pointInPolygon2D, distPointSegment2D, closestOnSegment } from '../core/geometry';
 import { t, formatDecimal, normalizeNumberInput } from '../i18n';
+import { gridLevels } from '../engine/gridView';
 
 type V3 = THREE.Vector3;
 
@@ -50,6 +51,50 @@ export class LiveTransform {
     return this.verts.has(vertex);
   }
 }
+
+/**
+ * Arrow keys move the selection by one step of the ground grid as it shows at the selection (Alt: a tenth of it):
+ * left/right and up/down along the red or green axis that runs most that way on screen, Shift + up/down along blue.
+ */
+export const nudgeSelection = (editor: Editor, key: string, shift: boolean, alt: boolean): boolean => {
+  const refs = editor.selected();
+  if (!refs.length || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key)) {
+    return false;
+  }
+  const center = editor.toWorld(editor.entities.refBounds(refs).getCenter(new THREE.Vector3()));
+  const pixel = editor.viewer.worldPerPixel(center);
+  const levels = gridLevels(editor.model.settings.units);
+  let step = levels.find((level) => level / pixel >= 20) ?? levels[levels.length - 1];
+  if (alt) {
+    step /= 10;
+  }
+  const horizontal = key === 'ArrowLeft' || key === 'ArrowRight';
+  const sign = key === 'ArrowRight' || key === 'ArrowUp' ? 1 : -1;
+  let direction: V3;
+  if (shift && !horizontal) {
+    direction = AXES.z.clone();
+  } else {
+    // the screen direction of each horizontal axis; "up" on screen is negative y
+    const origin = editor.viewer.project(center);
+    const onScreen = (['x', 'y'] as const).map((axis) => {
+      const tip = editor.viewer.project(center.clone().addScaledVector(AXES[axis], pixel * 50));
+      return { axis, along: horizontal ? tip.x - origin.x : origin.y - tip.y };
+    });
+    onScreen.sort((left, right) => Math.abs(right.along) - Math.abs(left.along));
+    const best = onScreen[0];
+    direction = AXES[best.axis].clone().multiplyScalar(Math.sign(best.along) || 1);
+  }
+  const delta = direction.multiplyScalar(step * sign);
+  editor.commit('undo.nudge', () => {
+    const live = new LiveTransform(editor.entities, refs);
+    const local = editor.toLocal(center.clone().add(delta)).sub(editor.toLocal(center));
+    live.apply(new THREE.Matrix4().makeTranslation(local.x, local.y, local.z));
+    live.finish();
+  });
+  editor.setVcb(editor.fmt(step));
+  editor.invalidate();
+  return true;
+};
 
 /** Shared selection-or-hover behaviour of Move/Rotate/Scale. */
 const hoverPick = (editor: Editor, pointer: { x: number; y: number }): EntityRef | null => {
@@ -101,6 +146,240 @@ const contextFilters = (editor: Editor, live: LiveTransform | null) => {
       return !(face && ents.faceVertices(face).every((vertex) => live.has(vertex)));
     },
   };
+};
+
+/** A group's or component's bounding box in its own axes; `matrix` maps box coordinates to the model. */
+interface BoxFrame {
+  box: THREE.Box3;
+  matrix: THREE.Matrix4;
+  instance: EntityRef;
+}
+/** Red cross on a face of the box: rotates about the face's normal through its centre (Move and Rotate). */
+interface RotateGrip {
+  world: V3;
+  center: V3;
+  axis: V3;
+}
+
+/** The single selected group/component – or the hovered one when nothing is selected. */
+const boxFrame = (editor: Editor): BoxFrame | null => {
+  const selected = editor.selected();
+  const entityRef = selected.length === 1 ? selected[0] : selected.length ? null : editor.hover;
+  if (entityRef?.kind !== 'instance') {
+    return null;
+  }
+  const instance = editor.entities.instances.get(entityRef.id);
+  if (!instance) {
+    return null;
+  }
+  const box = instance.definition.entities.bounds();
+  if (box.isEmpty()) {
+    return null;
+  }
+  return { box, matrix: editor.contextMatrix.multiply(editor.viewer.shownMatrix(instance)), instance: entityRef };
+};
+
+const boxPoint = (frame: BoxFrame, fraction: number[]) => {
+  const { min, max } = frame.box;
+  return new THREE.Vector3(
+    min.x + (max.x - min.x) * fraction[0],
+    min.y + (max.y - min.y) * fraction[1],
+    min.z + (max.z - min.z) * fraction[2],
+  ).applyMatrix4(frame.matrix);
+};
+
+const boxCorners = (frame: BoxFrame) => [0, 1, 2, 3, 4, 5, 6, 7].map((i) => boxPoint(frame, [i & 1, (i >> 1) & 1, (i >> 2) & 1]));
+
+const BOX_EDGES = [
+  [0, 1],
+  [1, 3],
+  [3, 2],
+  [2, 0],
+  [4, 5],
+  [5, 7],
+  [7, 6],
+  [6, 4],
+  [0, 4],
+  [1, 5],
+  [2, 6],
+  [3, 7],
+];
+
+/** Four crosses on every face of the box that faces the camera – SketchUp's rotation grips. */
+const rotateGrips = (editor: Editor, frame: BoxFrame): RotateGrip[] => {
+  const size = frame.box.getSize(new THREE.Vector3()).toArray();
+  const eye = editor.viewer.rig.camera.position;
+  const grips: RotateGrip[] = [];
+  for (let axis = 0; axis < 3; axis++) {
+    const [first, second] = [0, 1, 2].filter((other) => other !== axis);
+    if (size[first] < 1e-6 || size[second] < 1e-6) {
+      continue;
+    }
+    const direction = new THREE.Vector3().setFromMatrixColumn(frame.matrix, axis).normalize();
+    for (const side of size[axis] < 1e-6 ? [1] : [0, 1]) {
+      const fraction = [0.5, 0.5, 0.5];
+      fraction[axis] = side;
+      const center = boxPoint(frame, fraction);
+      const normal = direction.clone().multiplyScalar(side ? 1 : -1);
+      if (normal.dot(eye.clone().sub(center)) <= 0) {
+        continue;
+      }
+      for (const [along, value] of [
+        [first, 0.2],
+        [first, 0.8],
+        [second, 0.2],
+        [second, 0.8],
+      ]) {
+        const at = [...fraction];
+        at[along] = value;
+        grips.push({ world: boxPoint(frame, at), center, axis: normal });
+      }
+    }
+  }
+  return grips;
+};
+
+/** An outline ("profile") edge of a group or component as the camera sees it, and the point on it under the cursor. */
+interface ProfileGrip {
+  start: V3;
+  end: V3;
+  point: V3;
+}
+const PROFILE_EDGE_LIMIT = 20000;
+let profileCache: { key: string; segments: [V3, V3][] } | null = null;
+
+/**
+ * The outline edges of the box's group or component from where the camera stands: edges between a face turned to the
+ * camera and one turned away, or with one face – soft edges too, so round things have an outline as well.
+ */
+const profileSegments = (editor: Editor, frame: BoxFrame): [V3, V3][] => {
+  const instance = editor.entities.instances.get(frame.instance.id);
+  if (!instance) {
+    return [];
+  }
+  const rig = editor.viewer.rig;
+  const camera = rig.camera;
+  const key = [instance.id, editor.ui.revision, ...frame.matrix.elements, ...camera.matrixWorld.elements].join();
+  if (profileCache?.key === key) {
+    return profileCache.segments;
+  }
+  const eye = camera.position,
+    away = rig.forward().negate();
+  const segments: [V3, V3][] = [];
+  let count = 0;
+  const walk = (ents: Entities, matrix: THREE.Matrix4, depth: number) => {
+    for (const edge of ents.edges.values()) {
+      if (++count > PROFILE_EDGE_LIMIT) {
+        return;
+      }
+      const faces = ents.facesOfEdge(edge.id);
+      if (edge.hidden || !faces.length) {
+        continue;
+      }
+      const start = ents.positionOf(edge.start).clone().applyMatrix4(matrix),
+        end = ents.positionOf(edge.end).clone().applyMatrix4(matrix);
+      const toEye = rig.isOrtho ? away : eye.clone().sub(start.clone().add(end).multiplyScalar(0.5));
+      const facing = faces.slice(0, 2).map((face) => ents.faceNormal(face).transformDirection(matrix).dot(toEye) > 0);
+      if (facing.length === 1 || facing[0] !== facing[1]) {
+        segments.push([start, end]);
+      }
+    }
+    if (depth < 4) {
+      for (const child of ents.instances.values()) {
+        walk(child.definition.entities, matrix.clone().multiply(child.matrix), depth + 1);
+      }
+    }
+  };
+  walk(instance.definition.entities, frame.matrix, 0);
+  profileCache = { key, segments };
+  return segments;
+};
+
+/** the outline edge closest to the cursor on screen (within a few pixels) and the point on it under the cursor */
+const profileUnder = (editor: Editor, pointer: { x: number; y: number }, frame: BoxFrame): ProfileGrip | null => {
+  let best: ProfileGrip | null = null;
+  let bestDistance = 7;
+  const mouse = new THREE.Vector2(pointer.x, pointer.y);
+  const ray = editor.viewer.ray(pointer.x, pointer.y);
+  for (const [start, end] of profileSegments(editor, frame)) {
+    const screenStart = editor.viewer.project(start),
+      screenEnd = editor.viewer.project(end);
+    if (!screenStart.visible || !screenEnd.visible) {
+      continue;
+    }
+    const distance = distPointSegment2D(
+      mouse,
+      new THREE.Vector2(screenStart.x, screenStart.y),
+      new THREE.Vector2(screenEnd.x, screenEnd.y),
+    );
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      const point = closestOnSegment(closestOnLineToRay(start, end.clone().sub(start), ray), start, end).point;
+      best = { start, end, point };
+    }
+  }
+  return best;
+};
+
+/** Corners and edge midpoints of the box – Move can start from them like from geometry. */
+const boxGripPoints = (frame: BoxFrame): V3[] => {
+  const points: V3[] = [];
+  for (const x of [0, 0.5, 1]) {
+    for (const y of [0, 0.5, 1]) {
+      for (const z of [0, 0.5, 1]) {
+        if ([x, y, z].filter((value) => value === 0.5).length <= 1) {
+          points.push(boxPoint(frame, [x, y, z]));
+        }
+      }
+    }
+  }
+  return points;
+};
+
+const nearestOnScreen = <T>(editor: Editor, pointer: { x: number; y: number }, items: T[], at: (item: T) => V3, radius = 8) => {
+  let best: T | null = null;
+  let bestDistance = radius;
+  for (const item of items) {
+    const screenPos = editor.viewer.project(at(item));
+    if (!screenPos.visible) {
+      continue;
+    }
+    const distance = Math.hypot(screenPos.x - pointer.x, screenPos.y - pointer.y);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = item;
+    }
+  }
+  return best;
+};
+
+/** The box with its rotation grips; the hot grip shows the protractor it rotates in. */
+const drawBoxFrame = (editor: Editor, overlay: Overlay, frame: BoxFrame, grips: RotateGrip[], hot: RotateGrip | null) => {
+  const corners = boxCorners(frame);
+  for (const [i, j] of BOX_EDGES) {
+    overlay.line(corners[i], corners[j], '#d4b000', 1);
+  }
+  const context = overlay.context;
+  for (const grip of grips) {
+    const screenPos = overlay.screen(grip.world);
+    if (!screenPos) {
+      continue;
+    }
+    const half = grip === hot ? 6 : 4;
+    context.strokeStyle = '#e00000';
+    context.lineWidth = grip === hot ? 2.5 : 1.5;
+    context.beginPath();
+    context.moveTo(screenPos.x - half, screenPos.y);
+    context.lineTo(screenPos.x + half, screenPos.y);
+    context.moveTo(screenPos.x, screenPos.y - half);
+    context.lineTo(screenPos.x, screenPos.y + half);
+    context.stroke();
+  }
+  if (hot) {
+    const radius = hot.world.distanceTo(hot.center);
+    overlay.circle3D(hot.center, hot.axis, radius, '#555', 1, 48, [4, 3]);
+    overlay.line(hot.center, hot.world, '#555', 1, [4, 3]);
+  }
 };
 
 // ===================================================================== Push/Pull
@@ -429,6 +708,14 @@ export class MoveTool extends PointTool {
   pressed = false;
   delta = new THREE.Vector3();
   lastCopy: { refs: EntityRef[]; delta: V3; orig: EntityRef[] } | null = null;
+  frame: BoxFrame | null = null;
+  rotateGrips: RotateGrip[] = [];
+  hotRotate: RotateGrip | null = null;
+  hotPoint: V3 | null = null;
+  hotProfile: ProfileGrip | null = null;
+  /** moving from an outline edge: the moved groups are see-through, with the look they had before */
+  fromProfile = false;
+  seeThrough: { instance: Instance; look: ReturnType<Editor['viewer']['shownLook']> }[] = [];
   status() {
     return this.start ? t(this.copy ? 'tools.status.moveTargetCopy' : 'tools.status.moveTarget') : t('tools.status.moveStart');
   }
@@ -436,16 +723,44 @@ export class MoveTool extends PointTool {
     return !!this.start;
   }
   cancel() {
+    this.clearSeeThrough();
     if (this.start) {
       this.editor.abortOp();
     }
     this.start = null;
     this.live = null;
+    this.fromProfile = false;
     this.resetLocks();
+    this.clearGrips();
     this.editor.setHover(null);
   }
   activate() {
     this.copy = false;
+  }
+  clearGrips() {
+    this.frame = null;
+    this.rotateGrips = [];
+    this.hotRotate = null;
+    this.hotPoint = null;
+    this.hotProfile = null;
+  }
+  /** the moved groups and components see-through, so what lies behind them can be seen and picked */
+  applySeeThrough() {
+    const viewer = this.editor.viewer;
+    for (const id of this.live?.insts.keys() ?? []) {
+      const instance = this.editor.entities.instances.get(id);
+      if (instance) {
+        const look = viewer.shownLook(instance);
+        this.seeThrough.push({ instance, look });
+        viewer.lookForDisplay(instance, { ...look, opacity: (look?.opacity ?? 1) * 0.35 });
+      }
+    }
+  }
+  clearSeeThrough() {
+    for (const { instance, look } of this.seeThrough) {
+      this.editor.viewer.lookForDisplay(instance, look);
+    }
+    this.seeThrough = [];
   }
   refs(): EntityRef[] {
     return this.editor.selected();
@@ -457,6 +772,19 @@ export class MoveTool extends PointTool {
       if (!editor.selected().length) {
         editor.setHover(hoverPick(editor, pointer));
       }
+      // a group or component shows its box: crosses rotate it, corners and midpoints are start points
+      this.frame = boxFrame(editor);
+      this.rotateGrips = this.frame ? rotateGrips(editor, this.frame) : [];
+      this.hotRotate = nearestOnScreen(editor, pointer, this.rotateGrips, (grip) => grip.world);
+      this.hotPoint =
+        this.frame && snapping.value && !this.hotRotate && !['endpoint', 'midpoint'].includes(this.inference?.kind ?? '')
+          ? nearestOnScreen(editor, pointer, boxGripPoints(this.frame), (point) => point)
+          : null;
+      // an outline edge of it – also of round things, whose outline is no real edge
+      this.hotProfile =
+        this.frame && !this.hotRotate && !this.hotPoint && !['endpoint', 'midpoint'].includes(this.inference?.kind ?? '')
+          ? profileUnder(editor, pointer, this.frame)
+          : null;
       return;
     }
     const inference = this.pick(pointer, this.start, contextFilters(editor, this.live));
@@ -491,12 +819,32 @@ export class MoveTool extends PointTool {
     }
     this.live = new LiveTransform(editor.entities, refs);
     this.lastCopy = this.copy ? { refs, delta: new THREE.Vector3(), orig } : null;
+    if (this.fromProfile) {
+      this.applySeeThrough();
+    }
   }
   onDown(pointer: PEvt) {
     this.downAt = { x: pointer.x, y: pointer.y };
     if (!this.start) {
-      const inference = this.pick(pointer, null);
-      this.begin(inference.point);
+      if (this.hotRotate && this.frame) {
+        const grip = this.hotRotate;
+        const editor = this.editor;
+        editor.select([this.frame.instance]);
+        editor.setHover(null);
+        const rotate = editor.tools.get('rotate') as RotateTool | undefined;
+        if (rotate) {
+          editor.setTool('rotate');
+          rotate.startAt(grip, pointer, 'move');
+        }
+        return;
+      }
+      const point = this.hotPoint ?? this.hotProfile?.point ?? this.pick(pointer, null).point;
+      this.fromProfile = !!this.hotProfile;
+      if ((this.hotPoint || this.hotProfile) && this.frame) {
+        this.editor.select([this.frame.instance]);
+      }
+      this.clearGrips();
+      this.begin(point);
       this.pressed = true;
       return;
     }
@@ -517,6 +865,7 @@ export class MoveTool extends PointTool {
       this.cancel();
       return;
     }
+    this.clearSeeThrough();
     this.live.finish();
     editor.endOp();
     if (this.lastCopy) {
@@ -524,6 +873,7 @@ export class MoveTool extends PointTool {
     }
     this.start = null;
     this.live = null;
+    this.fromProfile = false;
     this.resetLocks();
     editor.invalidate();
   }
@@ -533,6 +883,7 @@ export class MoveTool extends PointTool {
       if (this.start) {
         const start = this.start,
           delta = this.delta.clone();
+        this.clearSeeThrough();
         this.editor.abortOp();
         this.start = null;
         this.live = null;
@@ -541,6 +892,10 @@ export class MoveTool extends PointTool {
       }
       this.editor.refreshStatus();
       return true;
+    }
+    // before the start point arrow keys move the selection (nudge) instead of locking a direction
+    if (!this.start && keyEvent.key.startsWith('Arrow') && this.editor.selected().length) {
+      return false;
     }
     return super.onKey(keyEvent, down);
   }
@@ -596,7 +951,21 @@ export class MoveTool extends PointTool {
       const col = this.inference.axis ? AXIS_COLOR[this.inference.axis] : '#000';
       overlay.line(this.start, this.start.clone().add(this.delta), col, 1.2, [4, 3]);
     }
-    this.drawInference(overlay);
+    if (!this.start && this.frame) {
+      drawBoxFrame(this.editor, overlay, this.frame, this.rotateGrips, this.hotRotate);
+      if (this.hotPoint) {
+        overlay.marker(this.hotPoint, 'endpoint');
+      }
+      if (this.hotRotate) {
+        overlay.tooltip(this.editor.mouse.x, this.editor.mouse.y, t('tools.hints.rotateGrip'));
+      }
+      if (this.hotProfile) {
+        overlay.line(this.hotProfile.start, this.hotProfile.end, '#e07000', 3);
+        overlay.marker(this.hotProfile.point, 'edge');
+        overlay.tooltip(this.editor.mouse.x, this.editor.mouse.y, t('inference.onProfile'));
+      }
+    }
+    this.drawInference(overlay, !this.hotRotate && !this.hotPoint && !this.hotProfile);
     if (this.copy) {
       const context = overlay.context;
       context.font = 'bold 14px sans-serif';
@@ -622,6 +991,14 @@ export class RotateTool extends PointTool {
   hoverN = new THREE.Vector3(0, 0, 1);
   hoverP: V3 | null = null;
   lastCopy: { orig: EntityRef[]; angle: number; center: V3; normal: V3 } | null = null;
+  frame: BoxFrame | null = null;
+  grips: RotateGrip[] = [];
+  hotGrip: RotateGrip | null = null;
+  /** started from a rotation grip of another tool (Move): back to it when done */
+  returnTo: string | null = null;
+  pressed = false;
+  /** the start point's circle meets the face under the cursor here – the angle snapped to it */
+  lean: { angle: number; point: V3 } | null = null;
   status() {
     return !this.center ? t('tools.status.rotateCenter') : !this.ref ? t('tools.status.rotateStart') : t('tools.status.rotateAngle');
   }
@@ -635,7 +1012,49 @@ export class RotateTool extends PointTool {
     this.center = this.ref = null;
     this.live = null;
     this.angle = 0;
+    this.lean = null;
+    this.frame = null;
+    this.grips = [];
+    this.hotGrip = null;
     this.editor.setHover(null);
+    this.goBack();
+  }
+  /** after the rotation from a grip: the tool it came from, unless the user picked another one meanwhile */
+  goBack() {
+    const back = this.returnTo;
+    this.returnTo = null;
+    this.pressed = false;
+    if (back) {
+      queueMicrotask(() => {
+        if (this.editor.tool === this) {
+          this.editor.setTool(back);
+        }
+      });
+    }
+  }
+  /** rotation grip clicked in another tool: the protractor lies on the grip's face, the grip is the start of the angle */
+  startAt(grip: RotateGrip, pointer: PEvt, returnTo: string) {
+    this.center = grip.center.clone();
+    this.normal = grip.axis.clone();
+    this.begin(grip.world.clone());
+    this.returnTo = returnTo;
+    this.pressed = true;
+    this.downAt = { x: pointer.x, y: pointer.y };
+    this.editor.refreshStatus();
+  }
+  /** the start of the angle is set: the selection rotates live from here */
+  begin(ref: V3) {
+    const editor = this.editor;
+    this.ref = ref;
+    editor.beginOp(this.copy ? 'undo.rotateCopy' : 'tools.rotate');
+    let refs = editor.selected();
+    const orig = refs;
+    if (this.copy) {
+      refs = editor.entities.copy(refs, new THREE.Matrix4(), editor.model);
+      editor.select(refs);
+    }
+    this.live = new LiveTransform(editor.entities, refs);
+    this.lastCopy = this.copy ? { orig, angle: 0, center: this.center!.clone(), normal: this.normal.clone() } : null;
   }
   onKey(keyEvent: KeyboardEvent, down: boolean) {
     if (down && ['ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(keyEvent.key) && !this.ref) {
@@ -668,6 +1087,14 @@ export class RotateTool extends PointTool {
       if (!editor.selected().length) {
         editor.setHover(hoverPick(editor, pointer));
       }
+      // the protractor snaps to the rotation grips of a group's or component's box
+      this.frame = boxFrame(editor);
+      this.grips = this.frame ? rotateGrips(editor, this.frame) : [];
+      this.hotGrip = this.normalLock ? null : nearestOnScreen(editor, pointer, this.grips, (grip) => grip.world);
+      if (this.hotGrip) {
+        this.hoverP = this.hotGrip.center.clone();
+        this.hoverN = this.hotGrip.axis.clone();
+      }
       return;
     }
     if (!this.ref) {
@@ -691,10 +1118,45 @@ export class RotateTool extends PointTool {
     let ang = Math.atan2(fromRef.clone().cross(toTarget).dot(this.normal), fromRef.dot(toTarget));
     const step = Math.PI / 12;
     const snap = Math.round(ang / step) * step;
-    if (Math.abs(ang - snap) < THREE.MathUtils.degToRad(2.5) && !(inference.kind === 'endpoint')) {
+    if (snapping.value && Math.abs(ang - snap) < THREE.MathUtils.degToRad(2.5) && !(inference.kind === 'endpoint')) {
       ang = snap;
     }
+    // over a face: the angle where the start point's circle meets it (a ladder leaning against a wall)
+    this.lean = snapping.value && inference.kind === 'face' && inference.face ? this.leanOn(inference.face, ang) : null;
+    if (this.lean) {
+      ang = this.lean.angle;
+    }
     this.applyAngle(ang);
+  }
+  /** where the circle the start point runs on crosses the face – the crossing nearest to `angle`, if inside the face */
+  leanOn(faceHit: FaceHit, angle: number): { angle: number; point: V3 } | null {
+    const center = this.center!,
+      normal = this.normal;
+    const radial = this.ref!.clone().sub(center);
+    const across = normal.clone().cross(radial);
+    const faceNormal = faceHit.normal.clone().normalize();
+    // radial·m cos θ + across·m sin θ = -(center - face)·m
+    const cosPart = radial.dot(faceNormal),
+      sinPart = across.dot(faceNormal),
+      offset = center.clone().sub(faceHit.point).dot(faceNormal);
+    const amplitude = Math.hypot(cosPart, sinPart);
+    if (amplitude < 1e-9 || Math.abs(offset) > amplitude) {
+      return null;
+    }
+    const phase = Math.atan2(sinPart, cosPart),
+      spread = Math.acos(-offset / amplitude);
+    const wrap = (value: number) => Math.atan2(Math.sin(value), Math.cos(value));
+    const best = [phase + spread, phase - spread]
+      .map(wrap)
+      .sort((left, right) => Math.abs(wrap(left - angle)) - Math.abs(wrap(right - angle)))[0];
+    const point = center.clone().addScaledVector(radial, Math.cos(best)).addScaledVector(across, Math.sin(best));
+    const ents = faceHit.context.entities;
+    const face = ents.faces.get(faceHit.faceId);
+    const local = point.clone().applyMatrix4(faceHit.context.world.clone().invert());
+    if (!face || !ents.pointInFace(face, local, false)) {
+      return null;
+    }
+    return { angle: best, point };
   }
   matrix(angle: number): THREE.Matrix4 {
     const editor = this.editor;
@@ -722,9 +1184,17 @@ export class RotateTool extends PointTool {
         return;
       }
       editor.setHover(null);
-      const inference = this.pick(pointer, null);
-      this.center = inference.point.clone();
-      this.normal = this.planeNormal();
+      if (this.hotGrip) {
+        this.center = this.hotGrip.center.clone();
+        this.normal = this.hotGrip.axis.clone();
+      } else {
+        const inference = this.pick(pointer, null);
+        this.center = inference.point.clone();
+        this.normal = this.planeNormal();
+      }
+      this.frame = null;
+      this.grips = [];
+      this.hotGrip = null;
       return;
     }
     if (!this.ref) {
@@ -733,19 +1203,17 @@ export class RotateTool extends PointTool {
       if (point.distanceTo(this.center) < 1e-5) {
         return;
       }
-      this.ref = point;
-      editor.beginOp(this.copy ? 'undo.rotateCopy' : 'tools.rotate');
-      let refs = editor.selected();
-      const orig = refs;
-      if (this.copy) {
-        refs = editor.entities.copy(refs, new THREE.Matrix4(), editor.model);
-        editor.select(refs);
-      }
-      this.live = new LiveTransform(editor.entities, refs);
-      this.lastCopy = this.copy ? { orig, angle: 0, center: this.center.clone(), normal: this.normal.clone() } : null;
+      this.begin(point);
       return;
     }
     this.finish();
+  }
+  onUp(pointer: PEvt) {
+    // dragged from a rotation grip: letting go ends the rotation
+    if (this.pressed && this.isDrag(pointer) && this.live) {
+      this.finish();
+    }
+    this.pressed = false;
   }
   finish() {
     const editor = this.editor;
@@ -760,6 +1228,7 @@ export class RotateTool extends PointTool {
     this.center = this.ref = null;
     this.live = null;
     editor.invalidate();
+    this.goBack();
   }
   onVcb(text: string) {
     const editor = this.editor;
@@ -796,6 +1265,9 @@ export class RotateTool extends PointTool {
   }
   draw(overlay: Overlay) {
     const editor = this.editor;
+    if (!this.center && this.frame) {
+      drawBoxFrame(editor, overlay, this.frame, this.grips, null);
+    }
     const center = this.center ?? this.hoverP;
     if (!center) {
       return;
@@ -824,6 +1296,22 @@ export class RotateTool extends PointTool {
       if (this.ref) {
         const cur = this.ref.clone().sub(this.center).applyAxisAngle(this.normal, this.angle).add(this.center);
         overlay.line(this.center, cur, '#000', 1.2);
+        if (this.lean) {
+          const screenPos = overlay.screen(this.lean.point);
+          if (screenPos) {
+            const context = overlay.context;
+            context.strokeStyle = '#e00000';
+            context.lineWidth = 2;
+            context.setLineDash([]);
+            context.beginPath();
+            context.moveTo(screenPos.x - 5, screenPos.y - 5);
+            context.lineTo(screenPos.x + 5, screenPos.y + 5);
+            context.moveTo(screenPos.x + 5, screenPos.y - 5);
+            context.lineTo(screenPos.x - 5, screenPos.y + 5);
+            context.stroke();
+          }
+          overlay.tooltip(editor.mouse.x, editor.mouse.y, t('inference.radiusOnFace'));
+        }
       }
     }
     if (this.copy) {
@@ -953,7 +1441,7 @@ export class ScaleTool extends PointTool {
     }
     // snap to round factors
     const rounded = Math.round(factor * 10) / 10;
-    if (Math.abs(factor - rounded) < 0.02) {
+    if (snapping.value && Math.abs(factor - rounded) < 0.02) {
       factor = rounded;
     }
     this.applyFactor(factor);

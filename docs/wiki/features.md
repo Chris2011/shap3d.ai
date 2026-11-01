@@ -90,4 +90,6 @@ The sun/moon split button switches dark mode on and off. Its menu lets you set t
 | Middle mouse button, <kbd>Shift</kbd> + middle mouse button, wheel                                                 | Orbit, pan, zoom                                       |
 | <kbd>Shift</kbd>+<kbd>Z</kbd>, <kbd>Alt</kbd>+<kbd>K</kbd>, <kbd>K</kbd>                                           | Zoom extents, X-ray, back edges                        |
 | <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd>, <kbd>Ctrl</kbd>+<kbd>S</kbd>                          | Undo / redo, save                                      |
+| <kbd>F3</kbd>                                                                                                      | Snapping on/off (also the magnet in the status bar)    |
+| Arrow keys, <kbd>Shift</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>, <kbd>Alt</kbd> + arrow keys                                | Move the selection one grid step, up/down, a tenth step |
 | Type a number and <kbd>Enter</kbd>                                                                                 | Exact length, distance or angle while a tool is active |

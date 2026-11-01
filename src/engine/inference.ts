@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { useLocalStorage } from '@vueuse/core';
 import type { Viewer, EdgeRec, VertRec, FaceHit, PickContext } from './viewer';
 import type { Overlay } from './overlay';
 import type { Entities } from '../core/model';
@@ -58,6 +59,12 @@ export const AXIS_LABEL = {
   },
 };
 export const MAGENTA = '#e000e0';
+
+/**
+ * Snapping on/off (F3, remembered in the browser): off, the cursor neither snaps to points, edges, guides and axes nor
+ * to round angles, factors and shapes – it stays on the face or plane under it. Arrow-key and shift locks still work.
+ */
+export const snapping = useLocalStorage('s3d.snapping', true);
 
 /** Snap radii in screen pixels – independent of zoom like in SketchUp. */
 const POINT_RADIUS = 10,
@@ -396,10 +403,14 @@ export class InferenceEngine {
     const ray = viewer.ray(x, y);
     const from = opt.from ?? null;
     const geometry = !opt.noGeometry;
+    const snap = snapping.value;
     // ---- locked direction: whatever the cursor snaps to is projected onto the locked line
     const lockOrigin = opt.lockOrigin ?? from;
     if (lockOrigin && opt.lock) {
-      return (this.last = this.inferLocked(x, y, lockOrigin, opt));
+      return (this.last = this.inferLocked(x, y, lockOrigin, snap ? opt : { ...opt, noGeometry: true }));
+    }
+    if (!snap) {
+      return (this.last = this.inferFree(x, y, opt));
     }
     // ---- points
     const point = geometry ? this.pickPoint(x, y, opt) : null;
@@ -480,6 +491,30 @@ export class InferenceEngine {
     }
     const freePoint = ray.at(from ? from.distanceTo(ray.origin) : 10, new THREE.Vector3());
     return (this.last = { point: freePoint, kind: 'free', label: '' });
+  }
+
+  /** Snapping off: the point on the plane, the face or the ground under the cursor – nothing pulls it aside. */
+  private inferFree(x: number, y: number, opt: InferOptions): Inference {
+    const ray = this.viewer.ray(x, y);
+    const from = opt.from ?? null;
+    if (opt.plane) {
+      const hit = ray.intersectPlane(
+        new THREE.Plane().setFromNormalAndCoplanarPoint(opt.plane.normal, opt.plane.point),
+        new THREE.Vector3(),
+      );
+      if (hit) {
+        return { point: hit, kind: 'face', label: '' };
+      }
+    }
+    const faceHit = opt.noGeometry ? null : this.viewer.pickFace(x, y, opt.filterFace);
+    if (faceHit) {
+      return { point: faceHit.point, kind: 'face', label: '', face: faceHit };
+    }
+    const groundPoint = ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), from ? -from.z : 0), new THREE.Vector3());
+    if (groundPoint && groundPoint.distanceTo(ray.origin) < 5000) {
+      return { point: groundPoint, kind: 'ground', label: '' };
+    }
+    return { point: ray.at(from ? from.distanceTo(ray.origin) : 10, new THREE.Vector3()), kind: 'free', label: '' };
   }
 
   /** Locked to a line through `from`: points project onto it, edges meet it, parallel faces cut it. */

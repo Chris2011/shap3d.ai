@@ -106,7 +106,8 @@
       "view-right": "Rechts",
       "view-back": "Hinten",
       "view-left": "Links",
-      "view-bottom": "Unten"
+      "view-bottom": "Unten",
+      "toggleSnapping": "Fangen"
     },
     "names": {
       "model": "Modell",
@@ -187,7 +188,10 @@
       "script": "Skript",
       "insertMesh": "Mesh einfügen",
       "fewerPolygons": "Weniger Polygone",
-      "tagsToScenes": "Tags auf Szenen"
+      "tagsToScenes": "Tags auf Szenen",
+      "nudge": "Mit Pfeiltasten verschieben",
+      "roundCorner": "Ecke abrunden",
+      "unroundCorner": "Ecke zurück"
     },
     "toast": {
       "nothingSelected": "Nichts ausgewählt",
@@ -205,7 +209,12 @@
       "loadFailed": "Laden fehlgeschlagen",
       "locked": "Gesperrt",
       "selectFirst": "Wählen Sie zuerst Objekte aus.",
-      "noValidPath": "Kein gültiger Pfad ausgewählt."
+      "noValidPath": "Kein gültiger Pfad ausgewählt.",
+      "snappingOn": "Fangen ein (F3)",
+      "snappingOff": "Fangen aus – Punkte bleiben, wo der Mauszeiger ist (F3)",
+      "roundCornerTwoEdges": "Nur eine Ecke aus genau zwei Kanten lässt sich abrunden.",
+      "roundCornerTooShort": "Die Kanten dieser Ecke sind für diese Rundung zu kurz.",
+      "unroundNoCorner": "Dieser Bogen liegt nicht zwischen zwei geraden Kanten, die sich in einer Ecke treffen."
     },
     "confirm": {
       "discardChanges": "Ungespeicherte Änderungen verwerfen?",
@@ -272,8 +281,8 @@
         "lineEnd": "Klicken, um den Endpunkt festzulegen, oder Länge eingeben. | Pfeiltasten = Ableitungsrichtung fixieren ein/aus. Umschalt = Ableitung fixieren.",
         "lineStart": "Klicken, um den ersten Endpunkt festzulegen. | Pfeiltasten = Ableitungsrichtung fixieren ein/aus.",
         "freehand": "Klicken und ziehen Sie, um eine Freihandkurve zu zeichnen.",
-        "rectangleCorner": "Klicken, um die gegenüberliegende Ecke festzulegen, oder Länge und Breite eingeben (z. B. 2000; 1500).",
-        "rectangleStart": "Klicken, um die erste Ecke festzulegen.",
+        "rectangleCorner": "Klicken, um die gegenüberliegende Ecke festzulegen, oder Länge und Breite eingeben (z. B. 2000; 1500). | Pfeil nach unten = an der zuletzt berührten Kante, nochmal = an den Achsen.",
+        "rectangleStart": "Klicken, um die erste Ecke festzulegen. | Beginnt das Rechteck auf einer Kante, richtet es sich an ihr aus.",
         "rotrect1": "Wählen Sie die erste Ecke aus.",
         "rotrect2": "Wählen Sie die zweite Ecke (Länge und Richtung) aus.",
         "rotrect3": "Wählen Sie die Breite und den Winkel aus.",
@@ -281,7 +290,7 @@
         "polygonRadius": "Wählen Sie den Radius aus oder geben Sie ihn ein. ({count} Seiten; „12s“ ändert die Anzahl)",
         "circleCenter": "Wählen Sie den Mittelpunkt aus. Geben Sie z. B. „48s“ ein, um die Segmente zu ändern.",
         "polygonCenter": "Wählen Sie den Mittelpunkt aus. Geben Sie z. B. „8s“ ein, um die Seiten zu ändern.",
-        "arc2Start": "Wählen Sie den Startpunkt des Bogens aus.",
+        "arc2Start": "Wählen Sie den Startpunkt des Bogens aus. | Punkte auf zwei Kanten einer Ecke runden sie ab. Doppelklick auf eine Ecke = wie die letzte abrunden, auf einen Bogen = Ecke zurück.",
         "pickEnd": "Wählen Sie den Endpunkt aus.",
         "arc2Bulge": "Wählen Sie die Wölbung aus oder geben Sie sie ein.",
         "pickCenter": "Wählen Sie den Mittelpunkt aus.",
@@ -297,7 +306,7 @@
         "offsetPick": "Wählen Sie eine Fläche für den Versatz aus.",
         "moveTarget": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. | Strg = Kopie ein/aus. Pfeiltasten = Ableitungsrichtung fixieren.",
         "moveTargetCopy": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. (Kopie) | Strg = Kopie ein/aus. Pfeiltasten = Ableitungsrichtung fixieren.",
-        "moveStart": "Klicken, um den Startpunkt festzulegen. | Strg = Kopie ein/aus.",
+        "moveStart": "Klicken, um den Startpunkt festzulegen. Rote Kreuze am Rahmen einer Gruppe drehen sie. | Strg = Kopie ein/aus.",
         "rotateCenter": "Wählen Sie den Drehpunkt aus. Pfeiltasten richten den Winkelmesser aus.",
         "rotateStart": "Wählen Sie den Startpunkt des Drehwinkels aus.",
         "rotateAngle": "Wählen Sie den Drehwinkel aus oder geben Sie ihn ein. Strg = Kopie.",
@@ -332,7 +341,10 @@
         "halfCircle": "Halbkreis",
         "scaleUniform": "Gleichmäßig skalieren",
         "scaleTwoAxes": "Zwei Achsen skalieren",
-        "scaleOneAxis": "Eine Achse skalieren"
+        "scaleOneAxis": "Eine Achse skalieren",
+        "rotateGrip": "Drehen",
+        "roundCorner": "Ecke abrunden",
+        "sameDistance": "Gleicher Abstand zur Ecke"
       }
     },
     "editor": {
@@ -363,7 +375,9 @@
       "parallel": "Parallel zu Kante",
       "perpendicular": "Senkrecht zu Kante",
       "extension": "Auf Kantenverlängerung",
-      "fromPoint": "Von Punkt"
+      "fromPoint": "Von Punkt",
+      "radiusOnFace": "Vom Radius auf Fläche",
+      "onProfile": "Auf Umriss"
     },
     "measure": {
       "grid": "Raster"
@@ -531,7 +545,9 @@
       "pinch": "Zwei Finger zusammenziehen",
       "middleDrag": "Mittlere Taste ziehen",
       "middleButton": "Mittlere Taste",
-      "building": "Skript baut das Modell …"
+      "building": "Skript baut das Modell …",
+      "snappingOn": "Fangen ein – an Punkten, Kanten, Achsen und runden Winkeln (F3)",
+      "snappingOff": "Fangen aus – klicken zum Einschalten (F3)"
     },
     "contextMenu": {
       "editGroup": "Gruppe/Komponente bearbeiten",

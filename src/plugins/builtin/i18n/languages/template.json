@@ -380,7 +380,9 @@
       "view-left": "",
       "view-left#en": "Left",
       "view-bottom": "",
-      "view-bottom#en": "Bottom"
+      "view-bottom#en": "Bottom",
+      "toggleSnapping": "",
+      "toggleSnapping#en": "Snapping"
     },
     "names": {
       "model": "",
@@ -532,7 +534,13 @@
       "fewerPolygons": "",
       "fewerPolygons#en": "Fewer polygons",
       "tagsToScenes": "",
-      "tagsToScenes#en": "Tags to scenes"
+      "tagsToScenes#en": "Tags to scenes",
+      "nudge": "",
+      "nudge#en": "Move with arrow keys",
+      "roundCorner": "",
+      "roundCorner#en": "Round corner",
+      "unroundCorner": "",
+      "unroundCorner#en": "Corner back"
     },
     "toast": {
       "nothingSelected": "",
@@ -566,7 +574,17 @@
       "selectFirst": "",
       "selectFirst#en": "Select objects first.",
       "noValidPath": "",
-      "noValidPath#en": "No valid path selected."
+      "noValidPath#en": "No valid path selected.",
+      "snappingOn": "",
+      "snappingOn#en": "Snapping on (F3)",
+      "snappingOff": "",
+      "snappingOff#en": "Snapping off – points stay where the cursor is (F3)",
+      "roundCornerTwoEdges": "",
+      "roundCornerTwoEdges#en": "Only a corner of exactly two edges can be rounded.",
+      "roundCornerTooShort": "",
+      "roundCornerTooShort#en": "The edges of this corner are too short for that rounding.",
+      "unroundNoCorner": "",
+      "unroundNoCorner#en": "This arc does not lie between two straight edges that meet in a corner."
     },
     "confirm": {
       "discardChanges": "",
@@ -691,9 +709,9 @@
         "freehand": "",
         "freehand#en": "Click and drag to draw a freehand curve.",
         "rectangleCorner": "",
-        "rectangleCorner#en": "Click to set the opposite corner, or type length and width (e.g. 2000; 1500).",
+        "rectangleCorner#en": "Click to set the opposite corner, or type length and width (e.g. 2000; 1500). | Down arrow = along the edge touched last, again = along the axes.",
         "rectangleStart": "",
-        "rectangleStart#en": "Click to set the first corner.",
+        "rectangleStart#en": "Click to set the first corner. | Starting on an edge aligns the rectangle with it.",
         "rotrect1": "",
         "rotrect1#en": "Pick the first corner.",
         "rotrect2": "",
@@ -709,7 +727,7 @@
         "polygonCenter": "",
         "polygonCenter#en": "Pick the centre. Type e.g. “8s” to change the sides.",
         "arc2Start": "",
-        "arc2Start#en": "Pick the start point of the arc.",
+        "arc2Start#en": "Pick the start point of the arc. | Points on two edges of a corner round it. Double-click a corner = round it like the last one, an arc = its corner back.",
         "pickEnd": "",
         "pickEnd#en": "Pick the end point.",
         "arc2Bulge": "",
@@ -741,7 +759,7 @@
         "moveTargetCopy": "",
         "moveTargetCopy#en": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = lock inference direction.",
         "moveStart": "",
-        "moveStart#en": "Click to set the start point. | Ctrl = copy on/off.",
+        "moveStart#en": "Click to set the start point. Red crosses on a group's box rotate it. | Ctrl = copy on/off.",
         "rotateCenter": "",
         "rotateCenter#en": "Pick the centre of rotation. Arrow keys align the protractor.",
         "rotateStart": "",
@@ -809,7 +827,13 @@
         "scaleTwoAxes": "",
         "scaleTwoAxes#en": "Scale two axes",
         "scaleOneAxis": "",
-        "scaleOneAxis#en": "Scale one axis"
+        "scaleOneAxis#en": "Scale one axis",
+        "rotateGrip": "",
+        "rotateGrip#en": "Rotate",
+        "roundCorner": "",
+        "roundCorner#en": "Round corner",
+        "sameDistance": "",
+        "sameDistance#en": "Same distance from the corner"
       }
     },
     "editor": {
@@ -866,7 +890,11 @@
       "extension": "",
       "extension#en": "On edge extension",
       "fromPoint": "",
-      "fromPoint#en": "From point"
+      "fromPoint#en": "From point",
+      "radiusOnFace": "",
+      "radiusOnFace#en": "From radius on face",
+      "onProfile": "",
+      "onProfile#en": "On outline"
     },
     "measure": {
       "grid": "",
@@ -1170,7 +1198,11 @@
       "middleDrag": "",
       "middleDrag#en": "Drag middle button",
       "middleButton": "",
-      "middleButton#en": "Middle button"
+      "middleButton#en": "Middle button",
+      "snappingOn": "",
+      "snappingOn#en": "Snapping on – to points, edges, axes and round angles (F3)",
+      "snappingOff": "",
+      "snappingOff#en": "Snapping off – click to switch it on (F3)"
     },
     "contextMenu": {
       "editGroup": "",
