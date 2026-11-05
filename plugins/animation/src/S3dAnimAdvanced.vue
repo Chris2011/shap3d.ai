@@ -126,6 +126,7 @@
             <option value="center">{{ t('animation.pivot.center') }}</option>
             <option value="bottom">{{ t('animation.pivot.bottom') }}</option>
             <option value="origin">{{ t('animation.pivot.origin') }}</option>
+            <option v-if="animation?.bone" value="joint">{{ t('animation.pivot.joint') }}</option>
           </select>
         </div>
 
@@ -185,6 +186,8 @@
       </template>
       <p v-else class="s3d-an-hint">{{ t('animation.panel.selectHint') }}</p>
     </section>
+
+    <S3dAnimRig />
 
     <!-- cameras and the shots that cut between them -->
     <section class="s3d-an-section">
@@ -437,6 +440,7 @@
 import { computed, ref } from 'vue';
 import S3dAnimField from './S3dAnimField.vue';
 import S3dAnimRender from './S3dAnimRender.vue';
+import S3dAnimRig from './S3dAnimRig.vue';
 import { currentPose, currentScene, overrides } from './apply';
 import { evaluate } from './curves';
 import { newId, objectAnimation, type Axis, type LightAnimation, type ObjectAnimation, type Tracks } from './data';
@@ -535,6 +539,9 @@ const toggleObject = (channels: string[]) => {
 
 const pivotKind = computed(() => {
   const pivot = animation.value?.pivot;
+  if (animation.value?.bone) {
+    return 'joint';
+  }
   if (!pivot) {
     return 'center';
   }
@@ -544,7 +551,7 @@ const pivotKind = computed(() => {
 /** the point it turns about: the middle of its box, the middle of its bottom, or its own origin */
 const setPivot = (kind: string) => {
   const instance = selected.value;
-  if (!instance) {
+  if (!instance || kind === 'joint') {
     return;
   }
   const box = boxOf(instance.definition.entities);

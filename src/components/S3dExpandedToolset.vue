@@ -62,6 +62,7 @@ const builtInGroups = (): Cell[][] => [
   [
     toolCell('offset'),
     toolCell('followme'),
+    toolCell('copyalong'),
     commandCell('flipx', 'undo.flip', 'flip', 'flipX'),
     commandCell('outershell', 'toolbar.outerShell', 'solid', 'solid-outershell'),
     commandCell('sintersect', 'undo.intersect', 'union', 'solid-intersect'),

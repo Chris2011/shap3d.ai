@@ -222,6 +222,9 @@ export class Model implements DefinitionRegistry {
     if (source.shape) {
       definition.shape = JSON.parse(JSON.stringify(source.shape));
     }
+    if (source.procedure) {
+      definition.procedure = JSON.parse(JSON.stringify(source.procedure));
+    }
     this.definitions.set(definition.id, definition);
     return definition;
   }
@@ -310,6 +313,7 @@ export class Model implements DefinitionRegistry {
         hidden: instance.hidden || undefined,
         locked: instance.locked || undefined,
         pluginData: instance.pluginData ? JSON.parse(JSON.stringify(instance.pluginData)) : undefined,
+        procedureRole: instance.procedureRole,
       })),
     });
     return {
@@ -326,6 +330,7 @@ export class Model implements DefinitionRegistry {
         faceMe: definition.faceMe || undefined,
         pluginData: definition.pluginData ? JSON.parse(JSON.stringify(definition.pluginData)) : undefined,
         shape: definition.shape,
+        procedure: definition.procedure ? JSON.parse(JSON.stringify(definition.procedure)) : undefined,
         entities: entitiesToJSON(definition.entities),
       })),
       root: entitiesToJSON(this.root),
@@ -401,6 +406,9 @@ export class Model implements DefinitionRegistry {
       if (stored.shape) {
         definition.shape = stored.shape;
       }
+      if (stored.procedure) {
+        definition.procedure = JSON.parse(JSON.stringify(stored.procedure));
+      }
       (definition as any).id = seen(stored.id);
       definitions.set(stored.id, definition);
       this.definitions.set(stored.id, definition);
@@ -439,6 +447,7 @@ export class Model implements DefinitionRegistry {
           tag: instance.tag,
           hidden: !!instance.hidden,
           locked: !!instance.locked,
+          procedureRole: instance.procedureRole,
         };
         if (instance.pluginData) {
           loaded.pluginData = JSON.parse(JSON.stringify(instance.pluginData));

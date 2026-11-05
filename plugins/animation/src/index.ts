@@ -5,6 +5,7 @@
 //   constant, linear, Bézier and eased curves and handles to drag
 // - paths (a group follows another group's edges), look-at, parents through the group hierarchy, cameras with shots
 // - rendering at a fixed frame rate as a video (MediaRecorder) or a PNG sequence – the model is not changed
+// - rigs: bones are groups inside each other, joints with limits, a Pose tool, stored and mirrored poses
 // Scripts: s3d.animate(), s3d.animateKeys(), s3d.animatePath(), s3d.animateLookAt(), s3d.animateCamera(), …
 import type { S3dPlugin } from '../../../src/plugins/types';
 import S3dAnimGuide from './S3dAnimGuide.vue';
@@ -15,14 +16,17 @@ import { OBJECT_FORMAT, SCENE_FORMAT, validObjectAnimation, validSceneAnimation 
 import { DEMOS } from './demos';
 import { drawAnimation } from './drawing';
 import { addCamera, keyCamera, keySelected, selectedInstances } from './keying';
-import { GUIDE_PANEL, MODE, PANEL } from './names';
+import { GUIDE_PANEL, JOINT_TOOL_ID, MODE, PANEL, POSE_TOOL_ID } from './names';
 import { connect, jumpTo, setFrame, setLookThrough, togglePlay } from './player';
 import { applyRecipe } from './recipes';
 import { cancelRender, renderAnimation } from './render';
+import { keyPosedBones } from './rig';
+import { createJointTool, createPoseTool } from './rigTools';
 import { MESSAGES, useRuntime } from './runtime';
 import {
   onScriptRequest,
   scriptAnimate,
+  scriptBone,
   scriptCamera,
   scriptClear,
   scriptKeys,
@@ -32,6 +36,7 @@ import {
   scriptPath,
   scriptPlay,
   scriptRender,
+  scriptRigPose,
   scriptScene,
   scriptShot,
   scriptSun,
@@ -52,6 +57,13 @@ const typing = (event: KeyboardEvent) => {
   );
 };
 
+/** a bone: a slim diamond with a ring at its joint */
+const JOINT_ICON =
+  '<path d="M6 18l3-6 9-6-6 9z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="6" cy="18" r="2.2" fill="currentColor"/>';
+/** a figure with a raised arm */
+const POSE_ICON =
+  '<circle cx="12" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M12 10l-5 2M12 10l5-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>';
+
 const plugin: S3dPlugin = {
   id: 'animation',
   name: 'animation.plugin.name',
@@ -65,6 +77,8 @@ const plugin: S3dPlugin = {
     const state = useAnimationState();
     context.onDispose(injectStyles());
     context.icons.register('animation', ICON);
+    context.icons.register('animation-joint', JOINT_ICON);
+    context.icons.register('animation-pose', POSE_ICON);
 
     // the formats of the animation, so other plugins can read and write it without this one
     context.data.formats.register({ ...OBJECT_FORMAT, label: 'animation.plugin.name', validate: validObjectAnimation });
@@ -86,6 +100,18 @@ const plugin: S3dPlugin = {
       component: S3dAnimGuide,
       tile: 'last',
     });
+    context.tools.register({
+      id: 'joint',
+      name: 'animation.tools.joint',
+      icon: 'animation-joint',
+      create: (editor) => createJointTool(editor),
+    });
+    context.tools.register({
+      id: 'pose',
+      name: 'animation.tools.pose',
+      icon: 'animation-pose',
+      create: (editor) => createPoseTool(editor),
+    });
     context.ui.addWindow(S3dAnimTimeline);
     context.ui.addWindow(S3dAnimRendering);
 
@@ -94,7 +120,7 @@ const plugin: S3dPlugin = {
       id: MODE,
       label: 'animation.mode',
       icon: 'animation',
-      tools: ['select', 'move', 'rotate', 'scale', 'line', 'arc2', 'eraser', 'orbit', 'pan', 'zoom', 'tape'],
+      tools: ['select', POSE_TOOL_ID, JOINT_TOOL_ID, 'move', 'rotate', 'scale', 'line', 'arc2', 'eraser', 'orbit', 'pan', 'zoom', 'tape'],
       panels: [`animation.${GUIDE_PANEL}`, `animation.${PANEL}`, 'entityinfo', 'outliner'],
       // the first time the guide, then the Animation panel
       enter: () => {
@@ -111,7 +137,7 @@ const plugin: S3dPlugin = {
     context.onDispose(connect());
     context.onDispose(cancelRender);
 
-    // I keys the selected groups – or the camera when nothing is selected (only while something is animated or in the mode)
+    // I keys the selected groups – else the bones just posed, else the camera (only while something is animated or in the mode)
     const onKey = (event: KeyboardEvent) => {
       if (event.ctrlKey || event.metaKey || event.altKey || typing(event) || context.editor.ui.dialog || context.workspaces.active()) {
         return;
@@ -123,7 +149,7 @@ const plugin: S3dPlugin = {
         return;
       }
       event.preventDefault();
-      if (!keySelected()) {
+      if (!keySelected() && !keyPosedBones()) {
         keyCamera();
       }
     };
@@ -230,6 +256,18 @@ const plugin: S3dPlugin = {
       "s3d.animateRender({ kind: 'video' | 'png', width, height })",
       "s3d.animateRender({ kind: 'video', width: 1280, height: 720 });",
     );
+    extend(
+      'animateBone',
+      scriptBone,
+      "s3d.animateBone(group, { head: [x, y, z], tail: [x, y, z], name, limits: { rx: [min, max], ry, rz }, side: 'L' | 'R', mirror })",
+      "s3d.animateBone(shin, { head: [0.1, 0, 0.5], tail: [0.1, 0, 0.08], name: 'shin.L', limits: { rx: [0, 140], ry: [0, 0], rz: [0, 0] } });",
+    );
+    extend(
+      'animatePose',
+      scriptRigPose,
+      's3d.animatePose(rig, name, { bones: { boneName: [rx, ry, rz] }, frame, interp })',
+      "s3d.animatePose(puppet, 'Wave', { bones: { 'upperarm.L': [0, 0, 150] } });\ns3d.animatePose(puppet, 'Wave', { frame: 24 });",
+    );
     extend('animateClear', scriptClear, 's3d.animateClear(group?)', 's3d.animateClear();');
 
     const keywords = 'animation keyframe timeline film video movie camera blender animieren schlüsselbild zeitleiste'; // i18n-ignore – search words
@@ -271,7 +309,7 @@ const plugin: S3dPlugin = {
       icon: 'animation',
       shortcut: 'I',
       run: () => {
-        if (!keySelected()) {
+        if (!keySelected() && !keyPosedBones()) {
           keyCamera();
         }
       },

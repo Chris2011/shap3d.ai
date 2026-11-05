@@ -33,16 +33,16 @@
     </button>
     <button
       :class="TB_SM"
-      :title="t('topbar.undo', { action: localize(editor.ui.undoLabel) })"
-      :disabled="!editor.ui.canUndo"
+      :title="toolBusy() ? t('topbar.cancelAction') : t('topbar.undo', { action: localize(editor.ui.undoLabel) })"
+      :disabled="!editor.ui.canUndo && !toolBusy()"
       @click="editor.undo()"
     >
       <S3dIcon name="undo" :size="18" />
     </button>
     <button
       :class="TB_SM"
-      :title="t('topbar.redo', { action: localize(editor.ui.redoLabel) })"
-      :disabled="!editor.ui.canRedo"
+      :title="toolBusy() ? t('topbar.cancelAction') : t('topbar.redo', { action: localize(editor.ui.redoLabel) })"
+      :disabled="!editor.ui.canRedo && !toolBusy()"
       @click="editor.redo()"
     >
       <S3dIcon name="redo" :size="18" />
@@ -126,6 +126,8 @@ import { useModel } from '../composables/useModel';
 import { t, localize } from '../i18n';
 
 const editor = useEditor();
+/** a tool in the middle of an action – undo and redo cancel it then; the status line changes with every step of one */
+const toolBusy = () => (void editor.ui.status, !!editor.tool?.busy());
 const workspaceOptions = computed(() => [
   { value: '', label: t('workspace.model'), icon: 'cube' },
   ...MODES.map((mode) => ({ value: mode.id, label: localize(mode.label), icon: mode.icon })),

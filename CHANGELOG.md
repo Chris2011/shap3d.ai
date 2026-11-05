@@ -35,6 +35,8 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ### Added
 
+- **Procedures – modelling you can change later**: _Union_, _Subtract_, _Intersect_ and _Outer shell_, _Follow me_ and the new tool _Copy along_ make a procedural group that keeps what it was made from. Entity Info shows its settings – the operation, the number of copies or their spacing, turning along the path – and the result follows at once. Opening the group (double-click, or _Edit inputs_) shows its inputs instead of its result, to be edited with any tool; the result is built again in the same undo step. A procedure can be used as an input of another one. _Explode to inputs_ gives the inputs back as ordinary groups, _Explode_ keeps the result. If a build fails, the last result stays and Entity Info says why. Saved with the model.
+- **Copy along**: select groups or components and click a path – a line of edges or a group of edges. Type the number of copies (`7x`) or a spacing afterwards.
 - **Moving from an outline edge**: with _Move_, a group or component can be picked up at its outline as the camera sees it (orange, _On outline_) – also round things, whose outline is no real edge. While it moves it is see-through, so what lies behind it can be seen and snapped to; afterwards it looks as before.
 - **Leaning against a face when rotating**: while _Rotate_ picks the angle over a face, the angle snaps where the start point's circle meets that face – a red cross and _From radius on face_ show it. So a ladder rotated about its foot leans exactly against the wall.
 - **Rectangles along any edge**: a rectangle started on an edge follows that edge instead of the model axes (drawn in magenta); while drawing, the down arrow aligns it with the edge touched last, pressed again it goes back to the axes. Started on an edge or corner of a sloping face, it now lies in that face instead of on the ground.
@@ -47,6 +49,16 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 ### Changed
 
 - **Mode switch centred**: the switch _Model | …_ (plugin modes and workspaces such as physics or layout) sits on its own at the top centre, apart from the bar with the model name, undo and redo; the active mode is filled in blue.
+- **Solid tools keep their inputs**: _Union_, _Subtract_, _Intersect_ and _Outer shell_ now make a procedure instead of replacing the solids for good; it takes the target's place, name, tag and data. Several solids work at once: _Subtract_ takes all the others from the one selected last. _Trim_ and _Split_ still replace the solids, but their pieces keep the same details.
+- **Solid tools keep the structure**: _Subtract_, _Intersect_, _Trim_ and _Split_ cut each group inside a solid on its own, so a wall made of parts stays made of parts, with their names, tags, materials and data; a component the tool does not reach stays that component. A group made only of solids now counts as a solid. _Union_ and _Outer shell_ melt the parts into one, as they must. Tags on single faces are not kept. _Follow me_ makes a procedure from a loose path and a profile on its own; on edges of a solid (rounding a box) it works on the geometry as before.
+- **Undo and redo end a running action first**: in the middle of an action they cancel it (with a message, the status line follows) and leave the history as it is; the next press goes on as usual. This also works with an empty history – the buttons are enabled then and say _Cancel the current action_ – and for placing a component, erasing, the lasso and dragging a selection box.
+
+### Fixed
+
+- <kbd>Ctrl</kbd>+<kbd>Z</kbd> and other shortcuts with <kbd>Ctrl</kbd> no longer switch what <kbd>Ctrl</kbd> alone switches in a tool: _Move_ stayed on copying after <kbd>Ctrl</kbd>+<kbd>Z</kbd>, and _Tape measure_ and _Push/Pull_ changed their mode.
+- <kbd>Ctrl</kbd>+<kbd>Y</kbd> in the middle of a move no longer redoes a step under the running action.
+- _Trim_ and _Split_ with more than two solids selected no longer delete the others: they use the first two and leave the rest alone.
+- Pressing <kbd>Ctrl</kbd> twice during a move no longer crashes the tool: the selection comes back when copying is switched off again.
 
 ## [0.10.0] – 2026-11-01
 

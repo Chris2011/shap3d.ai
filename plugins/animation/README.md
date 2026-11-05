@@ -25,12 +25,13 @@ The plugin is a package of its own with its own `package.json` and is **not** pa
 - **Paths**: a group follows the line another group's edges make (a line, an arc, a curve – a group of edges only), turned along it with a chosen front axis; cameras fly along paths too.
 - **Look-at**: a group turns its front towards another group; a camera looks at a group wherever it goes.
 - **Parents**: the group hierarchy is the parent-child chain – a group inside an animated group moves with it and adds its own animation (a robot arm, wheels of a car, blades of a windmill). Each group turns about its pivot: the middle of its box, the middle of its bottom, its origin – or any point set by a script.
+- **Rigs**: figures whose bones are groups inside each other, so a forearm hangs on its upper arm. The **Joint** tool makes a group a bone (a click for the joint, one for the tip; up and down arrows choose the inner or outer group under the cursor). The **Pose** tool turns bones without opening their groups: drag a bone about its joint, in the plane of the screen or about an axis locked with the arrow keys – I keys it, with auto-keying it is keyed at once. _Advanced › Rig_ sets a bone's name, side, partner on the other side and limits per axis (a knee bends one way), stores poses, keys them, mirrors the pose and goes back to rest. The skeleton is drawn over the model while animating.
 - **Cameras and shots**: cameras made from the view, keyed by position, target and lens (35 mm film); shots switch between them at frames – a film with cuts. _Through camera_ shows the 3D view through the shot's camera.
 - **The sun and lights**: the sun's hour moves its light (and its shadows when shadows are on), the daylight dims it; lamps and spots with keyed position, target, brightness and colour, optionally casting shadows.
 - **Colour and visibility**: a group's own colour, opacity and visibility over time; a material's colour (and opacity) over time.
 - **Rendering**: _Film_ in the panel – HD, Full HD, square, upright or the size of the view, as a video (MP4 where the browser can, else WebM) or as PNG images in a ZIP. Every frame is set and drawn one after another, through the shot's camera, without the axes and the selection, optionally with what is drawn over the view (labels, other plugins); the video is then recorded from those images at exactly the frame rate.
 - **Getting started**: the **animation mode** (_Model | Animation_ in the top bar) shows the timeline, the tools that move things and only the panels it needs; the first time it opens the **animation guide** – eight steps from a practice scene to the first film, each with buttons that do it.
-- **Scripts**: `s3d.animate`, `s3d.animateKeys`, `s3d.animatePath`, `s3d.animateLookAt`, `s3d.animateCamera`, `s3d.animateShot`, `s3d.animateSun`, `s3d.animateLight`, `s3d.animateMaterial`, `s3d.animateScene`, `s3d.animatePlay`, `s3d.animateRender` and `s3d.animateClear`; the data formats `animation.object` and `animation.scene`.
+- **Scripts**: `s3d.animate`, `s3d.animateKeys`, `s3d.animatePath`, `s3d.animateLookAt`, `s3d.animateCamera`, `s3d.animateShot`, `s3d.animateSun`, `s3d.animateLight`, `s3d.animateMaterial`, `s3d.animateScene`, `s3d.animatePlay`, `s3d.animateRender`, `s3d.animateBone`, `s3d.animatePose` and `s3d.animateClear`; the data formats `animation.object` and `animation.scene`.
 - Texts in English, German, French, Spanish and Arabic.
 
 ```js
@@ -49,6 +50,7 @@ The demos in [`docs/`](docs) are the scripts the screenshots are made with – a
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | [`demo.js`](docs/demo.js)                 | A little film: a car on a road (path), a bouncing ball (cycle), a windmill (parents), the sun, two cameras with shots |
 | [`demo-robot.js`](docs/demo-robot.js)     | A robot arm: groups inside groups, each joint turning about its own pivot                          |
+| [`demo-puppet.js`](docs/demo-puppet.js)   | A jointed puppet: a rig with limits, two stored poses keyed in turn make it walk                   |
 | [`demo-camera.js`](docs/demo-camera.js)   | A camera flying along a curve, looking at a house, zooming in; sunset, a lamp, glowing windows     |
 | [`demo-colors.js`](docs/demo-colors.js)   | Blocks appearing with an overshoot, a colour wave, fading out; a material's opacity                 |
 
@@ -70,6 +72,7 @@ Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i1
 - **The pose** (`pose.ts`): for a frame, every animated group's matrix in its parent – the place channels (the pivot's position, an XYZ turn in degrees, the scale) over the model's own values, then a path (the pivot onto the line, the front along it) and a look-at; parents first, so children follow them. The camera of the shot at the frame, the sun, lights and material colours.
 - **The view** (`apply.ts`): each animated group's matrix in its parent with `display.place` (the app puts a group inside a moved group where its parent is shown), its colour, opacity and visibility with `display.look`, material colours with `display.material`, the sun with `lighting.sun`, lamps with `lighting.set` – only what changed since the last frame is handed over. The app keeps them over every new build of the view; nothing of the model changes.
 - **Tools and keys** (`player.ts`, `keying.ts`): at the end of every undo step (`events.onUndoStep`, still inside it) the plugin compares the animated groups' matrices with the ones before – a tool's move, turn or scale goes onto the place shown at the frame (as keys with auto-keying); while the tool drags, the group is shown moved from where the animation has it.
+- **Rigs** (`rig.ts`, `rigTools.ts`): a bone is the data `bone` on a group (name, tail, limits, side, partner) with its `pivot` as the joint; the outermost group holds `rig` with the stored poses. Bones refer to each other by name, so a copy of a figure is a rig of its own. A posed bone is a place shown until the frame changes (`overrides`), like a group moved by a tool; limits are measured from the model's place and apply to posing, to tools and to values typed in the panel.
 - **Rendering** (`render.ts`): every frame is set and drawn at the chosen size (pixel ratio 1) through the shot's camera and kept as an image; for a video the images are played into `MediaRecorder` at exactly the frame rate (`captureStream(0)` and `requestFrame()`), for PNG images they go into a ZIP (`zip.ts`, stored).
 
 ## Limits
@@ -77,7 +80,8 @@ Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i1
 - A material's opacity builds the view again for each change (its faces may go into another mesh) – fast enough for small and middle-sized models; its colour does not. Faces with textures keep their texture.
 - The sun's hour changes the light's direction; its shadows only show with the model's shadows on. The sky does not darken with the daylight.
 - Needs the app with `display.look`, `display.material`, `lighting.sun` and `events.onUndoStep` (0.10.0 or newer – `shap3d.minAppVersion`).
-- Turns are XYZ Euler angles (as Blender's default); a camera has no roll.
+- Turns are XYZ Euler angles (as Blender's default); a camera has no roll. A bone's limits apply to those angles, so with large turns about several axes at once they are only approximate.
+- Rigs move rigid parts: there is no inverse kinematics and no skin that bends yet (see [the plan](../../docs/rig-architektur.md)). Build figures from groups – copies of a component share their bones. Mirroring expects left and right of the figure along its x axis.
 - Recording a video plays the rendered images in real time once more (a 10 s film takes 10 s after the frames are drawn).
 
 Third-party software: none – the plugin brings no library.

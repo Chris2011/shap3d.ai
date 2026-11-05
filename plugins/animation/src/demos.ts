@@ -1,6 +1,7 @@
 import showcaseDemo from '../docs/demo.js?raw';
 import cameraDemo from '../docs/demo-camera.js?raw';
 import colorsDemo from '../docs/demo-colors.js?raw';
+import puppetDemo from '../docs/demo-puppet.js?raw';
 import robotDemo from '../docs/demo-robot.js?raw';
 
 /**
@@ -11,6 +12,7 @@ import robotDemo from '../docs/demo-robot.js?raw';
 export const DEMOS = [
   { id: 'showcase', code: showcaseDemo },
   { id: 'robot', code: robotDemo },
+  { id: 'puppet', code: puppetDemo },
   { id: 'camera', code: cameraDemo },
   { id: 'colors', code: colorsDemo },
 ];

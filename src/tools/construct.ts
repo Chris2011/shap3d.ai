@@ -27,6 +27,7 @@ export class TapeTool extends PointTool {
   start: V3 | null = null;
   edgeDir: V3 | null = null;
   mode: TapeMode = 'guideLine';
+  ctrlStates = TAPE_MODES.length;
   current: V3 | null = null;
   lastMeasure = 0;
   status() {

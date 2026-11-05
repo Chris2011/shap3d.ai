@@ -1,15 +1,17 @@
 import type { Overlay } from '../../../src/engine/overlay';
 import { currentPose, currentScene } from './apply';
 import { selectedInstances } from './keying';
+import { JOINT_TOOL_ID, POSE_TOOL_ID } from './names';
 import { cameraPose, fovOf, pathPoint, poseAt } from './pose';
+import { boneSegments } from './rig';
 import { pluginContext, THREE } from './runtime';
 import { animatedNodes, findInstance, pathLine, pivotOf } from './scene';
 import { useAnimationState } from './state';
 
 /**
  * What the 3D view shows besides the model: the way selected animated groups go (their motion path with a dot at
- * each key), the lines things follow, the cameras (a pyramid looking at its target, the shot's one highlighted) and
- * the lights. Nothing of it goes into a render.
+ * each key), the lines things follow, the cameras (a pyramid looking at its target, the shot's one highlighted), the
+ * lights and the bones of rigs. Nothing of it goes into a render.
  */
 
 type Vector = InstanceType<typeof THREE.Vector3>;
@@ -19,6 +21,9 @@ const KEY_COLOUR = '#f59f00';
 const CAMERA_COLOUR = '#495057';
 const ACTIVE_CAMERA_COLOUR = '#1c7ed6';
 const LIGHT_COLOUR = '#f08c00';
+const BONE_COLOUR = '#5c7cfa';
+const HOVER_BONE_COLOUR = '#22b8cf';
+const PICKED_BONE_COLOUR = '#f59f00';
 
 /** motion paths are worked out again only when something changed */
 let cached: { key: string; paths: { points: Vector[]; keys: Vector[] }[] } | null = null;
@@ -111,6 +116,45 @@ const drawCamera = (overlay: Overlay, position: Vector, target: Vector, lens: nu
   overlay.text(position, label, { color: '#fff', background: colour, offsetY: -14, font: '11px "Segoe UI", sans-serif' });
 };
 
+/** the bones of rigs: a slim diamond from joint to tip with a ring at the joint, the picked one highlighted */
+const drawBones = (overlay: Overlay) => {
+  const state = useAnimationState();
+  const context = overlay.context;
+  for (const segment of boneSegments()) {
+    const head = overlay.screen(segment.head);
+    const tail = overlay.screen(segment.tail);
+    if (!head || !tail) {
+      continue;
+    }
+    const along = tail.clone().sub(head);
+    const length = along.length();
+    if (length < 1) {
+      continue;
+    }
+    const width = Math.min(8, Math.max(3, length * 0.1));
+    const across = new THREE.Vector2(-along.y, along.x).multiplyScalar(width / length);
+    const shoulder = head.clone().addScaledVector(along, 0.15);
+    const picked = state.bone === segment.instance.id;
+    const colour = picked ? PICKED_BONE_COLOUR : state.hoverBone === segment.instance.id ? HOVER_BONE_COLOUR : BONE_COLOUR;
+    context.setLineDash([]);
+    context.lineWidth = picked ? 2 : 1.5;
+    context.strokeStyle = colour;
+    context.fillStyle = `${colour}40`;
+    context.beginPath();
+    context.moveTo(head.x, head.y);
+    context.lineTo(shoulder.x + across.x, shoulder.y + across.y);
+    context.lineTo(tail.x, tail.y);
+    context.lineTo(shoulder.x - across.x, shoulder.y - across.y);
+    context.closePath();
+    context.fill();
+    context.stroke();
+    context.beginPath();
+    context.arc(head.x, head.y, 3.5, 0, Math.PI * 2);
+    context.fillStyle = colour;
+    context.fill();
+  }
+};
+
 export const drawAnimation = (overlay: Overlay) => {
   const state = useAnimationState();
   if (state.rendering) {
@@ -118,6 +162,10 @@ export const drawAnimation = (overlay: Overlay) => {
   }
   const scene = currentScene();
   const pose = currentPose();
+  // the skeleton belongs to animating: with the timeline open or a rig tool in hand
+  if (state.show.bones && (state.timeline || [JOINT_TOOL_ID, POSE_TOOL_ID].includes(pluginContext().editor.ui.tool))) {
+    drawBones(overlay);
+  }
   if (state.show.paths) {
     for (const path of motionPaths()) {
       overlay.polyline(path.points, PATH_COLOUR, 1.5, false);

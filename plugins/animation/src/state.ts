@@ -26,8 +26,11 @@ interface AnimationState {
   picked: PickedKey[];
   /** channels the graph editor shows: "<owner>|<channel>" */
   graphChannels: string[];
-  /** what the 3D view shows besides the model: the paths things move along, the cameras */
-  show: { paths: boolean; cameras: boolean };
+  /** what the 3D view shows besides the model: the paths things move along, the cameras, the bones of rigs */
+  show: { paths: boolean; cameras: boolean; bones: boolean };
+  /** the bone picked with the rig's tools and the one under the cursor (instance ids) */
+  bone: number | null;
+  hoverBone: number | null;
   /** a video or image sequence being rendered: what it does and how far it is (0 … 1) */
   rendering: { phase: 'frames' | 'video' | 'zip'; progress: number } | null;
   /** bumped after the plugin changed the animation, so the panels read it again */
@@ -51,7 +54,9 @@ export const useAnimationState = () =>
     expanded: {},
     picked: [],
     graphChannels: [],
-    show: { paths: true, cameras: true },
+    show: { paths: true, cameras: true, bones: true },
+    bone: null,
+    hoverBone: null,
     rendering: null,
     revision: 0,
     learned: { keyed: false, played: false, scrubbed: false, graph: false, camera: false, rendered: false },

@@ -14,7 +14,7 @@ import {
   type Track,
   type Tracks,
 } from './data';
-import { activeCamera, lensOf, matrixOf, PLACE_CHANNELS, placementAt, placementOf, type Placement } from './pose';
+import { activeCamera, lensOf, limitPlacement, matrixOf, PLACE_CHANNELS, placementAt, placementOf, type Placement } from './pose';
 import { pluginContext, t, type THREE } from './runtime';
 import { findInstance, pivotOf } from './scene';
 import { learn, useAnimationState, type PickedKey } from './state';
@@ -150,7 +150,9 @@ export const takeEdit = (instance: Instance, before: Matrix, after: Matrix) => {
   const delta = after.clone().multiply(before.clone().invert());
   // what the place was shown as, moved by what the tool did
   const base = shown ?? matrixOf(placementAt(instance, animation, frame, before), pivot);
-  const moved = delta.multiply(base);
+  // a bone turns only as far as its joint lets it
+  const turned = delta.multiply(base);
+  const moved = animation?.bone?.limits ? matrixOf(limitPlacement(instance, animation, placementOf(turned, pivot)), pivot) : turned;
   if (state.autoKey) {
     const copy = structuredClone(animation) ?? { tracks: {} };
     keyPlacement(copy, frame, placementOf(moved, pivot));
@@ -162,6 +164,33 @@ export const takeEdit = (instance: Instance, before: Matrix, after: Matrix) => {
     overrides.set(instance, moved);
   }
 };
+
+/** keys the turn channels of groups at the frame shown (poses of a rig) in one undo step; their places moved by hand go */
+export const keyRotations = (
+  entries: { instance: Instance; rx: number; ry: number; rz: number }[],
+  label = t('animation.undo.key'),
+  frame = Math.round(useAnimationState().frame),
+) => {
+  if (!entries.length) {
+    return;
+  }
+  editObjects(
+    label,
+    entries.map((entry) => entry.instance),
+    (animation, instance) => {
+      const entry = entries.find((candidate) => candidate.instance === instance)!;
+      keyPlacement(animation, frame, entry as unknown as Placement, ['rx', 'ry', 'rz']);
+    },
+  );
+  for (const entry of entries) {
+    overrides.delete(entry.instance);
+  }
+  learn('keyed');
+};
+
+/** the place channels an object is shown with now – moved by hand at this frame, or as the keys say */
+export const shownPlacementOf = (instance: Instance) =>
+  shownPlacement(instance, objectAnimation(instance), Math.round(useAnimationState().frame));
 
 /** auto-keying for a new group: keys it where it is, when it is first moved */
 export const keyNewObject = (instance: Instance, frame: number) => {

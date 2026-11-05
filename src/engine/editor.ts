@@ -28,6 +28,8 @@ export abstract class Tool {
   abstract name: string;
   cursor = 'default';
   vcbLabel = '';
+  /** how many states the Ctrl key steps through in this tool – to go back when Ctrl was the start of a shortcut */
+  ctrlStates = 2;
   constructor(public editor: Editor) {}
   status(): string {
     return '';
@@ -328,7 +330,7 @@ export class Editor {
     } catch (error) {
       console.error(error);
       this.restore(snap, path);
-      this.toast('Fehler: ' + (error as Error).message);
+      this.toast('Fehler: ' + localize((error as Error).message));
       throw error;
     } finally {
       this.commitDepth--;
@@ -443,9 +445,19 @@ export class Editor {
   restoreModel(snap: any, path: number[] = this.activePath.map((instance) => instance.id)) {
     this.restore(snap, path);
   }
+  /** a tool in the middle of an action: undo and redo end that action first, the history stays as it is */
+  private cancelAction() {
+    if (!this.tool.busy()) {
+      return false;
+    }
+    this.tool.cancel();
+    this.refreshStatus();
+    this.redraw();
+    this.toast(t('editor.actionCancelled'));
+    return true;
+  }
   undo() {
-    if (this.tool.busy()) {
-      this.tool.cancel();
+    if (this.cancelAction()) {
       return;
     }
     const entry = this.undoStack.pop();
@@ -458,6 +470,9 @@ export class Editor {
     this.toast(t('editor.undone', { action: localize(entry.label) }));
   }
   redo() {
+    if (this.cancelAction()) {
+      return;
+    }
     const entry = this.redoStack.pop();
     if (!entry) {
       return;

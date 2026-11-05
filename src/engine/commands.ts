@@ -7,16 +7,17 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { sceneToEntities } from './importMesh';
+import { createSolidProcedure, dropInputs, explodeToInputs, PROCEDURE_SOLID_OPS, type ProcedureSolidOp } from '../core/procedures';
 import { snapping } from './inference';
 import type { Editor } from './editor';
 import { theme, setTheme, setScene } from '../theme';
 import { openTour } from '../components/tour';
 import { openPalette } from '../components/paletteState';
 import { measureView } from './measureView';
-import type { Entities, EntityRef } from '../core/model';
-import { Entities as EntitiesClass, copyInstanceDetails } from '../core/model';
+import type { Entities, EntityRef, Instance } from '../core/model';
+import { Entities as EntitiesClass, copyInstanceDetails, isProcedureInput } from '../core/model';
 import type { FaceStyle } from '../core/document';
-import { solidOp, isSolid, type SolidOp } from '../core/solids';
+import { cutKeepingGroups, isSolid, type SolidOp } from '../core/solids';
 import { pluginImporters, type LoadedScene } from '../plugins/fileFormats';
 import { showPanel } from '../components/panelState';
 import { textureTile, tileUv, imageTexturesReady } from '../core/textures';
@@ -408,11 +409,28 @@ export const explode = (editor: Editor) => {
       if (!instance) {
         continue;
       }
+      dropInputs(instance.definition);
       out.push(...editor.entities.merge(instance.definition.entities, instance.matrix, editor.model, instance.material));
       editor.entities.instances.delete(instance.id);
     }
     editor.model.purge();
     editor.select(out);
+  });
+};
+
+/** the selected procedures go, what they were made from is back as ordinary groups */
+const explodeSelectedToInputs = (editor: Editor) => {
+  const procedures = editor
+    .selected()
+    .map((entityRef) => (entityRef.kind === 'instance' ? editor.entities.instances.get(entityRef.id) : undefined))
+    .filter((instance) => !!instance?.definition.procedure);
+  if (!procedures.length) {
+    return;
+  }
+  editor.commit('commands.explodeToInputs', () => {
+    const out = procedures.flatMap((instance) => explodeToInputs(editor.entities, instance!));
+    editor.model.purge();
+    editor.select(out.map((input) => ({ kind: 'instance' as const, id: input.id })));
   });
 };
 
@@ -539,7 +557,7 @@ export const unhideAll = (editor: Editor) => {
     const entities = editor.entities;
     entities.faces.forEach((face) => (face.hidden = undefined));
     entities.edges.forEach((x) => (x.hidden = undefined));
-    entities.instances.forEach((instance) => (instance.hidden = false));
+    entities.instances.forEach((instance) => (instance.hidden = isProcedureInput(instance)));
   });
 };
 export const reverseFaces = (editor: Editor) => {
@@ -748,35 +766,56 @@ export const runSolid = (editor: Editor, operation: SolidOp) => {
     editor.toast(t('toast.notASolid', { name: bad.name || bad.definition.name }));
     return;
   }
+  // the operations with one result stay editable: the inputs go into a procedure
+  if ((PROCEDURE_SOLID_OPS as SolidOp[]).includes(operation)) {
+    // Subtract keeps the last one selected and takes the others from it, the others build on the first
+    const target = operation === 'subtract' ? insts[insts.length - 1] : insts[0];
+    try {
+      editor.commit(`commands.solid-${operation}`, () => {
+        const procedure = createSolidProcedure(
+          editor.model,
+          editor.entities,
+          operation as ProcedureSolidOp,
+          target,
+          insts.filter((instance) => instance !== target),
+        );
+        editor.select([{ kind: 'instance', id: procedure.id }]);
+      });
+    } catch {
+      // commit has put everything back and said so
+    }
+    return;
+  }
   try {
     editor.commit(`commands.solid-${operation}`, () => {
-      let pieces: Entities[];
-      if (operation === 'outershell' || operation === 'union') {
-        let acc = insts[0];
-        let res: Entities | null = null;
-        for (let k = 1; k < insts.length; k++) {
-          res = solidOp('union', acc, insts[k])[0];
-          const def = editor.model.newDefinition(editor.model.uniqueDefName(t('names.solid')), false, res);
-          acc = { id: -1, definition: def, matrix: new THREE.Matrix4(), name: '' } as any;
-        }
-        pieces = [res!];
-      } else {
-        pieces = solidOp(operation, insts[0], insts[1]);
-      }
-      const keep = operation === 'trim' ? [insts[0]] : [];
-      for (const instance of insts) {
-        if (!keep.includes(instance) && (operation !== 'subtract' || true)) {
-          editor.entities.instances.delete(instance.id);
-        }
-      }
+      // the first two selected; each piece keeps the place, name, tag, data and inner groups of the solid it comes from
+      const [first, second] = insts;
+      const cut = (mode: 'subtract' | 'intersect', source: Instance, tool: Instance) => ({
+        source,
+        entities: cutKeepingGroups(mode, source.definition.entities, tool, source.matrix.clone().invert().multiply(tool.matrix), {
+          defs: editor.model,
+        }),
+      });
+      const pieces =
+        operation === 'trim'
+          ? [cut('subtract', second, first)]
+          : [cut('subtract', first, second), cut('subtract', second, first), cut('intersect', first, second)];
       const refs: EntityRef[] = [];
-      for (const entities of pieces) {
-        if (!entities.faces.size) {
+      for (const { source, entities } of pieces) {
+        if (!entities.faces.size && !entities.instances.size) {
           continue;
         }
-        const def = editor.model.newDefinition(editor.model.uniqueDefName(t('names.solid')), false, entities);
-        refs.push({ kind: 'instance', id: editor.entities.addInstance(def, new THREE.Matrix4(), '').id });
+        const def = editor.model.newDefinition(editor.model.uniqueDefName(source.definition.name || t('names.solid')), false, entities);
+        if (source.definition.pluginData) {
+          def.pluginData = JSON.parse(JSON.stringify(source.definition.pluginData));
+        }
+        const piece = copyInstanceDetails(source, editor.entities.addInstance(def, source.matrix.clone(), source.name));
+        refs.push({ kind: 'instance', id: piece.id });
       }
+      if (operation !== 'trim') {
+        editor.entities.instances.delete(first.id);
+      }
+      editor.entities.instances.delete(second.id);
       editor.model.purge();
       editor.select(refs);
     });
@@ -937,8 +976,20 @@ const COMMAND_LIST: CommandDefinition[] = [
     },
   },
   // edit
-  { id: 'undo', shortcut: 'Ctrl+Z', group: 'edit', run: (editor) => editor.undo(), enabled: (editor) => editor.ui.canUndo },
-  { id: 'redo', shortcut: 'Ctrl+Y', group: 'edit', run: (editor) => editor.redo(), enabled: (editor) => editor.ui.canRedo },
+  {
+    id: 'undo',
+    shortcut: 'Ctrl+Z',
+    group: 'edit',
+    run: (editor) => editor.undo(),
+    enabled: (editor) => editor.ui.canUndo || editor.tool.busy(),
+  },
+  {
+    id: 'redo',
+    shortcut: 'Ctrl+Y',
+    group: 'edit',
+    run: (editor) => editor.redo(),
+    enabled: (editor) => editor.ui.canRedo || editor.tool.busy(),
+  },
   { id: 'cut', shortcut: 'Ctrl+X', group: 'edit', run: (editor) => copySelection(editor, true) },
   { id: 'copy', shortcut: 'Ctrl+C', group: 'edit', run: (editor) => copySelection(editor) },
   { id: 'paste', shortcut: 'Ctrl+V', group: 'edit', run: (editor) => paste(editor) },
@@ -995,6 +1046,15 @@ const COMMAND_LIST: CommandDefinition[] = [
     },
   },
   { id: 'explode', group: 'edit', run: explode },
+  {
+    id: 'explodeToInputs',
+    group: 'edit',
+    run: explodeSelectedToInputs,
+    enabled: (editor) =>
+      editor
+        .selected()
+        .some((entityRef) => entityRef.kind === 'instance' && !!editor.entities.instances.get(entityRef.id)?.definition.procedure),
+  },
   {
     id: 'editGroup',
     group: 'edit',

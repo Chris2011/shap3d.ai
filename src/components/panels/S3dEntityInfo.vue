@@ -83,6 +83,7 @@
         ><span>{{ info.volume }}</span>
       </div>
       <label class="s3d-check"><input type="checkbox" :checked="info.locked" @change="toggle('locked')" /> {{ t('toast.locked') }}</label>
+      <S3dProcedureInfo />
     </template>
     <template v-if="info.kind === 'face'">
       <div class="s3d-row">
@@ -117,6 +118,7 @@
 
 <script setup lang="ts">
 import * as THREE from 'three';
+import S3dProcedureInfo from './S3dProcedureInfo.vue';
 import { useEditor } from '../keys';
 import type { EntityRef } from '../../core/model';
 import { parseLength, formatVolume } from '../../core/units';

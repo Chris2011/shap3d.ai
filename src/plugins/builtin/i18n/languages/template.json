@@ -382,7 +382,9 @@
       "view-bottom": "",
       "view-bottom#en": "Bottom",
       "toggleSnapping": "",
-      "toggleSnapping#en": "Snapping"
+      "toggleSnapping#en": "Snapping",
+      "explodeToInputs": "",
+      "explodeToInputs#en": "Explode to inputs"
     },
     "names": {
       "model": "",
@@ -813,7 +815,11 @@
         "walk": "",
         "walk#en": "Drag up/down to walk, left/right to turn. Arrow keys work too.",
         "poscam": "",
-        "poscam#en": "Click to place the camera there at eye height."
+        "poscam#en": "Click to place the camera there at eye height.",
+        "copyAlongSource": "",
+        "copyAlongSource#en": "Select the groups or components to copy, then click a path.",
+        "copyAlongPath": "",
+        "copyAlongPath#en": "Click the path: a line of edges or a group of edges. Then type a number of copies (7x) or a spacing."
       },
       "hints": {
         "square": "",
@@ -833,8 +839,12 @@
         "roundCorner": "",
         "roundCorner#en": "Round corner",
         "sameDistance": "",
-        "sameDistance#en": "Same distance from the corner"
-      }
+        "sameDistance#en": "Same distance from the corner",
+        "copyAlongPath": "",
+        "copyAlongPath#en": "Copy along this path"
+      },
+      "copyalong": "",
+      "copyalong#en": "Copy along"
     },
     "editor": {
       "undone": "",
@@ -850,7 +860,9 @@
       "edges": "",
       "edges#en": "{count} edge | {count} edges",
       "instances": "",
-      "instances#en": "{count} group/component | {count} groups/components"
+      "instances#en": "{count} group/component | {count} groups/components",
+      "actionCancelled": "",
+      "actionCancelled#en": "Action cancelled"
     },
     "inference": {
       "onRedAxis": "",
@@ -1052,7 +1064,9 @@
       "fov": "",
       "fov#en": "Field of view",
       "eyeHeight": "",
-      "eyeHeight#en": "Eye height"
+      "eyeHeight#en": "Eye height",
+      "copyAlong": "",
+      "copyAlong#en": "Copies or spacing"
     },
     "app": {
       "dropToImport": "",
@@ -1100,7 +1114,9 @@
       "exportStl": "",
       "exportStl#en": "STL (3D printing)",
       "exportPng": "",
-      "exportPng#en": "PNG image"
+      "exportPng#en": "PNG image",
+      "cancelAction": "",
+      "cancelAction#en": "Cancel the current action"
     },
     "theme": {
       "darkOff": "",
@@ -3149,6 +3165,64 @@
     "workspace": {
       "model": "",
       "model#en": "Model"
+    },
+    "procedures": {
+      "kinds": {
+        "solid": "",
+        "solid#en": "Procedure: solid tool",
+        "followme": "",
+        "followme#en": "Procedure: Follow Me",
+        "copyalong": "",
+        "copyalong#en": "Procedure: Copy Along"
+      },
+      "operation": "",
+      "operation#en": "Operation",
+      "distribute": "",
+      "distribute#en": "Distribute",
+      "byCount": "",
+      "byCount#en": "By number",
+      "bySpacing": "",
+      "bySpacing#en": "By spacing",
+      "count": "",
+      "count#en": "Copies",
+      "spacing": "",
+      "spacing#en": "Spacing",
+      "align": "",
+      "align#en": "Turn along the path",
+      "inputs": "",
+      "inputs#en": "Inputs",
+      "editInputs": "",
+      "editInputs#en": "Edit inputs",
+      "editHint": "",
+      "editHint#en": "Open it to edit its input groups; the result follows when you leave it. Geometry drawn directly inside it is replaced by the next result.",
+      "undoParams": "",
+      "undoParams#en": "Change procedure",
+      "names": {
+        "copyAlong": "",
+        "copyAlong#en": "Copy Along",
+        "followMe": "",
+        "followMe#en": "Follow Me",
+        "path": "",
+        "path#en": "Path",
+        "profile": "",
+        "profile#en": "Profile"
+      },
+      "errors": {
+        "missingInput": "",
+        "missingInput#en": "An input of the procedure is missing – the last result stays.",
+        "notSolid": "",
+        "notSolid#en": "An input of the procedure is no longer a solid – the last result stays.",
+        "empty": "",
+        "empty#en": "The procedure has no result with these inputs – the last result stays.",
+        "noPath": "",
+        "noPath#en": "The path of the procedure is not a single line of edges – the last result stays.",
+        "followMe": "",
+        "followMe#en": "The profile could not follow this path – the last result stays.",
+        "tooMany": "",
+        "tooMany#en": "That would be more than 2000 copies – the last result stays.",
+        "failed": "",
+        "failed#en": "The procedure could not be built – the last result stays."
+      }
     },
     "brand": {
       "tagline": "",

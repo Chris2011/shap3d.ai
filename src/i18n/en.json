@@ -107,7 +107,8 @@
       "view-back": "Back",
       "view-left": "Left",
       "view-bottom": "Bottom",
-      "toggleSnapping": "Snapping"
+      "toggleSnapping": "Snapping",
+      "explodeToInputs": "Explode to inputs"
     },
     "names": {
       "model": "Model",
@@ -333,7 +334,9 @@
         "zoomwindow": "Drag a rectangle to zoom into that area.",
         "lookaround": "Drag to look around (the camera turns on the spot).",
         "walk": "Drag up/down to walk, left/right to turn. Arrow keys work too.",
-        "poscam": "Click to place the camera there at eye height."
+        "poscam": "Click to place the camera there at eye height.",
+        "copyAlongSource": "Select the groups or components to copy, then click a path.",
+        "copyAlongPath": "Click the path: a line of edges or a group of edges. Then type a number of copies (7x) or a spacing."
       },
       "hints": {
         "square": "Square",
@@ -344,8 +347,10 @@
         "scaleOneAxis": "Scale one axis",
         "rotateGrip": "Rotate",
         "roundCorner": "Round corner",
-        "sameDistance": "Same distance from the corner"
-      }
+        "sameDistance": "Same distance from the corner",
+        "copyAlongPath": "Copy along this path"
+      },
+      "copyalong": "Copy along"
     },
     "editor": {
       "undone": "Undone: {action}",
@@ -354,7 +359,8 @@
       "noSelection": "No selection",
       "faces": "{count} face | {count} faces",
       "edges": "{count} edge | {count} edges",
-      "instances": "{count} group/component | {count} groups/components"
+      "instances": "{count} group/component | {count} groups/components",
+      "actionCancelled": "Action cancelled"
     },
     "inference": {
       "onRedAxis": "On red axis",
@@ -466,7 +472,8 @@
       "distance": "Distance",
       "scale": "Scale",
       "fov": "Field of view",
-      "eyeHeight": "Eye height"
+      "eyeHeight": "Eye height",
+      "copyAlong": "Copies or spacing"
     },
     "app": {
       "dropToImport": "Drop the file to import it",
@@ -493,7 +500,8 @@
       "export": "Export",
       "exportModel": "Model (.shap3d.json)",
       "exportStl": "STL (3D printing)",
-      "exportPng": "PNG image"
+      "exportPng": "PNG image",
+      "cancelAction": "Cancel the current action"
     },
     "theme": {
       "darkOff": "Dark mode off",
@@ -1660,6 +1668,39 @@
     },
     "workspace": {
       "model": "Model"
+    },
+    "procedures": {
+      "kinds": {
+        "solid": "Procedure: solid tool",
+        "followme": "Procedure: Follow Me",
+        "copyalong": "Procedure: Copy Along"
+      },
+      "operation": "Operation",
+      "distribute": "Distribute",
+      "byCount": "By number",
+      "bySpacing": "By spacing",
+      "count": "Copies",
+      "spacing": "Spacing",
+      "align": "Turn along the path",
+      "inputs": "Inputs",
+      "editInputs": "Edit inputs",
+      "editHint": "Open it to edit its input groups; the result follows when you leave it. Geometry drawn directly inside it is replaced by the next result.",
+      "undoParams": "Change procedure",
+      "names": {
+        "copyAlong": "Copy Along",
+        "followMe": "Follow Me",
+        "path": "Path",
+        "profile": "Profile"
+      },
+      "errors": {
+        "missingInput": "An input of the procedure is missing – the last result stays.",
+        "notSolid": "An input of the procedure is no longer a solid – the last result stays.",
+        "empty": "The procedure has no result with these inputs – the last result stays.",
+        "noPath": "The path of the procedure is not a single line of edges – the last result stays.",
+        "followMe": "The profile could not follow this path – the last result stays.",
+        "tooMany": "That would be more than 2000 copies – the last result stays.",
+        "failed": "The procedure could not be built – the last result stays."
+      }
     }
   }
 }

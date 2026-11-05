@@ -175,7 +175,8 @@
       "pivot": {
         "center": "die Mitte ihrer Box",
         "bottom": "die Mitte ihres Bodens",
-        "origin": "ihren eigenen Ursprung"
+        "origin": "ihren eigenen Ursprung",
+        "joint": "ihr Gelenk"
       },
       "camera": {
         "name": "Kamera {number}"
@@ -265,7 +266,10 @@
         "path": "Pfad folgen",
         "lookAt": "Schaut auf",
         "pivot": "Drehpunkt",
-        "clear": "Animation entfernen"
+        "clear": "Animation entfernen",
+        "joint": "Gelenk setzen",
+        "bone": "Knochen ändern",
+        "pose": "Pose"
       },
       "errors": {
         "noTarget": "Keine Gruppe oder Komponente \"{target}\" gefunden",
@@ -275,7 +279,10 @@
         "noCamera": "Keine Animationskamera \"{name}\"",
         "noLight": "Kein Animationslicht \"{name}\"",
         "noMaterial": "Kein Material \"{name}\" im Modell",
-        "axis": "Unbekannte Achse \"{value}\" – nimm +x, -x, +y oder -y"
+        "axis": "Unbekannte Achse \"{value}\" – nimm +x, -x, +y oder -y",
+        "noRig": "„{target}“ gehört zu keinem Rig – machen Sie es zuerst mit s3d.animateBone zum Knochen.",
+        "noBone": "Das Rig hat keinen Knochen „{name}“.",
+        "noPose": "Das Rig hat keine Pose „{name}“."
       },
       "script": {
         "animate": "Setzt Schlüsselbilder einer Gruppe oder Komponente in einem Bild: wo ihr Drehpunkt ist (at), ihre Drehung in Grad (rotate), ihre Skalierung, ob sie sichtbar ist, ihre Farbe und Deckkraft – mit einer Kurve (interp). Gibt ihre ID zurück.",
@@ -290,7 +297,9 @@
         "animateScene": "Bildrate sowie erstes und letztes Bild; gibt sie zurück.",
         "animatePlay": "Wenn das Skript fertig ist: zeigt ein Bild, spielt ab, schaut durch die Kamera.",
         "animateRender": "Wenn das Skript fertig ist: rendert den Film als Video oder PNG-Bilder.",
-        "animateClear": "Entfernt die Animation einer Gruppe – oder ohne Angabe die ganze Animation."
+        "animateClear": "Entfernt die Animation einer Gruppe – oder ohne Angabe die ganze Animation.",
+        "animateBone": "Macht eine Gruppe zum Knochen eines Rigs: Gelenk (head) und Spitze (tail) im Modell, wie weit sie sich aus der Ruhelage drehen darf (limits, Grad), Seite und Partner. Die äußerste Gruppe wird zum Rig. Gibt ihre ID zurück.",
+        "animatePose": "Speichert eine Pose eines Rigs (bones: Drehung jedes Knochens aus der Ruhelage in Grad) und/oder setzt Keys für eine gespeicherte Pose in einem Frame."
       },
       "demos": {
         "showcase": {
@@ -308,6 +317,10 @@
         "colors": {
           "name": "Farben und Blenden",
           "description": "Würfel tauchen nacheinander auf, wechseln wellenartig die Farbe und blenden aus; eine Glasscheibe wird milchig."
+        },
+        "puppet": {
+          "name": "Gliederpuppe",
+          "description": "Eine Figur mit Rig: Knochen mit Grenzen, zwei gespeicherte Posen lassen sie gehen."
         }
       },
       "guide": {
@@ -378,6 +391,46 @@
             "text": "Die Demos zeigen Pfade, Teile in Teilen, Kameraflüge, Sonne, Lichter und Farben – öffne eine im Skript-Editor und führe sie aus."
           }
         }
+      },
+      "tools": {
+        "joint": "Gelenk",
+        "jointHead": "Klicken Sie dorthin, wo das Gelenk der Gruppe sitzt. Pfeil hoch und runter wählen die Gruppe: innere oder äußere.",
+        "jointTail": "Klicken Sie auf die Spitze des Knochens.",
+        "jointNoGroup": "Klicken Sie auf eine Gruppe – Knochen sind Gruppen.",
+        "jointTarget": "Knochen: {name} (↑ ↓ andere Gruppe)",
+        "pose": "Posieren",
+        "poseStatus": "Knochen anklicken und ziehen, um ihn um sein Gelenk zu drehen. Pfeiltasten sperren eine Achse (→ X, ← Y, ↑ Z, ↓ aus). I setzt Keys für die Pose.",
+        "poseAxis": "Achse {axis}"
+      },
+      "rig": {
+        "title": "Rig",
+        "showBones": "Knochen zeigen",
+        "hint": "Figuren sind Gruppen ineinander: Der Oberarm enthält den Unterarm. Gelenk macht aus einer Gruppe einen Knochen, Posieren dreht Knochen. Gruppen verwenden: Kopien einer Komponente teilen sich ihre Knochen.",
+        "bone": "Knochen",
+        "boneName": "Knochen",
+        "name": "Name",
+        "side": "Seite",
+        "sideNone": "Keine",
+        "sideLeft": "Links",
+        "sideRight": "Rechts",
+        "partner": "Partner auf der anderen Seite",
+        "limits": "Grenzen ab Ruhelage (Grad: min, max)",
+        "limitMin": "Kleinste Drehung",
+        "limitMax": "Größte Drehung",
+        "free": "frei",
+        "removeBone": "Knochen entfernen",
+        "poses": "Posen",
+        "poseName": "Name der Pose",
+        "savePose": "Pose speichern",
+        "apply": "Anwenden",
+        "applyHint": "Setzt Keys für diese Pose im aktuellen Frame",
+        "removePose": "Pose löschen",
+        "keyPose": "Pose keyen",
+        "keyPoseHint": "Setzt Keys für die Drehungen aller Knochen, wie sie gerade zu sehen sind",
+        "mirror": "Spiegeln",
+        "mirrorHint": "Tauscht links und rechts in diesem Frame. Links und rechts der Figur müssen entlang ihrer X-Achse liegen.",
+        "rest": "Ruhelage",
+        "restHint": "Setzt Keys, die alle Knochen zurück in ihre Lage im Modell bringen"
       }
     }
   }

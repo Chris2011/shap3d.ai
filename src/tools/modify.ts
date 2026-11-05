@@ -2,11 +2,12 @@ import * as THREE from 'three';
 import type { VertRec, EdgeRec, FaceHit } from '../engine/viewer';
 import type { Editor, PEvt } from '../engine/editor';
 import type { Overlay } from '../engine/overlay';
-import type { EntityRef, Entities, Instance } from '../core/model';
+import { isProcedureInput, type EntityRef, type Entities, type Instance } from '../core/model';
 import { PointTool, onPlane, planeAxes } from './base';
 import { AXES, AXIS_COLOR, closestOnLineToRay, snapping } from '../engine/inference';
 import { parseArray, parseLengthList, formatAngle } from '../core/units';
 import { offsetPolygon, polygonNormal, planeBasis, to2D, pointInPolygon2D, distPointSegment2D, closestOnSegment } from '../core/geometry';
+import { createFollowMeProcedure } from '../core/procedures';
 import { t, formatDecimal, normalizeNumberInput } from '../i18n';
 import { gridLevels } from '../engine/gridView';
 
@@ -286,7 +287,9 @@ const profileSegments = (editor: Editor, frame: BoxFrame): [V3, V3][] => {
     }
     if (depth < 4) {
       for (const child of ents.instances.values()) {
-        walk(child.definition.entities, matrix.clone().multiply(child.matrix), depth + 1);
+        if (!isProcedureInput(child)) {
+          walk(child.definition.entities, matrix.clone().multiply(child.matrix), depth + 1);
+        }
       }
     }
   };
@@ -708,6 +711,8 @@ export class MoveTool extends PointTool {
   pressed = false;
   delta = new THREE.Vector3();
   lastCopy: { refs: EntityRef[]; delta: V3; orig: EntityRef[] } | null = null;
+  /** what was selected when the move began – a copy is selected while it moves */
+  moved: EntityRef[] = [];
   frame: BoxFrame | null = null;
   rotateGrips: RotateGrip[] = [];
   hotRotate: RotateGrip | null = null;
@@ -813,6 +818,7 @@ export class MoveTool extends PointTool {
     editor.beginOp(this.copy ? 'commands.copy' : 'tools.move');
     let refs = this.refs();
     const orig = refs;
+    this.moved = orig;
     if (this.copy) {
       refs = editor.entities.copy(refs, new THREE.Matrix4(), editor.model);
       editor.select(refs);
@@ -885,6 +891,7 @@ export class MoveTool extends PointTool {
           delta = this.delta.clone();
         this.clearSeeThrough();
         this.editor.abortOp();
+        this.editor.select(this.moved);
         this.start = null;
         this.live = null;
         this.begin(start);
@@ -1674,11 +1681,7 @@ export class FollowMeTool extends PointTool {
   path(): { points: V3[]; closed: boolean } | null {
     const editor = this.editor;
     const ents = editor.entities;
-    let edges = editor
-      .selected()
-      .filter((entityRef) => entityRef.kind === 'edge')
-      .map((entityRef) => ents.edges.get(entityRef.id)!)
-      .filter(Boolean);
+    let edges = this.selectedEdges();
     // a selected face (without edges) means "its boundary"
     if (!edges.length) {
       const entityRef = editor.selected().find((selectedRef) => selectedRef.kind === 'face');
@@ -1722,6 +1725,26 @@ export class FollowMeTool extends PointTool {
     }
     return { points: order.map((vertex) => ents.positionOf(vertex).clone()), closed };
   }
+  selectedEdges() {
+    const ents = this.editor.entities;
+    return this.editor
+      .selected()
+      .filter((entityRef) => entityRef.kind === 'edge')
+      .map((entityRef) => ents.edges.get(entityRef.id)!)
+      .filter(Boolean);
+  }
+  /** a loose path and a profile on its own lose nothing when they become inputs – edges of a solid must stay where they are */
+  canBeProcedure(faceId: number) {
+    const ents = this.editor.entities;
+    const face = ents.faces.get(faceId);
+    const path = this.selectedEdges();
+    return (
+      !!face &&
+      path.length > 0 &&
+      path.every((edge) => !ents.facesOfEdge(edge.id).length) &&
+      ents.faceEdges(face).every((edge) => ents.facesOfEdge(edge.id).length === 1)
+    );
+  }
   onMove(pointer: PEvt) {
     const editor = this.editor;
     const faceHit = editor.viewer.pickFace(
@@ -1744,6 +1767,24 @@ export class FollowMeTool extends PointTool {
       (context) => context.path.length === editor.activePath.length && editor.inContext(context.path),
     );
     if (!faceHit) {
+      return;
+    }
+    if (this.canBeProcedure(faceHit.faceId)) {
+      const pathEdges = this.selectedEdges().map((edge) => edge.id);
+      const names = {
+        group: editor.model.uniqueDefName(t('procedures.names.followMe')),
+        profile: t('procedures.names.profile'),
+        path: t('procedures.names.path'),
+      };
+      try {
+        editor.commit('tools.followme', () => {
+          const procedure = createFollowMeProcedure(editor.model, editor.entities, faceHit.faceId, pathEdges, names);
+          editor.select([{ kind: 'instance', id: procedure.id }]);
+        });
+      } catch {
+        // commit has put everything back and said so
+      }
+      editor.setHover(null);
       return;
     }
     // start the path at the end closest to the profile

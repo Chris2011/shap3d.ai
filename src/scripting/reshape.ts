@@ -75,6 +75,7 @@ export const subdivideInstance = (editor: Editor, inst: Instance, round = true):
   }
   editor.commit(round ? 'Mehr Polygone (abrunden)' : 'Mehr Polygone', () => {
     inst.definition.entities = fromTriMesh(loopSubdivide(triMesh, round), 40, round);
+    inst.definition.procedure = undefined;
     inst.definition.shape = undefined;
     inst.definition.pluginData = undefined; // no longer parametric / plugin-made (e.g. terrain grid)
   });
@@ -93,6 +94,7 @@ export const simplifyInstance = async (editor: Editor, inst: Instance, keep: num
   }
   editor.commit('undo.fewerPolygons', () => {
     inst.definition.entities = fromTriMesh(out);
+    inst.definition.procedure = undefined;
     inst.definition.shape = undefined;
     inst.definition.pluginData = undefined;
   });

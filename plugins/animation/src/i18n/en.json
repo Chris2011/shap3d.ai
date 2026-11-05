@@ -175,7 +175,8 @@
       "pivot": {
         "center": "the middle of its box",
         "bottom": "the middle of its bottom",
-        "origin": "its own origin"
+        "origin": "its own origin",
+        "joint": "its joint"
       },
       "camera": {
         "name": "Camera {number}"
@@ -265,7 +266,10 @@
         "path": "Follow a path",
         "lookAt": "Look at",
         "pivot": "Pivot",
-        "clear": "Remove animation"
+        "clear": "Remove animation",
+        "joint": "Set joint",
+        "bone": "Change bone",
+        "pose": "Pose"
       },
       "errors": {
         "noTarget": "No group or component \"{target}\" found",
@@ -275,7 +279,10 @@
         "noCamera": "No animation camera \"{name}\"",
         "noLight": "No animation light \"{name}\"",
         "noMaterial": "No material \"{name}\" in the model",
-        "axis": "Unknown axis \"{value}\" – use +x, -x, +y or -y"
+        "axis": "Unknown axis \"{value}\" – use +x, -x, +y or -y",
+        "noRig": "“{target}” is not part of a rig – make it a bone with s3d.animateBone first.",
+        "noBone": "The rig has no bone “{name}”.",
+        "noPose": "The rig has no pose “{name}”."
       },
       "script": {
         "animate": "Keys a group or component at a frame: where its pivot is (at), its turn in degrees (rotate), its scale, whether it is visible, its colour and opacity – with a curve (interp). Returns its id.",
@@ -290,7 +297,9 @@
         "animateScene": "The frame rate and the first and last frame; returns them.",
         "animatePlay": "Once the script is done: shows a frame, plays, looks through the camera.",
         "animateRender": "Once the script is done: renders the film as a video or PNG images.",
-        "animateClear": "Removes a group's animation – or, without one, the whole animation."
+        "animateClear": "Removes a group's animation – or, without one, the whole animation.",
+        "animateBone": "Makes a group a bone of a rig: its joint (head) and tip (tail) in the model, how far it may turn from rest (limits, degrees), its side and partner. The outermost group becomes the rig. Returns its id.",
+        "animatePose": "Stores a pose of a rig (bones: each one’s turn from rest in degrees) and/or keys a stored pose at a frame."
       },
       "demos": {
         "showcase": {
@@ -308,6 +317,10 @@
         "colors": {
           "name": "Colours and fades",
           "description": "Blocks pop up one after another, change colour in a wave and fade out; a glass pane frosts over."
+        },
+        "puppet": {
+          "name": "Jointed puppet",
+          "description": "A figure with a rig: bones with limits, two stored poses that make it walk."
         }
       },
       "guide": {
@@ -378,6 +391,46 @@
             "text": "The demos show paths, parts inside parts, camera flights, the sun, lights and colours – open one in the script editor and run it."
           }
         }
+      },
+      "tools": {
+        "joint": "Joint",
+        "jointHead": "Click where the joint of the group is. Up and down arrows choose the group: inner or outer.",
+        "jointTail": "Click the tip of the bone.",
+        "jointNoGroup": "Click on a group – bones are groups.",
+        "jointTarget": "Bone: {name} (↑ ↓ other group)",
+        "pose": "Pose",
+        "poseStatus": "Click a bone and drag to turn it about its joint. Arrow keys lock an axis (→ X, ← Y, ↑ Z, ↓ off). I keys the pose.",
+        "poseAxis": "Axis {axis}"
+      },
+      "rig": {
+        "title": "Rig",
+        "showBones": "Show bones",
+        "hint": "Figures are groups inside each other: an upper arm holds the forearm. Joint makes a group a bone, Pose turns bones. Use groups: copies of a component share their bones.",
+        "bone": "Bone",
+        "boneName": "Bone",
+        "name": "Name",
+        "side": "Side",
+        "sideNone": "None",
+        "sideLeft": "Left",
+        "sideRight": "Right",
+        "partner": "Partner on the other side",
+        "limits": "Limits from rest (degrees: min, max)",
+        "limitMin": "Smallest turn",
+        "limitMax": "Largest turn",
+        "free": "free",
+        "removeBone": "Remove bone",
+        "poses": "Poses",
+        "poseName": "Name of the pose",
+        "savePose": "Save pose",
+        "apply": "Apply",
+        "applyHint": "Keys this pose at the frame shown",
+        "removePose": "Delete pose",
+        "keyPose": "Key pose",
+        "keyPoseHint": "Keys the turns of all bones as shown, at this frame",
+        "mirror": "Mirror",
+        "mirrorHint": "Swaps left and right at this frame. Left and right of the figure must lie along its X axis.",
+        "rest": "Rest pose",
+        "restHint": "Keys all bones back to how they are in the model"
       }
     }
   }

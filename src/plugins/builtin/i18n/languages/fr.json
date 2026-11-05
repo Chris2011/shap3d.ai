@@ -107,7 +107,8 @@
       "view-back": "Arrière",
       "view-left": "Gauche",
       "view-bottom": "Dessous",
-      "toggleSnapping": "Accrochage"
+      "toggleSnapping": "Accrochage",
+      "explodeToInputs": "Éclater en entrées"
     },
     "names": {
       "model": "Modèle",
@@ -333,7 +334,9 @@
         "zoomwindow": "Tracez un rectangle pour zoomer sur cette zone.",
         "lookaround": "Faites glisser pour regarder autour (la caméra tourne sur place).",
         "walk": "Faites glisser vers le haut/bas pour marcher, à gauche/droite pour tourner. Les flèches fonctionnent aussi.",
-        "poscam": "Cliquez pour placer la caméra à hauteur des yeux."
+        "poscam": "Cliquez pour placer la caméra à hauteur des yeux.",
+        "copyAlongSource": "Sélectionnez les groupes ou composants à copier, puis cliquez sur un chemin.",
+        "copyAlongPath": "Cliquez sur le chemin : une ligne d’arêtes ou un groupe d’arêtes. Saisissez ensuite un nombre de copies (7x) ou un espacement."
       },
       "hints": {
         "square": "Carré",
@@ -344,8 +347,10 @@
         "scaleOneAxis": "Échelle sur un axe",
         "rotateGrip": "Faire pivoter",
         "roundCorner": "Arrondir le coin",
-        "sameDistance": "Même distance du coin"
-      }
+        "sameDistance": "Même distance du coin",
+        "copyAlongPath": "Copier le long de ce chemin"
+      },
+      "copyalong": "Copier le long"
     },
     "editor": {
       "undone": "Annulé : {action}",
@@ -354,7 +359,8 @@
       "noSelection": "Aucune sélection",
       "faces": "{count} face | {count} faces",
       "edges": "{count} arête | {count} arêtes",
-      "instances": "{count} groupe/composant | {count} groupes/composants"
+      "instances": "{count} groupe/composant | {count} groupes/composants",
+      "actionCancelled": "Action annulée"
     },
     "inference": {
       "onRedAxis": "Sur l’axe rouge",
@@ -466,7 +472,8 @@
       "distance": "Distance",
       "scale": "Échelle",
       "fov": "Champ de vision",
-      "eyeHeight": "Hauteur des yeux"
+      "eyeHeight": "Hauteur des yeux",
+      "copyAlong": "Copies ou espacement"
     },
     "app": {
       "dropToImport": "Déposez le fichier pour l’importer",
@@ -493,7 +500,8 @@
       "export": "Exporter",
       "exportModel": "Modèle (.shap3d.json)",
       "exportStl": "STL (impression 3D)",
-      "exportPng": "Image PNG"
+      "exportPng": "Image PNG",
+      "cancelAction": "Annuler l’action en cours"
     },
     "theme": {
       "darkOff": "Mode sombre désactivé",
@@ -1678,6 +1686,39 @@
     },
     "workspace": {
       "model": "Modèle"
+    },
+    "procedures": {
+      "kinds": {
+        "solid": "Procédure : outil solide",
+        "followme": "Procédure : Suivez-moi",
+        "copyalong": "Procédure : Copier le long"
+      },
+      "operation": "Opération",
+      "distribute": "Répartir",
+      "byCount": "Par nombre",
+      "bySpacing": "Par espacement",
+      "count": "Copies",
+      "spacing": "Espacement",
+      "align": "Tourner le long du chemin",
+      "inputs": "Entrées",
+      "editInputs": "Modifier les entrées",
+      "editHint": "Ouvrez-la pour modifier ses groupes d’entrée ; le résultat suit en la quittant. La géométrie dessinée directement à l’intérieur est remplacée par le résultat suivant.",
+      "undoParams": "Modifier la procédure",
+      "names": {
+        "copyAlong": "Copier le long",
+        "followMe": "Suivez-moi",
+        "path": "Chemin",
+        "profile": "Profil"
+      },
+      "errors": {
+        "missingInput": "Une entrée de la procédure manque – le dernier résultat reste.",
+        "notSolid": "Une entrée de la procédure n’est plus un solide – le dernier résultat reste.",
+        "empty": "La procédure n’a pas de résultat avec ces entrées – le dernier résultat reste.",
+        "noPath": "Le chemin de la procédure n’est pas une seule ligne d’arêtes – le dernier résultat reste.",
+        "followMe": "Le profil n’a pas pu suivre ce chemin – le dernier résultat reste.",
+        "tooMany": "Cela ferait plus de 2000 copies – le dernier résultat reste.",
+        "failed": "La procédure n’a pas pu être construite – le dernier résultat reste."
+      }
     }
   }
 }

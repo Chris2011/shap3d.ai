@@ -4,7 +4,7 @@ import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { MeshBVH } from 'three-mesh-bvh';
-import type { Entities, Instance, EntityRef } from '../core/model';
+import { Entities, isProcedureInput, type Instance, type EntityRef } from '../core/model';
 import type { Model } from '../core/document';
 import { CameraRig } from './camera';
 import { Overlay } from './overlay';
@@ -419,6 +419,9 @@ export class Viewer {
     const hiddenTags = model.hiddenTags();
     const activeKey = state.activePath.map((instance) => instance.id).join('/');
     const showHidden = model.settings.hiddenGeometry;
+    // a procedure that is open shows its inputs instead of its result
+    const openEntities = new Set(state.activePath.map((instance) => instance.definition.entities));
+    const noGeometry = new Entities();
 
     const walk = (ents: Entities, path: Instance[], world: THREE.Matrix4, inheritMat: string | undefined) => {
       const key = path.map((instance) => instance.id).join('/');
@@ -427,7 +430,8 @@ export class Viewer {
       const context: PickContext = { path, entities: ents, world };
       const faceMe = path.length ? path[path.length - 1].definition.faceMe : false;
       const firstProfile = this.profiles.length;
-      const grp = this.buildEntities(ents, context, inheritMat, faded, hiddenTags, showHidden, faceMe);
+      const openProcedure = openEntities.has(ents) && !!path[path.length - 1]?.definition.procedure;
+      const grp = this.buildEntities(openProcedure ? noGeometry : ents, context, inheritMat, faded, hiddenTags, showHidden, faceMe);
       const built = { group: grp, path, world: world.clone(), context };
       this.builtGroups.push(built);
       for (let index = firstProfile; index < this.profiles.length; index++) {
@@ -437,7 +441,11 @@ export class Viewer {
         this.faceMe.push({ group: grp, world: world.clone() });
       }
       for (const inst of ents.instances.values()) {
-        if ((inst.hidden && !showHidden) || (inst.tag && hiddenTags.has(inst.tag))) {
+        if (inst.procedureRole) {
+          if (isProcedureInput(inst) !== openProcedure) {
+            continue;
+          }
+        } else if ((inst.hidden && !showHidden) || (inst.tag && hiddenTags.has(inst.tag))) {
           continue;
         }
         walk(inst.definition.entities, [...path, inst], world.clone().multiply(inst.matrix), inst.material ?? inheritMat);

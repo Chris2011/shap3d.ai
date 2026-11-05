@@ -77,6 +77,11 @@ const items = computed<It[]>(() => {
       out.push(
         { label: t('contextMenu.editGroup'), cmd: 'editGroup' },
         { label: t('commands.explode'), cmd: 'explode' },
+        ...(selection.some(
+          (entityRef) => entityRef.kind === 'instance' && editor.entities.instances.get(entityRef.id)?.definition.procedure,
+        )
+          ? [{ label: t('commands.explodeToInputs'), cmd: 'explodeToInputs' }]
+          : []),
         { label: t('commands.makeUnique'), cmd: 'makeUnique' },
       );
       out.push({ label: t('commands.lock'), cmd: 'lock' }, { label: t('commands.unlock'), cmd: 'unlock' });

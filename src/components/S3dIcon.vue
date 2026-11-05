@@ -44,6 +44,7 @@ const ICONS: Record<string, string> = {
   move: `<path d="M12 3v18M3 12h18" ${STROKE_RED}/><path d="M9.5 5.5 12 3l2.5 2.5M9.5 18.5 12 21l2.5-2.5M5.5 9.5 3 12l2.5 2.5M18.5 9.5 21 12l-2.5 2.5" ${STROKE_RED}/>`,
   rotate: `<path d="M19 12a7 7 0 1 1-2.1-5" ${STROKE_RED}/><path d="M17.5 3.5v4h-4" ${STROKE_RED}/><circle cx="12" cy="12" r="1.4" ${FILL_RED}/>`,
   scale: `<rect x="3.5" y="9.5" width="11" height="11" ${STROKE}/><path d="M10 14 20 4M14.5 4H20v5.5" ${STROKE_RED}/><rect x="2.5" y="8.5" width="2" height="2" ${FILL_RED} stroke="none"/><rect x="13.5" y="19.5" width="2" height="2" ${FILL_RED} stroke="none"/>`,
+  copyalong: `<path d="M3 19c5-1 7-12 18-13" ${STROKE_RED}/><rect x="3" y="14" width="4" height="4" style="fill:var(--s3d-icon-fill)" ${STROKE}/><rect x="9.5" y="8.5" width="4" height="4" style="fill:var(--s3d-icon-fill)" ${STROKE}/><rect x="16" y="4" width="4" height="4" style="fill:var(--s3d-icon-fill)" ${STROKE}/>`,
   followme: `<path d="M4 20c0-8 8-8 8-14" ${STROKE_RED}/><path d="M12 3l4 2-2 4-4-2z" fill="#fde2e2" ${STROKE}/><path d="M3 18l3 3 3-2-2-3z" style="fill:var(--s3d-icon-fill)" ${STROKE}/>`,
   tape: `<rect x="3" y="7" width="11" height="11" rx="5.5" fill="#ffe58a" ${STROKE}/><circle cx="8.5" cy="12.5" r="2" ${STROKE}/><path d="M14 16h7v-3h-3" ${STROKE}/><path d="M16 16v-1.5M18 16v-1.5" ${STROKE}/>`,
   protractor: `<path d="M3 17a9 9 0 0 1 18 0z" style="fill:var(--s3d-icon-fill)" ${STROKE}/><path d="M12 17 17 9" ${STROKE_RED}/><path d="M7 17v-1.5M12 8v1.5M17 17v-1.5" ${STROKE}/>`,

@@ -19,10 +19,12 @@ import {
   PositionCameraTool,
 } from '../tools/construct';
 import { PlaceTool } from '../tools/place';
+import { CopyAlongTool } from '../tools/procedural';
+import { rebuildChangedProcedures } from '../core/procedures';
 import { runCommand } from './commands';
 import { installDefaults } from './defaults';
 import { onThemeChange } from '../theme';
-import { localized, shortcutLabel } from '../i18n';
+import { localized, shortcutLabel, t } from '../i18n';
 
 export interface ToolInfo {
   id: string;
@@ -65,6 +67,7 @@ export const TOOL_INFO: Record<string, ToolInfo> = {
   rotate: toolInfo('rotate', 'rotate', 'Q'),
   scale: toolInfo('scale', 'scale', 'S'),
   followme: toolInfo('followme', 'followme'),
+  copyalong: toolInfo('copyalong', 'copyalong'),
   tape: toolInfo('tape', 'tape', 'T'),
   protractor: toolInfo('protractor', 'protractor'),
   dimension: toolInfo('dimension', 'dimension'),
@@ -104,6 +107,7 @@ export const createEditor = (): Editor => {
     new RotateTool(editor),
     new ScaleTool(editor),
     new FollowMeTool(editor),
+    new CopyAlongTool(editor),
     new TapeTool(editor),
     new ProtractorTool(editor),
     new DimensionTool(editor),
@@ -119,6 +123,12 @@ export const createEditor = (): Editor => {
     new PlaceTool(editor),
   ];
   tools.forEach((tool) => editor.register(tool));
+  // an input of a procedure changed: its result follows in the same undo step
+  editor.settling.push(() => {
+    for (const error of new Set(rebuildChangedProcedures(editor.model.definitions.values(), editor.model))) {
+      editor.toast(t(error));
+    }
+  });
   installDefaults(editor);
   // edge colours and lights depend on day/night – rebuild the scene, not just redraw it
   onThemeChange(() => editor.invalidate());
@@ -151,6 +161,8 @@ export const installKeyboard = (editor: Editor, focusVcb: (initial: string) => v
     const target = keyEvent.target as HTMLElement;
     return target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
   };
+  /** the tool the Ctrl key held down has already switched (copy on/off …) – it may turn out to be the start of a shortcut */
+  let ctrlSwitched: Editor['tool'] | null = null;
   window.addEventListener('keydown', (keyEvent) => {
     if (editor.ui.dialog) {
       return;
@@ -163,6 +175,19 @@ export const installKeyboard = (editor: Editor, focusVcb: (initial: string) => v
     // a plugin's workspace handles its own keys – only undo/redo, save and the command palette stay global
     if (workspaceState.active && !(ctrl && ['z', 'y', 's', 'p', 'k'].includes(key.toLowerCase())) && key !== 'F1') {
       return;
+    }
+    // Ctrl was the start of a shortcut (Ctrl+Z …): what it switched in the tool goes back
+    if (key === 'Control') {
+      if (!keyEvent.repeat) {
+        ctrlSwitched = editor.tool;
+      }
+    } else if (ctrlSwitched && ctrl && !['Shift', 'Alt', 'Meta'].includes(key)) {
+      if (ctrlSwitched === editor.tool) {
+        for (let step = 1; step < editor.tool.ctrlStates; step++) {
+          editor.tool.onKey(new KeyboardEvent('keydown', { key: 'Control' }), true);
+        }
+      }
+      ctrlSwitched = null;
     }
     // let the active tool react first (arrow locks, ctrl copy toggle, shift lock)
     if (editor.tool.onKey(keyEvent, true)) {
@@ -272,6 +297,9 @@ export const installKeyboard = (editor: Editor, focusVcb: (initial: string) => v
     }
   });
   window.addEventListener('keyup', (keyEvent) => {
+    if (keyEvent.key === 'Control') {
+      ctrlSwitched = null;
+    }
     if (isTyping(keyEvent) || editor.ui.dialog) {
       return;
     }

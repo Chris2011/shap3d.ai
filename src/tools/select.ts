@@ -285,6 +285,9 @@ export class SelectTool extends Tool {
     }
     editor.select([ref], selectMode);
   }
+  busy() {
+    return !!this.drag;
+  }
   cancel() {
     this.drag = null;
     this.down = null;
@@ -333,6 +336,9 @@ export class LassoTool extends Tool {
       window ? pts.every((point) => pointInPoly(point.x, point.y, poly)) : pts.some((point) => pointInPoly(point.x, point.y, poly)),
     );
     editor.select(refs, this.mods.shift && this.mods.ctrl ? 'remove' : this.mods.shift ? 'toggle' : this.mods.ctrl ? 'add' : 'set');
+  }
+  busy() {
+    return this.pts.length > 0;
   }
   cancel() {
     this.pts = [];
@@ -459,6 +465,9 @@ export class EraserTool extends Tool {
       }
       editor.entities.removeOrphanVertices();
     });
+  }
+  busy() {
+    return this.active;
   }
   cancel() {
     this.active = false;

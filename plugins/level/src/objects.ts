@@ -52,6 +52,10 @@ export const levelObjects = (): LevelObject[] => {
   const found: LevelObject[] = [];
   const walk = (instances: Iterable<Instance>, parent: InstanceType<typeof THREE.Matrix4>) => {
     for (const instance of instances) {
+      // what a procedure of the app is made from is not in the level; the copies it made are
+      if (instance.procedureRole && instance.procedureRole !== 'result') {
+        continue;
+      }
       const world = parent.clone().multiply(instance.matrix);
       const kind = kindOf(instance.definition);
       if (kind) {

@@ -10,6 +10,7 @@ import {
   writeObject,
   writeScene,
   type Axis,
+  type BoneData,
   type CameraAnimation,
   type Interpolation,
   type LightAnimation,
@@ -18,15 +19,17 @@ import {
   type Track,
   type Tracks,
 } from './data';
-import { placementAt } from './pose';
+import { limitChannel, placementAt, placementOf } from './pose';
+import { bonesOf, rigRootOf, writeBone } from './rig';
 import { pluginContext, t, THREE } from './runtime';
-import { chain, findInstance } from './scene';
+import { chain, findInstance, pivotOf } from './scene';
 import { useAnimationState } from './state';
 
 /**
  * The script functions – s3d.animate(), s3d.animateKeys(), s3d.animatePath(), s3d.animateLookAt(),
  * s3d.animateCamera(), s3d.animateShot(), s3d.animateSun(), s3d.animateLight(), s3d.animateMaterial(),
- * s3d.animateScene(), s3d.animatePlay(), s3d.animateRender() and s3d.animateClear(). A script runs as one undo step,
+ * s3d.animateScene(), s3d.animatePlay(), s3d.animateRender(), s3d.animateBone(), s3d.animatePose() and
+ * s3d.animateClear(). A script runs as one undo step,
  * so they write the animation directly.
  */
 
@@ -493,6 +496,101 @@ export const scriptClear = (_api: ScriptApi, target?: TargetRef) => {
   clear(pluginContext().editor.model.root);
   pluginContext().data.setModel(undefined);
   changed();
+};
+
+export interface BoneOptions {
+  /** the joint and the tip of the bone, in the model where the group is now */
+  head: [number, number, number];
+  tail: [number, number, number];
+  name?: string;
+  limits?: BoneData['limits'];
+  side?: BoneData['side'];
+  mirror?: string;
+}
+
+/** s3d.animateBone(group, { head, tail, name, limits, side, mirror }) – makes a group a bone; the outermost group becomes the rig */
+export const scriptBone = (_api: ScriptApi, target: TargetRef, options: BoneOptions) => {
+  const instance = resolveTarget(target);
+  const path = [...(findInstance(instance.id)?.ancestors ?? []), instance];
+  const inverse = chain(path).invert();
+  const own = (value: unknown, name: string) =>
+    new THREE.Vector3(...vector(value, name))
+      .applyMatrix4(inverse)
+      .toArray()
+      .map((part) => Math.round(part * 1e6) / 1e6) as [number, number, number];
+  const root = path.find((candidate) => objectAnimation(candidate)?.rig) ?? path[0];
+  const taken = bonesOf(root)
+    .filter((node) => node.instance !== instance)
+    .map((node) => node.bone.name);
+  editObject(instance, (animation) => {
+    const name = options?.name ?? (instance.name || instance.definition.name);
+    writeBone(animation, instance, own(options?.head, 'head'), own(options?.tail, 'tail'), name, taken);
+    for (const field of ['limits', 'side', 'mirror'] as const) {
+      if (options[field] !== undefined) {
+        Object.assign(animation.bone!, { [field]: options[field] });
+      }
+    }
+  });
+  if (!objectAnimation(root)?.rig) {
+    editObject(root, (animation) => {
+      animation.rig = { poses: [] };
+    });
+  }
+  return instance.id;
+};
+
+/**
+ * s3d.animatePose(rig, name, { bones, frame, interp }) – with `bones` stores a pose (each bone's turn from its rest, in
+ * degrees; bones not named stay at rest), with `frame` keys the stored pose there
+ */
+export const scriptRigPose = (
+  _api: ScriptApi,
+  target: TargetRef,
+  name: string,
+  options: { bones?: Record<string, [number, number, number]>; frame?: number; interp?: Interpolation } = {},
+) => {
+  const instance = resolveTarget(target);
+  const root = rigRootOf(instance);
+  if (!root) {
+    throw new Error(t('animation.errors.noRig', { target: instance.name || instance.definition.name }));
+  }
+  const nodes = bonesOf(root);
+  if (options.bones) {
+    for (const boneName of Object.keys(options.bones)) {
+      if (!nodes.some((node) => node.bone.name === boneName)) {
+        throw new Error(t('animation.errors.noBone', { name: boneName }));
+      }
+    }
+    const bones = Object.fromEntries(
+      nodes.map((node) => {
+        const rest = placementOf(node.instance.matrix, pivotOf(node.instance, node.animation));
+        const turn = options.bones![node.bone.name] ?? [0, 0, 0];
+        return [node.bone.name, { rx: rest.rx + turn[0], ry: rest.ry + turn[1], rz: rest.rz + turn[2] }];
+      }),
+    );
+    editObject(root, (animation) => {
+      animation.rig ??= { poses: [] };
+      animation.rig.poses = [...animation.rig.poses.filter((pose) => pose.name !== name), { name, bones }];
+    });
+  }
+  if (options.frame !== undefined) {
+    const pose = objectAnimation(root)?.rig?.poses.find((entry) => entry.name === name);
+    if (!pose) {
+      throw new Error(t('animation.errors.noPose', { name }));
+    }
+    const interp = interpolation(options.interp);
+    for (const node of nodes) {
+      const turn = pose.bones[node.bone.name];
+      if (turn) {
+        editObject(node.instance, (animation) => {
+          for (const channel of ['rx', 'ry', 'rz'] as const) {
+            const value = limitChannel(node.instance, animation, channel, turn[channel]);
+            setKey(trackOf(animation.tracks, channel), options.frame!, value, channel, interp);
+          }
+        });
+      }
+    }
+  }
 };
 
 /** what a script asked for once it is done: a frame to show, playing, looking through the camera, a render */

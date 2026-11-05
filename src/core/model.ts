@@ -64,12 +64,34 @@ export interface Instance {
    * with the model, kept while the plugin is off and copied with the instance
    */
   pluginData?: Record<string, unknown>;
+  /** its part in the procedure of the definition it lies in (see core/procedures.ts) */
+  procedureRole?: ProcedureRole;
+}
+
+/** what an instance is in a procedure: one of its inputs, or a copy it made */
+export type ProcedureRole = 'target' | 'tool' | 'profile' | 'path' | 'source' | 'result';
+
+/** an instance a procedure is made from – not part of what the group looks like */
+export const isProcedureInput = (instance: Instance) => !!instance.procedureRole && instance.procedureRole !== 'result';
+
+/** how a procedural group was made; its result is built again from its inputs (see core/procedures.ts) */
+export interface ProcedureData {
+  kind: 'solid' | 'followme' | 'copyalong';
+  params: Record<string, string | number | boolean>;
+  /** of the inputs when the result was last built */
+  hash?: number;
+  /** the key of the message why the last build failed */
+  error?: string;
 }
 
 /** what a copy of an instance takes over from it besides its definition and place */
 export const copyInstanceDetails = (source: Instance, copy: Instance) => {
   copy.material = source.material;
   copy.tag = source.tag;
+  if (source.procedureRole) {
+    copy.procedureRole = source.procedureRole;
+    copy.hidden = source.hidden;
+  }
   if (source.pluginData) {
     copy.pluginData = JSON.parse(JSON.stringify(source.pluginData));
   }
@@ -87,6 +109,8 @@ export class Definition {
   pluginData?: Record<string, unknown>;
   /** how a parametric shape was made (su/s3d API call) – lets it be rebuilt with more or fewer segments */
   shape?: ShapeParams;
+  /** made by a procedure: its inputs are children of this definition, its geometry is the result */
+  procedure?: ProcedureData;
   constructor(
     public name: string,
     public isComponent: boolean,
@@ -1962,6 +1986,9 @@ export class Entities {
     let faces = this.faces.size,
       edges = this.edges.size;
     for (const instance of this.instances.values()) {
+      if (isProcedureInput(instance)) {
+        continue;
+      }
       const childStats = instance.definition.entities.stats();
       faces += childStats.faces;
       edges += childStats.edges;

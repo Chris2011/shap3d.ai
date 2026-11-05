@@ -175,7 +175,8 @@
       "pivot": {
         "center": "le centre de sa boîte",
         "bottom": "le centre de sa base",
-        "origin": "sa propre origine"
+        "origin": "sa propre origine",
+        "joint": "son articulation"
       },
       "camera": {
         "name": "Caméra {number}"
@@ -265,7 +266,10 @@
         "path": "Suivre une trajectoire",
         "lookAt": "Regarder",
         "pivot": "Pivot",
-        "clear": "Supprimer l’animation"
+        "clear": "Supprimer l’animation",
+        "joint": "Placer l’articulation",
+        "bone": "Modifier l’os",
+        "pose": "Pose"
       },
       "errors": {
         "noTarget": "Aucun groupe ou composant « {target} » trouvé",
@@ -275,7 +279,10 @@
         "noCamera": "Pas de caméra d’animation « {name} »",
         "noLight": "Pas de lumière d’animation « {name} »",
         "noMaterial": "Pas de matériau « {name} » dans le modèle",
-        "axis": "Axe inconnu « {value} » – utilisez +x, -x, +y ou -y"
+        "axis": "Axe inconnu « {value} » – utilisez +x, -x, +y ou -y",
+        "noRig": "« {target} » ne fait partie d’aucun rig – faites-en d’abord un os avec s3d.animateBone.",
+        "noBone": "Le rig n’a pas d’os « {name} ».",
+        "noPose": "Le rig n’a pas de pose « {name} »."
       },
       "script": {
         "animate": "Pose des clés sur un groupe ou composant à une image : où est son pivot (at), sa rotation en degrés (rotate), son échelle, sa visibilité, sa couleur et son opacité – avec une courbe (interp). Renvoie son id.",
@@ -290,7 +297,9 @@
         "animateScene": "La fréquence d’images, la première et la dernière image ; les renvoie.",
         "animatePlay": "Une fois le script fini : montre une image, lit, regarde par la caméra.",
         "animateRender": "Une fois le script fini : rend le film en vidéo ou en images PNG.",
-        "animateClear": "Supprime l’animation d’un groupe – ou, sans argument, toute l’animation."
+        "animateClear": "Supprime l’animation d’un groupe – ou, sans argument, toute l’animation.",
+        "animateBone": "Fait d’un groupe un os d’un rig : son articulation (head) et sa pointe (tail) dans le modèle, sa rotation permise depuis le repos (limits, degrés), son côté et son partenaire. Le groupe le plus extérieur devient le rig. Renvoie son id.",
+        "animatePose": "Enregistre une pose d’un rig (bones : rotation de chaque os depuis le repos en degrés) et/ou crée les clés d’une pose enregistrée à une image."
       },
       "demos": {
         "showcase": {
@@ -308,6 +317,10 @@
         "colors": {
           "name": "Couleurs et fondus",
           "description": "Des cubes apparaissent l’un après l’autre, changent de couleur en vague et s’effacent ; une vitre devient dépolie."
+        },
+        "puppet": {
+          "name": "Pantin articulé",
+          "description": "Une figure avec un rig : des os avec limites, deux poses enregistrées qui la font marcher."
         }
       },
       "guide": {
@@ -378,6 +391,46 @@
             "text": "Les démos montrent les trajectoires, des pièces dans des pièces, des vols de caméra, le soleil, les lumières et les couleurs – ouvrez-en une dans l’éditeur de scripts et lancez-la."
           }
         }
+      },
+      "tools": {
+        "joint": "Articulation",
+        "jointHead": "Cliquez à l’endroit de l’articulation du groupe. Les flèches haut et bas choisissent le groupe : intérieur ou extérieur.",
+        "jointTail": "Cliquez sur la pointe de l’os.",
+        "jointNoGroup": "Cliquez sur un groupe – les os sont des groupes.",
+        "jointTarget": "Os : {name} (↑ ↓ autre groupe)",
+        "pose": "Poser",
+        "poseStatus": "Cliquez sur un os et faites-le glisser pour le tourner autour de son articulation. Les flèches verrouillent un axe (→ X, ← Y, ↑ Z, ↓ aucun). I crée les clés de la pose.",
+        "poseAxis": "Axe {axis}"
+      },
+      "rig": {
+        "title": "Rig",
+        "showBones": "Afficher les os",
+        "hint": "Les figures sont des groupes imbriqués : le haut du bras contient l’avant-bras. Articulation fait d’un groupe un os, Poser tourne les os. Utilisez des groupes : les copies d’un composant partagent leurs os.",
+        "bone": "Os",
+        "boneName": "Os",
+        "name": "Nom",
+        "side": "Côté",
+        "sideNone": "Aucun",
+        "sideLeft": "Gauche",
+        "sideRight": "Droite",
+        "partner": "Partenaire de l’autre côté",
+        "limits": "Limites depuis le repos (degrés : min, max)",
+        "limitMin": "Rotation minimale",
+        "limitMax": "Rotation maximale",
+        "free": "libre",
+        "removeBone": "Retirer l’os",
+        "poses": "Poses",
+        "poseName": "Nom de la pose",
+        "savePose": "Enregistrer la pose",
+        "apply": "Appliquer",
+        "applyHint": "Crée les clés de cette pose à l’image affichée",
+        "removePose": "Supprimer la pose",
+        "keyPose": "Clés de la pose",
+        "keyPoseHint": "Crée les clés des rotations de tous les os tels qu’affichés",
+        "mirror": "Miroir",
+        "mirrorHint": "Échange gauche et droite à cette image. La gauche et la droite de la figure doivent se trouver le long de son axe X.",
+        "rest": "Pose de repos",
+        "restHint": "Crée les clés qui ramènent tous les os à leur place dans le modèle"
       }
     }
   }

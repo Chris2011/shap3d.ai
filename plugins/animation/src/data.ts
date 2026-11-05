@@ -65,12 +65,47 @@ export interface LookAt {
   axis?: Axis;
 }
 
+/** the turn channels a joint can be limited on */
+export const LIMIT_CHANNELS = ['rx', 'ry', 'rz'] as const;
+export type LimitChannel = (typeof LIMIT_CHANNELS)[number];
+
+/**
+ * A bone of a rig: the group it is on turns about its joint (`pivot`, the head of the bone) towards `tail`. The bones
+ * of a figure are groups inside each other – the hierarchy of the groups is the skeleton's.
+ */
+export interface BoneData {
+  /** unique in the rig, e.g. upperarm.L – poses and the partner on the other side refer to bones by it */
+  name: string;
+  /** the tip of the bone, in the group's own coordinates */
+  tail: Vec;
+  /** degrees it may turn about each axis from its rest (the model's place); a missing axis is free, [0, 0] locks it */
+  limits?: Partial<Record<LimitChannel, [number, number]>>;
+  side?: 'L' | 'R';
+  /** the name of its partner on the other side, for mirroring poses */
+  mirror?: string;
+}
+
+/** a stored pose: the turn channels of each bone by its name */
+export interface RigPose {
+  name: string;
+  bones: Record<string, { rx: number; ry: number; rz: number }>;
+}
+
+/** on the outermost group of a figure: its stored poses */
+export interface RigData {
+  poses: RigPose[];
+}
+
 export interface ObjectAnimation {
   tracks: Tracks;
   /** the point it turns and scales about, in its own coordinates (default: the middle of its box) */
   pivot?: Vec;
   path?: PathLink;
   lookAt?: LookAt;
+  /** a bone of a rig */
+  bone?: BoneData;
+  /** the outermost group of a rig */
+  rig?: RigData;
 }
 
 export interface CameraAnimation {
@@ -128,7 +163,13 @@ const validKey = (value: unknown) =>
 const validTracks = (value: unknown) =>
   isRecord(value) && Object.values(value).every((track) => isRecord(track) && Array.isArray(track.keys) && track.keys.every(validKey));
 
-export const validObjectAnimation = (value: unknown) => isRecord(value) && validTracks(value.tracks);
+const validBone = (value: unknown) =>
+  value === undefined || (isRecord(value) && typeof value.name === 'string' && Array.isArray(value.tail) && value.tail.length === 3);
+
+const validRig = (value: unknown) => value === undefined || (isRecord(value) && Array.isArray(value.poses));
+
+export const validObjectAnimation = (value: unknown) =>
+  isRecord(value) && validTracks(value.tracks) && validBone(value.bone) && validRig(value.rig);
 
 export const validSceneAnimation = (value: unknown) =>
   isRecord(value) &&
@@ -162,10 +203,15 @@ export const writeScene = (scene: SceneAnimation) => pluginContext().data.setMod
 
 export const objectAnimation = (instance: Instance) => pluginContext().data.get<ObjectAnimation>(instance);
 
-/** writes an object's animation; without tracks or constraints the data goes away */
+/** writes an object's animation; without tracks, constraints, bone or rig the data goes away */
 export const writeObject = (instance: Instance, animation: ObjectAnimation | undefined) => {
   const empty =
-    !animation || (!Object.values(animation.tracks).some((track) => track?.keys.length) && !animation.path && !animation.lookAt);
+    !animation ||
+    (!Object.values(animation.tracks).some((track) => track?.keys.length) &&
+      !animation.path &&
+      !animation.lookAt &&
+      !animation.bone &&
+      !animation.rig);
   pluginContext().data.set(instance, empty ? undefined : animation);
 };
 

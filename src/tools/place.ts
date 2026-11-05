@@ -72,9 +72,18 @@ export class PlaceTool extends PointTool {
     this.definition = null;
     editor.setTool('select');
   }
+  busy() {
+    return !!this.definition;
+  }
   cancel() {
     if (this.definition) {
       this.editor.model.purge();
+      // nothing left to place: back to Select, unless the user is switching to another tool anyway
+      queueMicrotask(() => {
+        if (this.editor.tool === this && !this.definition) {
+          this.editor.setTool('select');
+        }
+      });
     }
     this.definition = null;
   }

@@ -107,7 +107,8 @@
       "view-back": "Hinten",
       "view-left": "Links",
       "view-bottom": "Unten",
-      "toggleSnapping": "Fangen"
+      "toggleSnapping": "Fangen",
+      "explodeToInputs": "In Eingaben auflösen"
     },
     "names": {
       "model": "Modell",
@@ -333,7 +334,9 @@
         "zoomwindow": "Ziehen Sie ein Rechteck auf, um in diesen Bereich zu zoomen.",
         "lookaround": "Ziehen Sie, um sich umzusehen (Kamera dreht sich um ihren Standpunkt).",
         "walk": "Ziehen Sie nach oben/unten zum Gehen, links/rechts zum Drehen. Pfeiltasten funktionieren auch.",
-        "poscam": "Klicken Sie, um die Kamera dort in Augenhöhe zu positionieren."
+        "poscam": "Klicken Sie, um die Kamera dort in Augenhöhe zu positionieren.",
+        "copyAlongSource": "Wählen Sie die zu kopierenden Gruppen oder Komponenten aus und klicken Sie dann auf einen Pfad.",
+        "copyAlongPath": "Klicken Sie auf den Pfad: eine Linie aus Kanten oder eine Gruppe aus Kanten. Danach Anzahl (7x) oder Abstand eingeben."
       },
       "hints": {
         "square": "Quadrat",
@@ -344,8 +347,10 @@
         "scaleOneAxis": "Eine Achse skalieren",
         "rotateGrip": "Drehen",
         "roundCorner": "Ecke abrunden",
-        "sameDistance": "Gleicher Abstand zur Ecke"
-      }
+        "sameDistance": "Gleicher Abstand zur Ecke",
+        "copyAlongPath": "Entlang dieses Pfads kopieren"
+      },
+      "copyalong": "Entlang kopieren"
     },
     "editor": {
       "undone": "Rückgängig: {action}",
@@ -354,7 +359,8 @@
       "noSelection": "Keine Auswahl",
       "faces": "{count} Fläche | {count} Flächen",
       "edges": "{count} Kante | {count} Kanten",
-      "instances": "{count} Gruppe/Komponente | {count} Gruppen/Komponenten"
+      "instances": "{count} Gruppe/Komponente | {count} Gruppen/Komponenten",
+      "actionCancelled": "Aktion abgebrochen"
     },
     "inference": {
       "onRedAxis": "Auf roter Achse",
@@ -466,7 +472,8 @@
       "distance": "Abstand",
       "scale": "Skalierung",
       "fov": "Sichtfeld",
-      "eyeHeight": "Augenhöhe"
+      "eyeHeight": "Augenhöhe",
+      "copyAlong": "Kopien oder Abstand"
     },
     "app": {
       "dropToImport": "Datei loslassen zum Importieren",
@@ -493,7 +500,8 @@
       "export": "Exportieren",
       "exportModel": "Modell (.shap3d.json)",
       "exportStl": "STL (3D-Druck)",
-      "exportPng": "PNG-Bild"
+      "exportPng": "PNG-Bild",
+      "cancelAction": "Laufende Aktion abbrechen"
     },
     "theme": {
       "darkOff": "Dunkelmodus aus",
@@ -1678,6 +1686,39 @@
     },
     "workspace": {
       "model": "Modell"
+    },
+    "procedures": {
+      "kinds": {
+        "solid": "Procedure: Solid-Werkzeug",
+        "followme": "Procedure: Folge mir",
+        "copyalong": "Procedure: Entlang kopieren"
+      },
+      "operation": "Operation",
+      "distribute": "Verteilen",
+      "byCount": "Nach Anzahl",
+      "bySpacing": "Nach Abstand",
+      "count": "Kopien",
+      "spacing": "Abstand",
+      "align": "Entlang des Pfads drehen",
+      "inputs": "Eingaben",
+      "editInputs": "Eingaben bearbeiten",
+      "editHint": "Öffnen Sie sie, um ihre Eingabe-Gruppen zu bearbeiten; das Ergebnis folgt beim Verlassen. Direkt darin gezeichnete Geometrie wird vom nächsten Ergebnis ersetzt.",
+      "undoParams": "Procedure ändern",
+      "names": {
+        "copyAlong": "Entlang kopieren",
+        "followMe": "Folge mir",
+        "path": "Pfad",
+        "profile": "Profil"
+      },
+      "errors": {
+        "missingInput": "Eine Eingabe der Procedure fehlt – das letzte Ergebnis bleibt.",
+        "notSolid": "Eine Eingabe der Procedure ist kein Solid mehr – das letzte Ergebnis bleibt.",
+        "empty": "Mit diesen Eingaben hat die Procedure kein Ergebnis – das letzte Ergebnis bleibt.",
+        "noPath": "Der Pfad der Procedure ist keine einzelne Linie aus Kanten – das letzte Ergebnis bleibt.",
+        "followMe": "Das Profil konnte diesem Pfad nicht folgen – das letzte Ergebnis bleibt.",
+        "tooMany": "Das wären mehr als 2000 Kopien – das letzte Ergebnis bleibt.",
+        "failed": "Die Procedure ließ sich nicht aufbauen – das letzte Ergebnis bleibt."
+      }
     }
   }
 }

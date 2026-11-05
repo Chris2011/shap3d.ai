@@ -107,7 +107,8 @@
       "view-back": "Posterior",
       "view-left": "Izquierda",
       "view-bottom": "Inferior",
-      "toggleSnapping": "Ajuste"
+      "toggleSnapping": "Ajuste",
+      "explodeToInputs": "Descomponer en entradas"
     },
     "names": {
       "model": "Modelo",
@@ -333,7 +334,9 @@
         "zoomwindow": "Dibuja un rectángulo para hacer zoom en esa zona.",
         "lookaround": "Arrastra para mirar alrededor (la cámara gira sobre sí misma).",
         "walk": "Arrastra arriba/abajo para caminar, izquierda/derecha para girar. Las flechas también funcionan.",
-        "poscam": "Haz clic para situar allí la cámara a la altura de los ojos."
+        "poscam": "Haz clic para situar allí la cámara a la altura de los ojos.",
+        "copyAlongSource": "Selecciona los grupos o componentes que quieres copiar y haz clic en un recorrido.",
+        "copyAlongPath": "Haz clic en el recorrido: una línea de aristas o un grupo de aristas. Luego escribe un número de copias (7x) o una separación."
       },
       "hints": {
         "square": "Cuadrado",
@@ -344,8 +347,10 @@
         "scaleOneAxis": "Escalar un eje",
         "rotateGrip": "Rotar",
         "roundCorner": "Redondear esquina",
-        "sameDistance": "Misma distancia a la esquina"
-      }
+        "sameDistance": "Misma distancia a la esquina",
+        "copyAlongPath": "Copiar a lo largo de este recorrido"
+      },
+      "copyalong": "Copiar a lo largo"
     },
     "editor": {
       "undone": "Deshecho: {action}",
@@ -354,7 +359,8 @@
       "noSelection": "Sin selección",
       "faces": "{count} cara | {count} caras",
       "edges": "{count} arista | {count} aristas",
-      "instances": "{count} grupo/componente | {count} grupos/componentes"
+      "instances": "{count} grupo/componente | {count} grupos/componentes",
+      "actionCancelled": "Acción cancelada"
     },
     "inference": {
       "onRedAxis": "En el eje rojo",
@@ -466,7 +472,8 @@
       "distance": "Distancia",
       "scale": "Escala",
       "fov": "Campo de visión",
-      "eyeHeight": "Altura de los ojos"
+      "eyeHeight": "Altura de los ojos",
+      "copyAlong": "Copias o separación"
     },
     "app": {
       "dropToImport": "Suelta el archivo para importarlo",
@@ -493,7 +500,8 @@
       "export": "Exportar",
       "exportModel": "Modelo (.shap3d.json)",
       "exportStl": "STL (impresión 3D)",
-      "exportPng": "Imagen PNG"
+      "exportPng": "Imagen PNG",
+      "cancelAction": "Cancelar la acción en curso"
     },
     "theme": {
       "darkOff": "Modo oscuro desactivado",
@@ -1678,6 +1686,39 @@
     },
     "workspace": {
       "model": "Modelo"
+    },
+    "procedures": {
+      "kinds": {
+        "solid": "Procedimiento: herramienta de sólidos",
+        "followme": "Procedimiento: Sígueme",
+        "copyalong": "Procedimiento: Copiar a lo largo"
+      },
+      "operation": "Operación",
+      "distribute": "Repartir",
+      "byCount": "Por número",
+      "bySpacing": "Por separación",
+      "count": "Copias",
+      "spacing": "Separación",
+      "align": "Girar a lo largo del recorrido",
+      "inputs": "Entradas",
+      "editInputs": "Editar entradas",
+      "editHint": "Ábrelo para editar sus grupos de entrada; el resultado se actualiza al salir. La geometría dibujada directamente dentro se sustituye con el siguiente resultado.",
+      "undoParams": "Cambiar procedimiento",
+      "names": {
+        "copyAlong": "Copiar a lo largo",
+        "followMe": "Sígueme",
+        "path": "Recorrido",
+        "profile": "Perfil"
+      },
+      "errors": {
+        "missingInput": "Falta una entrada del procedimiento: se mantiene el último resultado.",
+        "notSolid": "Una entrada del procedimiento ya no es un sólido: se mantiene el último resultado.",
+        "empty": "El procedimiento no da resultado con estas entradas: se mantiene el último resultado.",
+        "noPath": "El recorrido del procedimiento no es una sola línea de aristas: se mantiene el último resultado.",
+        "followMe": "El perfil no pudo seguir este recorrido: se mantiene el último resultado.",
+        "tooMany": "Serían más de 2000 copias: se mantiene el último resultado.",
+        "failed": "No se pudo construir el procedimiento: se mantiene el último resultado."
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { SimplifyModifier } from 'three/examples/jsm/modifiers/SimplifyModifier.js';
-import { Entities, type Face } from './model';
+import { Entities, isProcedureInput, type Face } from './model';
 
 // ------------------------------------------------------------------ statistics
 export interface MeshStats {
@@ -36,7 +36,9 @@ export const meshStats = (ents: Entities, recursive = true): MeshStats => {
   }
   if (recursive) {
     for (const instance of ents.instances.values()) {
-      add(stats, meshStats(instance.definition.entities, true));
+      if (!isProcedureInput(instance)) {
+        add(stats, meshStats(instance.definition.entities, true));
+      }
     }
   }
   return stats;

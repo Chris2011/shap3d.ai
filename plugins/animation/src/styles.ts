@@ -18,6 +18,7 @@ const CSS = `
 .s3d-an-field > span:first-child { display: flex; align-items: center; gap: 0.25rem; font-size: 0.6875rem; color: var(--s3d-text-2); }
 .s3d-an-field .s3d-input { width: 100%; min-width: 0; }
 .s3d-an-check { display: inline-flex; align-items: center; gap: 0.25rem; }
+.s3d-an-limit { width: 2.5rem; }
 .s3d-an-hint { margin: 0; font-size: 0.75rem; color: var(--s3d-text-2); }
 .s3d-an-warning { margin: 0; font-size: 0.75rem; color: #c92a2a; }
 .s3d-an-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

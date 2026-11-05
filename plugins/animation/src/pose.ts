@@ -1,6 +1,16 @@
 import type { Instance } from '../../../src/core/model';
 import { evaluate } from './curves';
-import type { Axis, CameraAnimation, LightAnimation, ObjectAnimation, SceneAnimation, Tracks, Vec } from './data';
+import {
+  LIMIT_CHANNELS,
+  type Axis,
+  type CameraAnimation,
+  type LightAnimation,
+  type LimitChannel,
+  type ObjectAnimation,
+  type SceneAnimation,
+  type Tracks,
+  type Vec,
+} from './data';
 import { THREE } from './runtime';
 import { animatedNodes, centerOf, chain, findInstance, pathLine, pivotOf, pointOnLine, type AnimatedNode } from './scene';
 
@@ -304,6 +314,35 @@ export const poseAt = (scene: SceneAnimation, frame: number, overrides: Map<Inst
     lights: scene.lights.map((light) => lightPose(light, frame)),
     materials,
   };
+};
+
+/** a turn channel kept within a bone's limits – measured from its rest (the model's place), the shortest way round */
+export const limitChannel = (instance: Instance, animation: ObjectAnimation | undefined, channel: string, value: number) => {
+  const range = animation?.bone?.limits?.[channel as LimitChannel];
+  if (!range) {
+    return value;
+  }
+  const rest = placementOf(instance.matrix, pivotOf(instance, animation))[channel as LimitChannel];
+  const wrap = (angle: number) => ((((angle + 180) % 360) + 360) % 360) - 180;
+  const turned = wrap(value - rest);
+  if (turned >= range[0] && turned <= range[1]) {
+    return value;
+  }
+  // past a limit it stays at the nearer one, also beyond half a turn – a knee does not jump to its other end
+  const nearer = Math.abs(wrap(turned - range[0])) < Math.abs(wrap(turned - range[1])) ? range[0] : range[1];
+  return round(rest + nearer);
+};
+
+/** place channels with the turns kept within a bone's limits */
+export const limitPlacement = (instance: Instance, animation: ObjectAnimation | undefined, place: Placement): Placement => {
+  if (!animation?.bone?.limits) {
+    return place;
+  }
+  const limited = { ...place };
+  for (const channel of LIMIT_CHANNELS) {
+    limited[channel] = limitChannel(instance, animation, channel, place[channel]);
+  }
+  return limited;
 };
 
 /** an object's place channels at a frame as it is shown (keys, or the model's place – `rest` – where it has none) */

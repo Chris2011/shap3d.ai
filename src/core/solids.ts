@@ -1,10 +1,18 @@
 import * as THREE from 'three';
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
-import { Entities, type Instance } from './model';
+import {
+  copyInstanceDetails,
+  type Definition,
+  Entities,
+  isProcedureInput,
+  type DefinitionRegistry,
+  type Instance,
+  type ProcedureRole,
+} from './model';
 
-/** SketchUp definition of a solid: every edge borders exactly two faces. */
+/** SketchUp definition of a solid: every edge borders exactly two faces. A group made only of solids counts as one too. */
 export const isSolid = (ents: Entities): boolean => {
-  if (!ents.faces.size) {
+  if (!ents.faces.size && ![...ents.instances.values()].some((instance) => !isProcedureInput(instance))) {
     return false;
   }
   for (const edge of ents.edges.values()) {
@@ -13,7 +21,7 @@ export const isSolid = (ents: Entities): boolean => {
     }
   }
   for (const instance of ents.instances.values()) {
-    if (!isSolid(instance.definition.entities)) {
+    if (!isProcedureInput(instance) && !isSolid(instance.definition.entities)) {
       return false;
     }
   }
@@ -34,13 +42,16 @@ export const volume = (ents: Entities, matrix = new THREE.Matrix4()): number => 
     }
   }
   for (const instance of ents.instances.values()) {
+    if (isProcedureInput(instance)) {
+      continue;
+    }
     signedVolume += volume(instance.definition.entities, matrix.clone().multiply(instance.matrix));
   }
   return signedVolume;
 };
 
 /** Triangulate an entities tree into a geometry with one group per material. */
-const toBrush = (ents: Entities, transform: THREE.Matrix4, inherit?: string): Brush => {
+const toBrush = (ents: Entities, transform: THREE.Matrix4, inherit?: string, nested = true): Brush => {
   const byMat = new Map<string, number[]>();
   const walk = (entities: Entities, matrix: THREE.Matrix4, inh?: string) => {
     const flip = matrix.determinant() < 0;
@@ -57,7 +68,10 @@ const toBrush = (ents: Entities, transform: THREE.Matrix4, inherit?: string): Br
         arr.push(cornerA.x, cornerA.y, cornerA.z, cornerB.x, cornerB.y, cornerB.z, cornerC.x, cornerC.y, cornerC.z);
       }
     }
-    for (const instance of entities.instances.values()) {
+    for (const instance of nested ? entities.instances.values() : []) {
+      if (isProcedureInput(instance)) {
+        continue;
+      }
       walk(instance.definition.entities, matrix.clone().multiply(instance.matrix), instance.material ?? inh);
     }
   };
@@ -122,6 +136,62 @@ const fromMesh = (mesh: THREE.Mesh): Entities => {
 };
 
 export type SolidOp = 'union' | 'subtract' | 'intersect' | 'outershell' | 'trim' | 'split';
+
+interface CutOptions {
+  defs: DefinitionRegistry & { newDefinition(name: string, isComponent: boolean, entities?: Entities): Definition };
+  /** what the groups of the result are in a procedure */
+  role?: ProcedureRole;
+}
+
+/**
+ * A target cut by a tool – or what is left of it inside the tool – keeping the target's structure: its own faces and
+ * each group inside it are cut on their own, the groups keep their place, name, tag, material and data. A group the tool
+ * does not reach stays as it is (a component stays that component). `toolInTarget` is the tool's place in the target.
+ */
+export const cutKeepingGroups = (
+  mode: 'subtract' | 'intersect',
+  target: Entities,
+  tool: Instance,
+  toolInTarget: THREE.Matrix4,
+  options: CutOptions,
+): Entities => {
+  const evaluator = new Evaluator();
+  evaluator.attributes = ['position', 'uv', 'normal'];
+  evaluator.useGroups = true;
+  const reach = tool.definition.entities.bounds(new THREE.Box3(), toolInTarget);
+  let result = new Entities();
+  if (target.faces.size) {
+    const part = toBrush(target, new THREE.Matrix4(), undefined, false);
+    const cutter = toBrush(tool.definition.entities, toolInTarget, tool.material);
+    result = fromMesh(evaluator.evaluate(part, cutter, mode === 'subtract' ? SUBTRACTION : INTERSECTION) as unknown as THREE.Mesh);
+  }
+  for (const child of target.instances.values()) {
+    if (isProcedureInput(child)) {
+      continue;
+    }
+    const box = child.definition.entities.bounds(new THREE.Box3(), child.matrix);
+    let definition: Definition | null;
+    if (box.intersectsBox(reach)) {
+      const inChild = child.matrix.clone().invert().multiply(toolInTarget);
+      const cut = cutKeepingGroups(mode, child.definition.entities, tool, inChild, options);
+      definition = cut.faces.size || cut.instances.size ? options.defs.newDefinition(child.definition.name, false, cut) : null;
+      if (definition && child.definition.pluginData) {
+        definition.pluginData = JSON.parse(JSON.stringify(child.definition.pluginData));
+      }
+    } else if (mode === 'subtract') {
+      definition = child.definition.isComponent ? child.definition : options.defs.cloneDefinition(child.definition);
+    } else {
+      definition = null;
+    }
+    if (definition) {
+      const copy = copyInstanceDetails(child, result.addInstance(definition, child.matrix.clone(), child.name));
+      if (options.role) {
+        copy.procedureRole = options.role;
+      }
+    }
+  }
+  return result;
+};
 
 /**
  * Boolean operation on instances (in the coordinates of their parent).

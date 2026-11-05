@@ -1,6 +1,7 @@
 import { removeKeyAt, setKey } from './curves';
 import type { Tracks } from './data';
 import { editObjects, editScene, tracksOf } from './keying';
+import { limitChannel } from './pose';
 import { findInstance } from './scene';
 import { t } from './runtime';
 import { learn } from './state';
@@ -30,7 +31,13 @@ export const keyValues = (owner: string, frame: number, values: Record<string, n
   if (owner.startsWith('obj:')) {
     const instance = findInstance(Number(owner.slice(4)))?.instance;
     if (instance) {
-      editObjects(t('animation.undo.key'), [instance], (animation) => change(animation.tracks));
+      editObjects(t('animation.undo.key'), [instance], (animation) => {
+        // a bone's turns stay within its joint's limits
+        for (const channel of Object.keys(values)) {
+          values[channel] = limitChannel(instance, animation, channel, values[channel]);
+        }
+        change(animation.tracks);
+      });
     }
   } else {
     editScene(t('animation.undo.key'), (scene) => {

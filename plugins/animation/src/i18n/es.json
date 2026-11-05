@@ -175,7 +175,8 @@
       "pivot": {
         "center": "el centro de su caja",
         "bottom": "el centro de su base",
-        "origin": "su propio origen"
+        "origin": "su propio origen",
+        "joint": "su articulación"
       },
       "camera": {
         "name": "Cámara {number}"
@@ -265,7 +266,10 @@
         "path": "Seguir una trayectoria",
         "lookAt": "Mirar a",
         "pivot": "Pivote",
-        "clear": "Quitar animación"
+        "clear": "Quitar animación",
+        "joint": "Colocar articulación",
+        "bone": "Cambiar hueso",
+        "pose": "Pose"
       },
       "errors": {
         "noTarget": "No se encontró ningún grupo o componente \"{target}\"",
@@ -275,7 +279,10 @@
         "noCamera": "No hay cámara de animación \"{name}\"",
         "noLight": "No hay luz de animación \"{name}\"",
         "noMaterial": "No hay material \"{name}\" en el modelo",
-        "axis": "Eje desconocido \"{value}\" – usa +x, -x, +y o -y"
+        "axis": "Eje desconocido \"{value}\" – usa +x, -x, +y o -y",
+        "noRig": "«{target}» no forma parte de ningún rig: conviértelo antes en hueso con s3d.animateBone.",
+        "noBone": "El rig no tiene el hueso «{name}».",
+        "noPose": "El rig no tiene la pose «{name}»."
       },
       "script": {
         "animate": "Pone claves a un grupo o componente en un fotograma: dónde está su pivote (at), su giro en grados (rotate), su escala, si es visible, su color y opacidad – con una curva (interp). Devuelve su id.",
@@ -290,7 +297,9 @@
         "animateScene": "La frecuencia y el primer y último fotograma; los devuelve.",
         "animatePlay": "Cuando el script termina: muestra un fotograma, reproduce, mira por la cámara.",
         "animateRender": "Cuando el script termina: renderiza la película como vídeo o imágenes PNG.",
-        "animateClear": "Quita la animación de un grupo – o, sin argumento, toda la animación."
+        "animateClear": "Quita la animación de un grupo – o, sin argumento, toda la animación.",
+        "animateBone": "Convierte un grupo en hueso de un rig: su articulación (head) y punta (tail) en el modelo, cuánto puede girar desde el reposo (limits, grados), su lado y su pareja. El grupo más exterior pasa a ser el rig. Devuelve su id.",
+        "animatePose": "Guarda una pose de un rig (bones: giro de cada hueso desde el reposo en grados) y/o crea las claves de una pose guardada en un fotograma."
       },
       "demos": {
         "showcase": {
@@ -308,6 +317,10 @@
         "colors": {
           "name": "Colores y fundidos",
           "description": "Unos bloques aparecen uno tras otro, cambian de color en ola y se desvanecen; un cristal se vuelve esmerilado."
+        },
+        "puppet": {
+          "name": "Muñeco articulado",
+          "description": "Una figura con rig: huesos con límites y dos poses guardadas que la hacen caminar."
         }
       },
       "guide": {
@@ -378,6 +391,46 @@
             "text": "Las demos muestran trayectorias, piezas dentro de piezas, vuelos de cámara, el sol, luces y colores – abre una en el editor de scripts y ejecútala."
           }
         }
+      },
+      "tools": {
+        "joint": "Articulación",
+        "jointHead": "Haz clic donde está la articulación del grupo. Las flechas arriba y abajo eligen el grupo: interior o exterior.",
+        "jointTail": "Haz clic en la punta del hueso.",
+        "jointNoGroup": "Haz clic en un grupo: los huesos son grupos.",
+        "jointTarget": "Hueso: {name} (↑ ↓ otro grupo)",
+        "pose": "Posar",
+        "poseStatus": "Haz clic en un hueso y arrastra para girarlo sobre su articulación. Las flechas bloquean un eje (→ X, ← Y, ↑ Z, ↓ ninguno). I crea las claves de la pose.",
+        "poseAxis": "Eje {axis}"
+      },
+      "rig": {
+        "title": "Rig",
+        "showBones": "Mostrar huesos",
+        "hint": "Las figuras son grupos anidados: el brazo contiene el antebrazo. Articulación convierte un grupo en hueso, Posar gira los huesos. Usa grupos: las copias de un componente comparten sus huesos.",
+        "bone": "Hueso",
+        "boneName": "Hueso",
+        "name": "Nombre",
+        "side": "Lado",
+        "sideNone": "Ninguno",
+        "sideLeft": "Izquierda",
+        "sideRight": "Derecha",
+        "partner": "Pareja del otro lado",
+        "limits": "Límites desde el reposo (grados: mín, máx)",
+        "limitMin": "Giro mínimo",
+        "limitMax": "Giro máximo",
+        "free": "libre",
+        "removeBone": "Quitar hueso",
+        "poses": "Poses",
+        "poseName": "Nombre de la pose",
+        "savePose": "Guardar pose",
+        "apply": "Aplicar",
+        "applyHint": "Crea las claves de esta pose en el fotograma mostrado",
+        "removePose": "Eliminar pose",
+        "keyPose": "Claves de la pose",
+        "keyPoseHint": "Crea las claves de los giros de todos los huesos tal como se ven",
+        "mirror": "Reflejar",
+        "mirrorHint": "Intercambia izquierda y derecha en este fotograma. La izquierda y la derecha de la figura deben estar a lo largo de su eje X.",
+        "rest": "Pose de reposo",
+        "restHint": "Crea las claves que devuelven todos los huesos a su lugar en el modelo"
       }
     }
   }
