@@ -15,7 +15,7 @@
         "print": "Imprimer les plans / PDF…"
       },
       "sheets": "Feuilles",
-      "sheet": "Feuille",
+      "sheet": "Ajoutez une feuille : du papier avec un cartouche.",
       "addSheet": "+ Feuille",
       "fromScenes": "Depuis les scènes",
       "fromScenesTitle": "Une nouvelle feuille avec jusqu’à quatre scènes en fenêtres – les vues parallèles reçoivent une échelle adaptée",
@@ -127,7 +127,8 @@
         "cannotOffset": "Cet élément ne peut pas être décalé.",
         "cannotSplit": "Rien à scinder ici.",
         "nothingToReach": "Aucune ligne dans cette direction jusqu’où prolonger.",
-        "cannotJoinCorner": "Les lignes ne forment pas de coin (ou la distance est trop grande)."
+        "cannotJoinCorner": "Les lignes ne forment pas de coin (ou la distance est trop grande).",
+        "emptySheet": "La feuille est vide : prenez « Fenêtre » dans la barre ci-dessus et tracez un rectangle sur le papier pour montrer votre modèle."
       },
       "elements": {
         "viewport": "Fenêtre",
@@ -355,7 +356,13 @@
       },
       "context": {
         "openInModel": "Ouvrir dans le modèle"
-      }
+      },
+      "steps": {
+        "sheet": "Ajoutez une feuille : du papier avec un cartouche.",
+        "viewport": "Prenez « Fenêtre » et tracez un rectangle : votre modèle apparaît sur le papier.",
+        "finish": "Ajoutez du texte et des cotes, puis imprimez ou créez un PDF."
+      },
+      "noScenes": "Le modèle n’a pas encore de scènes. Enregistrez une vue dans le panneau Scènes – ou ajoutez simplement une feuille et tracez une fenêtre."
     }
   }
 }

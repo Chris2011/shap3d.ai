@@ -14,9 +14,13 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { refusal } from './requestGuard';
 
 const MAX_BYTES = 300 * 1024 * 1024;
 const TIMEOUT_MS = 180_000;
+/** conversions at the same time – each starts a program */
+const MAX_RUNNING = 2;
+let running = 0;
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Blender: BLENDER_PATH, the usual install folders, or "blender" on the PATH. */
@@ -67,8 +71,7 @@ const send = (res: any, status: number, body: unknown, type = 'application/json'
 
 const handler: Connect.NextHandleFunction = async (req, res) => {
   const url = new URL(req.url ?? '/', 'http://local');
-  const site = String(req.headers['sec-fetch-site'] ?? 'same-origin');
-  if (site !== 'same-origin' && site !== 'none') return send(res, 403, { error: 'Nur Anfragen aus der App selbst.' });
+  if (refusal(req)) return send(res, 403, { error: 'Nur Anfragen aus der App selbst.' });
 
   if (req.method === 'GET' && url.pathname === '/status') {
     const sdk = findSketchUpSdk();
@@ -78,7 +81,10 @@ const handler: Connect.NextHandleFunction = async (req, res) => {
 
   const from = url.searchParams.get('from');
   if (from !== 'blend' && from !== 'skp') return send(res, 400, { error: 'Unbekanntes Format' });
+  if (running >= MAX_RUNNING) return send(res, 429, { error: 'Es laufen schon zwei Umwandlungen – bitte gleich noch einmal.' });
+  running++;
 
+  try {
   // read the upload
   const chunks: Buffer[] = []; let size = 0;
   for await (const c of req) { size += (c as Buffer).length; if (size > MAX_BYTES) return send(res, 413, { error: 'Datei zu groß (max. 300 MB)' }); chunks.push(c as Buffer); }
@@ -92,7 +98,7 @@ const handler: Connect.NextHandleFunction = async (req, res) => {
       const blender = findBlender();
       if (!blender) return send(res, 503, { error: 'Blender wurde nicht gefunden. Blender installieren (blender.org) oder BLENDER_PATH auf blender.exe setzen und den Dev-Server neu starten.' });
       const py = `import bpy; bpy.ops.export_scene.gltf(filepath=r"${output}", export_format="GLB", export_apply=True, export_yup=True)`;
-      r = await run(blender, ['--background', '--factory-startup', input, '--python-expr', py]);
+      r = await run(blender, ['--background', '--factory-startup', '--disable-autoexec', input, '--python-expr', py]);
     } else {
       const sdk = findSketchUpSdk();
       if (!sdk) return send(res, 503, { error: 'Für .skp-Dateien wird das kostenlose SketchUp SDK von Trimble benötigt (developer.sketchup.com). Entpacken nach tools/sketchup-sdk oder SKETCHUP_SDK setzen und den Dev-Server neu starten.' });
@@ -105,6 +111,9 @@ const handler: Connect.NextHandleFunction = async (req, res) => {
     return send(res, 500, { error: (e as Error).message });
   } finally {
     rm(dir, { recursive: true, force: true }).catch(() => {});
+  }
+  } finally {
+    running--;
   }
 };
 

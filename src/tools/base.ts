@@ -39,7 +39,7 @@ export abstract class PointTool extends Tool {
     const plane = this.shiftPlane && !lock ? { plane: this.shiftPlane } : {};
     const lockOrigin = lock && this.shiftDir === lock ? this.shiftOrigin : null;
     const inference = this.editor.infer.infer(pointer.x, pointer.y, { from, lock, lockAxis, lockLabel, lockOrigin, ...plane, ...extra });
-    if (['endpoint', 'midpoint', 'intersection', 'center'].includes(inference.kind)) {
+    if (['endpoint', 'snap', 'midpoint', 'intersection', 'center'].includes(inference.kind)) {
       this.editor.infer.track(inference.point);
     }
     this.inference = inference;

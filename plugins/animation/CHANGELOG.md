@@ -4,8 +4,12 @@
 
 ### Added
 
+- The Animation and guide tiles only show in the animation mode, so they stay out of the way while modelling. The commands that open them switch to the mode.
+- Plainer words in the timeline and the panel: keyframe, curves, _Show all_ instead of key, dope sheet, graph and fit. The guide's last step points to figures with joints.
+- The practice scene asks before it replaces a model with something in it.
+- I with nothing selected and no camera in the scene says what to do; it no longer makes a camera out of nowhere.
 - A plugin package of its own (`plugins/animation`, built with `vite build`, installed via _Plugins › Load plugin folder…_), with its own lint, format, type and text checks; no library.
-- Keyframes on groups and components: position (of their pivot), rotation, scale, visibility, a colour of their own and opacity; on material colours and opacity, on cameras (position, target, lens), on lights (position, target, brightness, colour) and on the sun (hour, daylight). The I key keys the selected groups – or the camera when nothing is selected; auto-keying keys every move, turn or scale with the app's tools in the same undo step.
+- Keyframes on groups and components: position (of their pivot), rotation, scale, visibility, a colour of their own and opacity; on material colours and opacity, on cameras (position, target, lens), on lights (position, target, brightness, colour) and on the sun (hour, daylight). The I key keys the selected groups – or, when nothing is selected, the camera if there is one; auto-keying keys every move, turn or scale with the app's tools in the same undo step.
 - Curves between keys: constant, linear, Bézier with auto-clamped or free handles, ease in, ease out, ease in and out, back, bounce and elastic; channels that repeat (cycle).
 - A timeline under the 3D view: play, pause, frame by frame, key to key, start and end, frame rate, loop, scrubbing on the ruler with the shots marked, zoom and scroll in time; a dope sheet (keys picked, moved, deleted, their curve and handles changed by a right-click) and a graph editor (keys and handles dragged, normalised view).
 - Paths (a group or a camera follows the line of another group's edges, turned along it), look-at (a group's front or a camera towards another group), parents through the group hierarchy with a pivot per group.

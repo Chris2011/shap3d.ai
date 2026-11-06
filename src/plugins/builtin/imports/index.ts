@@ -32,12 +32,48 @@ const loaders = () => import('./loaders');
 const importsPlugin: S3dPlugin = {
   id: 'imports',
   name: 'imports.plugin.name',
-  version: '1.1.0',
+  version: '1.2.0',
   author: 'Shap3D.ai',
   description: 'imports.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },
 
   activate(context) {
+    context.files.registerExporter({
+      id: 'usdz',
+      label: 'imports.export.usdz',
+      fileName: (editor) => `${editor.model.name || 'model'}.usdz`, // i18n-ignore – file name
+      mimeType: 'model/vnd.usdz+zip',
+      export: async (editor) => (await loaders()).exportUsdz(editor),
+    });
+    context.files.registerExporter({
+      id: 'view-svg',
+      label: 'imports.export.svg',
+      fileName: (editor) => `${editor.model.name || 'model'}.svg`, // i18n-ignore – file name
+      mimeType: 'image/svg+xml',
+      options: [
+        {
+          id: 'width',
+          label: 'imports.export.size',
+          value: 'view',
+          choices: [
+            { value: 'view', label: 'imports.export.current' },
+            { value: '1920', label: '1920 px' }, // i18n-ignore – size
+            { value: '3840', label: '3840 px' }, // i18n-ignore – size
+          ],
+        },
+        { id: 'thick', label: 'imports.export.thick', value: true },
+      ],
+      export: (editor, options) => {
+        const viewer = editor.viewer;
+        const width = options.width === 'view' ? viewer.width : Number(options.width);
+        const height = Math.round((width * viewer.height) / viewer.width);
+        const lines = context.render.lines({ camera: viewer.rig.getState(), width, height });
+        const path = (list: number[][]) =>
+          list.map(([x1, y1, x2, y2]) => `M${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}`).join('');
+        // i18n-ignore-next-line – markup
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="#fff"/><g fill="none" stroke="#000" stroke-linecap="round"><path stroke-width="1" d="${path(lines.edges)}"/><path stroke-width="${options.thick ? 2.5 : 1}" d="${path(lines.profiles)}"/></g></svg>`;
+      },
+    });
     for (const format of FORMATS) {
       context.files.registerImporter({
         extensions: format.extensions,

@@ -15,7 +15,7 @@
         "print": "Imprimir planos / PDF…"
       },
       "sheets": "Hojas",
-      "sheet": "Hoja",
+      "sheet": "Añade una hoja: papel con cajetín.",
       "addSheet": "+ Hoja",
       "fromScenes": "Desde escenas",
       "fromScenesTitle": "Una hoja nueva con hasta cuatro escenas como ventanas – las vistas paralelas reciben una escala adecuada",
@@ -127,7 +127,8 @@
         "cannotOffset": "Este elemento no se puede equidistanciar.",
         "cannotSplit": "Aquí no hay nada que dividir.",
         "nothingToReach": "No hay ninguna línea en esa dirección hasta la que alargar.",
-        "cannotJoinCorner": "Las líneas no forman una esquina (o la distancia es demasiado grande)."
+        "cannotJoinCorner": "Las líneas no forman una esquina (o la distancia es demasiado grande).",
+        "emptySheet": "La hoja está vacía: toma «Ventana» en la barra de arriba y arrastra un rectángulo en el papel para mostrar tu modelo."
       },
       "elements": {
         "viewport": "Ventana",
@@ -355,7 +356,13 @@
       },
       "context": {
         "openInModel": "Abrir en el modelo"
-      }
+      },
+      "steps": {
+        "sheet": "Añade una hoja: papel con cajetín.",
+        "viewport": "Toma «Ventana» y arrastra un rectángulo: tu modelo aparece en el papel.",
+        "finish": "Añade texto y cotas, y luego imprime o crea un PDF."
+      },
+      "noScenes": "El modelo aún no tiene escenas. Guarda una vista en el panel Escenas, o simplemente añade una hoja y arrastra una ventana."
     }
   }
 }

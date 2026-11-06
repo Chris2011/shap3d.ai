@@ -4,6 +4,10 @@
 
 ### Added
 
+- The Physics and guide tiles only show in the physics mode, so they stay out of the way while modelling. The commands that open them switch to the mode.
+- Going back on the timeline and on from there simulates up to that moment in slices: the app stays usable and the panel shows it is working. The timeline stops recording at 256 MB (a lot of liquid); the simulation goes on.
+- The practice scene asks before it replaces a model with something in it.
+- Starting with nothing that can move says so and what to do, instead of running with nothing to see.
 - A plugin package of its own (`plugins/physics`, built with `vite build`, installed via _Plugins › Load plugin folder…_), with its own lint, format, type and text checks; Rapier (`@dimforge/rapier3d-compat` 0.21.0, Apache-2.0) ships as `rapier.js` and is loaded when a simulation starts for the first time.
 - Bodies from groups and components – dynamic, static, moving (kinematic: on and on or back and forth) or ignored – with a material (wood, steel, stone, rubber, ice, plastic, foam or own density, friction and bounce), a mass, a shape (convex hulls per part, one hull, box, sphere, cylinder, exact faces for static and moving bodies), a start speed and turn; the still world of loose faces and plain groups and a ground at height 0.
 - Forces: a constant force in model axes, thrust in the body's own axes, lift of a wing, air drag (its own or from its size) and wind.

@@ -110,7 +110,7 @@ Then in Shap3D.ai: _Plugins › Load plugin folder…_ and pick the folder `plug
 
 **Demos**: the scripts in `docs/demo*.js` are also examples in the script editor (JavaScript, under _Noise (plugin)_).
 
-**Screenshots**: `npm run screenshots` renders `docs/noise.png`, `docs/noise-scatter.png`, `docs/noise-stones.png`, `docs/noise-trees.png`, `docs/noise-villages.png`, `docs/noise-routes.png`, `docs/noise-junctions.png`, `docs/noise-cityroads.png`, `docs/noise-erosion.png`, `docs/noise-facade.png`, `docs/noise-city.png`, `docs/noise-hillcity.png` and `docs/noise-deform.png` from the demos in `docs/` ([`docs/screenshots.mjs`](docs/screenshots.mjs) – Windows and Linux/macOS) with the dev server running; `--url` picks another dev server, `--only stones` one picture.
+**Screenshots**: `npm run screenshots -- noise` in the repository root renders `docs/noise.png`, `docs/noise-scatter.png`, `docs/noise-stones.png`, `docs/noise-trees.png`, `docs/noise-villages.png`, `docs/noise-routes.png`, `docs/noise-junctions.png`, `docs/noise-cityroads.png`, `docs/noise-erosion.png`, `docs/noise-facade.png`, `docs/noise-city.png`, `docs/noise-hillcity.png` and `docs/noise-deform.png` from the demos in `docs/` ([`docs/screenshots.mjs`](docs/screenshots.mjs) – Windows and Linux/macOS) with the dev server running; `--url` picks another dev server, `--only stones` one picture.
 
 ## Structure
 
@@ -130,7 +130,7 @@ plugins/noise/
     S3dNoisePanel.vue     the panel; S3dNoiseSlider.vue a slider with a number field
     styles.ts, tabs.ts, runtime.ts
     i18n/*.json           the texts: en (source), de, fr, es, ar
-  docs/                   screenshots, their demos and screenshots.mjs
+  docs/                   screenshots and their demos
   dist/                   the installable plugin folder (not checked in)
 ```
 

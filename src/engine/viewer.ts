@@ -3,13 +3,25 @@ import { PluginLighting } from './pluginLighting';
 import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
-import { MeshBVH } from 'three-mesh-bvh';
-import { Entities, isProcedureInput, type Instance, type EntityRef } from '../core/model';
+import { acceleratedRaycast, MeshBVH } from 'three-mesh-bvh';
+import { SMOOTH_MIN_COS, Entities, isProcedureInput, type Instance, type EntityRef } from '../core/model';
 import type { Model } from '../core/document';
 import { CameraRig } from './camera';
 import { Overlay } from './overlay';
-import { textureTile, tileUv, onImageTextureLoad, type TextureTile } from '../core/textures';
-import { applySurface, materialShader, surfaceSetup, type SurfaceSetup } from './surfaceShaders';
+import {
+  defaultTextureSize,
+  imageTexture,
+  isPbrMaterial,
+  mapTile,
+  releaseImageTextures,
+  textureTile,
+  tileUv,
+  onImageTextureLoad,
+  type TextureTile,
+} from '../core/textures';
+import type { MaterialDef } from '../core/document';
+import { loadEnvironment, type LoadedEnvironment } from './environment';
+import { applySurface, materialShader, shaderSize, surfaceSetup, type SurfaceSetup } from './surfaceShaders';
 import { planeBasis } from '../core/geometry';
 import { theme, onThemeChange } from '../theme';
 import { meshView } from './meshView';
@@ -27,10 +39,23 @@ const NIGHT_EDGE = '#c3cedb',
   MOON = new THREE.Color('#b9c8ff');
 const tmpSky = new THREE.Color(),
   tmpGround = new THREE.Color();
+const tmpPoint = new THREE.Vector3(),
+  tmpRim = new THREE.Vector3(),
+  tmpUp = new THREE.Vector3();
 const tmpSphere = new THREE.Sphere(),
   tmpMatrix = new THREE.Matrix4();
 /** BVHs for the occlusion test of overlay labels, dropped together with their geometry */
-const occlusionTrees = new WeakMap<THREE.BufferGeometry, MeshBVH>();
+/** a tree for fast picking per shape – front, back and copies of a component have the same positions (`indirect` keeps the triangle order) */
+const shapeTrees = new WeakMap<THREE.BufferAttribute | THREE.InterleavedBufferAttribute, MeshBVH>();
+const shapeTree = (geometry: THREE.BufferGeometry) => {
+  const position = geometry.getAttribute('position');
+  let tree = shapeTrees.get(position);
+  if (!tree) {
+    tree = new MeshBVH(geometry, { indirect: true });
+    shapeTrees.set(position, tree);
+  }
+  return tree;
+};
 /** Edge colours that would vanish on a night background are replaced. */
 const nightEdge = (color: string) => (new THREE.Color(color).getHSL({ h: 0, s: 0, l: 0 }).l < 0.35 ? NIGHT_EDGE : color);
 
@@ -157,26 +182,28 @@ interface ProfileRec {
   built?: { group: THREE.Group; world: THREE.Matrix4 };
 }
 
-const sunDirection = (hour: number, month: number): THREE.Vector3 => {
-  // simple solar model for ~48°N
-  const lat = THREE.MathUtils.degToRad(48);
+/** from the model towards the sun: x east, y north (the green axis, unless `north` turns it), z up */
+const sunDirection = (hour: number, month: number, latitude: number, north: number): THREE.Vector3 => {
+  const lat = THREE.MathUtils.degToRad(latitude);
   const decl = THREE.MathUtils.degToRad(23.44) * Math.sin((2 * Math.PI * ((month - 1) * 30.4 + 15 - 81)) / 365);
   const hourAngle = THREE.MathUtils.degToRad((hour - 12) * 15);
   const alt = Math.asin(Math.sin(lat) * Math.sin(decl) + Math.cos(lat) * Math.cos(decl) * Math.cos(hourAngle));
   const azimuth = Math.atan2(-Math.sin(hourAngle), Math.tan(decl) * Math.cos(lat) - Math.sin(lat) * Math.cos(hourAngle));
-  // az measured from south → convert to x(east)/y(north)
+  // azimuth clockwise from north, as seen from above
   const x = Math.cos(alt) * Math.sin(azimuth),
-    y = -Math.cos(alt) * Math.cos(azimuth),
+    y = Math.cos(alt) * Math.cos(azimuth),
     z = Math.sin(alt);
-  return new THREE.Vector3(-x, y, Math.max(z, 0.05)).normalize();
+  return new THREE.Vector3(x, y, Math.max(z, 0.05))
+    .normalize()
+    .applyAxisAngle(new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(-north));
 };
 
 /** Full quality first, then cheaper settings – weak or software GPUs sometimes refuse antialias/preserveDrawingBuffer. */
 const createRenderer = (canvas: HTMLCanvasElement): THREE.WebGLRenderer => {
   const tries: THREE.WebGLRendererParameters[] = [
-    { antialias: true, preserveDrawingBuffer: true },
-    { antialias: false, preserveDrawingBuffer: true },
-    { antialias: false, preserveDrawingBuffer: false, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false },
+    { antialias: true, preserveDrawingBuffer: true, stencil: true },
+    { antialias: false, preserveDrawingBuffer: true, stencil: true },
+    { antialias: false, preserveDrawingBuffer: false, stencil: true, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false },
   ];
   let last: unknown;
   for (const params of tries) {
@@ -202,6 +229,34 @@ export interface DisplayMaterialLook {
   opacity?: number;
 }
 
+/** what a face material needs, so an instance can get its own later */
+interface FaceMaterialSetup {
+  map?: THREE.Texture;
+  surface?: SurfaceSetup;
+  /** physically based: its values and pictures */
+  pbr?: MaterialDef;
+  transparent: boolean;
+  opacity: number;
+}
+/** one level of the model as it is drawn */
+interface EntityParts {
+  faces: {
+    geometry: THREE.BufferGeometry;
+    material: THREE.Material;
+    setup: FaceMaterialSetup;
+    /** the face of each triangle */
+    triangles: number[];
+    /** each triangle's material (for materials shown in another colour) */
+    materials: (string | undefined)[];
+    castShadow: boolean;
+    base: { opacity: number; transparent: boolean; depthWrite: boolean };
+  }[];
+  lines: { geometry: LineSegmentsGeometry; material: LineMaterial } | null;
+}
+
+/** meshes with fewer triangle corners are picked without a tree */
+const PICK_TREE_CORNERS = 15000;
+
 export class WebGLUnavailableError extends Error {
   override name = 'WebGLUnavailableError';
 }
@@ -220,9 +275,25 @@ export class Viewer {
   /** lights and atmosphere plugins bring (a level's lamps, fog, darkness) */
   pluginLighting = new PluginLighting();
   /** every built group with the instances above it and the place it was built at – for places shown for now */
-  private builtGroups: { group: THREE.Group; path: Instance[]; world: THREE.Matrix4; context: PickContext }[] = [];
+  private builtGroups: {
+    group: THREE.Group;
+    path: Instance[];
+    world: THREE.Matrix4;
+    context: PickContext;
+    shown: Entities;
+    faceMe: boolean;
+    /** the shown shape's box in its own coordinates, null when empty */
+    sphere: THREE.Sphere | null;
+    /** made when something is picked near this group – models have many */
+    records?: { edges: EdgeRec[]; verts: VertRec[] };
+  }[] = [];
+  /** geometry and materials per level of the model and look – instances that look the same share them */
+  /** drawn by plugins over each frame (`render.pass`) – one that throws is taken out */
+  renderPasses = new Set<(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => void>();
+  private sharedParts = new Map<Entities, Map<string, EntityParts>>();
+  private spheres = new Map<Entities, THREE.Sphere>();
+  private recordFilter: { hiddenTags: Set<string>; showHidden: boolean } = { hiddenTags: new Set(), showHidden: false };
   /** edge and vertex records are behind a display place that changed – brought up to date before they are used */
-  private recordsStale = false;
   /** instances shown at another place for now (a test run's moving enemies) – the model is not changed */
   private displayPlaces = new Map<Instance, THREE.Matrix4>();
   /** instances and materials shown in another look for now – the model is not changed */
@@ -234,8 +305,6 @@ export class Viewer {
   private ambientOcclusion: AmbientOcclusion | null = null;
   overlay: Overlay;
   model!: Model;
-  edges: EdgeRec[] = [];
-  verts: VertRec[] = [];
   pickMeshes: THREE.Mesh[] = [];
   clipPlanes: THREE.Plane[] = [];
   needsRender = true;
@@ -397,10 +466,19 @@ export class Viewer {
       }
     });
     this.content.clear();
+    // parts a display look has replaced on all its meshes are no longer in the view
+    for (const partsOfEntities of this.sharedParts.values()) {
+      for (const parts of partsOfEntities.values()) {
+        for (const part of parts.faces) {
+          part.geometry.dispose();
+          part.material.dispose();
+        }
+      }
+    }
+    this.sharedParts.clear();
+    this.spheres.clear();
     this.builtGroups = [];
     this.lineMats = this.lineMats.filter((material) => !material.userData.owned);
-    this.edges = [];
-    this.verts = [];
     this.pickMeshes = [];
     this.profiles = [];
     this.profileKey = '';
@@ -422,6 +500,7 @@ export class Viewer {
     // a procedure that is open shows its inputs instead of its result
     const openEntities = new Set(state.activePath.map((instance) => instance.definition.entities));
     const noGeometry = new Entities();
+    this.recordFilter = { hiddenTags, showHidden };
 
     const walk = (ents: Entities, path: Instance[], world: THREE.Matrix4, inheritMat: string | undefined) => {
       const key = path.map((instance) => instance.id).join('/');
@@ -432,7 +511,15 @@ export class Viewer {
       const firstProfile = this.profiles.length;
       const openProcedure = openEntities.has(ents) && !!path[path.length - 1]?.definition.procedure;
       const grp = this.buildEntities(openProcedure ? noGeometry : ents, context, inheritMat, faded, hiddenTags, showHidden, faceMe);
-      const built = { group: grp, path, world: world.clone(), context };
+      const built = {
+        group: grp,
+        path,
+        world: world.clone(),
+        context,
+        shown: openProcedure ? noGeometry : ents,
+        faceMe,
+        sphere: this.partsSphere(openProcedure ? noGeometry : ents),
+      };
       this.builtGroups.push(built);
       for (let index = firstProfile; index < this.profiles.length; index++) {
         this.profiles[index].built = built;
@@ -460,9 +547,47 @@ export class Viewer {
     this.applyDisplayPlaces();
     this.applyDisplayLooks();
     this.content.updateMatrixWorld(true);
+    releaseImageTextures(
+      new Set(model.materials.flatMap((material) => [...(material.image ? [material.image] : []), ...Object.values(material.maps ?? {})])),
+    );
+    this.applyEnvironment(state);
     this.buildGuides();
     this.rebuildHighlight(state);
     this.needsRender = true;
+  }
+
+  private loadedEnvironment: LoadedEnvironment | null = null;
+  /** the stored picture `loadedEnvironment` was made from */
+  private environmentData: string | undefined;
+
+  /** the model's environment as light, reflections and sky; a new picture is read in the background and builds the view again */
+  private applyEnvironment(state: ViewState) {
+    const { environment, settings } = this.model;
+    if (environment?.data !== this.environmentData) {
+      const wanted = (this.environmentData = environment?.data);
+      this.loadedEnvironment?.dispose();
+      this.loadedEnvironment = null;
+      if (environment) {
+        loadEnvironment(this.renderer, environment)
+          .then((loaded) => {
+            if (wanted !== this.environmentData) {
+              loaded.dispose();
+              return;
+            }
+            this.loadedEnvironment = loaded;
+            this.rebuild(state);
+          })
+          .catch((error) => console.error('Environment:', error));
+      }
+    }
+    const loaded = this.loadedEnvironment;
+    this.scene.environment = loaded?.lighting.texture ?? null;
+    this.scene.environmentIntensity = settings.environmentIntensity;
+    this.scene.background = loaded && settings.environmentBackground ? loaded.background : null;
+    this.scene.backgroundIntensity = settings.environmentIntensity;
+    // the pictures have Y up, the model Z
+    this.scene.environmentRotation.set(Math.PI / 2, 0, 0);
+    this.scene.backgroundRotation.set(Math.PI / 2, 0, 0);
   }
 
   /**
@@ -474,7 +599,13 @@ export class Viewer {
     const style = model.settings.style;
     // a plugin's sun (an animation's sunset) – else the model's
     const pluginSun = this.pluginLighting.sun;
-    const sunDir = sunDirection(pluginSun?.hour ?? model.settings.shadowHour, pluginSun?.month ?? model.settings.shadowMonth);
+    const { latitude, north } = model.settings;
+    const sunDir = sunDirection(
+      pluginSun?.hour ?? model.settings.shadowHour,
+      pluginSun?.month ?? model.settings.shadowMonth,
+      latitude,
+      north,
+    );
     const box = model.bounds();
     const center = box.isEmpty() ? new THREE.Vector3() : box.getCenter(new THREE.Vector3());
     const radius = box.isEmpty() ? 10 : Math.max(10, box.getBoundingSphere(new THREE.Sphere()).radius * 1.5);
@@ -515,7 +646,7 @@ export class Viewer {
     this.sun.intensity *= daylight * (pluginSun?.daylight ?? 1);
     // a plugin's sun near the horizon fades out, below it is gone
     if (pluginSun?.hour !== undefined) {
-      const height = sunDirection(pluginSun.hour, pluginSun.month ?? model.settings.shadowMonth).z;
+      const height = sunDirection(pluginSun.hour, pluginSun.month ?? model.settings.shadowMonth, latitude, north).z;
       const night = pluginSun.hour < 4 || pluginSun.hour > 22;
       this.sun.intensity *= night ? 0 : Math.min(1, Math.max(0, (height - 0.05) / 0.2) + 0.15);
     }
@@ -546,6 +677,123 @@ export class Viewer {
     group.matrixAutoUpdate = false;
     group.matrix.copy(context.world);
     group.updateMatrixWorld(true);
+    // copies of a component with the same look share geometry and materials
+    const partsKey = `${faded ? 1 : 0}|${inheritMat ?? ''}`;
+    const partsOfEntities = this.sharedParts.get(ents) ?? this.sharedParts.set(ents, new Map()).get(ents)!;
+    let parts = partsOfEntities.get(partsKey);
+    if (!parts) {
+      parts = this.buildParts(ents, inheritMat, faded, hiddenTags, showHidden);
+      partsOfEntities.set(partsKey, parts);
+    }
+    for (const part of parts.faces) {
+      const mesh = new THREE.Mesh(part.geometry, part.material);
+      mesh.raycast = acceleratedRaycast;
+      mesh.userData.ctx = context;
+      mesh.userData.tri = part.triangles;
+      mesh.userData.materials = part.materials;
+      // what display looks start from
+      mesh.userData.faded = faded;
+      mesh.userData.shared = true;
+      mesh.userData.setup = part.setup;
+      mesh.userData.base = part.base;
+      mesh.castShadow = part.castShadow;
+      mesh.receiveShadow = true;
+      mesh.matrixAutoUpdate = false;
+      group.add(mesh);
+      this.pickMeshes.push(mesh);
+      mesh.visible = style.faceStyle !== 'wireframe';
+    }
+    // ---- edges drawn sharp between faces at an angle, as the model's profiles
+    if (style.profiles && style.faceStyle !== 'wireframe') {
+      for (const edge of ents.edges.values()) {
+        if ((edge.hidden && !showHidden) || (edge.tag && hiddenTags.has(edge.tag)) || (edge.soft && !showHidden)) {
+          continue;
+        }
+        const faces = ents.facesOfEdge(edge.id).filter((face) => !((face.hidden && !showHidden) || (face.tag && hiddenTags.has(face.tag))));
+        if (faces.length) {
+          this.profiles.push({
+            start: ents.positionOf(edge.start).clone().applyMatrix4(context.world),
+            end: ents.positionOf(edge.end).clone().applyMatrix4(context.world),
+            normals: faces.slice(0, 2).map((face) => ents.faceNormal(face).transformDirection(context.world)),
+            faded,
+          });
+        }
+      }
+    }
+    if (meshView.on && !faceMe) {
+      this.buildMeshView(ents, group, faded, showHidden, hiddenTags);
+    }
+    if (parts.lines) {
+      const lines = new LineSegments2(parts.lines.geometry, parts.lines.material);
+      lines.matrixAutoUpdate = false;
+      group.add(lines);
+    }
+    this.content.add(group);
+    return group;
+  }
+
+  /** A material for faces. */
+  private faceMaterial(setup: FaceMaterialSetup, side: THREE.Side) {
+    const style = this.model.settings.style;
+    const unlit = style.faceStyle === 'hiddenline';
+    let material: THREE.Material;
+    // lit materials with shadows – and while plugins bring lights or an atmosphere, so they fall on the faces
+    if (unlit || this.model.settings.shadows || this.pluginLighting.active() || setup.pbr || this.loadedEnvironment) {
+      // the environment only lights physically based materials
+      const physical = !unlit && (setup.pbr || this.loadedEnvironment);
+      const Mat: any = unlit ? THREE.MeshBasicMaterial : physical ? THREE.MeshStandardMaterial : THREE.MeshLambertMaterial;
+      const maps = setup.pbr?.maps;
+      const physicalParameters = physical
+        ? {
+            roughness: setup.pbr?.roughness ?? (maps?.roughness ? 1 : 0.8),
+            metalness: setup.pbr?.metalness ?? (maps?.metalness ? 1 : 0),
+            ...(maps?.normal ? { normalMap: imageTexture(maps.normal, true) } : {}),
+            ...(maps?.roughness ? { roughnessMap: imageTexture(maps.roughness, true) } : {}),
+            ...(maps?.metalness ? { metalnessMap: imageTexture(maps.metalness, true) } : {}),
+            ...(maps?.ao ? { aoMap: imageTexture(maps.ao, true) } : {}),
+          }
+        : {};
+      material = new Mat({
+        vertexColors: !setup.map,
+        map: setup.map ?? null,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1,
+        transparent: setup.transparent,
+        opacity: setup.opacity,
+        depthWrite: !setup.transparent,
+        clippingPlanes: this.clipPlanes,
+        side,
+        ...physicalParameters,
+      });
+      if (setup.surface) {
+        applySurface(material as any, setup.surface);
+      }
+    } else {
+      material = makeShadeMaterial({
+        side,
+        transparent: setup.transparent,
+        opacity: setup.opacity,
+        depthWrite: !setup.transparent,
+        clippingPlanes: this.clipPlanes,
+        map: setup.map,
+        surface: setup.surface,
+      });
+    }
+    material.userData.owned = true;
+    return material;
+  }
+
+  /** The geometry and materials of one level of the model – for every instance that looks the same. */
+  private buildParts(
+    ents: Entities,
+    inheritMat: string | undefined,
+    faded: boolean,
+    hiddenTags: Set<string>,
+    showHidden: boolean,
+  ): EntityParts {
+    const style = this.model.settings.style;
+    const parts: EntityParts = { faces: [], lines: null };
     const fadeCol = (color: THREE.Color) => (faded ? color.clone().lerp(new THREE.Color(1, 1, 1), 0.6) : color);
 
     // ---- faces
@@ -562,6 +810,7 @@ export class Viewer {
       backMaterials: (string | undefined)[];
       map?: THREE.Texture;
       surface?: SurfaceSetup;
+      pbr?: MaterialDef;
     };
     const bucket = (): Bucket => ({
       positions: [],
@@ -578,6 +827,20 @@ export class Viewer {
       trans = bucket();
     const textured = new Map<string, Bucket>();
     const mono = style.faceStyle === 'monochrome' || style.faceStyle === 'hiddenline';
+    // a pattern made for walls is one colour on a small part: without a size of its own, it fits what it is on
+    const halfSize = this.partsSphere(ents)?.radius ?? Infinity;
+    const faceLooks = new Map<number, { normal: THREE.Vector3; area: number }>();
+    const fittedMaterials = new Map<MaterialDef, MaterialDef>();
+    const fitted = (material: MaterialDef) => {
+      let result = fittedMaterials.get(material);
+      if (!result) {
+        const shader = materialShader(material);
+        const usual = shader ? shaderSize(material, shader) : defaultTextureSize(material);
+        result = material.textureSize === undefined && halfSize < usual ? { ...material, textureSize: halfSize } : material;
+        fittedMaterials.set(material, result);
+      }
+      return result;
+    };
     for (const face of ents.faces.values()) {
       if ((face.hidden && !showHidden) || (face.tag && hiddenTags.has(face.tag))) {
         continue;
@@ -588,6 +851,10 @@ export class Viewer {
       }
       const pts = [...face.outer, ...face.holes.flat()].map((vertex) => ents.positionOf(vertex));
       const normal = ents.faceNormal(face);
+      const corners = [...face.outer, ...face.holes.flat()];
+      const cornerNormals = ents.faceEdges(face).some((edge) => edge.soft)
+        ? corners.map((vertex) => ents.smoothNormal(face, vertex, SMOOTH_MIN_COS, faceLooks))
+        : null;
       const frontLook = mono
         ? { color: new THREE.Color(style.frontColor), opacity: 1 }
         : this.colorOf(face.material ?? inheritMat, style.frontColor);
@@ -611,11 +878,26 @@ export class Viewer {
         let shaderBucket = textured.get(key);
         if (!shaderBucket) {
           shaderBucket = bucket();
-          shaderBucket.surface = surfaceSetup(shader, mdef);
+          shaderBucket.surface = surfaceSetup(shader, fitted(mdef));
           textured.set(key, shaderBucket);
         }
         target = shaderBucket;
-      } else if ((tile = textureTile(mdef))) {
+      } else if (mdef && isPbrMaterial(mdef)) {
+        const key = 'pbr:' + mdef.name + (frontLook.opacity < 1 ? ':t' : '');
+        let pbrBucket = textured.get(key);
+        const colorTile = textureTile(fitted(mdef));
+        if (!pbrBucket) {
+          pbrBucket = bucket();
+          pbrBucket.map = colorTile?.map;
+          pbrBucket.pbr = mdef;
+          textured.set(key, pbrBucket);
+        }
+        target = pbrBucket;
+        tile = colorTile ?? ({ ...mapTile(fitted(mdef)), map: undefined } as unknown as TextureTile);
+        const basis = planeBasis(normal);
+        texU = basis.basisU;
+        texV = basis.basisV;
+      } else if ((tile = textureTile(mdef && fitted(mdef)))) {
         const key = mdef!.name + (frontLook.opacity < 1 ? ':t' : '');
         let textureBucket = textured.get(key);
         if (!textureBucket) {
@@ -634,7 +916,8 @@ export class Viewer {
         for (let k = 0; k < 3; k++) {
           const point = pts[tri[i + k]];
           target.positions.push(point.x, point.y, point.z);
-          target.normals.push(normal.x, normal.y, normal.z);
+          const shading = cornerNormals?.[tri[i + k]] ?? normal;
+          target.normals.push(shading.x, shading.y, shading.z);
           target.frontColors.push(color.r, color.g, color.b);
           target.backColors.push(backColor.r, backColor.g, backColor.b);
           if (tile && texU && texV) {
@@ -654,71 +937,37 @@ export class Viewer {
       if (!data.positions.length) {
         return;
       }
-      const meshGeometry = new THREE.BufferGeometry();
-      meshGeometry.setAttribute('position', new THREE.Float32BufferAttribute(data.positions, 3));
-      meshGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(data.normals, 3));
-      if (data.map) {
-        meshGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(data.uvs, 2));
-      }
-      const unlit = style.faceStyle === 'hiddenline';
-      const shadows = this.model.settings.shadows;
-      const Mat: any = unlit ? THREE.MeshBasicMaterial : THREE.MeshLambertMaterial;
-      const common: any = {
-        vertexColors: !data.map,
-        map: data.map ?? null,
-        polygonOffset: true,
-        polygonOffsetFactor: 1,
-        polygonOffsetUnits: 1,
+      const position = new THREE.Float32BufferAttribute(data.positions, 3);
+      const normal = new THREE.Float32BufferAttribute(data.normals, 3);
+      const uv = data.uvs.length ? new THREE.Float32BufferAttribute(data.uvs, 2) : null;
+      const setup: FaceMaterialSetup = {
+        map: data.map,
+        surface: data.surface,
+        pbr: data.pbr,
         transparent: transparent || xray,
         opacity: xray ? Math.min(opacity, 0.5) : opacity,
-        depthWrite: !(transparent || xray),
-        clippingPlanes: this.clipPlanes,
       };
-      const makeMaterial = (side: THREE.Side) => {
-        // lit materials with shadows – and while plugins bring lights or an atmosphere, so they fall on the faces
-        if (unlit || shadows || this.pluginLighting.active()) {
-          const material = new Mat({ ...common, side });
-          if (data.surface) {
-            applySurface(material, data.surface);
-          }
-          return material;
+      const addSide = (side: THREE.Side, colors: number[], materials: (string | undefined)[]) => {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', position);
+        geometry.setAttribute('normal', normal);
+        if (uv) {
+          geometry.setAttribute('uv', uv);
         }
-        return makeShadeMaterial({
-          side,
-          transparent: common.transparent,
-          opacity: common.opacity,
-          depthWrite: common.depthWrite,
-          clippingPlanes: this.clipPlanes,
-          map: data.map,
-          surface: data.surface,
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        const material = this.faceMaterial(setup, side);
+        parts.faces.push({
+          geometry,
+          material,
+          setup,
+          triangles: data.triangles,
+          materials,
+          castShadow: !transparent,
+          base: { opacity: material.opacity, transparent: material.transparent, depthWrite: material.depthWrite },
         });
       };
-      const frontGeometry = meshGeometry.clone();
-      frontGeometry.setAttribute('color', new THREE.Float32BufferAttribute(data.frontColors, 3));
-      const geometry = meshGeometry.clone();
-      geometry.setAttribute('color', new THREE.Float32BufferAttribute(data.backColors, 3));
-      const front = new THREE.Mesh(frontGeometry, makeMaterial(THREE.FrontSide));
-      const back = new THREE.Mesh(geometry, makeMaterial(THREE.BackSide));
-      (front.material as any).userData.owned = true;
-      (back.material as any).userData.owned = true;
-      front.userData.materials = data.frontMaterials;
-      back.userData.materials = data.backMaterials;
-      for (const mesh of [front, back]) {
-        mesh.userData.ctx = context;
-        mesh.userData.tri = data.triangles;
-        // what display looks start from
-        mesh.userData.faded = faded;
-        mesh.userData.baseColors = (mesh.geometry.getAttribute('color').array as Float32Array).slice();
-        const built = mesh.material as THREE.Material;
-        mesh.userData.base = { opacity: built.opacity, transparent: built.transparent, depthWrite: built.depthWrite };
-        mesh.castShadow = !transparent;
-        mesh.receiveShadow = true;
-        mesh.matrixAutoUpdate = false;
-        group.add(mesh);
-        this.pickMeshes.push(mesh);
-        mesh.visible = style.faceStyle !== 'wireframe';
-      }
-      meshGeometry.dispose();
+      addSide(THREE.FrontSide, data.frontColors, data.frontMaterials);
+      addSide(THREE.BackSide, data.backColors, data.backMaterials);
     };
     mkMesh(opaque, false, 1);
     for (const textureBucket of textured.values()) {
@@ -737,66 +986,33 @@ export class Viewer {
     const linePositions: number[] = [];
     const showEdges = style.edges || style.faceStyle === 'wireframe';
     for (const edge of ents.edges.values()) {
+      if ((edge.hidden && !showHidden) || (edge.tag && hiddenTags.has(edge.tag)) || (edge.soft && !showHidden)) {
+        continue;
+      }
+      // without edges shown, those without faces (loose lines) are still drawn
+      if (
+        !showEdges &&
+        ents.facesOfEdge(edge.id).some((face) => !((face.hidden && !showHidden) || (face.tag && hiddenTags.has(face.tag))))
+      ) {
+        continue;
+      }
       const start = ents.positionOf(edge.start),
         end = ents.positionOf(edge.end);
-      const hidden = (edge.hidden && !showHidden) || (edge.tag && hiddenTags.has(edge.tag));
-      if (hidden) {
-        continue;
-      }
-      const worldStart = start.clone().applyMatrix4(context.world),
-        worldEnd = end.clone().applyMatrix4(context.world);
-      if (!faceMe) {
-        this.edges.push({ start: worldStart, end: worldEnd, edgeId: edge.id, context: context, local: [start.clone(), end.clone()] });
-      }
-      if (edge.soft && !showHidden) {
-        continue;
-      }
-      const faces = ents.facesOfEdge(edge.id).filter((face) => !((face.hidden && !showHidden) || (face.tag && hiddenTags.has(face.tag))));
-      if (!showEdges) {
-        // still draw edges without faces (loose lines) so they are visible
-        if (faces.length) {
-          continue;
-        }
-      }
       linePositions.push(start.x, start.y, start.z, end.x, end.y, end.z);
-      if (style.profiles && faces.length && style.faceStyle !== 'wireframe') {
-        this.profiles.push({
-          start: worldStart,
-          end: worldEnd,
-          normals: faces.slice(0, 2).map((face) => ents.faceNormal(face).transformDirection(context.world)),
-          faded,
-        });
-      }
-    }
-    if (!faceMe) {
-      for (const vertex of ents.vertices.values()) {
-        this.verts.push({
-          position: vertex.position.clone().applyMatrix4(context.world),
-          vertexId: vertex.id,
-          context: context,
-          local: vertex.position.clone(),
-        });
-      }
-    }
-    if (meshView.on && !faceMe) {
-      this.buildMeshView(ents, group, faded, showHidden, hiddenTags);
     }
     if (linePositions.length) {
-      const lineGeometry = new LineSegmentsGeometry();
-      lineGeometry.setPositions(linePositions);
+      const geometry = new LineSegmentsGeometry();
+      geometry.setPositions(linePositions);
       const col = faded
         ? theme.night
           ? 0x4a5563
           : 0xb4b4b4
         : new THREE.Color(theme.night ? nightEdge(style.edgeColor) : style.edgeColor).getHex();
-      const mat = this.lineMat(col, 1, faded ? ({ transparent: true, opacity: 0.6 } as any) : {});
-      mat.userData.owned = true;
-      const lines = new LineSegments2(lineGeometry, mat);
-      lines.matrixAutoUpdate = false;
-      group.add(lines);
+      const material = this.lineMat(col, 1, faded ? ({ transparent: true, opacity: 0.6 } as any) : {});
+      material.userData.owned = true;
+      parts.lines = { geometry, material };
     }
-    this.content.add(group);
-    return group;
+    return parts;
   }
 
   /** Polygon view overlay for one entities level (local coordinates – the group carries the world matrix). */
@@ -983,9 +1199,10 @@ export class Viewer {
       );
       for (const child of built.group.children) {
         const mesh = child as THREE.Mesh;
-        if (!mesh.isMesh || !mesh.userData.baseColors) {
+        if (!mesh.isMesh || !mesh.userData.tri) {
           continue;
         }
+        this.ownFaceMesh(mesh);
         const faded = (color: THREE.Color) => (mesh.userData.faded ? color.clone().lerp(white, 0.6) : color);
         const attribute = mesh.geometry.getAttribute('color') as THREE.BufferAttribute;
         const colors = attribute.array as Float32Array;
@@ -1025,20 +1242,132 @@ export class Viewer {
     }
   }
 
-  /** the edge and vertex records (for picking and snapping) where their groups are shown now */
-  pickRecords() {
-    if (this.recordsStale) {
-      this.recordsStale = false;
-      // new vectors: the profile records share the built ones
-      for (const record of this.edges) {
-        record.start = record.local[0].clone().applyMatrix4(record.context.world);
-        record.end = record.local[1].clone().applyMatrix4(record.context.world);
+  /** a mesh about to look different from the other instances: its own colours and material – its shape stays shared */
+  private ownFaceMesh(mesh: THREE.Mesh) {
+    if (!mesh.userData.shared) {
+      return;
+    }
+    mesh.userData.shared = false;
+    const geometry = new THREE.BufferGeometry();
+    for (const [name, attribute] of Object.entries(mesh.geometry.attributes)) {
+      geometry.setAttribute(name, name === 'color' ? (attribute as THREE.BufferAttribute).clone() : attribute);
+    }
+    geometry.boundingSphere = mesh.geometry.boundingSphere;
+    mesh.userData.baseColors = (mesh.geometry.getAttribute('color').array as Float32Array).slice();
+    mesh.geometry = geometry;
+    mesh.material = this.faceMaterial(mesh.userData.setup, (mesh.material as THREE.Material).side);
+  }
+
+  /** the box around a level's points as a sphere, shared by its instances */
+  private partsSphere(ents: Entities) {
+    if (!ents.vertices.size) {
+      return null;
+    }
+    let sphere = this.spheres.get(ents);
+    if (!sphere) {
+      const box = new THREE.Box3();
+      for (const vertex of ents.vertices.values()) {
+        box.expandByPoint(vertex.position);
       }
-      for (const record of this.verts) {
-        record.position = record.local.clone().applyMatrix4(record.context.world);
+      sphere = box.getBoundingSphere(new THREE.Sphere());
+      this.spheres.set(ents, sphere);
+    }
+    return sphere;
+  }
+
+  /** Edge and vertex records of one built group, where it is shown now. */
+  private groupRecords(built: Viewer['builtGroups'][number]) {
+    if (built.records) {
+      return built.records;
+    }
+    const { hiddenTags, showHidden } = this.recordFilter;
+    const { shown, context } = built;
+    const records: { edges: EdgeRec[]; verts: VertRec[] } = { edges: [], verts: [] };
+    for (const edge of shown.edges.values()) {
+      if ((edge.hidden && !showHidden) || (edge.tag && hiddenTags.has(edge.tag))) {
+        continue;
+      }
+      const start = shown.positionOf(edge.start),
+        end = shown.positionOf(edge.end);
+      records.edges.push({
+        start: start.clone().applyMatrix4(context.world),
+        end: end.clone().applyMatrix4(context.world),
+        edgeId: edge.id,
+        context,
+        local: [start, end],
+      });
+    }
+    for (const vertex of shown.vertices.values()) {
+      records.verts.push({
+        position: vertex.position.clone().applyMatrix4(context.world),
+        vertexId: vertex.id,
+        context,
+        local: vertex.position,
+      });
+    }
+    built.records = records;
+    return records;
+  }
+
+  /** whether a group can have anything within `tolPx` of a screen point – most of a big scene does not */
+  private groupNear(built: Viewer['builtGroups'][number], x: number, y: number, tolPx: number) {
+    if (!built.sphere) {
+      return false;
+    }
+    const center = tmpPoint.copy(built.sphere.center).applyMatrix4(built.context.world);
+    const radius = built.sphere.radius * built.context.world.getMaxScaleOnAxis();
+    const camera = this.rig.camera as THREE.Camera;
+    // the eye in or close to it: no sensible circle on the screen
+    if (!this.rig.isOrtho && center.distanceTo(camera.position) < radius * 1.5) {
+      return true;
+    }
+    const projected = this.project(center);
+    if (!projected.visible) {
+      return true;
+    }
+    const rim = this.project(tmpRim.copy(center).addScaledVector(tmpUp.setFromMatrixColumn(camera.matrixWorld, 1), radius));
+    const radiusPx = Math.hypot(rim.x - projected.x, rim.y - projected.y) * 1.3; // perspective makes it a little larger
+    return Math.hypot(projected.x - x, projected.y - y) <= radiusPx + tolPx;
+  }
+
+  /** the snap points of everything shown, where it is shown now; `vertexId` is the point's place in its definition */
+  snapRecords() {
+    const records: VertRec[] = [];
+    for (const { path, context } of this.builtGroups) {
+      path[path.length - 1]?.definition.snaps?.forEach((point, index) => {
+        const local = new THREE.Vector3(point[0], point[1], point[2]);
+        records.push({ position: local.clone().applyMatrix4(context.world), vertexId: index, context, local });
+      });
+    }
+    return records;
+  }
+
+  /** the edge and vertex records (for picking and snapping) of the groups near a screen point */
+  recordsNear(x: number, y: number, tolPx: number) {
+    const edges: EdgeRec[][] = [];
+    const verts: VertRec[][] = [];
+    for (const built of this.builtGroups) {
+      if (!built.faceMe && this.groupNear(built, x, y, tolPx)) {
+        const records = this.groupRecords(built);
+        edges.push(records.edges);
+        verts.push(records.verts);
       }
     }
-    return { edges: this.edges, verts: this.verts };
+    return { edges: edges.flat(), verts: verts.flat() };
+  }
+
+  /** the edge and vertex records of everything shown, where it is shown now */
+  pickRecords() {
+    const edges: EdgeRec[][] = [];
+    const verts: VertRec[][] = [];
+    for (const built of this.builtGroups) {
+      if (!built.faceMe) {
+        const records = this.groupRecords(built);
+        edges.push(records.edges);
+        verts.push(records.verts);
+      }
+    }
+    return { edges: edges.flat(), verts: verts.flat() };
   }
 
   /** an instance's matrix in its parent as the view shows it – its display place, else the model's */
@@ -1063,7 +1392,7 @@ export class Viewer {
       built.group.updateMatrixWorld(true);
       // picks in the group (faces, edges, vertices) are where it is shown
       built.context.world.copy(world);
-      this.recordsStale = true;
+      built.records = undefined;
     }
     this.highlightStale = true;
   }
@@ -1391,10 +1720,96 @@ export class Viewer {
     this.renderer.clear();
     this.renderer.render(this.bgScene, this.bgCam);
     this.renderer.render(this.scene, cam);
+    this.renderSectionFills(cam);
     if (style?.ao && style.faceStyle !== 'wireframe' && !style.xray) {
       this.renderOcclusion(cam);
     }
+    for (const pass of this.renderPasses) {
+      try {
+        pass(this.renderer, this.scene, cam);
+      } catch (error) {
+        this.renderPasses.delete(pass);
+        console.error(error);
+      }
+    }
     this.overlay.draw();
+  }
+
+  /**
+   * Fills where section planes cut closed things: seen through the cut, a closed body shows more backs than fronts. Those
+   * pixels are counted in the stencil buffer, and the plane is drawn where the count is not zero.
+   */
+  private renderSectionFills(cam: THREE.Camera) {
+    const style = this.model?.settings.style;
+    if (!style || !this.clipPlanes.length || !this.model.settings.sectionFill || style.xray || style.faceStyle === 'wireframe') {
+      return;
+    }
+    const layer = 6;
+    const meshes = this.pickMeshes.filter((mesh) => {
+      const material = mesh.material as THREE.Material;
+      return material.side === THREE.FrontSide && !material.transparent && mesh.visible && mesh.parent?.visible !== false;
+    });
+    const savedLayers = cam.layers.mask;
+    const savedOverride = this.scene.overrideMaterial;
+    const savedBackground = this.scene.background;
+    this.scene.background = null;
+    for (const mesh of meshes) {
+      mesh.layers.enable(layer);
+    }
+    cam.layers.set(layer);
+    const count = (side: THREE.Side, operation: THREE.StencilOp, clippingPlanes: THREE.Plane[]) =>
+      new THREE.MeshBasicMaterial({
+        side,
+        colorWrite: false,
+        depthWrite: false,
+        depthTest: false,
+        stencilWrite: true,
+        stencilFunc: THREE.AlwaysStencilFunc,
+        stencilFail: operation,
+        stencilZFail: operation,
+        stencilZPass: operation,
+        clippingPlanes,
+      });
+    const box = this.model.bounds();
+    const size = box.isEmpty() ? 100 : box.getBoundingSphere(new THREE.Sphere()).radius * 4;
+    const capGeometry = new THREE.PlaneGeometry(size, size);
+    for (const plane of this.clipPlanes) {
+      this.renderer.clearStencil();
+      const others = this.clipPlanes.filter((other) => other !== plane);
+      const backs = count(THREE.BackSide, THREE.IncrementWrapStencilOp, this.clipPlanes);
+      const fronts = count(THREE.FrontSide, THREE.DecrementWrapStencilOp, this.clipPlanes);
+      for (const material of [backs, fronts]) {
+        this.scene.overrideMaterial = material;
+        this.renderer.render(this.scene, cam);
+        material.dispose();
+      }
+      this.scene.overrideMaterial = savedOverride;
+      const capMaterial = new THREE.MeshBasicMaterial({
+        color: theme.night ? 0x59616b : 0x8a9199,
+        side: THREE.DoubleSide,
+        stencilWrite: true,
+        stencilRef: 0,
+        stencilFunc: THREE.NotEqualStencilFunc,
+        clippingPlanes: others,
+      });
+      const cap = new THREE.Mesh(capGeometry, capMaterial);
+      // on the plane, around the point of the model closest to the middle
+      const center = box.isEmpty() ? new THREE.Vector3() : box.getCenter(new THREE.Vector3());
+      cap.position.copy(plane.projectPoint(center, new THREE.Vector3()));
+      cap.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), plane.normal);
+      cap.layers.set(layer);
+      cap.updateMatrixWorld(true);
+      this.renderer.render(cap, cam);
+      capMaterial.dispose();
+    }
+    capGeometry.dispose();
+    this.renderer.clearStencil();
+    this.scene.background = savedBackground;
+    this.scene.overrideMaterial = savedOverride;
+    cam.layers.mask = savedLayers;
+    for (const mesh of meshes) {
+      mesh.layers.disable(layer);
+    }
   }
 
   /** darkens corners and contact points over the frame – opaque faces cast it, glass does not */
@@ -1441,6 +1856,12 @@ export class Viewer {
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(this.ndc(x, y), this.rig.camera);
     const vis = this.pickMeshes.filter((mesh) => mesh.visible && mesh.parent?.visible !== false);
+    for (const mesh of vis) {
+      // big meshes get a tree, small ones are quick to test anyway
+      if (mesh.geometry.getAttribute('position').count >= PICK_TREE_CORNERS) {
+        mesh.geometry.boundsTree = shapeTree(mesh.geometry);
+      }
+    }
     const hits = raycaster.intersectObjects(vis, false);
     for (const hit of hits) {
       if (this.clipPlanes.some((plane) => plane.distanceToPoint(hit.point) < -1e-6)) {
@@ -1529,11 +1950,7 @@ export class Viewer {
       if (!ray.intersectsSphere(tmpSphere.copy(geometry.boundingSphere!).applyMatrix4(mesh.matrixWorld))) {
         continue;
       }
-      let bvh = occlusionTrees.get(geometry);
-      if (!bvh) {
-        bvh = new MeshBVH(geometry, { indirect: true });
-        occlusionTrees.set(geometry, bvh);
-      }
+      const bvh = shapeTree(geometry);
       const toLocal = tmpMatrix.copy(mesh.matrixWorld).invert();
       const localRay = ray.clone().applyMatrix4(toLocal);
       // with active section cuts the first hit may be cut away, so all hits are checked
@@ -1563,7 +1980,7 @@ export class Viewer {
   ): { rec: EdgeRec; point: THREE.Vector3; dist: number } | null {
     let best: { rec: EdgeRec; point: THREE.Vector3; dist: number } | null = null;
     const mouse = new THREE.Vector2(x, y);
-    for (const edgeRec of this.edges) {
+    for (const edgeRec of this.recordsNear(x, y, tolPx).edges) {
       if (filter && !filter(edgeRec)) {
         continue;
       }
@@ -1608,7 +2025,7 @@ export class Viewer {
 
   pickVertex(x: number, y: number, tolPx = 10, filter?: (vertex: VertRec) => boolean): { rec: VertRec; dist: number } | null {
     let best: { rec: VertRec; dist: number } | null = null;
-    for (const vertex of this.pickRecords().verts) {
+    for (const vertex of this.recordsNear(x, y, tolPx).verts) {
       if (filter && !filter(vertex)) {
         continue;
       }

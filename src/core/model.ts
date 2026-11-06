@@ -111,6 +111,10 @@ export class Definition {
   shape?: ShapeParams;
   /** made by a procedure: its inputs are children of this definition, its geometry is the result */
   procedure?: ProcedureData;
+  /** points that other things dock to when moved, in the definition's coordinates */
+  snaps?: [number, number, number][];
+  /** the user's own key/value data, e.g. a part number */
+  attributes?: Record<string, string>;
   constructor(
     public name: string,
     public isComponent: boolean,
@@ -120,6 +124,13 @@ export class Definition {
 
 const ekey = (vertexA: number, vertexB: number) => (vertexA < vertexB ? `${vertexA}_${vertexB}` : `${vertexB}_${vertexA}`);
 const PLANE_TOL = 1e-5;
+/** soft edges up to this angle (30°) join faces into one round surface; sharper soft edges only hide their line */
+export const SMOOTH_MIN_COS = Math.cos(Math.PI / 6);
+/**
+ * Points of a finished mesh are meant to be where they are: only the same point twice is one. With the tolerance of
+ * drawing (0.1 mm), small parts lose points that lie closer, and triangles fold over.
+ */
+export const MESH_POINT_TOLERANCE = 1e-7;
 
 export type EntityRef = { kind: 'edge' | 'face' | 'instance'; id: number };
 
@@ -324,8 +335,8 @@ export class Entities {
     }
     return best;
   }
-  addVertex(point: V3): number {
-    const found = this.findVertex(point);
+  addVertex(point: V3, tolerance = LEN_EPS): number {
+    const found = this.findVertex(point, tolerance);
     if (found != null) {
       return found;
     }
@@ -425,7 +436,7 @@ export class Entities {
     if (outer.length < 3) {
       return null;
     }
-    if (polygonArea(outer.map((vertex) => this.positionOf(vertex))) < 1e-10) {
+    if (polygonArea(outer.map((vertex) => this.positionOf(vertex))) < 1e-14) {
       return null;
     }
     const existing = this.findFaceByOuter(outer);
@@ -1005,13 +1016,20 @@ export class Entities {
       const shapeA = { outer: [...faceA.outer], holes: faceA.holes.map((hole) => [...hole]) },
         shapeB = { outer: [...faceB.outer], holes: faceB.holes.map((hole) => [...hole]) };
       const edgeIds = new Set([...this.faceEdges(faceA), ...this.faceEdges(faceB)].map((x) => x.id));
-      edgeIds.delete(edgeId);
+      // two faces can touch along several edges (the last slice of a ring): all of them go, or a ring is no ring with a hole
+      const idsOfB = new Set(this.faceEdges(faceB).map((x) => x.id));
+      const shared = this.faceEdges(faceA).filter((x) => idsOfB.has(x.id));
+      for (const { id } of shared) {
+        edgeIds.delete(id);
+      }
       const props = { material: faceA.material, backMaterial: faceA.backMaterial, tag: faceA.tag };
       const area = this.faceArea(faceA) + this.faceArea(faceB);
       const keep1 = { ...faceA, outer: [...faceA.outer], holes: faceA.holes.map((hole) => [...hole]) },
         keep2 = { ...faceB, outer: [...faceB.outer], holes: faceB.holes.map((hole) => [...hole]) };
-      const eprops = { soft: edge.soft, hidden: edge.hidden, tag: edge.tag };
-      this.removeEdgeRaw(edgeId);
+      const removed = shared.map((x) => ({ id: x.id, start: x.start, end: x.end, props: { soft: x.soft, hidden: x.hidden, tag: x.tag } }));
+      for (const { id } of removed) {
+        this.removeEdgeRaw(id);
+      }
       const regions = this.extractCycles(edgeIds, normal, anchor);
       const made: Face[] = [];
       for (const region of regions) {
@@ -1035,7 +1053,9 @@ export class Entities {
         for (const face of made) {
           this.removeFace(face.id);
         }
-        this.createEdgeRaw(edge.start, edge.end, eprops, edgeId);
+        for (const { id, start, end, props: edgeProps } of removed) {
+          this.createEdgeRaw(start, end, edgeProps, id);
+        }
         this.createFaceRaw(
           keep1.outer,
           keep1.holes,
@@ -1050,7 +1070,15 @@ export class Entities {
         );
         return;
       }
-      this.healCollinear([edge.start, edge.end]);
+      // an edge with the merged face on both sides belongs to no outline: left alone it stays as a stray line
+      for (const id of edgeIds) {
+        if (this.edges.has(id) && !this.facesOfEdge(id).length) {
+          this.eraseEdge(id, false);
+        }
+      }
+      const ends = removed.flatMap(({ start, end }) => [start, end]);
+      this.healCollinear(ends);
+      this.removeOrphanVertices(ends);
     } else {
       this.removeEdgeRaw(edgeId);
     }
@@ -1128,6 +1156,156 @@ export class Entities {
         this.eraseEdge(id, true);
       }
     }
+  }
+
+  /**
+   * Merges a whole mesh at once: triangles in one plane are grouped, and each group's outline is found once. Merging
+   * edge by edge (`mergeCoplanar`) goes over the growing outline each time – minutes for a detailed part. A group whose
+   * outline is not simple (it touches itself in a point) stays as it is.
+   */
+  mergeMeshFaces() {
+    const leader = new Map<number, number>();
+    const leaderOf = (id: number): number => {
+      let root = id;
+      while (leader.has(root)) {
+        root = leader.get(root)!;
+      }
+      if (root !== id) {
+        leader.set(id, root);
+      }
+      return root;
+    };
+    for (const edge of this.edges.values()) {
+      const faces = this.facesOfEdge(edge.id);
+      if (
+        faces.length === 2 &&
+        faces[0].material === faces[1].material &&
+        faces[0].backMaterial === faces[1].backMaterial &&
+        // opposite normals too: slivers folded over by rounding in the file would pinch the outline
+        Math.abs(this.faceNormal(faces[0]).dot(this.faceNormal(faces[1]))) > 1 - 1e-6 &&
+        Math.abs(this.positionOf(faces[1].outer[0]).clone().sub(this.positionOf(faces[0].outer[0])).dot(this.faceNormal(faces[0]))) <
+          PLANE_TOL
+      ) {
+        const [first, second] = [leaderOf(faces[0].id), leaderOf(faces[1].id)];
+        if (first !== second) {
+          leader.set(first, second);
+        }
+      }
+    }
+    const groups = new Map<number, Face[]>();
+    for (const face of this.faces.values()) {
+      const root = leaderOf(face.id);
+      const group = groups.get(root);
+      if (group) {
+        group.push(face);
+      } else {
+        groups.set(root, [face]);
+      }
+    }
+    for (const group of groups.values()) {
+      if (group.length < 2) {
+        continue;
+      }
+      const inGroup = new Map<number, number>();
+      for (const face of group) {
+        for (const { id } of this.faceEdges(face)) {
+          inGroup.set(id, (inGroup.get(id) ?? 0) + 1);
+        }
+      }
+      const outline = [...inGroup].filter(([, count]) => count === 1).map(([id]) => id);
+      const first = group.reduce((largest, face) => (this.faceArea(face) > this.faceArea(largest) ? face : largest));
+      const normal = this.faceNormal(first);
+      const cycles = this.extractCycles(outline, normal, this.positionOf(first.outer[0]).clone());
+      // a hole also comes back as a region of its own (its inside)
+      const holeVertices = new Set(cycles.flatMap(({ holes }) => holes.flat()));
+      const regions = cycles.filter(({ outer }) => !holeVertices.has(outer[0]));
+      const areaOf = (loop: number[]) => polygonArea(loop.map((vertex) => this.positionOf(vertex)));
+      const wanted = group.reduce((sum, face) => sum + Math.sign(this.faceNormal(face).dot(normal)) * this.faceArea(face), 0);
+      const found = regions.reduce(
+        (sum, { outer, holes }) => sum + areaOf(outer) - holes.reduce((inner, hole) => inner + areaOf(hole), 0),
+        0,
+      );
+      if (Math.abs(found - wanted) > Math.max(1e-12, wanted * 1e-6)) {
+        continue;
+      }
+      const props = { material: first.material, backMaterial: first.backMaterial, tag: first.tag };
+      const vertices = new Set(group.flatMap((face) => [...face.outer, ...face.holes.flat()]));
+      for (const face of group) {
+        this.removeFace(face.id);
+      }
+      for (const [id, count] of inGroup) {
+        if (count > 1) {
+          this.removeEdgeRaw(id);
+        }
+      }
+      for (const { outer, holes } of regions) {
+        this.createFaceRaw(outer, holes, props);
+      }
+      this.removeOrphanVertices(vertices);
+    }
+  }
+
+  /**
+   * The faces that look like one with this one: joined over soft edges that turn by less than `minCos`. A curved
+   * surface cannot be one flat face, but it can be picked and painted as one.
+   */
+  smoothSurface(start: Face, minCos: number) {
+    const surface = new Set([start]);
+    for (const face of surface) {
+      const normal = this.faceNormal(face);
+      for (const edge of this.faceEdges(face)) {
+        if (edge.soft) {
+          for (const other of this.facesOfEdge(edge.id)) {
+            if (!surface.has(other) && this.faceNormal(other).dot(normal) > minCos) {
+              surface.add(other);
+            }
+          }
+        }
+      }
+    }
+    return [...surface];
+  }
+
+  /**
+   * How a face looks lit at one of its corners: averaged with the faces around that corner that are joined by soft
+   * edges, so a curve made of flat strips looks round. Faces turned by more than `minCos` keep their own corner,
+   * and big faces count for more, so a flat side stays flat.
+   */
+  smoothNormal(face: Face, vertexId: number, minCos: number, known: Map<number, { normal: V3; area: number }>) {
+    const lookOf = (of: Face) => {
+      let look = known.get(of.id);
+      if (!look) {
+        look = { normal: this.faceNormal(of), area: this.faceArea(of) };
+        known.set(of.id, look);
+      }
+      return look;
+    };
+    const own = lookOf(face).normal;
+    const sum = own.clone().multiplyScalar(lookOf(face).area);
+    const seen = new Set([face.id]);
+    const pending = [face];
+    const softEdges = this.edgesOfVertex(vertexId).filter((edge) => edge.soft);
+    while (pending.length) {
+      const current = pending.pop()!;
+      for (const edge of softEdges) {
+        const faces = this.facesOfEdge(edge.id);
+        if (!faces.includes(current)) {
+          continue;
+        }
+        for (const other of faces) {
+          if (seen.has(other.id)) {
+            continue;
+          }
+          const { normal, area } = lookOf(other);
+          if (normal.dot(own) > minCos) {
+            seen.add(other.id);
+            sum.addScaledVector(normal, area);
+            pending.push(other);
+          }
+        }
+      }
+    }
+    return sum.normalize();
   }
 
   /** Merge vertex src into dst (topology repair after moves). */
@@ -1604,6 +1782,27 @@ export class Entities {
       }
       const cosAngle = this.faceNormal(faces[0]).dot(this.faceNormal(faces[1]));
       if (cosAngle > cosLimit && cosAngle < 1 - 1e-6) {
+        edge.soft = true;
+      }
+    }
+  }
+
+  /**
+   * For meshes from elsewhere (imports, OpenSCAD, solid tools): edges between faces in one plane that
+   * could not be merged (the outline would not be simple) are no lines of the shape – they are hidden
+   * like soft ones. A change of material stays visible. Not for drawn models: a line on a face is meant.
+   */
+  softenFlatEdges(edgeIds: Iterable<number>) {
+    for (const id of edgeIds) {
+      const edge = this.edges.get(id);
+      const faces = edge ? this.facesOfEdge(id) : [];
+      if (
+        edge &&
+        faces.length === 2 &&
+        faces[0].material === faces[1].material &&
+        // opposite normals: a sliver folded back onto its neighbour by rounding in the file
+        Math.abs(this.faceNormal(faces[0]).dot(this.faceNormal(faces[1]))) >= 1 - 1e-6
+      ) {
         edge.soft = true;
       }
     }

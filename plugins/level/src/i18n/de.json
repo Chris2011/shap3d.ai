@@ -42,7 +42,7 @@
         "world": "Kameras und Bewegung"
       },
       "kinds": {
-        "spawn": "Spawn",
+        "spawn": "Startpunkt",
         "enemy": "Gegner",
         "waypoint": "Wegpunkt",
         "trigger": "Trigger",
@@ -52,7 +52,7 @@
         "door": "Tür",
         "savepoint": "Speicherpunkt",
         "camera": "Kamera",
-        "jumppad": "Jump-Pad",
+        "jumppad": "Sprungfeld",
         "teleporter": "Teleporter",
         "light": "Licht"
       },
@@ -213,8 +213,8 @@
         "guide": "Level-Anleitung"
       },
       "blockout": {
-        "title": "Blockout",
-        "tool": "Blockout zeichnen",
+        "title": "Räume",
+        "tool": "Räume zeichnen",
         "groupName": "Blockout",
         "draw": "Zeichnen",
         "pieces": "Teile ({count})",
@@ -258,7 +258,7 @@
         "hints": {
           "room": "Ein Rechteck auf dem Raster aufziehen. Zwischen Räumen nebeneinander steht eine Wand – eine Level-Tür darin schneidet eine Türöffnung.",
           "corridor": "Anfang und Ende anklicken. Wo er in einen Raum führt, öffnet sich der Raum.",
-          "stairs": "Ihr Rechteck in die Richtung aufziehen, in die sie steigt. Sie steigt von der Bodenhöhe um „Steigt um“."
+          "stairs": "Dein Rechteck in die Richtung aufziehen, in die sie steigt. Sie steigt von der Bodenhöhe um „Steigt um“."
         },
         "materials": {
           "floor": "Blockout-Boden",
@@ -309,8 +309,8 @@
       },
       "generate": {
         "title": "Grundriss erzeugen",
-        "seed": "Seed",
-        "dice": "Anderer Seed",
+        "seed": "Startzahl (Seed)",
+        "dice": "Anderer Grundriss",
         "rooms": "Räume",
         "size": "Fläche (m)",
         "objects": "Mit Spielobjekten (Start, Lichter, Gegner, Gesundheit, Speicherpunkt, Ziel)",
@@ -327,7 +327,7 @@
         "hint": "Klangzonen und die Aktion „Klang abspielen“ spielen einen Sound über seinen Namen – eine Datei dieses Namens (ohne Endung, z. B. door-creak.ogg für door-creak). Namen ohne Datei spielen im Probelauf einen Platzhalter."
       },
       "guide": {
-        "title": "Anleitung",
+        "title": "Level-Anleitung",
         "progress": "{done} von {count}",
         "intro": "Schritt für Schritt zum ersten spielbaren Level. Jeder Schritt hakt sich selbst ab, sobald das Modell ihn zeigt – die Reihenfolge ist frei.",
         "back": "‹ Zurück",
@@ -339,9 +339,9 @@
           "spawn": "Start setzen (J)",
           "enemy": "Gegner setzen",
           "waypoint": "Wegpunkte setzen",
-          "trigger": "Trigger setzen",
+          "trigger": "Auslöser setzen (Trigger)",
           "door": "Tür setzen",
-          "pickup": "Pickup setzen",
+          "pickup": "Etwas zum Einsammeln setzen",
           "light": "Licht setzen",
           "atmosphere": "Tageslicht und Nebel …",
           "check": "Level prüfen",
@@ -355,9 +355,9 @@
         },
         "steps": {
           "blockout": {
-            "title": "Räume blocken",
-            "text": "Räume zeichnest du als Rechteck auf dem Raster, Gänge mit Klick auf Anfang und Ende, Treppen in Laufrichtung nach oben. Bodenhöhe, Raumhöhe und Decken kommen aus dem Blockout-Panel. Keine Zeit? Grundriss aus einem Seed generieren.",
-            "done": "Das Level hat einen Blockout – Teile änderst oder entfernst du im Blockout-Panel."
+            "title": "Räume zeichnen",
+            "text": "Räume zeichnest du als Rechteck auf dem Raster, Gänge mit Klick auf Anfang und Ende, Treppen in Laufrichtung nach oben. Bodenhöhe, Raumhöhe und Decken kommen aus dem Panel Räume. Keine Zeit? Lass dir einen Grundriss erzeugen.",
+            "done": "Das Level hat Räume – ändern oder entfernen kannst du sie im Panel Räume."
           },
           "spawn": {
             "title": "Start des Spielers setzen",
@@ -381,7 +381,7 @@
           },
           "check": {
             "title": "Prüfen",
-            "text": "Die Prüfungen zeigen, worüber eine Game-Engine stolpern würde; das Laufraster zeigt grün, wohin der Spieler vom Start aus kommt. Klick auf ein Problem wählt sein Objekt aus.",
+            "text": "Die Prüfungen zeigen, worüber eine Spiel-Engine stolpern würde; das Laufraster zeigt grün, wohin der Spieler vom Start aus kommt. Klick auf ein Problem wählt sein Objekt aus.",
             "done": "Keine Probleme, alles erreichbar."
           },
           "play": {
@@ -390,7 +390,7 @@
             "done": "Du hast das Level gespielt."
           },
           "export": {
-            "title": "In die Game-Engine bringen",
+            "title": "In die Spiel-Engine bringen",
             "text": "Exportiere das Modell als glTF und die Level-Datei daneben – die Spielobjekte mit Eigenschaften, Aktionen und Laufraster. Im Level-Panel gibt es Vorlagen für Godot, Unity und Unreal, die sie in der Engine aufbauen.",
             "done": "Exportiert."
           }
@@ -436,6 +436,21 @@
           "name": "Zwei Etagen",
           "description": "Eine Halle mit Treppe hinauf zu einer Galerie über ihrer hinteren Hälfte, oben ein Schlüssel. Leert das Modell."
         }
+      },
+      "kindHints": {
+        "spawn": "Hier beginnt der Spieler",
+        "enemy": "Eine Figur, die ihre Runde läuft und den Spieler verfolgt",
+        "waypoint": "Ein Punkt auf der Runde eines Gegners",
+        "trigger": "Ein unsichtbarer Kasten: Läuft der Spieler hinein, passiert etwas",
+        "hazard": "Ein Bereich, der dem Spieler schadet",
+        "soundzone": "Ein Bereich mit eigenem Klang",
+        "pickup": "Etwas zum Einsammeln: Gesundheit, ein Schlüssel …",
+        "door": "Geht auf und zu, lässt sich abschließen",
+        "savepoint": "Hierher kehrt der Spieler zurück",
+        "camera": "Ein fester Blick fürs Spiel",
+        "jumppad": "Schleudert den Spieler in die Luft",
+        "teleporter": "Bringt den Spieler an einen anderen Ort",
+        "light": "Eine Lampe oder ein Spot"
       }
     }
   }

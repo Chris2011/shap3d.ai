@@ -1,4 +1,4 @@
-import { shallowReactive } from 'vue';
+import { shallowReactive, watch } from 'vue';
 import { Editor } from './editor';
 import { workspaceState } from '../plugins/uiExtensions';
 import { SelectTool, LassoTool, EraserTool, PaintTool, SampleTool } from '../tools/select';
@@ -10,6 +10,7 @@ import {
   DimensionTool,
   TextTool,
   SectionTool,
+  SnapPointTool,
   OrbitTool,
   PanTool,
   ZoomTool,
@@ -73,6 +74,7 @@ export const TOOL_INFO: Record<string, ToolInfo> = {
   dimension: toolInfo('dimension', 'dimension'),
   text: toolInfo('text', 'text'),
   section: toolInfo('section', 'section'),
+  snappoint: toolInfo('snappoint', 'snappoint'),
   orbit: toolInfo('orbit', 'orbit', 'O'),
   pan: toolInfo('pan', 'pan', 'H'),
   zoom: toolInfo('zoom', 'zoom', 'Z'),
@@ -113,6 +115,7 @@ export const createEditor = (): Editor => {
     new DimensionTool(editor),
     new TextTool(editor),
     new SectionTool(editor),
+    new SnapPointTool(editor),
     new OrbitTool(editor),
     new PanTool(editor),
     new ZoomTool(editor),
@@ -123,6 +126,16 @@ export const createEditor = (): Editor => {
     new PlaceTool(editor),
   ];
   tools.forEach((tool) => editor.register(tool));
+  // a model without a name of its own follows the language (the texts arrive after the first empty model is made)
+  watch(
+    () => t('names.untitled'),
+    (now, before) => {
+      if (editor.model.name === before) {
+        editor.model.name = now;
+        editor.ui.revision++;
+      }
+    },
+  );
   // an input of a procedure changed: its result follows in the same undo step
   editor.settling.push(() => {
     for (const error of new Set(rebuildChangedProcedures(editor.model.definitions.values(), editor.model))) {

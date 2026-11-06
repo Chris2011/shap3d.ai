@@ -191,7 +191,8 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import S3dAnimGraph from './S3dAnimGraph.vue';
 import { currentScene } from './apply';
 import { INTERPOLATIONS, type Interpolation } from './data';
-import { deleteKeys, editScene, keyCamera, keySelected, readTracks, setCycle, setHandles, setInterpolation, shiftKeys } from './keying';
+import { keyWhatIsMeant } from './rig';
+import { deleteKeys, editScene, readTracks, setCycle, setHandles, setInterpolation, shiftKeys } from './keying';
 import { jumpKey, jumpTo, setFrame, setLookThrough, stepFrame, togglePlay } from './player';
 import { ownerRows, type OwnerRow } from './rows';
 import { pluginContext, t } from './runtime';
@@ -630,12 +631,8 @@ const menuDelete = () => {
 
 // ------------------------------------------------------------ keys of the keyboard
 
-/** I: the selected groups, or the camera when nothing is selected */
-const insertKey = () => {
-  if (!keySelected()) {
-    keyCamera();
-  }
-};
+/** I: the selected groups, the bones just posed or the camera there is – else it says what to do */
+const insertKey = () => keyWhatIsMeant();
 
 const onKey = (event: KeyboardEvent) => {
   // undo, redo, save and the palette stay the app's

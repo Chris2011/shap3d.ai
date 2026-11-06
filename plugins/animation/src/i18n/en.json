@@ -58,8 +58,8 @@
         "toStart": "Back to the start",
         "keyTitle": "Make something move",
         "keySteps": "1. Select a group and go to a frame in the timeline.\n2. Put it where it should be (Move, Rotate, Scale).\n3. Press I – a key. Go to a later frame, move it again, press I again.",
-        "keyHere": "Key here (I)",
-        "autoKey": "Key every change",
+        "keyHere": "Set keyframe (I)",
+        "autoKey": "Remember every change",
         "selectFirst": "Select a group or component first.",
         "notKeyed": "Moved but not keyed yet – press I, or it jumps back when the frame changes.",
         "recipes": "Ready-made movements",
@@ -85,9 +85,9 @@
         "play": "Play",
         "pause": "Pause",
         "frame": "Frame",
-        "key": "Key",
-        "keyHint": "Keys the selected groups where they are – the camera when nothing is selected (I)",
-        "autoKey": "Auto key",
+        "key": "Set keyframe",
+        "keyHint": "Remembers the selected groups where they are at this frame; with nothing selected the camera, if there is one (I)",
+        "autoKey": "Auto keyframes",
         "autoKeyHint": "Every move, turn or scale of a group becomes a key at the frame shown",
         "lookThrough": "Through camera",
         "lookThroughHint": "The 3D view looks through the camera of the shot at this frame",
@@ -95,15 +95,16 @@
         "end": "End",
         "fps": "fps",
         "loop": "Play again from the start",
-        "dope": "Dope sheet",
-        "graph": "Graph",
-        "fit": "Fit",
+        "dope": "Keyframes",
+        "graph": "Curves",
+        "fit": "Show all",
         "fitHint": "Shows the whole scene from start to end",
         "close": "Close the timeline",
         "resize": "Drag to make it taller or lower",
         "summary": "Animated",
         "allKeys": "All keys",
-        "empty": "Nothing animated yet. Select a group and press I – or choose a ready-made movement in the Animation panel."
+        "empty": "Nothing animated yet. Select a group and press I – or choose a ready-made movement in the Animation panel.",
+        "keyNeedsSelection": "Select a group first – I remembers where it is at this frame."
       },
       "graph": {
         "normalize": "Normalise",
@@ -339,10 +340,10 @@
           "practice": "Load a practice scene",
           "select": "Select a group",
           "toStart": "To the first frame",
-          "key": "Key it (I)",
+          "key": "Set keyframe (I)",
           "toMiddle": "To the middle frame",
           "move": "Move tool",
-          "graph": "Open the graph editor",
+          "graph": "Open the curves",
           "render": "Open the Film section"
         },
         "checks": {
@@ -378,7 +379,7 @@
           },
           "camera": {
             "title": "A camera",
-            "text": "Turn the view to a nice angle and add a camera from it. 'Through camera' shows what it sees; move the view at another frame and key the camera again for a camera move.",
+            "text": "Turn the view to a nice angle and add a camera from it. 'Through camera' shows what it sees; move the view at another frame and set another keyframe for the camera: a camera move.",
             "done": "The film has a camera."
           },
           "render": {
@@ -388,9 +389,10 @@
           },
           "more": {
             "title": "More to try",
-            "text": "The demos show paths, parts inside parts, camera flights, the sun, lights and colours – open one in the script editor and run it."
+            "text": "The demos show paths, parts inside parts, camera flights, the sun, lights and colours – open one in the script editor and run it. For figures with joints, try the jointed puppet with the Pose tool on the left."
           }
-        }
+        },
+        "confirmReplace": "This replaces your current model with the practice scene. Ctrl+Z brings it back. Continue?"
       },
       "tools": {
         "joint": "Joint",
@@ -425,7 +427,7 @@
         "apply": "Apply",
         "applyHint": "Keys this pose at the frame shown",
         "removePose": "Delete pose",
-        "keyPose": "Key pose",
+        "keyPose": "Set as keyframe",
         "keyPoseHint": "Keys the turns of all bones as shown, at this frame",
         "mirror": "Mirror",
         "mirrorHint": "Swaps left and right at this frame. Left and right of the figure must lie along its X axis.",

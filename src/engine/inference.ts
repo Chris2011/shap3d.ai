@@ -8,6 +8,7 @@ import { type PlaneRef, segmentSegmentClosest, lineLineClosest, closestOnSegment
 import { t } from '../i18n';
 export type InferKind =
   | 'endpoint'
+  | 'snap'
   | 'midpoint'
   | 'intersection'
   | 'edge'
@@ -31,6 +32,8 @@ export interface Inference {
   face?: FaceHit | null;
   edge?: EdgeRec;
   vert?: VertRec;
+  /** the snap point it landed on */
+  snap?: VertRec;
   axis?: 'x' | 'y' | 'z';
   axisFrom?: THREE.Vector3;
   alignFrom?: THREE.Vector3;
@@ -291,6 +294,16 @@ export class InferenceEngine {
         },
       });
     }
+    for (const rec of viewer.snapRecords()) {
+      const dist = this.screenDist(rec.position, x, y);
+      if (dist < POINT_RADIUS && (!opt.filterVert || opt.filterVert(rec))) {
+        // ahead of points at the same place: this one was set on purpose
+        candidates.push({
+          dist: dist - 1,
+          inference: { point: rec.position.clone(), kind: 'snap', label: t('inference.snapPoint') + this.where(rec.context), snap: rec },
+        });
+      }
+    }
     const near = this.edgesNear(x, y, POINT_RADIUS, opt.filterEdge);
     for (const { rec } of near) {
       const mid = rec.start.clone().add(rec.end).multiplyScalar(0.5);
@@ -369,7 +382,7 @@ export class InferenceEngine {
     const viewer = this.viewer;
     const found: { rec: EdgeRec; dist: number }[] = [];
     const mouse = new THREE.Vector2(x, y);
-    for (const edgeRec of viewer.pickRecords().edges) {
+    for (const edgeRec of viewer.recordsNear(x, y, tolPx).edges) {
       if (filter && !filter(edgeRec)) {
         continue;
       }
@@ -814,6 +827,7 @@ export class InferenceEngine {
     }
     const markers: Partial<Record<InferKind, string>> = {
       endpoint: 'endpoint',
+      snap: 'guide',
       midpoint: 'midpoint',
       intersection: 'intersection',
       edge: 'edge',

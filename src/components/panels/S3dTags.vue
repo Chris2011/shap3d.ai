@@ -1,10 +1,20 @@
 <template>
   <div class="mb-2 flex gap-1.5 [&_.s3d-btn]:flex [&_.s3d-btn]:items-center [&_.s3d-btn]:gap-1">
     <button class="s3d-btn small" @click="add"><S3dIcon name="plus" :size="14" /> {{ t('tags.add') }}</button>
-    <button class="s3d-btn small" :disabled="!editor.selection.size" :title="t('tags.assignTitle')" @click="assign">
+    <button
+      class="s3d-btn small"
+      :disabled="!editor.selection.size"
+      :title="t(editor.selection.size ? 'tags.assignTitle' : 'tags.selectFirst')"
+      @click="assign"
+    >
       {{ t('tags.assign') }}
     </button>
-    <button class="s3d-btn small" :disabled="!scenes.length" :title="t('tags.toScenesTitle')" @click="openToScenes">
+    <button
+      class="s3d-btn small"
+      :disabled="!scenes.length"
+      :title="t(scenes.length ? 'tags.toScenesTitle' : 'tags.scenesFirst')"
+      @click="openToScenes"
+    >
       {{ t('tags.toScenes') }}
     </button>
   </div>

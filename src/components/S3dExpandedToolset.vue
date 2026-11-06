@@ -76,6 +76,7 @@ const builtInGroups = (): Cell[][] => [
     toolCell('protractor'),
     toolCell('text'),
     toolCell('section'),
+    toolCell('snappoint'),
     commandCell('makeGroup', 'names.group', 'group', 'makeGroup'),
     commandCell('makeComponent', 'names.component', 'component', 'makeComponent'),
   ],

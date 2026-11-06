@@ -66,7 +66,7 @@ Then in Shap3D.ai: _Plugins › Load plugin folder…_ and pick the folder `plug
 
 **Vue in a plugin package**: the components are normal `.vue` files. The build routes every `import … from 'vue'` to the app's Vue (`context.vue`) – a plugin must not bring its own Vue, because the app's reactive state only tracks with the app's Vue. CSS comes as a `<style>` element while the plugin is on (`src/styles.ts`), using the app's colour tokens, so dark mode follows by itself.
 
-**Screenshots**: `npm run screenshots` (Windows) or `npm run screenshots:sh` (Linux, macOS) renders `docs/layout.png` from the demo model `docs/demo.js` and `docs/layout-plan.png` from the floor plan `docs/demo-plan.js` with the dev server running.
+**Screenshots**: `npm run screenshots -- layout` in the repository root renders `docs/layout.png` from the demo model `docs/demo.js` and `docs/layout-plan.png` from the floor plan `docs/demo-plan.js` with the dev server running.
 
 ## Structure
 

@@ -133,6 +133,23 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/shaders/dist`.
 
 It uses `context.materials.registerShader` – the way to add shaders of your own is in [its README](../../plugins/shaders/README.md). Without the plugin, materials with a shader show their colour; export formats keep the colour too.
 
+## The model marketplace plugin
+
+The package in [`plugins/marketplace/`](../../plugins/marketplace) searches public 3D sources from a panel in the right-hand bar and loads a model into the current one. It needs no dependencies of its own.
+
+```bash
+cd plugins/marketplace
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/marketplace/dist`.
+
+- **Sources**: Poly Haven, Wikimedia Commons and OpenStreetMap buildings without a key; Sketchfab (loading), Thingiverse and MyMiniFactory with your own key, marked in the panel as not tested.
+- **Loading** in a worker with progress, _Cancel_ and a limit of 256 MB. A glTF with its parts or a zip becomes one `.glb`; the app's import then makes the faces. A textured material becomes the mean colour of its picture.
+- **Credits**: author, licence and source stay on the imported group, and _In this model_ copies them as text. Exports to other formats do not carry them.
+
+Details in [its README](../../plugins/marketplace/README.md).
+
 ## The noise plugin
 
 The package in [`plugins/noise/`](../../plugins/noise) brings procedural generation from seeded noise – simplex noise (fBm, ridged, billow) and cellular (Voronoi) noise – to the app. No dependencies of its own; built like the others:

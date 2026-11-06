@@ -21,12 +21,28 @@ export interface MaterialDef {
   shader?: string;
   /** the shader's parameters (numbers, colours as "#rrggbb") – missing ones take the shader's defaults */
   shaderParams?: Record<string, number | string>;
+  /** physically based: 0 (mirror) … 1 (matt), default 0.8 */
+  roughness?: number;
+  /** physically based: 0 (not metal) … 1 (metal), default 0 */
+  metalness?: number;
+  /** physically based: pictures (data URLs, saved with the model) laid out like the texture */
+  maps?: Partial<Record<MaterialMapKind, string>>;
+}
+export type MaterialMapKind = 'normal' | 'roughness' | 'metalness' | 'ao';
+/** an HDR or EXR picture as light, reflections and sky (saved with the model) */
+export interface ModelEnvironment {
+  name: string;
+  /** data URL */
+  data: string;
 }
 /** a copy that shares nothing with the original */
 export const copyMaterial = (material: MaterialDef): MaterialDef => {
   const copy = { ...material };
   if (material.shaderParams) {
     copy.shaderParams = { ...material.shaderParams };
+  }
+  if (material.maps) {
+    copy.maps = { ...material.maps };
   }
   if (material.textureOffset) {
     copy.textureOffset = [material.textureOffset[0], material.textureOffset[1]];
@@ -53,8 +69,13 @@ export interface Dimension {
 export interface Label {
   id: number;
   point: THREE.Vector3;
+  /** `<>` in it shows the measured value of `source` */
   text: string;
   offset: THREE.Vector3;
+  /** the edge or face it was placed on (below the instances of `path`) */
+  source?: { kind: 'edge' | 'face'; path: number[]; id: number };
+  /** the value last measured – shown if the edge or face is gone */
+  lastValue?: string;
 }
 export interface SectionPlane {
   id: number;
@@ -117,6 +138,15 @@ export interface ModelSettings {
   shadows: boolean;
   shadowHour: number; // 0..24
   shadowMonth: number; // 1..12
+  /** where the model stands, for the sun: degrees north (negative: south) */
+  latitude: number;
+  /** degrees from the green axis clockwise to north, seen from above */
+  north: number;
+  /** the environment also shows as the sky */
+  environmentBackground: boolean;
+  environmentIntensity: number;
+  /** closed things cut by a section plane show a surface instead of a hole */
+  sectionFill: boolean;
   hiddenGeometry: boolean;
   /** tabs for the scenes above the viewport */
   sceneTabs: boolean;
@@ -175,6 +205,7 @@ export class Model implements DefinitionRegistry {
   guides: Guide[] = [];
   dimensions: Dimension[] = [];
   labels: Label[] = [];
+  environment?: ModelEnvironment;
   sections: SectionPlane[] = [];
   scenes: Scene[] = [];
   settings: ModelSettings = {
@@ -187,6 +218,11 @@ export class Model implements DefinitionRegistry {
     shadows: false,
     shadowHour: 13.5,
     shadowMonth: 6,
+    latitude: 48,
+    north: 0,
+    environmentBackground: true,
+    environmentIntensity: 1,
+    sectionFill: true,
     hiddenGeometry: false,
     sceneTabs: true,
     style: { ...DEFAULT_STYLE },
@@ -216,6 +252,8 @@ export class Model implements DefinitionRegistry {
   cloneDefinition(source: Definition): Definition {
     const definition = new Definition(source.name, source.isComponent, source.entities.clone(this));
     definition.faceMe = source.faceMe;
+    definition.snaps = source.snaps?.map((point) => [...point]);
+    definition.attributes = source.attributes && { ...source.attributes };
     if (source.pluginData) {
       definition.pluginData = JSON.parse(JSON.stringify(source.pluginData));
     }
@@ -275,6 +313,7 @@ export class Model implements DefinitionRegistry {
     this.guides = [];
     this.dimensions = [];
     this.labels = [];
+    this.environment = undefined;
     this.sections = [];
     this.pluginData = undefined;
   }
@@ -322,12 +361,15 @@ export class Model implements DefinitionRegistry {
       // copies, not references – undo snapshots must not change when the model changes later
       settings: JSON.parse(JSON.stringify(this.settings)),
       materials: this.materials.map(copyMaterial),
+      environment: this.environment && { ...this.environment },
       tags: this.tags.map((tag) => ({ ...tag })),
       definitions: [...this.definitions.values()].map((definition) => ({
         id: definition.id,
         name: definition.name,
         isComponent: definition.isComponent,
         faceMe: definition.faceMe || undefined,
+        snaps: definition.snaps?.length ? definition.snaps.map((point) => [...point]) : undefined,
+        attributes: definition.attributes && Object.keys(definition.attributes).length ? { ...definition.attributes } : undefined,
         pluginData: definition.pluginData ? JSON.parse(JSON.stringify(definition.pluginData)) : undefined,
         shape: definition.shape,
         procedure: definition.procedure ? JSON.parse(JSON.stringify(definition.procedure)) : undefined,
@@ -347,7 +389,14 @@ export class Model implements DefinitionRegistry {
         end: toArray(dimension.end),
         offset: toArray(dimension.offset),
       })),
-      labels: this.labels.map((label) => ({ id: label.id, point: toArray(label.point), text: label.text, offset: toArray(label.offset) })),
+      labels: this.labels.map((label) => ({
+        id: label.id,
+        point: toArray(label.point),
+        text: label.text,
+        offset: toArray(label.offset),
+        source: label.source ? { ...label.source, path: [...label.source.path] } : undefined,
+        lastValue: label.lastValue,
+      })),
       sections: this.sections.map((section) => ({
         id: section.id,
         point: toArray(section.point),
@@ -388,6 +437,7 @@ export class Model implements DefinitionRegistry {
     this.name = json.name ?? t('names.untitled');
     this.settings = { ...this.settings, ...json.settings, style: { ...DEFAULT_STYLE, ...json.settings?.style } };
     this.pluginData = json.pluginData ? JSON.parse(JSON.stringify(json.pluginData)) : undefined;
+    this.environment = json.environment && { name: String(json.environment.name), data: String(json.environment.data) };
     if (json.materials) {
       this.materials = json.materials.map(copyMaterial);
     }
@@ -398,6 +448,9 @@ export class Model implements DefinitionRegistry {
     for (const stored of json.definitions ?? []) {
       const definition = new Definition(stored.name, !!stored.isComponent);
       definition.faceMe = !!stored.faceMe;
+      definition.snaps = stored.snaps?.map((point: number[]) => [Number(point[0]), Number(point[1]), Number(point[2])]);
+      definition.attributes =
+        stored.attributes && Object.fromEntries(Object.entries(stored.attributes).map(([key, value]) => [key, String(value)]));
       if (stored.pluginData) {
         definition.pluginData = JSON.parse(JSON.stringify(stored.pluginData));
       } else if (stored.terrain) {
@@ -475,6 +528,8 @@ export class Model implements DefinitionRegistry {
       id: seen(label.id),
       point: toVector(label.point),
       text: label.text,
+      source: label.source ? { ...label.source, path: [...label.source.path] } : undefined,
+      lastValue: label.lastValue,
       offset: toVector(label.offset),
     }));
     this.sections = (json.sections ?? []).map((section: any): SectionPlane => ({

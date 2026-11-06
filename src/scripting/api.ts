@@ -1086,12 +1086,47 @@ for (const [kind, meta] of Object.entries(PARAMETRIC)) {
   };
 }
 
+/** names of the s3d functions plugins brought (`script.extend`) */
+export const PLUGIN_EXTENSIONS = new Set<string>();
+
 export interface RunResult {
   ok: boolean;
   logs: ScriptLog[];
   error?: string;
   durationMs: number;
+  /** the script stopped because something it needs is still being made – run it again when this is done */
+  retryAfter?: Promise<unknown>;
 }
+
+/** how many letters apart two names are */
+const lettersApart = (first: string, second: string) => {
+  let row = Array.from({ length: second.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= first.length; i++) {
+    const next = [i];
+    for (let j = 1; j <= second.length; j++) {
+      next[j] = Math.min(row[j] + 1, next[j - 1] + 1, row[j - 1] + (first[i - 1] === second[j - 1] ? 0 : 1));
+    }
+    row = next;
+  }
+  return row[second.length];
+};
+
+/** what went wrong in a script, in its own lines: a command that does not exist names the one probably meant */
+export const scriptErrorText = (error: any): string => {
+  let text = error?.message ?? String(error);
+  const missing = /^s3d\.(\w+) is not a function/.exec(text);
+  if (missing) {
+    const names = Object.getOwnPropertyNames(ScriptApi.prototype).filter((name) => name !== 'constructor' && !name.startsWith('_'));
+    const nearest = names.reduce((best, name) => (lettersApart(name, missing[1]) < lettersApart(best, missing[1]) ? name : best), names[0]);
+    text = t('script.errors.unknownCommand', { name: missing[1] });
+    if (lettersApart(nearest, missing[1]) <= 2) {
+      text += ` ${t('script.errors.didYouMean', { name: nearest })}`;
+    }
+  }
+  // new Function puts three lines in front of the code
+  const line = /<anonymous>:(\d+):\d+/.exec(String(error?.stack));
+  return line && Number(line[1]) > 3 ? `${text} ${t('script.errors.line', { line: Number(line[1]) - 3 })}` : text;
+};
 
 /** Run a JavaScript snippet with the `s3d` API as one undoable step. */
 export const runScript = (editor: Editor, code: string, label = 'undo.script'): RunResult => {
@@ -1137,10 +1172,28 @@ export const runScript = (editor: Editor, code: string, label = 'undo.script'): 
     return {
       ok: false,
       logs: api.logs,
-      error: (error?.message ?? String(error)) + (error?.stack ? '\n' + String(error.stack).split('\n').slice(1, 3).join('\n') : ''),
+      error: scriptErrorText(error),
       durationMs: performance.now() - startedAt,
+      retryAfter: error?.retryAfter,
     };
   }
+};
+
+/** does the code call an s3d function a plugin brought? Those exist only on the main thread. */
+const usesPluginExtension = (code: string) =>
+  [...code.matchAll(/\.\s*([A-Za-z_$][\w$]*)\s*\(/g)].some(([, name]) => PLUGIN_EXTENSIONS.has(name));
+
+/** so many runs may wait for a script's parts – each one waits for one part, and parts are remembered */
+const MAX_SCRIPT_RERUNS = 200;
+
+/** `runScript`, again whenever the script waits for something a plugin makes off the main thread (e.g. `s3d.scad()`). */
+const runScriptRerunning = async (editor: Editor, code: string, label: string): Promise<RunResult> => {
+  let result = runScript(editor, code, label);
+  for (let reruns = 0; result.retryAfter && reruns < MAX_SCRIPT_RERUNS; reruns++) {
+    await result.retryAfter.catch(() => {});
+    result = runScript(editor, code, label);
+  }
+  return result;
 };
 
 /**
@@ -1156,7 +1209,7 @@ export const runScript = (editor: Editor, code: string, label = 'undo.script'): 
  */
 export const runScriptAsync = async (editor: Editor, code: string, label = 'undo.script'): Promise<RunResult> => {
   if (editor.activePath.length) {
-    return runScript(editor, code, label);
+    return runScriptRerunning(editor, code, label);
   }
   // visible while the worker builds – nothing else happens on the main thread, so the run would look "dead"
   const statusBefore = editor.ui.status;
@@ -1181,8 +1234,9 @@ const runScriptInWorker = async (editor: Editor, code: string, label: string): P
       });
       if (!response.ok) {
         // plugin-only s3d extension or similar → retry once on the main thread (same result, just blocking)
-        if (response.retriable) {
-          return runScript(editor, code, label);
+        // only for scripts that call an extension of a plugin: on the main thread a script can reach everything
+        if (response.retriable && usesPluginExtension(code)) {
+          return await runScriptRerunning(editor, code, label);
         }
         return { ok: false, logs: response.logs ?? [], error: response.error, durationMs: response.durationMs };
       }
@@ -1203,7 +1257,7 @@ const runScriptInWorker = async (editor: Editor, code: string, label: string): P
     }
   } catch {
     // worker unavailable (CSP, old webview …) → the classic synchronous path
-    return runScript(editor, code, label);
+    return runScriptRerunning(editor, code, label);
   }
 };
 

@@ -26,6 +26,13 @@
       "plugin": {
         "name": "Importformate",
         "description": "Öffnet FBX, Collada (.dae), KMZ, 3DS, PLY, 3MF, AMF, VRML, USD/USDZ und Blender-Dateien (.blend) – ohne die Originalprogramme. Die Leseroutinen werden erst beim ersten Import geladen."
+      },
+      "export": {
+        "usdz": "USDZ (Apple AR, Pixar USD)",
+        "svg": "Ansicht als SVG",
+        "size": "Breite",
+        "current": "Wie die 3D-Ansicht",
+        "thick": "Umrisse dicker"
       }
     }
   }

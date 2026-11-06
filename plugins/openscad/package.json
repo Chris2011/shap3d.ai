@@ -12,9 +12,7 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
-    "i18n": "node ../../scripts/i18n.mjs check --package .",
-    "screenshots": "powershell -File ../../scripts/screenshots.ps1 -Shots script -Name openscad -Out docs -Query \"package=openscad&language=openscad&file=/plugins/openscad/docs/demo.scad&camera=-0.32,-0.42,0.22&target=0.1,0,-0.01\"",
-    "screenshots:sh": "bash ../../scripts/screenshots.sh --shots script --name openscad --out docs --query \"package=openscad&language=openscad&file=/plugins/openscad/docs/demo.scad&camera=-0.32,-0.42,0.22&target=0.1,0,-0.01\""
+    "i18n": "node ../../scripts/i18n.mjs check --package ."
   },
   "dependencies": {
     "@typopro/dtp-liberation": "3.7.5",
@@ -34,5 +32,14 @@
   },
   "portal": {
     "thumbnail": "docs/openscad.png"
-  }
+  },
+  "screenshots": [
+    {
+      "name": "openscad",
+      "file": "demo.scad",
+      "language": "openscad",
+      "camera": "-0.32,-0.42,0.22",
+      "target": "0.1,0,-0.01"
+    }
+  ]
 }

@@ -5,7 +5,8 @@
  * The scenes know no plugin packages. `&package=<folder>` (repeatable or comma-separated) installs the built
  * package from plugins/<folder>/dist before any scene, and the scene `script` (`&language=<id>&file=<path>`)
  * runs a file in the script editor – that is how a package renders its own screenshots. `&command=<id>`
- * (comma-separated) runs commands after the scene, e.g. one that opens a package's workspace.
+ * (comma-separated) runs commands after the scene, e.g. one that opens a package's workspace. `&step=` (repeatable,
+ * see runStep) then uses what is on screen.
  */
 import type { Editor } from './engine/editor';
 import { runScript } from './scripting/api';
@@ -103,6 +104,9 @@ const requestedPackages = params
  * dist/package.json; scripts are read with ?raw so Vite hands them over untouched.
  */
 const installPackage = async (folder: string) => {
+  if (!/^[a-z0-9-]+$/.test(folder)) {
+    throw new Error('package: only a folder name in plugins/');
+  }
   const base = `/plugins/${folder}/dist/`;
   // always the current build: an installed copy is replaced when its files differ (installPlugin compares them),
   // and nothing may come from a cache – the browser keeps an imported module per URL, so each load asks with its own
@@ -136,6 +140,28 @@ const until = async (done: () => boolean, limit = 60000) => {
 };
 const button = (label: string) =>
   ([...document.querySelectorAll('button')] as HTMLElement[]).find((candidate) => candidate.textContent?.trim().endsWith(label));
+
+/** one `&step=` after the scene and commands, for pictures that need the panel used: `search:<words>`, `click:<start of a button's text>` (waits until it is there and enabled), `wait:<ms>` */
+const runStep = async (step: string) => {
+  const [action, value] = [step.slice(0, step.indexOf(':')), step.slice(step.indexOf(':') + 1)];
+  if (action === 'wait') {
+    await wait(Number(value));
+  } else if (action === 'search') {
+    const input = document.querySelector<HTMLInputElement>('input[type=search]');
+    if (input) {
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    }
+  } else if (action === 'click') {
+    const target = () =>
+      ([...document.querySelectorAll('button')] as HTMLButtonElement[]).find(
+        (candidate) => !candidate.disabled && candidate.textContent?.trim().startsWith(value),
+      );
+    await until(() => !!target());
+    target()?.click();
+  }
+};
 
 const SCENES: Record<string, (editor: Editor) => Promise<void>> = {
   async hero(editor) {
@@ -272,7 +298,12 @@ s3d.torus([6.3, 0, 0.3], 0.6, 0.25, { segments: 18, material: 'Gold' });`,
     setTheme('light');
     setScene('day');
     empty(editor);
-    const code = await (await fetch(params.get('file') ?? '')).text();
+    // a link can name it: only files of the plugins – never a script from elsewhere
+    const file = params.get('file') ?? '';
+    if (!/^\/plugins\/[\w./-]+$/.test(file) || file.includes('..')) {
+      throw new Error('file: only a path below /plugins/');
+    }
+    const code = await (await fetch(file)).text();
     useScripts().open({ lang: params.get('language') ?? 'js', code });
     openPanel.value = 'scripts';
     await wait(600);
@@ -387,6 +418,9 @@ export const runShot = async (editor: Editor, name: string) => {
     .map((entry) => entry.trim())
     .filter(Boolean)) {
     await findCommand(id)?.run(editor);
+  }
+  for (const step of params.getAll('step')) {
+    await runStep(step);
   }
   editor.invalidate();
   await wait(800);

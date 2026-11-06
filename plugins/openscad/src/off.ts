@@ -1,6 +1,5 @@
 import type * as THREE from 'three';
 import type { PluginMaterial } from '../../../src/plugins/types';
-import { t } from './i18n';
 
 export interface FaceColor {
   red: number;
@@ -19,32 +18,30 @@ export interface ScadMesh {
 
 export type ConsoleLine = { kind: 'log' | 'warn' | 'error'; text: string };
 
-/**
- * Parses OFF text (OpenSCAD's export) into vertices and faces. Line based, because OpenSCAD
- * appends a colour to every face ("3 0 7 23 249 215 44" = triangle 0-7-23 in RGB 249/215/44).
- */
-export const parseOff = (text: string) => {
-  const rows = text
-    .split('\n')
-    .map((line) => line.replace(/#.*/, '').trim())
-    .filter(Boolean)
-    .map((line) => line.split(/\s+/));
-  const header = rows.shift();
-  if (!header || !/^C?OFF$/.test(header[0])) {
-    throw new Error(t('openscad.errors.noOff'));
+/** what the worker makes of OpenSCAD's OFF file (compileWorker.js) */
+export interface OffArrays {
+  positions: Float64Array;
+  faceSizes: Int32Array;
+  faceIndices: Int32Array;
+  /** red, green, blue, alpha per face, 0–255; -1 = no colour */
+  colors: Int16Array;
+}
+
+export const meshFromArrays = ({ positions, faceSizes, faceIndices, colors }: OffArrays) => {
+  const vertices = new Array<[number, number, number]>(positions.length / 3);
+  for (let i = 0; i < vertices.length; i++) {
+    vertices[i] = [positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]];
   }
-  const counts = header.length > 1 ? header.slice(1) : (rows.shift() ?? []); // "OFF 8 6 0" or "OFF" + "8 6 0"
-  const vertexCount = +counts[0];
-  const faceCount = +counts[1];
-  const vertices = rows.slice(0, vertexCount).map((row): [number, number, number] => [+row[0], +row[1], +row[2]]);
-  const faceRows = rows.slice(vertexCount, vertexCount + faceCount);
-  const faces = faceRows.map((row) => row.slice(1, 1 + +row[0]).map(Number));
-  // colour after the indices: "r g b" or "r g b a", 0–255 (OpenSCAD writes it with the Manifold kernel only)
-  const colors = faceRows.map((row): FaceColor | null => {
-    const values = row.slice(1 + +row[0]).map(Number);
-    return values.length >= 3 ? { red: values[0], green: values[1], blue: values[2], alpha: values[3] ?? 255 } : null;
-  });
-  return { vertices, faces, colors };
+  const faces = new Array<number[]>(faceSizes.length);
+  const faceColors = new Array<FaceColor | null>(faceSizes.length);
+  let cursor = 0;
+  for (let i = 0; i < faces.length; i++) {
+    faces[i] = Array.from(faceIndices.subarray(cursor, cursor + faceSizes[i]));
+    cursor += faceSizes[i];
+    faceColors[i] =
+      colors[i * 4] < 0 ? null : { red: colors[i * 4], green: colors[i * 4 + 1], blue: colors[i * 4 + 2], alpha: colors[i * 4 + 3] };
+  }
+  return { vertices, faces, colors: faceColors };
 };
 
 /** OpenSCAD's colour for parts without color() – they get no material. */

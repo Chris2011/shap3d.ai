@@ -13,7 +13,7 @@
     <section class="s3d-an-section">
       <div v-for="(step, index) in steps" :key="step.id" class="s3d-an-guide-step" :class="{ open: index === current, done: step.done }">
         <button class="s3d-an-guide-head" @click="current = index">
-          <span class="s3d-an-guide-mark">{{ step.done ? '✓' : index + 1 }}</span>
+          <span class="s3d-an-guide-mark">{{ step.done ? '✓' : step.done === undefined ? '+' : index + 1 }}</span>
           <span class="s3d-an-entry-name">{{ t(`animation.guide.steps.${step.id}.title`) }}</span>
         </button>
         <div v-if="index === current" class="s3d-an-guide-body">
@@ -86,7 +86,11 @@ const toMode = () => {
 };
 
 /** a box and a ball to try it on, the box selected */
-const buildPractice = () => {
+const buildPractice = async () => {
+  const root = pluginContext().editor.model.root;
+  if ((root.instances.size || root.faces.size) && !(await pluginContext().editor.confirm(t('animation.guide.confirmReplace')))) {
+    return;
+  }
   const name = (key: string) => JSON.stringify(t(`animation.guide.practice.${key}`));
   context.script.run(`s3d.clear();
 s3d.animateClear();

@@ -2,6 +2,10 @@
 
 ## [1.0.0] – 2026-10-27 · Shap3D.ai (unreleased)
 
+### Fixed
+
+- `s3d.noiseTerrain()` works without `scale`, `width`, `depth` or `height`: a value left out takes its default instead of failing with _invalid coordinates_.
+
 ### Added
 
 - The demos (island, trees, scattering, stones, rivers and roads, junctions, roads into town, villages, erosion, facades, city, hill town, deforming) as examples in the script editor, under _Noise (plugin)_.

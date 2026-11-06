@@ -7,45 +7,30 @@
  *   /mcp              MCP server (Streamable HTTP); src/plugins/builtin/remote/server/mcpStdio.mjs for stdio clients
  *
  * The model lives in the browser, so every request goes over Vite's WebSocket to the open tab (see bridge.ts)
- * and is answered there by this plugin (../handlers.ts). Only requests from this computer's own pages or
- * from programs (no browser origin) are accepted – other websites cannot drive the app.
+ * and is answered there by this plugin (../handlers.ts). Who may ask: tools/requestGuard.ts.
  */
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createReadStream, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join, normalize } from 'node:path';
+import { dirname, join, normalize, sep } from 'node:path';
 import { ACTIONS, inputProperties, pathParameters, usesQuery, type JsonSchema, type RemoteAction } from './actions';
 import { buildOpenApi } from './openapi';
 import { createBridge, RemoteError } from './bridge';
 import { createMcp } from './mcp';
+import { refusal } from '../../../../../tools/requestGuard';
 
 const MAX_BODY_BYTES = 200 * 1024 * 1024;
 const SWAGGER_DIR = dirname(createRequire(import.meta.url).resolve('swagger-ui-dist/package.json'));
-const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
+/** JSON-RPC messages in one batch */
+const MAX_BATCH = 64;
 
 const sendJson = (res: ServerResponse, status: number, body: unknown) => {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'no-store');
   res.end(JSON.stringify(body, null, 2));
-};
-
-/** browsers mark cross-site requests – those (and foreign origins) are refused; curl, scripts and MCP clients send neither */
-const isTrusted = (req: IncomingMessage) => {
-  const site = req.headers['sec-fetch-site'];
-  if (site && site !== 'same-origin' && site !== 'none') {
-    return false;
-  }
-  const origin = req.headers.origin;
-  if (!origin) {
-    return true;
-  }
-  try {
-    const host = new URL(origin).hostname;
-    return LOCAL_HOSTS.includes(host) || host.endsWith('.localhost');
-  } catch {
-    return false;
-  }
 };
 
 const readBody = async (req: IncomingMessage) => {
@@ -113,7 +98,11 @@ const collectInput = async (req: IncomingMessage, url: URL, action: RemoteAction
     if (body !== undefined && (typeof body !== 'object' || Array.isArray(body))) {
       throw new RemoteError(400, 'The body must be a JSON object');
     }
-    Object.assign(input, body);
+    for (const [key, value] of Object.entries(body ?? {})) {
+      if (key !== '__proto__') {
+        input[key] = value;
+      }
+    }
   }
   names.forEach((name, index) => {
     input[name] = coerce(values[index], properties[name]);
@@ -136,7 +125,7 @@ const swaggerPage = `<!doctype html>
 
 const serveSwaggerFile = (res: ServerResponse, name: string) => {
   const file = normalize(join(SWAGGER_DIR, name));
-  if (!file.startsWith(SWAGGER_DIR) || !existsSync(file)) {
+  if (!file.startsWith(SWAGGER_DIR + sep) || !existsSync(file)) {
     return sendJson(res, 404, { error: 'Not found' });
   }
   res.setHeader('Content-Type', name.endsWith('.css') ? 'text/css' : name.endsWith('.js') ? 'text/javascript' : 'application/octet-stream');
@@ -154,8 +143,9 @@ export function remoteApi(): Plugin {
       const handleApi = async (req: Connect.IncomingMessage, res: ServerResponse) => {
         const url = new URL(req.url ?? '/', 'http://local');
         const method = req.method ?? 'GET';
-        if (!isTrusted(req)) {
-          return sendJson(res, 403, { error: 'Only requests from this computer (no other websites).' });
+        const refused = refusal(req);
+        if (refused) {
+          return sendJson(res, 403, { error: refused });
         }
         if (url.pathname === '/' || url.pathname === '') {
           res.statusCode = 302;
@@ -164,6 +154,7 @@ export function remoteApi(): Plugin {
         }
         if (url.pathname === '/docs' || url.pathname === '/docs/') {
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          res.setHeader('X-Frame-Options', 'DENY');
           return res.end(swaggerPage);
         }
         if (url.pathname.startsWith('/docs/')) {
@@ -193,6 +184,7 @@ export function remoteApi(): Plugin {
             const bytes = Buffer.from(answer.file.base64, 'base64');
             res.statusCode = 200;
             res.setHeader('Content-Type', answer.file.mimeType);
+            res.setHeader('X-Content-Type-Options', 'nosniff');
             res.setHeader('Content-Length', bytes.length);
             res.setHeader(
               'Content-Disposition',
@@ -207,8 +199,9 @@ export function remoteApi(): Plugin {
       };
 
       const handleMcp = async (req: Connect.IncomingMessage, res: ServerResponse) => {
-        if (!isTrusted(req)) {
-          return sendJson(res, 403, { error: 'Only requests from this computer (no other websites).' });
+        const refused = refusal(req);
+        if (refused) {
+          return sendJson(res, 403, { error: refused });
         }
         // no server-sent event stream and no sessions: GET/DELETE are not offered
         if (req.method !== 'POST') {
@@ -218,6 +211,9 @@ export function remoteApi(): Plugin {
         try {
           const body = await readBody(req);
           const messages = Array.isArray(body) ? body : [body];
+          if (messages.length > MAX_BATCH) {
+            throw new RemoteError(413, 'Too many messages in one batch');
+          }
           const answers = (await Promise.all(messages.map((message) => mcp.handle(message)))).filter(Boolean);
           if (!answers.length) {
             res.statusCode = 202;

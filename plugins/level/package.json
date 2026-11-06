@@ -12,8 +12,7 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
-    "i18n": "node ../../scripts/i18n.mjs check --package .",
-    "screenshots": "node docs/screenshots.mjs"
+    "i18n": "node ../../scripts/i18n.mjs check --package ."
   },
   "lint-staged": {
     "src/**/*.{js,mjs,ts,vue}": [
@@ -29,5 +28,84 @@
   },
   "portal": {
     "thumbnail": "docs/level.png"
-  }
+  },
+  "screenshots": [
+    {
+      "name": "level",
+      "file": "demo.js",
+      "command": "level.open",
+      "camera": "-2,-26,24",
+      "target": "3,1,0"
+    },
+    {
+      "name": "level-house",
+      "file": "demo.js",
+      "command": "level.open",
+      "camera": "22,-17,17",
+      "target": "30,1,0"
+    },
+    {
+      "name": "level-blockout",
+      "file": "demo-blockout.js",
+      "command": "level.blockout",
+      "camera": "3,-17,26",
+      "target": "9,7,1"
+    },
+    {
+      "name": "level-guide",
+      "file": "demo-blockout.js",
+      "command": "level.guide",
+      "camera": "3,-17,26",
+      "target": "9,7,1"
+    },
+    {
+      "name": "level-play",
+      "file": "demo-blockout.js",
+      "command": "level.play",
+      "camera": "0,0,10",
+      "target": "1,1,0"
+    },
+    {
+      "name": "level-play-arena",
+      "file": "demo.js",
+      "command": "level.play-third",
+      "camera": "0,0,10",
+      "target": "1,1,0"
+    },
+    {
+      "name": "level-night",
+      "file": "demo-night.js",
+      "command": "level.open",
+      "camera": "9.6,0.4,3.4",
+      "target": "2.5,8,1"
+    },
+    {
+      "name": "level-night-play",
+      "file": "demo-night.js",
+      "command": "level.play-first",
+      "camera": "0,0,10",
+      "target": "1,1,0"
+    },
+    {
+      "name": "level-generated",
+      "file": "demo-generate.js",
+      "command": "level.blockout",
+      "camera": "18,-22,52",
+      "target": "24,24,0"
+    },
+    {
+      "name": "level-nav",
+      "file": "demo-generate.js",
+      "command": "level.nav",
+      "camera": "18,-22,52",
+      "target": "24,24,0"
+    },
+    {
+      "name": "level-storeys",
+      "file": "demo-storeys.js",
+      "command": "level.nav",
+      "camera": "1,-7,15",
+      "target": "7,3.5,1"
+    }
+  ]
 }

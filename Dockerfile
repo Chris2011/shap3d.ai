@@ -22,6 +22,7 @@ RUN npm run build
 
 FROM nginx:1.27-alpine AS static
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/tools/nginx-security.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 # last stage = what `docker build` makes without --target
@@ -30,8 +31,11 @@ COPY --chown=node:node . .
 # files the MCP tool export_model writes (mount a volume here to get them out)
 RUN mkdir -p /app/exports
 ENV NODE_ENV=development
+# connections reach the container from its network, not from 127.0.0.1 – so the port may only be published on the host's
+# 127.0.0.1 (as below). Published on all interfaces, set S3D_REMOTE_TOKEN: the remote API can change the model and run scripts
+ENV S3D_REMOTE_TRUST_NETWORK=1
 EXPOSE 5173
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://localhost:5173/api/status').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
-# --host: reachable through the published port; the remote API itself still only accepts this computer (localhost origins, programs)
+# --host: reachable through the published port; who may use the remote API: tools/requestGuard.ts
 CMD ["npx", "vite", "--host", "0.0.0.0", "--port", "5173", "--strictPort"]

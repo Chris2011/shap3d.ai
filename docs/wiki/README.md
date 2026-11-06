@@ -13,6 +13,8 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
 
 ## Extending and controlling the app
 
+- [LLM wiki](../llm-wiki/README.md) – rules for AI agents that write code here: Vue practices, KISS, DRY, SOLID
+
 - [Remote control: REST API, Swagger UI and MCP](remote-api.md) – control the open editor from other programs and AI agents
 - [Writing plugins](plugins.md) – plugin modules, the `context` API, texts and languages in plugins, built-in plugins, plugin packages
 - [Plugin packages](plugin-packages.md) – the packages in this repository:
@@ -21,6 +23,7 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
   - LayOut – [overview](plugin-packages.md#the-layout-plugin) · [README](../../plugins/layout/README.md)
   - Room planner – [overview](plugin-packages.md#the-room-planner-plugin) · [README](../../plugins/roomplanner/README.md)
   - Shader materials – [overview](plugin-packages.md#the-shader-materials-plugin) · [README](../../plugins/shaders/README.md)
+  - Model marketplace – [overview](plugin-packages.md#the-model-marketplace-plugin) · [README](../../plugins/marketplace/README.md)
   - Noise – [overview](plugin-packages.md#the-noise-plugin) · [README](../../plugins/noise/README.md)
   - Level editor – [overview](plugin-packages.md#the-level-editor-plugin) · [README](../../plugins/level/README.md)
   - Physics – [overview](plugin-packages.md#the-physics-plugin) · [README](../../plugins/physics/README.md)

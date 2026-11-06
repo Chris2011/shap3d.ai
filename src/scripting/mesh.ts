@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { Editor } from '../engine/editor';
-import { Entities } from '../core/model';
+import { Entities, MESH_POINT_TOLERANCE } from '../core/model';
 import type { RunResult } from './api';
 import { t } from '../i18n';
 
@@ -67,7 +67,7 @@ export const buildMesh = (ents: Entities, mesh: ObjMesh, opts: MeshOptions = {})
   // fit: centred on the ground; otherwise in place
   const center = box.getCenter(new THREE.Vector3());
   const origin = fit ? new THREE.Vector3(center.x, center.y, box.min.z) : new THREE.Vector3();
-  const ids = pts.map((point) => ents.addVertex(point.clone().sub(origin).multiplyScalar(scale)));
+  const ids = pts.map((point) => ents.addVertex(point.clone().sub(origin).multiplyScalar(scale), MESH_POINT_TOLERANCE));
   let made = 0;
   for (const [faceNumber, faceIndices] of mesh.faces.entries()) {
     if (faceIndices.some((i) => !(i >= 0 && i < ids.length))) {
@@ -82,7 +82,8 @@ export const buildMesh = (ents: Entities, mesh: ObjMesh, opts: MeshOptions = {})
       made++;
     }
   }
-  ents.mergeCoplanar([...ents.edges.keys()]);
+  ents.mergeMeshFaces();
+  ents.softenFlatEdges(ents.edges.keys());
   if (smooth > 0) {
     ents.autoSoften([...ents.edges.keys()], smooth);
   }

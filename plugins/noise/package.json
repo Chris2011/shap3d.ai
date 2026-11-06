@@ -12,8 +12,7 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
-    "i18n": "node ../../scripts/i18n.mjs check --package .",
-    "screenshots": "node docs/screenshots.mjs"
+    "i18n": "node ../../scripts/i18n.mjs check --package ."
   },
   "lint-staged": {
     "src/**/*.{js,mjs,ts,vue}": [
@@ -29,5 +28,98 @@
   },
   "portal": {
     "thumbnail": "docs/noise.png"
-  }
+  },
+  "screenshots": [
+    {
+      "name": "noise",
+      "file": "demo.js",
+      "command": "noise.open",
+      "camera": "58,-62,44",
+      "target": "36,30,2"
+    },
+    {
+      "name": "noise-scatter",
+      "file": "demo-scatter.js",
+      "command": "noise.scatter",
+      "camera": "24,-30,30",
+      "target": "24,10,0"
+    },
+    {
+      "name": "noise-stones",
+      "file": "demo-paving.js",
+      "command": "noise.paving",
+      "camera": "9,-12,8",
+      "target": "8.5,2.5,0.5"
+    },
+    {
+      "name": "noise-facade",
+      "file": "demo-facade.js",
+      "command": "noise.city",
+      "camera": "0,-44,16",
+      "target": "17,5,8.5"
+    },
+    {
+      "name": "noise-city",
+      "file": "demo-city.js",
+      "command": "noise.city",
+      "camera": "20,-120,175",
+      "target": "110,75,0"
+    },
+    {
+      "name": "noise-hillcity",
+      "file": "demo-hillcity.js",
+      "command": "noise.city",
+      "camera": "-45,-95,105",
+      "target": "110,85,0"
+    },
+    {
+      "name": "noise-trees",
+      "file": "demo-trees.js",
+      "command": "noise.scatter",
+      "camera": "34,-82,22",
+      "target": "42,3,6"
+    },
+    {
+      "name": "noise-villages",
+      "file": "demo-villages.js",
+      "command": "noise.city",
+      "camera": "150,-120,175",
+      "target": "150,105,0"
+    },
+    {
+      "name": "noise-routes",
+      "file": "demo-routes.js",
+      "command": "noise.scatter",
+      "camera": "62,-62,72",
+      "target": "60,42,0"
+    },
+    {
+      "name": "noise-junctions",
+      "file": "demo-junctions.js",
+      "command": "noise.scatter",
+      "camera": "58,-22,50",
+      "target": "62,40,0"
+    },
+    {
+      "name": "noise-cityroads",
+      "file": "demo-cityroads.js",
+      "command": "noise.city",
+      "camera": "80,-40,95",
+      "target": "80,55,0"
+    },
+    {
+      "name": "noise-erosion",
+      "file": "demo-erosion.js",
+      "command": "noise.open",
+      "camera": "82,-62,92",
+      "target": "82,34,0"
+    },
+    {
+      "name": "noise-deform",
+      "file": "demo-deform.js",
+      "command": "noise.deform",
+      "camera": "8,-17,9",
+      "target": "8.5,0.5,1.8"
+    }
+  ]
 }

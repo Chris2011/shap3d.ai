@@ -4,6 +4,8 @@
 
 ### Changed
 
+- The IFC panel has a tile in the right-hand bar.
+- IFC files are read in a worker and their faces are made in another (`meshes.prepareAll` of the app, where it has it), so a big file does not stop the app. web-ifc is only in memory while a file is read.
 - The built package's `package.json` keeps every `shap3d` field (its display name `shap3d.name`, `minAppVersion` …) – for the plugin catalog and the app's version check.
 
 ## [1.0.0] – 2026-10-25 · Shap3D.ai 0.9.0

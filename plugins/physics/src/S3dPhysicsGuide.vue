@@ -13,7 +13,7 @@
     <section class="s3d-ph-section">
       <div v-for="(step, index) in steps" :key="step.id" class="s3d-ph-guide-step" :class="{ open: index === current, done: step.done }">
         <button class="s3d-ph-guide-head" @click="current = index">
-          <span class="s3d-ph-guide-mark">{{ step.done ? '✓' : index + 1 }}</span>
+          <span class="s3d-ph-guide-mark">{{ step.done ? '✓' : step.id === 'more' ? '+' : index + 1 }}</span>
           <span class="s3d-ph-entry-name">{{ t(`physics.guide.steps.${step.id}.title`) }}</span>
         </button>
         <div v-if="index === current" class="s3d-ph-guide-body">
@@ -92,7 +92,11 @@ const tool = (id: string) => {
 };
 
 /** a few plain groups to try it on: three crates, a ball above them and a standing board for a door */
-const buildPractice = () => {
+const buildPractice = async () => {
+  const root = pluginContext().editor.model.root;
+  if ((root.instances.size || root.faces.size) && !(await pluginContext().editor.confirm(t('physics.guide.confirmReplace')))) {
+    return;
+  }
   resetSim();
   const name = (key: string) => JSON.stringify(t(`physics.guide.practice.${key}`));
   context.script.run(`s3d.clear();

@@ -88,6 +88,44 @@
       @input="set('groundColor', val($event))"
     />
   </div>
+  <div class="s3d-section-title">{{ t('styles.environment') }}</div>
+  <div class="s3d-row">
+    <button class="s3d-btn small" @click="loadEnvironmentFile">{{ t('styles.environmentLoad') }}</button>
+    <span class="truncate" :title="editor.model.environment?.name">{{ editor.model.environment?.name }}</span>
+    <button v-if="editor.model.environment" class="s3d-btn small" :title="t('styles.environmentRemove')" @click="setEnvironment(undefined)">
+      ×
+    </button>
+  </div>
+  <template v-if="editor.model.environment">
+    <label class="s3d-check"
+      ><input
+        type="checkbox"
+        :checked="editor.model.settings.environmentBackground"
+        @change="setScene('environmentBackground', !editor.model.settings.environmentBackground)"
+      />
+      {{ t('styles.environmentBackground') }}</label
+    >
+    <div class="s3d-row">
+      <span class="s3d-label">{{ t('styles.environmentIntensity') }}</span>
+      <input
+        type="range"
+        min="0"
+        max="3"
+        step="0.05"
+        class="flex-1"
+        :value="editor.model.settings.environmentIntensity"
+        @input="setScene('environmentIntensity', +($event.target as HTMLInputElement).value)"
+      />
+    </div>
+  </template>
+  <label class="s3d-check"
+    ><input
+      type="checkbox"
+      :checked="editor.model.settings.sectionFill"
+      @change="setScene('sectionFill', !editor.model.settings.sectionFill)"
+    />
+    {{ t('styles.sectionFill') }}</label
+  >
   <div class="s3d-section-title">{{ t('styles.ambientOcclusion') }}</div>
   <label class="s3d-check"
     ><input type="checkbox" :checked="styleSettings.ao" @change="set('ao', !styleSettings.ao)" /> {{ t('styles.aoShow') }}</label
@@ -131,12 +169,41 @@
 import { computed } from 'vue';
 import S3dSegmentedControl from '../ui/S3dSegmentedControl.vue';
 import { useEditor } from '../keys';
-import { DEFAULT_STYLE, type StyleSettings, type FaceStyle } from '../../core/document';
+import { DEFAULT_STYLE, type ModelEnvironment, type ModelSettings, type StyleSettings, type FaceStyle } from '../../core/document';
+import { pickFile } from '../../engine/commands';
 import { useModel } from '../../composables/useModel';
 import { formatLength } from '../../core/units';
 import { t } from '../../i18n';
 
 const editor = useEditor();
+const MAX_ENVIRONMENT_BYTES = 32 * 1024 * 1024;
+const setScene = <K extends keyof ModelSettings>(key: K, value: ModelSettings[K]) => {
+  editor.model.settings[key] = value;
+  editor.ui.saved = false;
+  editor.invalidate();
+};
+const setEnvironment = (environment: ModelEnvironment | undefined) => {
+  editor.commit('undo.environment', () => {
+    editor.model.environment = environment;
+  });
+};
+const loadEnvironmentFile = async () => {
+  const file = await pickFile('.hdr,.exr');
+  if (!file) {
+    return;
+  }
+  if (file.size > MAX_ENVIRONMENT_BYTES) {
+    editor.toast(t('styles.environmentTooBig'));
+    return;
+  }
+  const data = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+  setEnvironment({ name: file.name, data });
+};
 const styleSettings = useModel(() => editor.model.settings.style);
 const val = (event: Event) => (event.target as HTMLInputElement).value;
 const set = <K extends keyof StyleSettings>(key: K, value: StyleSettings[K]) => {

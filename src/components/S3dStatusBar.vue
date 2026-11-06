@@ -47,9 +47,12 @@
         </div>
       </div>
     </div>
-    <div class="min-w-0 flex-1 truncate ps-1.5 text-[0.83125rem] text-ink" :title="editor.ui.status">{{ editor.ui.status }}</div>
-    <div v-if="selInfo" class="whitespace-nowrap px-3 text-ink-2">{{ selInfo }}</div>
-    <div class="flex items-center gap-1 ps-2.5 text-[0.83125rem]">
+    <!-- what the 3D tool says and takes: a workspace of a plugin (the sheets) has its own -->
+    <div v-show="!workspaceState.active" class="min-w-0 flex-1 truncate ps-1.5 text-[0.83125rem] text-ink" :title="editor.ui.status">
+      {{ editor.ui.status }}
+    </div>
+    <div v-if="selInfo && !workspaceState.active" class="whitespace-nowrap px-3 text-ink-2">{{ selInfo }}</div>
+    <div v-show="!workspaceState.active" class="flex items-center gap-1 ps-2.5 text-[0.83125rem]">
       <label class="whitespace-nowrap text-ink">{{ localize(editor.ui.vcbLabel) || t('statusbar.measurements') }}</label>
       <input
         ref="input"
@@ -75,6 +78,7 @@ import { nav, wheelAction, ACTION_LABEL, type NavAction } from '../engine/naviga
 import { useTemplateRef } from 'vue';
 import { usePopover } from '../composables/usePopover';
 import { useEditor } from './keys';
+import { workspaceState } from '../plugins/uiExtensions';
 import { snapping } from '../engine/inference';
 import { runCommand } from '../engine/commands';
 import { useSelection } from '../composables/useModel';

@@ -1,3 +1,7 @@
+import { USDZExporter } from 'three/examples/jsm/exporters/USDZExporter.js';
+import type { Editor } from '../../../engine/editor';
+import { modelToThree } from '../../../engine/commands';
+import { imageTexturesReady } from '../../../core/textures';
 import * as THREE from 'three';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { KMZLoader } from 'three/examples/jsm/loaders/KMZLoader.js';
@@ -114,4 +118,12 @@ export const loadScene = async (ext: string, file: File): Promise<LoadedScene> =
     }
   }
   throw new Error(t('imports.errors.unsupported', { ext }));
+};
+
+/** the model as USDZ – the materials as they are exported to glTF, in the metres and Z up of the model */
+export const exportUsdz = async (editor: Editor) => {
+  const scene = modelToThree(editor);
+  await imageTexturesReady();
+  const bytes = await new USDZExporter().parseAsync(scene);
+  return new Blob([bytes.slice().buffer as ArrayBuffer], { type: 'model/vnd.usdz+zip' });
 };

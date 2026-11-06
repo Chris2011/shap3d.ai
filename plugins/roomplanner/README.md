@@ -64,7 +64,7 @@ npm run build
 
 Then in Shap3D.ai: _Plugins › Load plugin folder…_ and pick the folder `plugins/roomplanner/dist`. The panel _Room planner_ opens from the tile in the right-hand bar or the command palette.
 
-**Screenshots**: `npm run screenshots` (Windows) or `npm run screenshots:sh` (Linux, macOS) renders `docs/roomplanner.png` from the demo `docs/demo.js`, `docs/roomplanner-maisonette.png` from `docs/demo-maisonette.js` and `docs/roomplanner-house.png` from `docs/demo-house.js` with the dev server running.
+**Screenshots**: `npm run screenshots -- roomplanner` in the repository root renders `docs/roomplanner.png` from the demo `docs/demo.js`, `docs/roomplanner-maisonette.png` from `docs/demo-maisonette.js` and `docs/roomplanner-house.png` from `docs/demo-house.js` with the dev server running.
 
 ## Structure
 

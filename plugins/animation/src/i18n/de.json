@@ -36,7 +36,7 @@
         "cameras": "Kameras",
         "addCamera": "Kamera aus Ansicht",
         "addCameraHint": "Eine neue Kamera dort, wo die Ansicht gerade ist, mit Schlüsselbild in diesem Bild",
-        "keyCamera": "Aus Ansicht keyen",
+        "keyCamera": "Schlüsselbild aus Ansicht",
         "keyCameraHint": "Setzt ein Schlüsselbild der Kamera dort, wo die Ansicht gerade ist",
         "viewCamera": "Hindurchsehen",
         "remove": "Entfernen",
@@ -58,8 +58,8 @@
         "toStart": "Zum Anfang",
         "keyTitle": "Etwas bewegen",
         "keySteps": "1. Wähle eine Gruppe und geh in der Zeitleiste zu einem Bild.\n2. Stell sie dorthin, wo sie sein soll (Verschieben, Drehen, Skalieren).\n3. Drück I – ein Schlüsselbild. Geh zu einem späteren Bild, beweg sie wieder, drück wieder I.",
-        "keyHere": "Hier keyen (I)",
-        "autoKey": "Jede Änderung keyen",
+        "keyHere": "Schlüsselbild setzen (I)",
+        "autoKey": "Jede Änderung automatisch merken",
         "selectFirst": "Wähle zuerst eine Gruppe oder Komponente.",
         "notKeyed": "Bewegt, aber noch kein Schlüsselbild – drück I, sonst springt sie beim Bildwechsel zurück.",
         "recipes": "Fertige Bewegungen",
@@ -70,7 +70,7 @@
         "clear": "Animation der Auswahl entfernen",
         "camera": "Kamera",
         "cameraHere": "Kamera hier",
-        "cameraKey": "Kamera keyen",
+        "cameraKey": "Schlüsselbild für die Kamera",
         "cameraHereHint": "wo die Ansicht gerade ist",
         "more": "Kameras, Schnitte, Lichter, Sonne, Kurven und jeder Wert:",
         "toAdvanced": "Erweiterte Ansicht"
@@ -85,32 +85,33 @@
         "play": "Abspielen",
         "pause": "Pause",
         "frame": "Bild",
-        "key": "Key",
-        "keyHint": "Setzt Schlüsselbilder für die ausgewählten Gruppen, wo sie sind – ohne Auswahl für die Kamera (I)",
-        "autoKey": "Auto-Key",
-        "autoKeyHint": "Jedes Verschieben, Drehen oder Skalieren einer Gruppe wird ein Schlüsselbild im gezeigten Bild",
+        "key": "Schlüsselbild",
+        "keyHint": "Merkt sich, wo die ausgewählten Gruppen in diesem Bild sind; ohne Auswahl die Kamera, falls es eine gibt (I)",
+        "autoKey": "Automatisch",
+        "autoKeyHint": "Jedes Verschieben, Drehen oder Skalieren einer Gruppe wird automatisch ein Schlüsselbild im gezeigten Bild",
         "lookThrough": "Durch Kamera",
         "lookThroughHint": "Die 3D-Ansicht schaut durch die Kamera des Schnitts in diesem Bild",
         "start": "Anfang",
         "end": "Ende",
-        "fps": "B/s",
+        "fps": "Bilder/s",
         "loop": "Von vorn wiederholen",
-        "dope": "Dope Sheet",
-        "graph": "Graph",
-        "fit": "Einpassen",
+        "dope": "Schlüsselbilder",
+        "graph": "Kurven",
+        "fit": "Alles zeigen",
         "fitHint": "Zeigt die ganze Szene vom Anfang bis zum Ende",
         "close": "Zeitleiste schließen",
         "resize": "Ziehen, um sie höher oder niedriger zu machen",
         "summary": "Animiert",
         "allKeys": "Alle Schlüsselbilder",
-        "empty": "Noch nichts animiert. Wähle eine Gruppe und drück I – oder wähle im Animation-Panel eine fertige Bewegung."
+        "empty": "Noch nichts animiert. Wähle eine Gruppe und drück I – oder wähle im Animation-Panel eine fertige Bewegung.",
+        "keyNeedsSelection": "Wähle zuerst eine Gruppe aus – I merkt sich, wo sie in diesem Bild ist."
       },
       "graph": {
         "normalize": "Normalisieren",
         "empty": "Links Kanäle anhaken – oder eine animierte Gruppe auswählen."
       },
       "field": {
-        "key": "Diesen Wert in diesem Bild keyen",
+        "key": "Diesen Wert in diesem Bild merken",
         "unkey": "Schlüsselbild in diesem Bild entfernen"
       },
       "interp": {
@@ -173,7 +174,7 @@
         }
       },
       "pivot": {
-        "center": "die Mitte ihrer Box",
+        "center": "die Mitte ihres Rahmens",
         "bottom": "die Mitte ihres Bodens",
         "origin": "ihren eigenen Ursprung",
         "joint": "ihr Gelenk"
@@ -192,7 +193,7 @@
         "spotName": "Spot {number}",
         "range": "Reichweite (m)",
         "shadow": "Wirft Schatten",
-        "here": "Wo die Ansicht ist keyen",
+        "here": "Schlüsselbild, wo die Ansicht ist",
         "hereHint": "Ein Spot am Auge, auf das Ziel gerichtet – eine Lampe über dem Ziel"
       },
       "material": {
@@ -280,7 +281,7 @@
         "noLight": "Kein Animationslicht \"{name}\"",
         "noMaterial": "Kein Material \"{name}\" im Modell",
         "axis": "Unbekannte Achse \"{value}\" – nimm +x, -x, +y oder -y",
-        "noRig": "„{target}“ gehört zu keinem Rig – machen Sie es zuerst mit s3d.animateBone zum Knochen.",
+        "noRig": "„{target}“ gehört zu keinem Rig – mach es zuerst mit s3d.animateBone zum Knochen.",
         "noBone": "Das Rig hat keinen Knochen „{name}“.",
         "noPose": "Das Rig hat keine Pose „{name}“."
       },
@@ -339,10 +340,10 @@
           "practice": "Übungsszene laden",
           "select": "Gruppe auswählen",
           "toStart": "Zum ersten Bild",
-          "key": "Keyen (I)",
+          "key": "Schlüsselbild setzen (I)",
           "toMiddle": "Zum mittleren Bild",
           "move": "Verschieben-Werkzeug",
-          "graph": "Graph-Editor öffnen",
+          "graph": "Kurven öffnen",
           "render": "Bereich Film öffnen"
         },
         "checks": {
@@ -373,12 +374,12 @@
           },
           "graph": {
             "title": "Weiche Kurven",
-            "text": "Schalte die Zeitleiste auf Graph: die Bewegung als Kurven über die Zeit. Zieh ein Schlüsselbild, Rechtsklick für seine Kurve – sanft beginnen und enden, abprallen, konstant …",
+            "text": "Schalte die Zeitleiste auf Kurven: die Bewegung als Linien über die Zeit. Zieh ein Schlüsselbild, Rechtsklick für seine Kurve – sanft beginnen und enden, abprallen, konstant …",
             "done": "Du hast die Kurven gesehen."
           },
           "camera": {
             "title": "Eine Kamera",
-            "text": "Dreh die Ansicht in einen schönen Winkel und leg daraus eine Kamera an. „Durch Kamera“ zeigt, was sie sieht; ändere die Ansicht in einem anderen Bild und keye die Kamera erneut – eine Kamerafahrt.",
+            "text": "Dreh die Ansicht in einen schönen Winkel und leg daraus eine Kamera an. „Durch Kamera“ zeigt, was sie sieht; ändere die Ansicht in einem anderen Bild und setz für die Kamera noch ein Schlüsselbild – eine Kamerafahrt.",
             "done": "Der Film hat eine Kamera."
           },
           "render": {
@@ -388,15 +389,16 @@
           },
           "more": {
             "title": "Mehr ausprobieren",
-            "text": "Die Demos zeigen Pfade, Teile in Teilen, Kameraflüge, Sonne, Lichter und Farben – öffne eine im Skript-Editor und führe sie aus."
+            "text": "Die Demos zeigen Pfade, Teile in Teilen, Kameraflüge, Sonne, Lichter und Farben – öffne eine im Skript-Editor und führe sie aus. Für Figuren mit Gelenken: Probier die Gliederpuppe mit dem Werkzeug Posieren links."
           }
-        }
+        },
+        "confirmReplace": "Das ersetzt dein aktuelles Modell durch die Übungsszene. Strg+Z holt es zurück. Weitermachen?"
       },
       "tools": {
         "joint": "Gelenk",
-        "jointHead": "Klicken Sie dorthin, wo das Gelenk der Gruppe sitzt. Pfeil hoch und runter wählen die Gruppe: innere oder äußere.",
-        "jointTail": "Klicken Sie auf die Spitze des Knochens.",
-        "jointNoGroup": "Klicken Sie auf eine Gruppe – Knochen sind Gruppen.",
+        "jointHead": "Klicke dorthin, wo das Gelenk der Gruppe sitzt. Pfeil hoch und runter wählen die Gruppe: innere oder äußere.",
+        "jointTail": "Klicke auf die Spitze des Knochens.",
+        "jointNoGroup": "Klicke auf eine Gruppe – Knochen sind Gruppen.",
         "jointTarget": "Knochen: {name} (↑ ↓ andere Gruppe)",
         "pose": "Posieren",
         "poseStatus": "Knochen anklicken und ziehen, um ihn um sein Gelenk zu drehen. Pfeiltasten sperren eine Achse (→ X, ← Y, ↑ Z, ↓ aus). I setzt Keys für die Pose.",
@@ -425,7 +427,7 @@
         "apply": "Anwenden",
         "applyHint": "Setzt Keys für diese Pose im aktuellen Frame",
         "removePose": "Pose löschen",
-        "keyPose": "Pose keyen",
+        "keyPose": "Als Schlüsselbild setzen",
         "keyPoseHint": "Setzt Keys für die Drehungen aller Knochen, wie sie gerade zu sehen sind",
         "mirror": "Spiegeln",
         "mirrorHint": "Tauscht links und rechts in diesem Frame. Links und rechts der Figur müssen entlang ihrer X-Achse liegen.",

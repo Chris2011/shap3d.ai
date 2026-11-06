@@ -26,6 +26,13 @@
       "plugin": {
         "name": "صيغ الاستيراد",
         "description": "يفتح ملفات FBX وCollada ‏(.dae‏) وKMZ و3DS وPLY و3MF وAMF وVRML وUSD/USDZ وBlender ‏(.blend‏) – دون البرامج الأصلية. تُحمَّل القارئات عند أول استيراد."
+      },
+      "export": {
+        "usdz": "USDZ (Apple AR, Pixar USD)",
+        "svg": "العرض بصيغة SVG",
+        "size": "العرض",
+        "current": "مثل العرض ثلاثي الأبعاد",
+        "thick": "حدود أكثر سماكة"
       }
     }
   }

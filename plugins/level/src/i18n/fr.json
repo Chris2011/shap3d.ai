@@ -436,6 +436,21 @@
           "name": "Deux étages",
           "description": "Un hall avec un escalier vers une galerie au-dessus de sa moitié arrière, et une clé là-haut. Vide le modèle."
         }
+      },
+      "kindHints": {
+        "spawn": "Le joueur commence ici",
+        "enemy": "Un personnage qui fait sa ronde et poursuit le joueur",
+        "waypoint": "Un point de la ronde d’un ennemi",
+        "trigger": "Une boîte invisible : quand le joueur y entre, il se passe quelque chose",
+        "hazard": "Une zone qui blesse le joueur",
+        "soundzone": "Une zone avec son propre son",
+        "pickup": "Un objet à ramasser : santé, clé…",
+        "door": "S’ouvre et se ferme, peut être verrouillée",
+        "savepoint": "Le joueur revient ici",
+        "camera": "Une vue fixe pour le jeu",
+        "jumppad": "Projette le joueur en l’air",
+        "teleporter": "Emmène le joueur ailleurs",
+        "light": "Une lampe ou un spot"
       }
     }
   }

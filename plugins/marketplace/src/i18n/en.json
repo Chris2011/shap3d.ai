@@ -1,0 +1,93 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "marketplace": {
+      "plugin": {
+        "name": "Model marketplace",
+        "description": "Search public 3D sources, see preview, author and licence, and load a model into the current model."
+      },
+      "commands": {
+        "open": "Model marketplace"
+      },
+      "panel": {
+        "title": "Model marketplace",
+        "search": "Search",
+        "source": "Source",
+        "placeholder": "What are you looking for? e.g. chair",
+        "placePlaceholder": "A place or address, e.g. Marienplatz Munich",
+        "searching": "Searching…",
+        "nothing": "Nothing found. Try another word, in English if you can.",
+        "more": "Show more",
+        "privacy": "Nothing is sent until you search. A search goes to {source}.",
+        "poweredBy": "Models provided by {source}.",
+        "untested": "Not tested with a real key yet. If something fails, please tell us."
+      },
+      "key": {
+        "short": "key",
+        "forSearch": "{source} only answers with your own key.",
+        "forDownload": "Searching works without a key. To load a model, {source} needs your own API token.",
+        "get": "Get a key",
+        "label": "Your key",
+        "stored": "The key stays in this browser and only goes to this source."
+      },
+      "category": {
+        "furniture": "Furniture",
+        "buildings": "Buildings",
+        "plants": "Plants",
+        "animals": "Animals",
+        "people": "People",
+        "vehicles": "Vehicles",
+        "objects": "Objects"
+      },
+      "item": {
+        "back": "‹ Back to the results",
+        "source": "Source",
+        "author": "Author",
+        "license": "Licence",
+        "licenseUnknown": "unknown",
+        "licenseOnClick": "Licence: click to see",
+        "triangles": "Triangles",
+        "open": "Open at the source",
+        "load": "Load into the model",
+        "cancel": "Cancel",
+        "linkOnly": "{source} only allows downloads when logged in on its site. Open the page, download the file and import it.",
+        "places": "Loads the buildings within {radius} m of this place as simple blocks, with heights where the map knows them."
+      },
+      "license": {
+        "free": "Free to use for anything; no credit needed.",
+        "attribution": "Name the author and follow the licence when you share or sell your work. Some licences forbid commercial use or changes: read it first.",
+        "unknown": "The licence is not known yet. Check the page at the source before you use the model."
+      },
+      "load": {
+        "starting": "Asking the source, this can take a moment…",
+        "building": "Making faces…",
+        "received": "{size} MB received…",
+        "millimetres": "The file has no unit and looked too big for metres, so it was read as millimetres."
+      },
+      "credits": {
+        "tab": "In this model",
+        "hint": "Author and licence stay with each loaded model, also in the saved file. Exports to other formats do not carry them: copy them if you pass the work on.",
+        "empty": "Nothing loaded from a source yet.",
+        "copy": "Copy all credits",
+        "copied": "Credits copied."
+      },
+      "errors": {
+        "network": "{source} could not be reached. Are you online? The service may also not allow calls from a web page.",
+        "auth": "{source} refused access. Check your key.",
+        "rate": "{source} has had too many requests. Try again later.",
+        "server": "{source} has a problem right now. Try again later.",
+        "noBuildings": "The map knows no buildings around this place.",
+        "noFile": "{source} offers no file for this model that can be loaded here.",
+        "tooLarge": "The model is bigger than {limit} MB and was not loaded.",
+        "noModel": "The download holds no model in a format that can be loaded here.",
+        "broken": "The downloaded file is damaged.",
+        "compressed": "This model is compressed in a way that cannot be read yet.",
+        "remote": "The file points to an address outside itself and was not opened.",
+        "missingPart": "A part of the model is missing from the download.",
+        "format": "The file has a format that cannot be read here."
+      }
+    }
+  }
+}

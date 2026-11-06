@@ -1,0 +1,93 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "marketplace": {
+      "plugin": {
+        "name": "Mercado de modelos",
+        "description": "Busca en fuentes 3D públicas, mira la vista previa, el autor y la licencia, y carga un modelo en el modelo actual."
+      },
+      "commands": {
+        "open": "Mercado de modelos"
+      },
+      "panel": {
+        "title": "Mercado de modelos",
+        "search": "Buscar",
+        "source": "Fuente",
+        "placeholder": "¿Qué buscas? p. ej. chair (silla)",
+        "placePlaceholder": "Un lugar o dirección, p. ej. Plaza Mayor Madrid",
+        "searching": "Buscando…",
+        "nothing": "No se encontró nada. Prueba otra palabra, mejor en inglés.",
+        "more": "Mostrar más",
+        "privacy": "No se envía nada hasta que buscas. Una búsqueda va a {source}.",
+        "poweredBy": "Modelos proporcionados por {source}.",
+        "untested": "Aún no probado con una clave real. Si algo falla, avísanos."
+      },
+      "key": {
+        "short": "clave",
+        "forSearch": "{source} solo responde con tu propia clave.",
+        "forDownload": "La búsqueda funciona sin clave. Para cargar un modelo, {source} necesita tu propio token de API.",
+        "get": "Obtener una clave",
+        "label": "Tu clave",
+        "stored": "La clave se queda en este navegador y solo va a esta fuente."
+      },
+      "category": {
+        "furniture": "Muebles",
+        "buildings": "Edificios",
+        "plants": "Plantas",
+        "animals": "Animales",
+        "people": "Personas",
+        "vehicles": "Vehículos",
+        "objects": "Objetos"
+      },
+      "item": {
+        "back": "‹ Volver a los resultados",
+        "source": "Fuente",
+        "author": "Autor",
+        "license": "Licencia",
+        "licenseUnknown": "desconocida",
+        "licenseOnClick": "Licencia: haz clic para ver",
+        "triangles": "Triángulos",
+        "open": "Abrir en la fuente",
+        "load": "Cargar en el modelo",
+        "cancel": "Cancelar",
+        "linkOnly": "{source} solo permite descargas con sesión iniciada en su sitio. Abre la página, descarga el archivo e impórtalo.",
+        "places": "Carga los edificios en un radio de {radius} m como bloques simples, con las alturas que conoce el mapa."
+      },
+      "license": {
+        "free": "Libre para cualquier uso; no hace falta citar.",
+        "attribution": "Cita al autor y respeta la licencia si compartes o vendes tu trabajo. Algunas licencias prohíben el uso comercial o los cambios: léela antes.",
+        "unknown": "La licencia aún no se conoce. Revisa la página en la fuente antes de usar el modelo."
+      },
+      "load": {
+        "starting": "Consultando, puede tardar un momento…",
+        "building": "Creando caras…",
+        "received": "{size} MB recibidos…",
+        "millimetres": "El archivo no tiene unidad y parecía demasiado grande en metros, así que se leyó en milímetros."
+      },
+      "credits": {
+        "tab": "En este modelo",
+        "hint": "El autor y la licencia se quedan con cada modelo cargado, también en el archivo guardado. Las exportaciones a otros formatos no los llevan: cópialos si pasas el trabajo a otros.",
+        "empty": "Aún no se ha cargado nada de una fuente.",
+        "copy": "Copiar todos los créditos",
+        "copied": "Créditos copiados."
+      },
+      "errors": {
+        "network": "No se pudo contactar con {source}. ¿Tienes conexión? Puede que el servicio tampoco permita llamadas desde una página web.",
+        "auth": "{source} rechazó el acceso. Revisa tu clave.",
+        "rate": "{source} ha recibido demasiadas peticiones. Inténtalo más tarde.",
+        "server": "{source} tiene un problema ahora. Inténtalo más tarde.",
+        "noBuildings": "El mapa no conoce edificios alrededor de este lugar.",
+        "noFile": "{source} no ofrece para este modelo ningún archivo que se pueda cargar aquí.",
+        "tooLarge": "El modelo supera {limit} MB y no se cargó.",
+        "noModel": "La descarga no contiene ningún modelo en un formato que se pueda cargar aquí.",
+        "broken": "El archivo descargado está dañado.",
+        "compressed": "Este modelo está comprimido de una forma que aún no se puede leer.",
+        "remote": "El archivo apunta a una dirección externa y no se abrió.",
+        "missingPart": "Falta una parte del modelo en la descarga.",
+        "format": "El archivo tiene un formato que no se puede leer aquí."
+      }
+    }
+  }
+}

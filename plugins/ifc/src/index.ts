@@ -13,7 +13,7 @@ import { importIfc } from './importIfc';
 import { createPanel } from './panel';
 import { MESSAGES, useRuntime } from './runtime';
 
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 
 const oneGroupSelected = (editor: Editor) => {
   const selection = editor.selected();
@@ -45,7 +45,7 @@ const plugin: S3dPlugin = {
       export: (editor) => exportIfc(editor, `Shap3D.ai IFC plugin ${VERSION}`), // i18n-ignore – application name in the file
     });
 
-    context.panels.register({ id: 'properties', label: 'ifc.panel.title', icon: 'tags', component: createPanel(context) });
+    context.panels.register({ id: 'properties', label: 'ifc.panel.title', icon: 'tags', component: createPanel(context), tile: 'last' });
 
     context.ui.addContextMenuEntry({
       label: 'ifc.panel.contextEntry',

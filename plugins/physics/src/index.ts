@@ -62,6 +62,7 @@ const plugin: S3dPlugin = {
       width: 320,
       component: S3dPhysicsPanel,
       tile: 'last',
+      inMode: true,
     });
     context.panels.register({
       id: GUIDE_PANEL,
@@ -70,6 +71,7 @@ const plugin: S3dPlugin = {
       width: 320,
       component: S3dPhysicsGuide,
       tile: 'last',
+      inMode: true,
     });
     // the physics mode: the 3D view with the physics tools in the toolbar and only the panels it needs
     context.modes.register({
@@ -190,7 +192,10 @@ const plugin: S3dPlugin = {
       label: 'physics.commands.guide',
       icon: 'physics',
       keywords: 'guide tutorial help how physics anleitung hilfe physik', // i18n-ignore – search words
-      run: () => context.panels.open(GUIDE_PANEL),
+      run: () => {
+        context.modes.open(MODE);
+        context.panels.open(GUIDE_PANEL);
+      },
     });
     context.commands.register({ id: 'step', label: 'physics.commands.step', icon: 'physics', run: () => stepSim() });
     context.commands.register({ id: 'keep', label: 'physics.commands.keep', icon: 'physics', run: () => keepPositions() });
@@ -209,7 +214,10 @@ const plugin: S3dPlugin = {
       label: 'physics.commands.open',
       icon: 'physics',
       keywords,
-      run: () => context.panels.open(PANEL),
+      run: () => {
+        context.modes.open(MODE);
+        context.panels.open(PANEL);
+      },
     });
     context.commands.register({
       id: 'dynamic',

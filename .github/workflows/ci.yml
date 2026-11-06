@@ -107,7 +107,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        plugin: [animation, ifc, layout, level, noise, openscad, physics, roomplanner, shaders]
+        plugin: [animation, ifc, layout, level, marketplace, noise, openscad, physics, roomplanner, shaders]
     defaults:
       run:
         working-directory: plugins/${{ matrix.plugin }}
@@ -127,4 +127,5 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run i18n
+      - run: npm run test --if-present
       - run: npm run build

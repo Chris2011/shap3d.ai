@@ -25,6 +25,25 @@
         ><button ref="first" class="s3d-btn primary" @click="answer(true)">{{ t('common.yes') }}</button>
       </div>
     </template>
+    <!-- a few options -->
+    <template v-else-if="dialog.kind === 'options'">
+      <div class="mb-3 text-[0.9375rem] font-semibold">{{ dialog.data.title }}</div>
+      <div class="grid gap-2">
+        <template v-for="option in dialog.data.options" :key="option.id">
+          <label v-if="option.choices" class="grid gap-1">
+            <span class="s3d-label">{{ localize(option.label) }}</span>
+            <select v-model="optionValues[option.id]" class="s3d-input">
+              <option v-for="choice in option.choices" :key="choice.value" :value="choice.value">{{ localize(choice.label) }}</option>
+            </select>
+          </label>
+          <label v-else class="s3d-check"><input v-model="optionValues[option.id]" type="checkbox" /> {{ localize(option.label) }}</label>
+        </template>
+      </div>
+      <div class="mt-3.5 flex justify-end gap-2">
+        <button class="s3d-btn" @click="dialog.data.resolve(null)">{{ t('common.cancel') }}</button
+        ><button ref="first" class="s3d-btn primary" @click="dialog.data.resolve({ ...optionValues })">{{ t('common.ok') }}</button>
+      </div>
+    </template>
     <!-- help -->
     <template v-else-if="dialog.kind === 'help'">
       <div class="mb-3 text-[0.9375rem] font-semibold">{{ t('dialogs.helpTitle') }}</div>
@@ -47,15 +66,21 @@
 import S3dModalDialog from './ui/S3dModalDialog.vue';
 import { ref, shallowRef, computed, watch, nextTick, reactive } from 'vue';
 import { useEditor } from './keys';
-import { t, shortcutLabel } from '../i18n';
+import { t, localize, shortcutLabel } from '../i18n';
 
 const editor = useEditor();
 const dialog = computed(() => editor.ui.dialog);
 const val = ref('');
+const optionValues = ref<Record<string, string | boolean>>({});
 const first = shallowRef<HTMLElement | null>(null);
 watch(dialog, (current) => {
   if (current?.kind === 'prompt') {
     val.value = current.data.value ?? '';
+  }
+  if (current?.kind === 'options') {
+    optionValues.value = Object.fromEntries(
+      current.data.options.map((option: { id: string; value: string | boolean }) => [option.id, option.value]),
+    );
   }
   nextTick(() => {
     (first.value as any)?.focus?.();
@@ -70,7 +95,7 @@ const cancel = () => {
   if (!current) {
     return;
   }
-  if (current.kind === 'prompt') {
+  if (current.kind === 'prompt' || current.kind === 'options') {
     current.data.resolve(null);
   } else if (current.kind === 'confirm') {
     current.data.resolve(false);

@@ -23,7 +23,12 @@
       <div class="s3d-lo-side-actions s3d-lo-add">
         <button class="s3d-btn small" :title="t('layout.templates.addTitle')" @click="addPage()">{{ t('layout.addSheet') }}</button>
         <button class="s3d-btn small" :title="t('layout.templates.title')" @click="addMenu = !addMenu">▾</button>
-        <button class="s3d-btn small" :disabled="!scenes.length" :title="t('layout.fromScenesTitle')" @click="fromScenes">
+        <button
+          class="s3d-btn small"
+          :disabled="!scenes.length"
+          :title="t(scenes.length ? 'layout.fromScenesTitle' : 'layout.noScenes')"
+          @click="fromScenes"
+        >
           {{ t('layout.fromScenes') }}
         </button>
         <!-- new sheet from a template; the star marks the default for "+ Sheet" -->
@@ -122,9 +127,21 @@
       >
         <div v-if="!currentPage" class="s3d-lo-empty">
           <p>{{ t('layout.empty') }}</p>
+          <ol class="s3d-lo-steps">
+            <li>{{ t('layout.steps.sheet') }}</li>
+            <li>{{ t('layout.steps.viewport') }}</li>
+            <li>{{ t('layout.steps.finish') }}</li>
+          </ol>
           <div class="s3d-lo-side-actions">
             <button class="s3d-btn small" @click="addPage()">{{ t('layout.addSheet') }}</button>
-            <button class="s3d-btn small" :disabled="!scenes.length" @click="fromScenes">{{ t('layout.fromScenes') }}</button>
+            <button
+              class="s3d-btn small"
+              :disabled="!scenes.length"
+              :title="t(scenes.length ? 'layout.fromScenesTitle' : 'layout.noScenes')"
+              @click="fromScenes"
+            >
+              {{ t('layout.fromScenes') }}
+            </button>
           </div>
         </div>
         <div
@@ -1204,6 +1221,9 @@ document.addEventListener('fullscreenchange', () => {
 const status = computed(() => {
   if (!currentPage.value) {
     return '';
+  }
+  if (tool.value === 'select' && !currentPage.value.elements.length) {
+    return t('layout.status.emptySheet');
   }
   if ((tool.value === 'fillet' || tool.value === 'chamfer') && clicks.value.length) {
     return t('layout.status.secondLine');

@@ -26,6 +26,20 @@
       class="flex-1"
     /><span class="w-18.5 text-end tabular-nums">{{ monthName(settings.shadowMonth) }}</span>
   </div>
+  <div class="s3d-section-title">{{ t('shadows.latitude') }}</div>
+  <div class="s3d-row">
+    <input type="range" min="-66" max="66" step="1" :value="settings.latitude" @input="set('latitude', +val($event))" class="flex-1" /><span
+      class="w-18.5 text-end tabular-nums"
+      >{{ settings.latitude }}°</span
+    >
+  </div>
+  <div class="s3d-section-title">{{ t('shadows.north') }}</div>
+  <div class="s3d-row">
+    <input type="range" min="0" max="359" step="1" :value="settings.north" @input="set('north', +val($event))" class="flex-1" /><span
+      class="w-18.5 text-end tabular-nums"
+      >{{ settings.north }}°</span
+    >
+  </div>
   <p class="s3d-label my-3">{{ t('shadows.hint') }}</p>
 </template>
 

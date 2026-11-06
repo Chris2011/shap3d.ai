@@ -33,8 +33,16 @@
     {{ message.text }}
   </p>
 
+  <input
+    v-model="search"
+    type="search"
+    class="s3d-input"
+    :placeholder="t('pluginManager.search')"
+    :aria-label="t('pluginManager.search')"
+  />
+
   <div class="s3d-caption mt-3 mb-1 text-navy">{{ t('pluginManager.installed') }}</div>
-  <div v-for="plugin in plugins" :key="plugin.id" class="mb-1.5 border border-line bg-surface px-2.25 py-1.75">
+  <div v-for="plugin in shownPlugins" :key="plugin.id" class="mb-1.5 border border-line bg-surface px-2.25 py-1.75">
     <div class="flex items-center gap-2">
       <S3dIcon name="plugin" :size="18" />
       <span class="flex-1 font-semibold text-navy"
@@ -86,6 +94,7 @@
     </div>
   </div>
   <div v-if="!plugins.length" class="px-0.5 py-2 text-xs text-ink-2">{{ t('pluginManager.none') }}</div>
+  <div v-else-if="!shownPlugins.length" class="px-0.5 py-2 text-xs text-ink-2">{{ t('pluginManager.noMatch') }}</div>
 
   <!-- discover: the plugins of the catalogs, installed with one click -->
   <div class="s3d-caption mt-4 mb-1 flex items-center gap-2 text-navy">
@@ -98,7 +107,7 @@
     {{ t('pluginManager.catalogFailed', { catalog: hostOf(failure.catalog), error: failure.error }) }}
   </p>
   <div
-    v-for="entry in catalog.entries"
+    v-for="entry in shownEntries"
     :key="entry.catalog + entry.id"
     class="mb-1.5 flex items-start gap-2 border border-line px-2.25 py-1.75"
   >
@@ -149,15 +158,16 @@
       }}
     </button>
   </div>
+  <div v-if="catalog.entries.length && !shownEntries.length" class="px-0.5 py-2 text-xs text-ink-2">{{ t('pluginManager.noMatch') }}</div>
   <div v-for="url in ownCatalogs" :key="url" class="flex items-center gap-2 text-[0.6875rem] text-muted">
     <span class="min-w-0 flex-1 truncate" :title="url">{{ t('pluginManager.ownCatalog', { url }) }}</span>
     <button class="s3d-link" @click="removeCatalog(url)">{{ t('pluginManager.remove') }}</button>
   </div>
 
-  <template v-if="examples.length">
+  <template v-if="shownExamples.length">
     <div class="s3d-caption mt-4 mb-1 text-navy">{{ t('pluginManager.examples') }}</div>
     <div
-      v-for="example in examples"
+      v-for="example in shownExamples"
       :key="example.file"
       class="mb-1.5 flex items-start gap-2 border border-dashed border-line px-2.25 py-1.75"
     >
@@ -199,6 +209,15 @@ import { t, localize, formatNumber } from '../../i18n';
 import { loadCatalogs, ownCatalogs, type CatalogEntry } from '../../plugins/catalog';
 
 const editor = useEditor();
+const search = ref('');
+/** does the search text occur in one of these texts? */
+const matches = (...texts: (string | undefined)[]) => {
+  const wanted = search.value.trim().toLowerCase();
+  return !wanted || texts.some((text) => text?.toLowerCase().includes(wanted));
+};
+const shownPlugins = computed(() =>
+  plugins.filter((plugin) => matches(localize(plugin.name), localize(plugin.description), plugin.author, plugin.id)),
+);
 const busy = ref(false);
 const folderInput = shallowRef<HTMLInputElement | null>(null);
 const megabytes = (bytes: number) => `${formatNumber(bytes / 1024 / 1024, { maximumFractionDigits: 1 })} MB`;
@@ -217,6 +236,7 @@ const examples = computed(() =>
     // new examples, or bundled ones that changed since they were installed
     .filter((example) => !example.installed || pluginSource(example.id) !== example.code),
 );
+const shownExamples = computed(() => examples.value.filter((example) => matches(example.name, example.description, example.id)));
 
 const folders = usePluginFolders();
 const { updateHints, upToDate, updating } = folders;
@@ -330,6 +350,9 @@ const updateFromUrl = async (id: string) => {
 
 // the catalogs: read when the panel opens, again with "Reload" and after adding one
 const catalog = shallowRef<Awaited<ReturnType<typeof loadCatalogs>>>({ entries: [], failed: [] });
+const shownEntries = computed(() =>
+  catalog.value.entries.filter((entry) => matches(entry.name, entry.description, entry.author, entry.id)),
+);
 const catalogBusy = ref(false);
 const refreshCatalogs = async () => {
   catalogBusy.value = true;

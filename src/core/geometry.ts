@@ -242,7 +242,8 @@ export const offsetPolygon = (pts: V3[], normal: V3, distance: number): V3[] => 
 export const isCollinear = (first: V3, second: V3, third: V3, tol = 1e-6): boolean => {
   return (
     second.clone().sub(first).cross(third.clone().sub(first)).length() <
-    tol * Math.max(1, second.distanceTo(first) * third.distanceTo(first))
+    // relative to the lengths: on small parts, a fixed limit takes real corners for a straight line
+    Math.max(tol * second.distanceTo(first) * third.distanceTo(first), 1e-11)
   );
 };
 

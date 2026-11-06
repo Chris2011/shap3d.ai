@@ -21,7 +21,7 @@
 
     <!-- 1: provider -->
     <div v-if="step === 0" class="overflow-auto px-4 py-3.5 select-text">
-      <p class="mb-3" v-html="t('ai.wizard.providerIntro')"></p>
+      <p class="mb-3" v-html="richText(t('ai.wizard.providerIntro'))"></p>
       <div class="grid grid-cols-[repeat(2,1fr)] gap-2">
         <button
           v-for="provider in PROVIDERS"
@@ -77,7 +77,7 @@
 
     <!-- 3: model -->
     <div v-if="step === 2" class="overflow-auto px-4 py-3.5 select-text">
-      <p class="mb-3" v-html="t('ai.wizard.modelIntro')"></p>
+      <p class="mb-3" v-html="richText(t('ai.wizard.modelIntro'))"></p>
       <div class="mb-1.5 flex flex-col gap-1.5">
         <div
           v-for="preset in MODEL_PRESETS"
@@ -200,6 +200,7 @@
 </template>
 
 <script setup lang="ts">
+import { richText } from '../../../utils/safeHtml';
 import S3dModalDialog from '../../../components/ui/S3dModalDialog.vue';
 import S3dPullProgress from './S3dPullProgress.vue';
 import { reactive, ref, shallowRef, computed, onMounted } from 'vue';

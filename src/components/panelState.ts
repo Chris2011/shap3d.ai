@@ -21,6 +21,8 @@ export interface PanelInfo {
   tile?: boolean;
   /** only inside a mode that lists it – no tile, palette entry or command outside */
   inMode?: boolean;
+  /** opened by a button in the Materials panel */
+  inMaterials?: boolean;
 }
 
 /** Right-hand panels (order = order of the tiles); reactive so plugins can add and remove panels. */

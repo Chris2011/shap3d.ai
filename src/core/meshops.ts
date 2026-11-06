@@ -98,7 +98,7 @@ export const fromTriMesh = (triMesh: TriMesh, smoothDeg = 40, merge = true): Ent
   }
   // without merging, flat areas keep their extra triangles (more polygons, same shape)
   if (merge) {
-    ents.mergeCoplanar([...ents.edges.keys()]);
+    ents.mergeMeshFaces();
   }
   const cosLimit = Math.cos(THREE.MathUtils.degToRad(smoothDeg));
   for (const edge of ents.edges.values()) {

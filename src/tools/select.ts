@@ -1,12 +1,17 @@
 import * as THREE from 'three';
 import { Tool, type PEvt, type Editor } from '../engine/editor';
 import type { Overlay } from '../engine/overlay';
-import type { EntityRef, Entities } from '../core/model';
+import type { EdgeRec } from '../engine/viewer';
+import { SMOOTH_MIN_COS, type EntityRef, type Entities } from '../core/model';
 import { t } from '../i18n';
+
+/** soft edges are not drawn, so they cannot be clicked either – unless hidden geometry is shown */
+export const visibleEdge = (editor: Editor) => (record: EdgeRec) =>
+  editor.model.settings.hiddenGeometry || !record.context.entities.edges.get(record.edgeId)?.soft;
 
 /** Pick the most specific entity under the cursor and map it into the active context. */
 export const pickRef = (editor: Editor, x: number, y: number): { ref: EntityRef | null; outside: boolean } => {
-  const edgeHit = editor.viewer.pickEdge(x, y, 5);
+  const edgeHit = editor.viewer.pickEdge(x, y, 5, visibleEdge(editor));
   const faceHit = editor.viewer.pickFace(x, y);
   // prefer edge if it's in front or no face
   if (edgeHit) {
@@ -23,6 +28,12 @@ export const pickRef = (editor: Editor, x: number, y: number): { ref: EntityRef 
     return { ref: null, outside: true };
   }
   return { ref: null, outside: true };
+};
+
+/** a face stands for the round surface it is part of */
+const withSurface = (ents: Entities, ref: EntityRef): EntityRef[] => {
+  const face = ref.kind === 'face' ? ents.faces.get(ref.id) : undefined;
+  return face ? ents.smoothSurface(face, SMOOTH_MIN_COS).map(({ id }) => ({ kind: 'face' as const, id })) : [ref];
 };
 
 const segIntersectsRect = (
@@ -283,7 +294,7 @@ export class SelectTool extends Tool {
       editor.select(bounding(editor, ref), selectMode === 'set' ? 'set' : 'add');
       return;
     }
-    editor.select([ref], selectMode);
+    editor.select(withSurface(editor.entities, ref), selectMode);
   }
   busy() {
     return !!this.drag;
@@ -370,7 +381,7 @@ export class EraserTool extends Tool {
   }
   mark(pointer: PEvt) {
     const editor = this.editor;
-    const edgeHit = editor.viewer.pickEdge(pointer.x, pointer.y, 6);
+    const edgeHit = editor.viewer.pickEdge(pointer.x, pointer.y, 6, visibleEdge(editor));
     let picked: EntityRef | null = null;
     if (edgeHit) {
       picked = editor.refFromPick(edgeHit.rec.context.path, 'edge', edgeHit.rec.edgeId);
@@ -512,7 +523,8 @@ export class PaintTool extends Tool {
     const back = faceHit.normal.dot(ray.direction) > 0;
     editor.commit('undo.paint', () => {
       const sel = editor.selected();
-      const targets: EntityRef[] = sel.some((entityRef) => editor.key(entityRef) === editor.key(ref)) ? sel : [ref];
+      const inSelection = sel.some((entityRef) => editor.key(entityRef) === editor.key(ref));
+      const targets: EntityRef[] = inSelection ? sel : withSurface(ents, ref);
       let faces = targets;
       if (ref.kind === 'face' && (pointer.ctrl || pointer.shift)) {
         const src = ents.faces.get(ref.id)!;
@@ -530,7 +542,7 @@ export class PaintTool extends Tool {
           if (!face) {
             continue;
           }
-          if (back && targets.length === 1 && !pointer.ctrl && !pointer.shift) {
+          if (back && (targets.length === 1 || !inSelection) && !pointer.ctrl && !pointer.shift) {
             face.backMaterial = mat;
           } else {
             face.material = mat;

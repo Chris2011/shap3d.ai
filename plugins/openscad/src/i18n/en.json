@@ -119,9 +119,7 @@
         "no3d": "OpenSCAD created no 3D object (exit code {code})",
         "emptyMaybe2d": "The result is empty – is the top-level object 2D? Then use linear_extrude().",
         "loadFailed": "OpenSCAD could not be loaded: {error}",
-        "stillLoading": "OpenSCAD is still loading – please run it again in a moment.",
-        "tooManyCalls": "More than {max} s3d.scad() calls in one run – please combine the OpenSCAD code into fewer calls.",
-        "morePrepared": "This script needs more OpenSCAD instances than were prepared – {count} are being prepared now. Please run it again in a moment.",
+        "computing": "OpenSCAD is computing this part in the background – please run the script again in a moment.",
         "noFaces": "The model has no faces"
       },
       "extension": "Runs OpenSCAD code (the real OpenSCAD) and inserts the result as a group. Unit as set in the “OpenSCAD” panel (default: mm).",

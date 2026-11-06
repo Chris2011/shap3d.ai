@@ -59,6 +59,7 @@ interface Item {
 }
 const items: Item[] = [
   { label: 'new', icon: 'file', cmd: 'new' },
+  { label: 'newTab', icon: 'file', cmd: 'newTab' },
   { label: 'open', icon: 'folder', cmd: 'open' },
   { label: 'saveAs', icon: 'save', cmd: 'save' },
   { label: 'saveLocal', icon: 'save', cmd: 'saveLocal' },

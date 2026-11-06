@@ -1,22 +1,37 @@
 import type { PluginContext } from '../../../src/plugins/types';
 import { scadCompletions } from './completions';
-import { POOL_MAX, scriptError, type Engine } from './engine';
+import { scriptError, type Engine } from './engine';
 import { EXAMPLES } from './examples';
-import { formatNumber, t } from './i18n';
-import type { ScadMesh } from './off';
+import { t } from './i18n';
+import type { ConsoleLine, ScadMesh } from './off';
 import { scaleOf, unitLabel, type Settings } from './settings';
 
-/** instances prepared when s3d.scad() sits in a loop (the count is only known after running) */
-const LOOP_GUESS = 12;
-/** for/while/forEach/map/times-style repetition in a script */
-const LOOP = /\b(for|while)\s*\(|\.(forEach|map|flatMap|reduce)\s*\(|Array\.from\s*\(/;
-/** s3d.scad( / su.scad( / fw.scad( in a script */
-const SCAD_CALL = /\b(?:s3d|su|fw)\s*\.\s*scad\s*\(/g;
+/** computed parts of a script are kept this long after its last run */
+const PARTS_KEPT_MS = 120_000;
+/** s3d.scad('…') with a plain string in a script – these can be computed before it runs */
+const SCAD_LITERAL = /\b(?:s3d|su|fw)\s*\.\s*scad\s*\(\s*(`(?:[^`\\$]|\\.|\$(?!\{))*`|'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*")/g;
+
+/**
+ * OpenSCAD shows no edges at all, and details like gear teeth turned into a thicket of lines. Only what is close to a
+ * right angle or sharper stays a line: the edges of a cube, the rims of parts. The faces still show the corners by their shade.
+ */
+const LINE_FROM_DEGREES = 87.5;
+
+export const meshOptions = (settings: Settings) => ({ scale: scaleOf(settings), smooth: LINE_FROM_DEGREES });
+
+/** the faces, made in a worker (versions of the app without `prepare` make them in `add`) */
+const prepared = async (context: PluginContext, settings: Settings, mesh: ScadMesh) =>
+  (await context.meshes.prepare?.(mesh, meshOptions(settings))) ?? mesh;
 
 /** adds a mesh as a group to the model – one undo step, materials included */
-export const addToModel = (context: PluginContext, settings: Settings, mesh: ScadMesh, name: string) => {
-  context.meshes.add(mesh, { name, scale: scaleOf(settings), smooth: 25, materials: mesh.materials });
+export const addToModel = async (context: PluginContext, settings: Settings, mesh: ScadMesh, name: string) => {
+  context.meshes.add(await prepared(context, settings, mesh), { ...meshOptions(settings), name, materials: mesh.materials });
 };
+
+/** a part of a script: what OpenSCAD and the mesh worker made of one s3d.scad() call */
+type Part =
+  | { lines: ConsoleLine[]; materials: ScadMesh['materials']; faces: Awaited<ReturnType<typeof prepared>> }
+  | { error: Error & { lines?: ConsoleLine[] } };
 
 /** OpenSCAD in the script editor (language, examples, help, completion) and s3d.scad() for JavaScript scripts */
 export const registerScripting = (context: PluginContext, engine: Engine, settings: Settings) => {
@@ -29,8 +44,8 @@ export const registerScripting = (context: PluginContext, engine: Engine, settin
     run: async (code) => {
       const startedAt = performance.now();
       try {
-        const { mesh, lines } = engine.compile(await engine.instanceAsync(), code);
-        addToModel(context, settings, mesh, 'OpenSCAD');
+        const { mesh, lines } = await engine.compile(code);
+        await addToModel(context, settings, mesh, 'OpenSCAD');
         const result = t('openscad.result', { count: mesh.faces.length, unit: unitLabel(settings.unit) });
         return { ok: true, logs: [...lines, { kind: 'result', text: result }], durationMs: performance.now() - startedAt };
       } catch (error) {
@@ -48,49 +63,63 @@ export const registerScripting = (context: PluginContext, engine: Engine, settin
   // code completion in the script editor (Shap3D.ai versions without it simply skip this)
   context.script.registerCompletions?.('openscad', scadCompletions);
 
-  /** s3d.scad() calls since the last script started (to learn how many instances a script needs) */
-  let callsThisRun = 0;
-  context.script.beforeRun(async (code) => {
-    callsThisRun = 0;
-    const written = (code.match(SCAD_CALL) ?? []).length;
-    if (!written) {
-      return;
+  // s3d.scad() is called in the middle of a script, which cannot wait: what is not computed yet is
+  // computed in the worker, the script stops and the app runs it again. Parts are remembered by their code.
+  const parts = new Map<string, Part>();
+  const computing = new Map<string, Promise<void>>();
+  const partKey = (code: string) => `${settings.backend}|${scaleOf(settings)}|${code}`;
+  let forgetTimer: ReturnType<typeof setTimeout> | undefined;
+  const forgetLater = () => {
+    clearTimeout(forgetTimer);
+    forgetTimer = setTimeout(() => parts.clear(), PARTS_KEPT_MS);
+  };
+  engine.onLibraryChange(() => parts.clear());
+  context.onDispose(() => {
+    clearTimeout(forgetTimer);
+    parts.clear();
+  });
+
+  const computePart = (code: string) => {
+    const key = partKey(code);
+    let running = computing.get(key);
+    if (!running) {
+      running = (async () => {
+        try {
+          const { mesh, lines } = await engine.compile(code);
+          parts.set(key, { lines, materials: mesh.materials, faces: await prepared(context, settings, mesh) });
+        } catch (error) {
+          parts.set(key, { error: error as Error });
+        } finally {
+          computing.delete(key);
+          forgetLater();
+        }
+      })();
+      computing.set(key, running);
     }
-    // calls in loops are only known after running: guess generously, the learned target covers the rest
-    const target = Math.min(POOL_MAX, Math.max(written, engine.poolTarget, LOOP.test(code) ? LOOP_GUESS : 0));
-    await engine.warm(target).catch(() => {});
+    return running;
+  };
+
+  context.script.beforeRun(async (code) => {
+    const written = [...code.matchAll(SCAD_LITERAL)].map((match) => new Function(`return ${match[1]}`)() as string);
+    await Promise.all(written.filter((scad) => !parts.has(partKey(scad))).map(computePart));
+    forgetLater();
   });
 
   context.script.extend(
     'scad',
     (api, code: unknown, options: { at?: [number, number, number]; name?: string } = {}) => {
-      callsThisRun++;
-      const ready = engine.takeSpare();
-      if (!ready) {
-        if (engine.status.state === 'failed') {
-          throw scriptError(t('openscad.errors.loadFailed', { error: engine.status.error }));
-        }
-        if (engine.status.state !== 'ready') {
-          throw scriptError(t('openscad.errors.stillLoading'));
-        }
-        // more calls than prepared: the script stopped at this call, so the real need is unknown – grow generously
-        const target = engine.growPool(callsThisRun, LOOP_GUESS);
-        throw scriptError(
-          callsThisRun > POOL_MAX
-            ? t('openscad.errors.tooManyCalls', { max: formatNumber(POOL_MAX) })
-            : t('openscad.errors.morePrepared', { count: target }),
-        );
+      const part = parts.get(partKey(String(code)));
+      if (!part) {
+        // only built here while the script runs: its text was not a plain string
+        throw Object.assign(scriptError(t('openscad.errors.computing')), { retryAfter: computePart(String(code)) });
       }
-      let result;
-      try {
-        result = engine.compile(ready, String(code));
-      } catch (error) {
-        for (const line of (error as { lines?: { text: string }[] }).lines ?? []) {
+      if ('error' in part) {
+        for (const line of part.error.lines ?? []) {
           api.warn(line.text);
         }
-        throw error;
+        throw part.error;
       }
-      for (const line of result.lines) {
+      for (const line of part.lines) {
         if (line.kind === 'log') {
           api.log(line.text);
         } else {
@@ -98,11 +127,11 @@ export const registerScripting = (context: PluginContext, engine: Engine, settin
         }
       }
       // the script run is one undo step – materials created here are part of it
-      for (const [name, material] of Object.entries(result.mesh.materials)) {
+      for (const [name, material] of Object.entries(part.materials)) {
         api.ensureMaterial(name, material.color, material.opacity);
       }
       const group = api.group(options.name ?? 'OpenSCAD', (inner) => {
-        context.meshes.build(inner.ents, result.mesh, { scale: scaleOf(settings), smooth: 25 });
+        context.meshes.build(inner.ents, part.faces, meshOptions(settings));
       });
       if (options.at) {
         group.move(options.at);

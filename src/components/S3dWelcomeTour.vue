@@ -169,7 +169,7 @@
           v-if="cur.tips"
           class="mt-2.5 list-disc ps-4.5 text-[0.78125rem]/[1.8] text-ink [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-line-2 [&_kbd]:bg-surface-2 [&_kbd]:px-1.25 [&_kbd]:font-mono [&_kbd]:text-[0.6875rem]"
         >
-          <li v-for="tip in cur.tips" :key="tip" v-html="tip"></li>
+          <li v-for="tip in cur.tips" :key="tip" v-html="richText(tip)"></li>
         </ul>
         <button v-if="cur.action && (cur.action.available?.() ?? true)" class="s3d-btn small mt-3" @click="cur.action.run()">
           {{ cur.action.label }}
@@ -206,6 +206,7 @@
 </template>
 
 <script setup lang="ts">
+import { richText } from '../utils/safeHtml';
 import S3dCloseButton from './ui/S3dCloseButton.vue';
 import { computed } from 'vue';
 import { useEventListener } from '@vueuse/core';

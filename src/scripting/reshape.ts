@@ -1,7 +1,9 @@
 import type { Editor } from '../engine/editor';
 import { Entities, type Instance, type Face } from '../core/model';
 import { ScriptApi, PARAMETRIC } from './api';
-import { toTriMesh, fromTriMesh, loopSubdivide, simplify, resampleCircle } from '../core/meshops';
+import { toTriMesh, resampleCircle, type TriMesh } from '../core/meshops';
+import { runMeshJob, type MeshJob } from './meshJobs';
+import { unpackInto, type PreparedMesh } from './preparedMesh';
 import { t } from '../i18n';
 
 /** Current segment / side count of a parametric shape. */
@@ -50,7 +52,7 @@ export const setResolution = (editor: Editor, inst: Instance, value: number): bo
 /** Circle drawn with the circle/polygon tool (not extruded yet): redraw it with a new segment count. */
 export const setCircleSegments = (editor: Editor, ents: Entities, face: Face, value: number): number | null => {
   let id: number | null = null;
-  editor.commit(`Kreis: ${Math.round(value)} Segmente`, () => {
+  editor.commit(t('mesh.undoCircle', { count: Math.round(value) }), () => {
     id = resampleCircle(ents, face, value);
   });
   if (id != null) {
@@ -65,7 +67,26 @@ const MAX_TRIANGLES = 250_000;
  * More polygons for any group/component: every triangle becomes four.
  * round = Loop subdivision (corners and curves get softer), otherwise the shape stays exactly the same.
  */
-export const subdivideInstance = (editor: Editor, inst: Instance, round = true): string | null => {
+const reshapeJob = (triMesh: TriMesh, operation: Extract<MeshJob, { kind: 'reshape' }>['operation']): MeshJob => {
+  const materialNames = [...new Set([...triMesh.materials, ...triMesh.backMaterials].filter((name): name is string => !!name))];
+  const indexOf = (name: string | undefined) => (name ? materialNames.indexOf(name) : -1);
+  return {
+    kind: 'reshape',
+    operation,
+    positions: Float64Array.from(triMesh.positions.flatMap((point) => [point.x, point.y, point.z])),
+    triangles: Int32Array.from(triMesh.triangles),
+    materials: Int32Array.from(triMesh.materials, indexOf),
+    backMaterials: Int32Array.from(triMesh.backMaterials, indexOf),
+    materialNames,
+  };
+};
+const entitiesOf = (mesh: PreparedMesh) => {
+  const entities = new Entities();
+  unpackInto(entities, mesh);
+  return entities;
+};
+
+export const subdivideInstance = async (editor: Editor, inst: Instance, round = true): Promise<string | null> => {
   const triMesh = toTriMesh(inst.definition.entities);
   if (!triMesh.triangles.length) {
     return t('mesh.noTopFaces');
@@ -73,8 +94,9 @@ export const subdivideInstance = (editor: Editor, inst: Instance, round = true):
   if ((triMesh.triangles.length / 3) * 4 > MAX_TRIANGLES) {
     return t('mesh.tooMany', { count: Math.round((triMesh.triangles.length / 3) * 4) });
   }
-  editor.commit(round ? 'Mehr Polygone (abrunden)' : 'Mehr Polygone', () => {
-    inst.definition.entities = fromTriMesh(loopSubdivide(triMesh, round), 40, round);
+  const [mesh] = await runMeshJob(reshapeJob(triMesh, { name: 'subdivide', round }));
+  editor.commit(round ? 'mesh.undoSubdivideRound' : 'mesh.undoSubdivide', () => {
+    inst.definition.entities = entitiesOf(mesh);
     inst.definition.procedure = undefined;
     inst.definition.shape = undefined;
     inst.definition.pluginData = undefined; // no longer parametric / plugin-made (e.g. terrain grid)
@@ -88,12 +110,12 @@ export const simplifyInstance = async (editor: Editor, inst: Instance, keep: num
   if (triMesh.triangles.length < 12) {
     return t('mesh.fewAlready');
   }
-  const out = await simplify(triMesh, keep);
-  if (out.triangles.length < 3) {
+  const [mesh] = await runMeshJob(reshapeJob(triMesh, { name: 'simplify', keep }));
+  if (!mesh) {
     return t('mesh.cannotSimplify');
   }
   editor.commit('undo.fewerPolygons', () => {
-    inst.definition.entities = fromTriMesh(out);
+    inst.definition.entities = entitiesOf(mesh);
     inst.definition.procedure = undefined;
     inst.definition.shape = undefined;
     inst.definition.pluginData = undefined;

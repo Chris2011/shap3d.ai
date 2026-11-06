@@ -1,3 +1,4 @@
+import { webUrl } from '../utils/safeHtml';
 import { useStorage } from '@vueuse/core';
 
 /**
@@ -52,7 +53,7 @@ const readCatalog = async (catalog: string): Promise<CatalogEntry[]> => {
       description: String(plugin.description ?? ''),
       license: plugin.license ? String(plugin.license) : undefined,
       author: plugin.author ? String(plugin.author) : undefined,
-      homepage: plugin.homepage ? String(plugin.homepage) : undefined,
+      homepage: webUrl(plugin.homepage),
       minAppVersion: plugin.minAppVersion ? String(plugin.minAppVersion) : null,
       source: plugin.source === 'community' ? 'community' : 'official',
       preview: plugin.preview === true,

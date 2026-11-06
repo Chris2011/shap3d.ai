@@ -12,9 +12,7 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
-    "i18n": "node ../../scripts/i18n.mjs check --package .",
-    "screenshots": "powershell -File ../../scripts/screenshots.ps1 -Shots script -Name shaders -Out docs -Query \"package=shaders&file=/plugins/shaders/docs/demo.js&command=shaders.open&camera=6.2,-6.8,4.6&target=1.6,0.6,0.6\"",
-    "screenshots:sh": "bash ../../scripts/screenshots.sh --shots script --name shaders --out docs --query \"package=shaders&file=/plugins/shaders/docs/demo.js&command=shaders.open&camera=6.2,-6.8,4.6&target=1.6,0.6,0.6\""
+    "i18n": "node ../../scripts/i18n.mjs check --package ."
   },
   "lint-staged": {
     "src/**/*.{js,mjs,ts,vue}": [
@@ -30,5 +28,14 @@
   },
   "portal": {
     "thumbnail": "docs/shaders.png"
-  }
+  },
+  "screenshots": [
+    {
+      "name": "shaders",
+      "file": "demo.js",
+      "command": "shaders.open",
+      "camera": "6.2,-6.8,4.6",
+      "target": "1.6,0.6,0.6"
+    }
+  ]
 }

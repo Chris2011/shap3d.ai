@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Security
+
+- Texts from language files no longer run as markup in the setup wizard: only simple emphasis stays.
+
 ### Added
 
 - **Responsive model builds**: the code of the assistant runs in a Web Worker instead of the main thread – the finished model arrives as one undo step while the browser stays usable. A blinking _"building model …"_ line with a timer in the chat (and the building note in the status bar) shows while it runs, and _Run again_ on a running turn does nothing instead of starting a second build.

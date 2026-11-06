@@ -15,7 +15,7 @@
         "print": "Print sheets / PDF…"
       },
       "sheets": "Sheets",
-      "sheet": "Sheet",
+      "sheet": "Add a sheet: paper with a title block.",
       "addSheet": "+ Sheet",
       "fromScenes": "From scenes",
       "fromScenesTitle": "A new sheet with up to four scenes as viewports – parallel scenes get a drawing scale that fits",
@@ -127,7 +127,8 @@
         "cannotOffset": "This element cannot be offset.",
         "cannotSplit": "Nothing to split here.",
         "nothingToReach": "No line in that direction to extend to.",
-        "cannotJoinCorner": "The lines do not meet in a corner (or the distance is too large)."
+        "cannotJoinCorner": "The lines do not meet in a corner (or the distance is too large).",
+        "emptySheet": "The sheet is empty: take “Viewport” in the bar above and drag a rectangle on the paper to show your model."
       },
       "elements": {
         "viewport": "Viewport",
@@ -355,7 +356,13 @@
       },
       "context": {
         "openInModel": "Open in model"
-      }
+      },
+      "steps": {
+        "sheet": "Add a sheet: paper with a title block.",
+        "viewport": "Take “Viewport” and drag a rectangle: your model appears on the paper.",
+        "finish": "Add text and dimensions, then “Print / PDF”."
+      },
+      "noScenes": "The model has no scenes yet. Save a view in the Scenes panel – or just add a sheet and drag a viewport."
     }
   }
 }

@@ -22,7 +22,7 @@ const REMOTE_ICON =
 const remotePlugin: S3dPlugin = {
   id: 'remote',
   name: 'remote.plugin.name',
-  version: '1.0.0',
+  version: '1.0.1',
   author: 'Shap3D.ai',
   description: 'remote.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },
@@ -37,7 +37,6 @@ const remotePlugin: S3dPlugin = {
       label: 'remote.plugin.name',
       icon: 'remote',
       width: 380,
-      tile: 'last',
       component: S3dRemotePanel,
     });
     context.onDispose(startRemoteConnection(context));

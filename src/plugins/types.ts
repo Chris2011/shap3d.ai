@@ -1,7 +1,8 @@
+import type { PreparedMesh } from '../scripting/preparedMesh';
 import type * as THREE from 'three';
 import type * as Vue from 'vue';
 import type { Component } from 'vue';
-import type { Editor, Tool } from '../engine/editor';
+import type { DialogOption, Editor, Tool } from '../engine/editor';
 import type { PointTool } from '../tools/base';
 import type { Overlay } from '../engine/overlay';
 import type { RunResult, ScriptApi } from '../scripting/api';
@@ -90,6 +91,8 @@ export interface PluginPanel {
    * palette entry or command outside the mode; leaving the mode closes it
    */
   inMode?: boolean;
+  /** no tile: a button in the Materials panel opens it (ready-made materials and the like) */
+  inMaterials?: boolean;
   /** no padding and no scrolling – the component lays itself out (chat, editor) */
   flush?: boolean;
 }
@@ -137,7 +140,9 @@ export interface PluginExporter {
   /** file name including extension, e.g. "stueckliste.csv" */
   fileName: (editor: Editor) => string;
   mimeType?: string;
-  export: (editor: Editor) => Blob | string | Promise<Blob | string>;
+  /** asked before exporting (a choice or a checkbox each) – the answers go to `export` */
+  options?: DialogOption[];
+  export: (editor: Editor, options: Record<string, string | boolean>) => Blob | string | Promise<Blob | string>;
 }
 
 /** A polygon mesh: vertex positions and faces as lists of vertex indices (0-based). */
@@ -267,10 +272,17 @@ export interface PluginContext {
   /** files shipped in the plugin package (folder install), by path relative to its package.json */
   assets: { list: () => string[]; blob: (path: string) => Blob | undefined; url: (path: string) => string };
   meshes: {
+    /**
+     * turns a mesh into faces in a worker, so a big one does not stop the app – hand the result to `add` or `build`.
+     * `scale` and `smooth` are used here, the options of `add` and `build` no longer change them
+     */
+    prepare: (mesh: PluginMesh, options?: PluginMeshOptions) => Promise<PreparedMesh>;
+    /** `prepare` for many meshes at once, in one worker */
+    prepareAll: (list: { mesh: PluginMesh; options?: PluginMeshOptions }[]) => Promise<PreparedMesh[]>;
     /** builds a mesh into `entities` (e.g. `api.ents` inside a script extension); returns the number of faces */
-    build: (entities: Entities, mesh: PluginMesh, options?: PluginMeshOptions) => number;
+    build: (entities: Entities, mesh: PluginMesh | PreparedMesh, options?: PluginMeshOptions) => number;
     /** adds a mesh as a new group to the current context – one undo step */
-    add: (mesh: PluginMesh, options?: PluginMeshOptions) => void;
+    add: (mesh: PluginMesh | PreparedMesh, options?: PluginMeshOptions) => void;
   };
   materials: {
     /** creates the material if the model doesn't have it yet (call inside editor.commit or a script for undo); returns its name */
@@ -287,7 +299,15 @@ export interface PluginContext {
    * a script language (script.registerLanguage) so the code runs in the editor.
    */
   code: { registerFormat: (format: CodeFormat) => Disposer };
-  files: { registerImporter: (importer: PluginImporter) => Disposer; registerExporter: (exporter: PluginExporter) => Disposer };
+  files: {
+    registerImporter: (importer: PluginImporter) => Disposer;
+    registerExporter: (exporter: PluginExporter) => Disposer;
+    /**
+     * opens a file like Import… does: faces in a worker, placed on the ground, one undo step. `onCreated` runs inside that step with
+     * the new group (e.g. to keep data on it) – not for a format a plugin imports itself or a model file, which replaces the model
+     */
+    importFile: (file: File, onCreated?: (instance: Instance) => void) => Promise<void>;
+  };
   overlay: { draw: (draw: (overlay: Overlay, editor: Editor) => void) => Disposer };
   events: {
     onToolChange: (listener: () => void) => Disposer;
@@ -390,6 +410,8 @@ export interface PluginContext {
     image: (request: ViewRequest) => string;
     /** as lines in pixels: visible edges and silhouettes, hidden parts removed (for vector output) */
     lines: (request: ViewRequest) => ViewLines;
+    /** draws over each frame of the 3D view, under what is drawn on top of it – for analysis colours and effects */
+    pass: (draw: (renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => void) => Disposer;
   };
   /**
    * JSON data the plugin keeps on a group/component definition (all its copies), on one instance or on the model –

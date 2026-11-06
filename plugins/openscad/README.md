@@ -32,9 +32,11 @@ In the “OpenSCAD” panel under **Files** you can add single files or whole fo
 - **Fonts for `text()`**: **Liberation Sans** (OpenSCAD's default font), **Liberation Serif** and **Liberation Mono** ship with the plugin, each regular, bold, italic and bold italic – so `text("Hello")` works right away, also e.g. `text("Hello", font = "Liberation Serif:style=Bold")`. Your own `.ttf` or `.otf` files come in through the library (or simply drag them into the window), then `text("Hello", font = "Name of the font")`.
 - **.scad files in the library** can be opened directly (*Open*) or loaded into the script editor (*Editor*). Relative paths then start at the file's folder.
 
-## Any number of `s3d.scad()` calls
+## The app keeps running
 
-An OpenSCAD instance can only compute once, and `s3d.scad()` needs one right away. So before every script run the plugin counts the `s3d.scad()` calls in the code and prepares that many instances. When the calls sit in a loop, the number is only known after the first run: a one-time message says that more instances are being prepared, and from the next run on there are enough (up to 24 calls per run; the learned number is kept).
+OpenSCAD runs in a worker of its own and the faces are made in another, so the app does not stop however long a model takes. OpenSCAD is only loaded when it is needed; a minute after the last compile its memory is free again.
+
+A script that calls `s3d.scad()` cannot wait in the middle: plain strings (`s3d.scad('cube(10);')`) are computed before it starts; code put together while the script runs is computed when the script reaches it, and the script runs again – it is undone in between and only the finished result stays. So the script may run several times; it should not depend on chance (`Math.random()` in the OpenSCAD code). What was computed is remembered for two minutes, by its code.
 
 ## Changes
 
@@ -60,7 +62,8 @@ plugins/openscad/
   vite.config.ts    builds dist/: plugin.js from src/, plus openscad.js, the fonts, README and package.json
   src/
     index.ts        the plugin (id, name, messages, activate)
-    engine.ts       OpenSCAD instances, the file library and compile()
+    engine.ts       the worker, the file library and compile()
+    compileWorker.js  runs OpenSCAD in the worker and reads its OFF file
     scripting.ts    script editor language, code completion and s3d.scad()
     files.ts        .scad/.ttf import, .scad export, "Open as code ▸ OpenSCAD"
     panel.ts        the "OpenSCAD" panel and the command

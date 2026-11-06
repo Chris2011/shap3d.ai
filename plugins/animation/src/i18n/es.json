@@ -103,7 +103,8 @@
         "resize": "Arrastra para hacerla más alta o más baja",
         "summary": "Animado",
         "allKeys": "Todas las claves",
-        "empty": "Aún no hay nada animado. Selecciona un grupo y pulsa I – o elige un movimiento listo en el panel Animación."
+        "empty": "Aún no hay nada animado. Selecciona un grupo y pulsa I – o elige un movimiento listo en el panel Animación.",
+        "keyNeedsSelection": "Selecciona primero un grupo: I recuerda dónde está en este fotograma."
       },
       "graph": {
         "normalize": "Normalizar",
@@ -388,9 +389,10 @@
           },
           "more": {
             "title": "Más para probar",
-            "text": "Las demos muestran trayectorias, piezas dentro de piezas, vuelos de cámara, el sol, luces y colores – abre una en el editor de scripts y ejecútala."
+            "text": "Las demos muestran recorridos, piezas dentro de piezas, vuelos de cámara, el sol, luces y colores: abre una en el editor de scripts y ejecútala. Para figuras con articulaciones, prueba el muñeco con la herramienta Posar de la izquierda."
           }
-        }
+        },
+        "confirmReplace": "Esto sustituye tu modelo actual por la escena de práctica. Ctrl+Z lo recupera. ¿Continuar?"
       },
       "tools": {
         "joint": "Articulación",

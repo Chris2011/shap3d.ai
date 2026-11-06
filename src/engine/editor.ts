@@ -1,7 +1,8 @@
+import { createSnapshotPacker, HISTORY_BUDGET_BYTES, unpackSnapshot, type PackedSnapshot } from './history';
 import * as THREE from 'three';
 import { drawMeasure } from './measureView';
 import { reactive, markRaw } from 'vue';
-import { Model } from '../core/document';
+import { Model, type Label } from '../core/document';
 import type { Entities, EntityRef, Instance } from '../core/model';
 import { Viewer } from './viewer';
 import { InferenceEngine } from './inference';
@@ -79,6 +80,22 @@ export interface UiState {
   toolsRevision: number;
 }
 
+/** a question in `askOptions`: a choice or a checkbox */
+export interface DialogOption {
+  id: string;
+  /** text or message key */
+  label: string;
+  value: string | boolean;
+  /** with these it is a choice, else a checkbox */
+  choices?: { value: string; label: string }[];
+}
+
+interface HistoryEntry {
+  label: string;
+  snap: PackedSnapshot;
+  path: number[];
+}
+
 export class Editor {
   model = new Model();
   viewer!: Viewer;
@@ -111,8 +128,9 @@ export class Editor {
   selection = new Map<string, EntityRef>();
   hover: EntityRef | null = null;
   mouse = { x: 0, y: 0, inside: false };
-  private undoStack: { label: string; snap: any; path: number[] }[] = [];
-  private redoStack: { label: string; snap: any; path: number[] }[] = [];
+  private undoStack: HistoryEntry[] = [];
+  private redoStack: HistoryEntry[] = [];
+  private packSnapshot = createSnapshotPacker();
   private nav: { mode: 'orbit' | 'pan'; x: number; y: number; pivot: THREE.Vector3 | null } | null = null;
   private dirty = true;
   private selDirty = true;
@@ -328,20 +346,31 @@ export class Editor {
         this.settle();
       }
     } catch (error) {
-      console.error(error);
       this.restore(snap, path);
-      this.toast('Fehler: ' + localize((error as Error).message));
+      // a script that waits for something and runs again has not failed
+      if (!(error as { retryAfter?: unknown }).retryAfter) {
+        console.error(error);
+        this.toast(t('editor.error', { message: localize((error as Error).message) }));
+      }
       throw error;
     } finally {
       this.commitDepth--;
     }
-    this.undoStack.push({ label, snap, path });
-    if (this.undoStack.length > 100) {
-      this.undoStack.shift();
-    }
     this.redoStack = [];
+    this.pushUndo(label, snap, path);
     this.changed();
     return result;
+  }
+  /** a new undo step; the oldest ones go when there are too many or they take too much memory */
+  private pushUndo(label: string, snap: any, path: number[]) {
+    this.undoStack.push({ label, snap: this.packSnapshot(snap), path });
+    let bytes = 0;
+    for (const entry of [...this.undoStack, ...this.redoStack]) {
+      bytes += entry.snap.bytes;
+    }
+    while (this.undoStack.length > 1 && (this.undoStack.length > 100 || bytes > HISTORY_BUDGET_BYTES)) {
+      bytes -= this.undoStack.shift()!.snap.bytes;
+    }
   }
   /** inside an undo step (commit or a long-running operation)? */
   changing() {
@@ -374,8 +403,8 @@ export class Editor {
       return;
     }
     this.settle();
-    this.undoStack.push(this.operation);
     this.redoStack = [];
+    this.pushUndo(this.operation.label, this.operation.snap, this.operation.path);
     this.operation = null;
     this.changed();
   }
@@ -391,6 +420,69 @@ export class Editor {
     return !!this.operation;
   }
 
+  /** the text of a label, with the length or area of what it points at where it says `<>` */
+  private labelText(label: Label) {
+    if (!label.source || !label.text.includes('<>')) {
+      return label.text;
+    }
+    label.lastValue = this.measuredValue(label.source) ?? label.lastValue;
+    return label.text.split('<>').join(label.lastValue ?? '?');
+  }
+  private measuredValue({ kind, path, id }: NonNullable<Label['source']>) {
+    let entities = this.model.root;
+    const world = new THREE.Matrix4();
+    for (const instanceId of path) {
+      const instance = entities.instances.get(instanceId);
+      if (!instance) {
+        return undefined;
+      }
+      world.multiply(instance.matrix);
+      entities = instance.definition.entities;
+    }
+    if (kind === 'edge') {
+      const edge = entities.edges.get(id);
+      return edge
+        ? this.fmt(
+            entities
+              .positionOf(edge.start)
+              .clone()
+              .applyMatrix4(world)
+              .distanceTo(entities.positionOf(edge.end).clone().applyMatrix4(world)),
+          )
+        : undefined;
+    }
+    const face = entities.faces.get(id);
+    if (!face) {
+      return undefined;
+    }
+    // how much the groups above stretch this plane
+    const normal = entities.faceNormal(face);
+    const along = new THREE.Vector3(1, 0, 0).cross(normal);
+    if (along.lengthSq() < 1e-6) {
+      along.set(0, 1, 0).cross(normal);
+    }
+    along.normalize();
+    const across = normal.clone().cross(along);
+    const linear = new THREE.Matrix3().setFromMatrix4(world);
+    const factor = along.applyMatrix3(linear).cross(across.applyMatrix3(linear)).length();
+    return this.fmtArea(entities.faceArea(face) * factor);
+  }
+  /** Modal choice of a few options; null when cancelled. */
+  askOptions(title: string, options: DialogOption[]): Promise<Record<string, string | boolean> | null> {
+    return new Promise((resolve) => {
+      this.ui.dialog = {
+        kind: 'options',
+        data: {
+          title,
+          options,
+          resolve: (values: Record<string, string | boolean> | null) => {
+            this.ui.dialog = null;
+            resolve(values);
+          },
+        },
+      };
+    });
+  }
   /** Modal text prompt rendered by the UI. */
   prompt(title: string, value = '', multiline = false): Promise<string | null> {
     return new Promise((resolve) => {
@@ -464,8 +556,12 @@ export class Editor {
     if (!entry) {
       return;
     }
-    this.redoStack.push({ label: entry.label, snap: this.snapshot(), path: this.activePath.map((instance) => instance.id) });
-    this.restore(entry.snap, entry.path);
+    this.redoStack.push({
+      label: entry.label,
+      snap: this.packSnapshot(this.snapshot()),
+      path: this.activePath.map((instance) => instance.id),
+    });
+    this.restore(unpackSnapshot(entry.snap), entry.path);
     this.updateHistoryUi();
     this.toast(t('editor.undone', { action: localize(entry.label) }));
   }
@@ -477,8 +573,12 @@ export class Editor {
     if (!entry) {
       return;
     }
-    this.undoStack.push({ label: entry.label, snap: this.snapshot(), path: this.activePath.map((instance) => instance.id) });
-    this.restore(entry.snap, entry.path);
+    this.undoStack.push({
+      label: entry.label,
+      snap: this.packSnapshot(this.snapshot()),
+      path: this.activePath.map((instance) => instance.id),
+    });
+    this.restore(unpackSnapshot(entry.snap), entry.path);
     this.updateHistoryUi();
     this.toast(t('editor.redone', { action: localize(entry.label) }));
   }
@@ -487,6 +587,18 @@ export class Editor {
     this.ui.canRedo = this.redoStack.length > 0;
     this.ui.undoLabel = this.undoStack[this.undoStack.length - 1]?.label ?? '';
     this.ui.redoLabel = this.redoStack[this.redoStack.length - 1]?.label ?? '';
+  }
+  /** hands over the undo steps, for a model that goes out of view (`modelTabs`) */
+  takeHistory() {
+    const history = { undo: this.undoStack, redo: this.redoStack };
+    this.undoStack = [];
+    this.redoStack = [];
+    return history;
+  }
+  restoreHistory(history: { undo: HistoryEntry[]; redo: HistoryEntry[] }) {
+    this.undoStack = history.undo;
+    this.redoStack = history.redo;
+    this.updateHistoryUi();
   }
   resetHistory() {
     this.undoStack = [];
@@ -748,6 +860,11 @@ export class Editor {
         }
       }
     }
+    if (this.tool.id === 'move' || this.tool.id === 'snappoint') {
+      for (const { position } of this.viewer.snapRecords()) {
+        overlay.marker(position, 'guide');
+      }
+    }
     // dimensions & labels
     for (const dimension of this.model.dimensions) {
       this.drawDimension(overlay, dimension.start, dimension.end, dimension.offset);
@@ -763,7 +880,7 @@ export class Editor {
         overlay.context.arc(tipScreen.x, tipScreen.y, 2, 0, 7);
         overlay.context.fill();
       }
-      overlay.text(anchor, label.text, { background: '#ffffffd9', align: 'left', offsetX: 4 });
+      overlay.text(anchor, this.labelText(label), { background: '#ffffffd9', align: 'left', offsetX: 4 });
     }
     // section planes
     if (this.model.settings.sectionPlanes) {

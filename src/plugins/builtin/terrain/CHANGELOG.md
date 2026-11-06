@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Security
+
+- Texts from language files no longer run as markup in the panel: only simple emphasis stays.
+
 ### Added
 
 - The height grid is a data format of the app (`terrain.grid`, version 1): other plugins read and write it through the plugin API, and hear when a terrain was sculpted.

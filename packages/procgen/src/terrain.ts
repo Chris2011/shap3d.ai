@@ -81,7 +81,9 @@ export const TERRAIN_DEFAULTS: TerrainSettings = {
 
 /** the settings with every gap filled and every number in its range */
 export const normaliseSettings = (settings: Partial<TerrainSettings>): TerrainSettings => {
-  const merged = { ...TERRAIN_DEFAULTS, ...settings };
+  // a value left undefined keeps its default
+  const given = Object.fromEntries(Object.entries(settings).filter(([, value]) => value !== undefined));
+  const merged: TerrainSettings = { ...TERRAIN_DEFAULTS, ...given };
   return {
     ...merged,
     width: Math.max(1, merged.width),

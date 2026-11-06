@@ -4,6 +4,13 @@
 
 ### Changed
 
+- The OpenSCAD panel has a tile in the right-hand bar.
+- Far fewer lines on OpenSCAD models: only edges from about a right angle stay lines (before: from 25°), so gear teeth are no longer a thicket of lines. Faces still show the corners by their shade; _Soften/Smooth_ changes it per object.
+
+- OpenSCAD runs in a worker: the app stays usable while a model is computed – in the script editor, when opening a `.scad` file or a library file, and for `s3d.scad()`. The faces are made in a worker as well (`meshes.prepare` of the app, where it has it).
+- Far less memory: no more prepared OpenSCAD instances. OpenSCAD is not loaded when the app starts but when it is first needed, each compile has its own instance, and a minute after the last one the worker with all of it is gone.
+- `s3d.scad()` has no limit of 24 calls per run and no more _run it again_ message: plain strings are computed before the script starts, other code when the script reaches it, and the script then runs again by itself.
+
 - The built package's `package.json` keeps every `shap3d` field (its display name `shap3d.name`, `minAppVersion` …) – for the plugin catalog and the app's version check.
 
 ## [1.4.1] – 2026-10-25 · Shap3D.ai 0.9.0

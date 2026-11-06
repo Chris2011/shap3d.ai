@@ -35,6 +35,48 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ### Added
 
+- **Text with a live value**: text placed on an edge or a face starts with `<>` – it shows the length or area and follows the model, also when a group above it is scaled. Saved with the model; if the edge or face is gone, the last value stays.
+- **Autosave can be switched off**: _File › Autosave_ (on by default, remembered in the browser). Off, the saved copy is deleted and nothing comes back after a reload.
+- **Import**: a textured material in a glTF, FBX or other file now takes the mean colour of its picture instead of a neutral grey. The picture itself is not imported.
+- **Plugin API**: `files.importFile(file, onCreated?)` opens a file from a plugin like _Import…_; `onCreated` runs inside the undo step with the new group. _(Model marketplace 1.0.0: search public 3D sources and load models)_
+- **Plugin API**: `panels.register({ inMaterials: true })` opens a plugin's panel from a button in the Materials panel instead of a tile. _(Remote API 1.0.1: no tile)_
+- **Search in the plugin manager**: a field filters installed plugins, the catalog and the examples by name, description, author and id.
+- **Several models in tabs**: _File › New tab_ opens another model next to the one shown, each with its own undo steps and view. Tabs show once there is more than one; closing one with unsaved changes asks first. Autosave only covers the tab shown.
+- **Snap points**: the _Snap point_ tool sets points on a group or component. Move docks to them, from one snap point to another; they show while moving. Copies of a component share them.
+- **Attributes**: Entity Info keeps your own names and values on a group or component (a part number, a price), saved with the model.
+- **Physically based materials**: roughness and metal for a material, with pictures for normal, roughness, metal and ambient occlusion, laid out like its texture (Materials panel, in the _textured_ style). glTF export takes the values, not the pictures.
+- **Environments**: an HDR or EXR picture (up to 32 MB) as light, reflections and sky, with its brightness, saved with the model (Styles panel).
+- **Section cuts are filled**: closed things cut by a section plane show a surface instead of a hole; can be switched off in the Styles panel. Open surfaces can give wrong fills; views rendered for plugins are not filled.
+- **The place of the sun**: latitude and north direction in the Shadows panel, saved with the model.
+- **Materials as a cube**: the swatches in the Materials panel can be shown flat or as a small cube.
+- **Plugin API**: `render.pass(draw)` draws over each frame of the 3D view; exporters can ask first (`options`: choices and checkboxes, handed to `export`). _(Import formats 1.2.0: USDZ export, view as SVG)_
+
+### Fixed
+
+- **Curves look and act as one surface**: faces joined by soft edges up to 30° are shaded smoothly instead of as flat strips (cylinders, spheres, gear flanks, imports), and a click or the paint bucket takes the whole surface. The shape stays the same; exports are unchanged.
+- **Hidden soft edges could be clicked**: selecting and erasing took edges that are not drawn. They now only react while hidden geometry is shown.
+- **Stray lines on flat faces of meshes**: merging coplanar triangles left inner edges without a face behind, drawn as loose lines (a fan of them on OpenSCAD gears, also in imports). Merging now removes them, so such a mesh counts as a solid again.
+- **Flat sides of meshes are one face**: a ring (a gear's side with its bore) stayed a C-shaped face plus a loose wedge, which could not be selected or painted with it. Meshes are now merged as a whole, also faster, and a ring becomes one face with a hole.
+- **Round outlines of small parts lost points**: the check for straight lines used a fixed limit, so corners of parts under a few centimetres counted as straight. It is now relative to their size.
+- **Patterns on small parts**: shader and texture materials showed only their colour on small objects, because their pattern is made for about a metre. Without a size of their own they now fit the object in the view. glTF export still bakes the usual size.
+- **The sun was on the wrong side of the sky**: at noon in the north, in the morning in the west. It now rises in the east (red axis) and stands in the south at noon north of the equator, so shadows and the light on faces change in existing models.
+
+### Security
+
+- **The dev server's endpoints** (remote API, MCP, AI proxy, converter) check the Host header against DNS rebinding, accept connections from elsewhere only with the token `S3D_REMOTE_TOKEN` (before, `vite --host` opened them to the network, and any page on another port of this computer got past the origin check) and refuse batches of over 64 messages. _(Remote API 1.0.1)_
+- **`export_model` could write anywhere**: text of the caller's choosing into any file of the computer. It now writes only below `exports/` (or `S3D_EXPORT_DIR`), with the format's file ending, and not through links.
+- **Texts from language files** no longer run as markup in the welcome tour, the AI wizard and the terrain panel: only simple emphasis stays. _(AI assistant, Terrain)_
+- **Scripts** run in a worker without network, storage or `navigator`. Only scripts that call a plugin's `s3d` function go to the main thread – before, any unknown name in a script sent it there, with access to everything.
+- **Links in plugin catalogs** must be web addresses (`javascript:` ran in the app when clicked). The plugin portal too.
+- **Generated code**: a line break in a name can no longer add lines to the code of _Open as code_.
+- **Images in model files** must be stored in the file; an address elsewhere is not loaded.
+- **The built app has a Content Security Policy** without inline scripts, also the desktop app (which had none) and the Docker image, which sends further security headers. The dev container drops its capabilities.
+- **The screenshot mode of the dev server** only runs files below `/plugins/` – a link to it could run any script from anywhere.
+- **Blender** converts `.blend` files with `--disable-autoexec`, two conversions at a time.
+- New: [SECURITY.md](SECURITY.md) – what can be attacked, what counts as code, how to report a problem.
+
+### Added
+
 - **Procedures – modelling you can change later**: _Union_, _Subtract_, _Intersect_ and _Outer shell_, _Follow me_ and the new tool _Copy along_ make a procedural group that keeps what it was made from. Entity Info shows its settings – the operation, the number of copies or their spacing, turning along the path – and the result follows at once. Opening the group (double-click, or _Edit inputs_) shows its inputs instead of its result, to be edited with any tool; the result is built again in the same undo step. A procedure can be used as an input of another one. _Explode to inputs_ gives the inputs back as ordinary groups, _Explode_ keeps the result. If a build fails, the last result stays and Entity Info says why. Saved with the model.
 - **Copy along**: select groups or components and click a path – a line of edges or a group of edges. Type the number of copies (`7x`) or a spacing afterwards.
 - **Moving from an outline edge**: with _Move_, a group or component can be picked up at its outline as the camera sees it (orange, _On outline_) – also round things, whose outline is no real edge. While it moves it is see-through, so what lies behind it can be seen and snapped to; afterwards it looks as before.
@@ -48,13 +90,30 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ### Changed
 
+- **No stray lines on imported meshes**: flat areas of OpenSCAD results, imported files and solid tool results no longer show leftover lines where faces in one plane could not be merged.
+- **Undo takes far less memory**: undo steps are kept as text, groups that did not change share it, and the oldest steps go when the history passes 256 MB. Autosave no longer writes out a model again and again that does not fit into the browser's storage.
+- **Importing and changing big meshes no longer stops the app**: the faces of imported files (STL, OBJ, glTF, Collada, FBX …) and _More polygons_ and _Fewer polygons_ in the Mesh panel run in a worker. Reading a file stays on the main thread.
+- **Drawing takes less memory and time**: copies of a component with the same look share geometry and materials, instead of each having its own, and so do the front and back of faces (positions and normals). A copy that looks different for a while (`display.look`) gets its own colours only then.
+- **Picking on big models is fast**: points and edges are only looked at in groups near the cursor, and their records are made when needed – not for the whole model with every change. Big meshes are picked through a tree.
+- **Images no material uses any more** leave memory and the graphics card.
+- **Plugin API**: `meshes.prepare(mesh, options)` and `meshes.prepareAll(list)` make the faces of big meshes in a worker, the result goes into `meshes.add` or `meshes.build`. A script extension can throw an error with `retryAfter: promise`: the script is undone without a message and runs again when the promise is done.
 - **Mode switch centred**: the switch _Model | …_ (plugin modes and workspaces such as physics or layout) sits on its own at the top centre, apart from the bar with the model name, undo and redo; the active mode is filled in blue.
 - **Solid tools keep their inputs**: _Union_, _Subtract_, _Intersect_ and _Outer shell_ now make a procedure instead of replacing the solids for good; it takes the target's place, name, tag and data. Several solids work at once: _Subtract_ takes all the others from the one selected last. _Trim_ and _Split_ still replace the solids, but their pieces keep the same details.
 - **Solid tools keep the structure**: _Subtract_, _Intersect_, _Trim_ and _Split_ cut each group inside a solid on its own, so a wall made of parts stays made of parts, with their names, tags, materials and data; a component the tool does not reach stays that component. A group made only of solids now counts as a solid. _Union_ and _Outer shell_ melt the parts into one, as they must. Tags on single faces are not kept. _Follow me_ makes a procedure from a loose path and a profile on its own; on edges of a solid (rounding a box) it works on the geometry as before.
 - **Undo and redo end a running action first**: in the middle of an action they cancel it (with a message, the status line follows) and leave the history as it is; the next press goes on as usual. This also works with an empty history – the buttons are enabled then and say _Cancel the current action_ – and for placing a component, erasing, the lasso and dragging a selection box.
 
+- **Plainer words for beginners**: the status line, messages and Entity Info say things in everyday words ("keep to a direction" instead of inference, "closed body" with what makes one, "Made from" and "Take apart into its parts" for procedures). A message that a solid tool cannot be used now says why. The German texts address people the same way everywhere.
+- The status line and the measurements box at the bottom are hidden while a workspace of a plugin is open: they belong to the 3D tools.
+
+- **Opening files says what to do**: an unknown type, a SketchUp or Blender file without the converter and a damaged file each say so in a sentence and what to do instead, without internal error texts or commands for developers in the first place.
+- **Script errors are short**: the mistake and its line instead of the app's stack, and a mistyped command names the one probably meant (`s3d.bx does not exist. Did you mean s3d.box?`).
+- Greyed-out buttons in Tags and Soften say why, and the Tags panel says what tags are for.
+
 ### Fixed
 
+- A new model starts with its name in the chosen language instead of English.
+- Undo labels of the polygon tools and the error message of a failed step followed no language.
+- Tool buttons have names for screen readers.
 - <kbd>Ctrl</kbd>+<kbd>Z</kbd> and other shortcuts with <kbd>Ctrl</kbd> no longer switch what <kbd>Ctrl</kbd> alone switches in a tool: _Move_ stayed on copying after <kbd>Ctrl</kbd>+<kbd>Z</kbd>, and _Tape measure_ and _Push/Pull_ changed their mode.
 - <kbd>Ctrl</kbd>+<kbd>Y</kbd> in the middle of a move no longer redoes a step under the running action.
 - _Trim_ and _Split_ with more than two solids selected no longer delete the others: they use the first two and leave the rest alone.

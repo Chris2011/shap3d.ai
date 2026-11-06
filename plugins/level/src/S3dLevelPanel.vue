@@ -12,6 +12,7 @@
             class="s3d-lv-kind"
             :class="{ active: state.placing === spec.kind }"
             :style="{ '--s3d-lv-colour': spec.colour }"
+            :title="t(`level.kindHints.${spec.kind}`)"
             @click="choose(spec.kind)"
           >
             <span class="s3d-lv-swatch" />

@@ -112,7 +112,7 @@ npm run build
 
 Then in Shap3D.ai: _Plugins › Load plugin folder…_ and pick `plugins/physics/dist` (`plugin.js`, `rapier.js`, the README and the licence notes).
 
-Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n` (texts in all languages). Screenshots: start the dev server in the repository root (`npm run dev`), build the package, then `npm run screenshots` (`--url`, `--only <name>`).
+Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n` (texts in all languages). Screenshots: start the dev server in the repository root (`npm run dev`), build the package, then `npm run screenshots -- physics` in the repository root (`--only <name>`). The package lists them under `screenshots` in its `package.json`.
 
 ## How it works
 

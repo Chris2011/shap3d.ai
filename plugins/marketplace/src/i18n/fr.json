@@ -1,0 +1,93 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "marketplace": {
+      "plugin": {
+        "name": "Place de marché de modèles",
+        "description": "Cherchez dans des sources 3D publiques, voyez l’aperçu, l’auteur et la licence, et chargez un modèle dans le modèle actuel."
+      },
+      "commands": {
+        "open": "Place de marché de modèles"
+      },
+      "panel": {
+        "title": "Place de marché de modèles",
+        "search": "Rechercher",
+        "source": "Source",
+        "placeholder": "Que cherchez-vous ? p. ex. chair (chaise)",
+        "placePlaceholder": "Un lieu ou une adresse, p. ex. Place Bellecour Lyon",
+        "searching": "Recherche…",
+        "nothing": "Rien trouvé. Essayez un autre mot, si possible en anglais.",
+        "more": "Afficher plus",
+        "privacy": "Rien n’est envoyé avant votre recherche. Une recherche va à {source}.",
+        "poweredBy": "Modèles fournis par {source}.",
+        "untested": "Pas encore testé avec une vraie clé. Si quelque chose échoue, dites-le-nous."
+      },
+      "key": {
+        "short": "clé",
+        "forSearch": "{source} ne répond qu’avec votre propre clé.",
+        "forDownload": "La recherche fonctionne sans clé. Pour charger un modèle, {source} demande votre propre jeton d’API.",
+        "get": "Obtenir une clé",
+        "label": "Votre clé",
+        "stored": "La clé reste dans ce navigateur et ne va qu’à cette source."
+      },
+      "category": {
+        "furniture": "Meubles",
+        "buildings": "Bâtiments",
+        "plants": "Plantes",
+        "animals": "Animaux",
+        "people": "Personnes",
+        "vehicles": "Véhicules",
+        "objects": "Objets"
+      },
+      "item": {
+        "back": "‹ Retour aux résultats",
+        "source": "Source",
+        "author": "Auteur",
+        "license": "Licence",
+        "licenseUnknown": "inconnue",
+        "licenseOnClick": "Licence : cliquez pour voir",
+        "triangles": "Triangles",
+        "open": "Ouvrir à la source",
+        "load": "Charger dans le modèle",
+        "cancel": "Annuler",
+        "linkOnly": "{source} n’autorise les téléchargements qu’avec une connexion sur son site. Ouvrez la page, téléchargez le fichier et importez-le.",
+        "places": "Charge les bâtiments dans un rayon de {radius} m sous forme de blocs simples, avec les hauteurs connues de la carte."
+      },
+      "license": {
+        "free": "Libre pour tout usage ; aucune mention requise.",
+        "attribution": "Citez l’auteur et respectez la licence si vous partagez ou vendez votre travail. Certaines licences interdisent l’usage commercial ou les modifications : lisez-la d’abord.",
+        "unknown": "La licence n’est pas encore connue. Vérifiez la page à la source avant d’utiliser le modèle."
+      },
+      "load": {
+        "starting": "Demande en cours, cela peut prendre un moment…",
+        "building": "Création des faces…",
+        "received": "{size} Mo reçus…",
+        "millimetres": "Le fichier n’a pas d’unité et semblait trop grand en mètres : il a été lu en millimètres."
+      },
+      "credits": {
+        "tab": "Dans ce modèle",
+        "hint": "L’auteur et la licence restent avec chaque modèle chargé, aussi dans le fichier enregistré. Les exports vers d’autres formats ne les emportent pas : copiez-les si vous transmettez le travail.",
+        "empty": "Rien de chargé depuis une source pour l’instant.",
+        "copy": "Copier toutes les mentions",
+        "copied": "Mentions copiées."
+      },
+      "errors": {
+        "network": "{source} est injoignable. Êtes-vous en ligne ? Le service n’autorise peut-être pas les appels depuis une page web.",
+        "auth": "{source} refuse l’accès. Vérifiez votre clé.",
+        "rate": "{source} a reçu trop de demandes. Réessayez plus tard.",
+        "server": "{source} a un problème en ce moment. Réessayez plus tard.",
+        "noBuildings": "La carte ne connaît aucun bâtiment autour de ce lieu.",
+        "noFile": "{source} ne propose pour ce modèle aucun fichier chargeable ici.",
+        "tooLarge": "Le modèle dépasse {limit} Mo et n’a pas été chargé.",
+        "noModel": "Le téléchargement ne contient aucun modèle dans un format chargeable ici.",
+        "broken": "Le fichier téléchargé est endommagé.",
+        "compressed": "Ce modèle est compressé d’une façon qui ne peut pas encore être lue.",
+        "remote": "Le fichier renvoie à une adresse extérieure et n’a pas été ouvert.",
+        "missingPart": "Une partie du modèle manque dans le téléchargement.",
+        "format": "Le fichier a un format illisible ici."
+      }
+    }
+  }
+}

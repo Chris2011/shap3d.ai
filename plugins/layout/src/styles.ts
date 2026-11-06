@@ -35,6 +35,7 @@ const CSS = `
 .s3d-lo-handle { fill: #fff; stroke: #1d4ed8; stroke-width: 0.4; pointer-events: all; cursor: nwse-resize; }
 .s3d-lo-draft { fill: rgba(29, 78, 216, 0.06); stroke: #1d4ed8; stroke-width: 0.35; stroke-dasharray: 1.2 0.8; }
 .s3d-lo-empty { text-align: center; color: var(--s3d-text-2); }
+.s3d-lo-steps { display: inline-block; margin: 0 0 0.75rem; padding-left: 1.25rem; text-align: start; }
 .s3d-lo-empty .s3d-lo-side-actions { justify-content: center; }
 .s3d-lo-status { padding: 0.25rem 0.75rem; font-size: 0.75rem; color: var(--s3d-text-2); background: var(--s3d-panel); border-top: 1px solid var(--s3d-line); }
 .s3d-lo-field { display: flex; align-items: center; gap: 0.5rem; margin: 0.125rem 0; }

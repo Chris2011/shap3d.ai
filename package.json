@@ -12,6 +12,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "screenshots": "node scripts/screenshots.mjs",
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build",
     "lint": "oxlint src scripts",

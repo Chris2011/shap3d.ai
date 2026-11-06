@@ -1,0 +1,48 @@
+{
+  "name": "s3d-plugin-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Model marketplace for Shap3D.ai: search public 3D sources (Poly Haven, Wikimedia Commons, OpenStreetMap buildings, Sketchfab, Thingiverse, MyMiniFactory), see preview, author and licence, and load a model into the current model with its credits kept on it.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "test": "node --test test/*.test.ts"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "marketplace",
+    "name": "Model marketplace",
+    "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/marketplace.png"
+  },
+  "screenshots": [
+    {
+      "name": "marketplace",
+      "file": "demo.js",
+      "command": "marketplace.open",
+      "step": [
+        "search:modern arm chair",
+        "click:Modern Arm Chair",
+        "click:Ins Modell laden",
+        "click:‹",
+        "search:chair",
+        "wait:9000"
+      ]
+    }
+  ]
+}

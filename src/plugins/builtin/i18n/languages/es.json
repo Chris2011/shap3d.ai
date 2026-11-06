@@ -108,7 +108,9 @@
       "view-left": "Izquierda",
       "view-bottom": "Inferior",
       "toggleSnapping": "Ajuste",
-      "explodeToInputs": "Descomponer en entradas"
+      "explodeToInputs": "Separar en sus partes",
+      "newTab": "Nueva pestaña",
+      "toggleAutosave": "Guardado automático (en el navegador)"
     },
     "names": {
       "model": "Modelo",
@@ -121,10 +123,10 @@
       "sectionNumbered": "Sección {number}"
     },
     "import": {
-      "converterUnreachable": "No se puede acceder al conversor local – inicia la app con «npm run dev» o «npm run preview».",
-      "needsLocalServer": "Los archivos .skp y .blend solo funcionan con el servidor local («npm run dev» o «npm run preview»).",
+      "converterUnreachable": "Los archivos de SketchUp y Blender necesitan un conversor local que aquí no está en marcha. Guarda el archivo como glTF, FBX u OBJ en el otro programa y abre ese. (Desarrolladores: inicia la app con «npm run dev».)",
+      "needsLocalServer": "Los archivos de SketchUp y Blender necesitan un conversor local que aquí no está en marcha. Guarda el archivo como glTF, FBX u OBJ en el otro programa y abre ese. (Desarrolladores: inicia la app con «npm run dev».)",
       "conversionFailed": "Error de conversión (HTTP {status})",
-      "unsupported": "El formato .{ext} no es compatible – más formatos (FBX, Collada, 3DS, Blender …) los aporta el plugin «Formatos de importación» (Plugins › Administrar plugins).",
+      "unsupported": "Los archivos .{ext} no se pueden abrir. Guarda el archivo como glTF, OBJ o STL en el otro programa y abre ese.",
       "unknownJson": "Formato JSON desconocido",
       "maxFile": "Solo 3ds Max puede leer los archivos de 3ds Max (.max) – guárdalos allí con Archivo › Exportar como FBX (o .3ds/.obj) e importa ese archivo.",
       "detectedMillimetres": "milímetros detectados",
@@ -134,7 +136,10 @@
       "groups": "{count} grupo | {count} grupos",
       "materials": "{count} material | {count} materiales",
       "skipped": "{count} triángulo por encima del límite omitido | {count} triángulos por encima del límite omitidos",
-      "part": "parte"
+      "part": "parte",
+      "morePlugin": "El plugin Formatos de importación (Plugins) añade FBX, Collada, 3DS y más.",
+      "unreadable": "No se pudo leer «{name}»: quizá está dañado o no es lo que dice su extensión.",
+      "skpNeedsSdk": "Los archivos de SketchUp no se pueden abrir aquí directamente. En SketchUp, exporta el modelo como DAE o glTF y abre ese archivo. (Desarrolladores: hace falta el SDK de SketchUp en tools/sketchup-sdk.)"
     },
     "units": {
       "centimetres": "Centímetros",
@@ -192,15 +197,18 @@
       "tagsToScenes": "Etiquetas a escenas",
       "nudge": "Mover con las flechas",
       "roundCorner": "Redondear esquina",
-      "unroundCorner": "Recuperar esquina"
+      "unroundCorner": "Recuperar esquina",
+      "snapPoint": "Cambiar punto de anclaje",
+      "attribute": "Cambiar atributo",
+      "environment": "Cambiar entorno"
     },
     "toast": {
       "nothingSelected": "No hay nada seleccionado",
       "cut": "Cortado",
       "copied": "Copiado",
       "selectTwoFaces": "Selecciona al menos dos caras.",
-      "selectTwoSolids": "Selecciona dos grupos o componentes (sólidos).",
-      "notASolid": "«{name}» no es un sólido.",
+      "selectTwoSolids": "Selecciona al menos dos grupos o componentes que sean cuerpos cerrados.",
+      "notASolid": "«{name}» no es un cuerpo cerrado: cada arista debe tocar exactamente dos caras, sin agujeros ni líneas sueltas.",
       "solidFailed": "La operación con sólidos falló: {error}",
       "alreadyEmpty": "El área de trabajo ya está vacía",
       "cleared": "Área de trabajo vaciada – Ctrl+Z lo recupera todo",
@@ -215,7 +223,8 @@
       "snappingOff": "Ajuste desactivado – los puntos quedan donde está el cursor (F3)",
       "roundCornerTwoEdges": "Solo se puede redondear una esquina de exactamente dos aristas.",
       "roundCornerTooShort": "Las aristas de esta esquina son demasiado cortas para ese redondeo.",
-      "unroundNoCorner": "Este arco no está entre dos aristas rectas que se unen en una esquina."
+      "unroundNoCorner": "Este arco no está entre dos aristas rectas que se unen en una esquina.",
+      "snapPointNeedsGroup": "Los puntos de anclaje pertenecen a un grupo o componente. Haz clic en uno."
     },
     "confirm": {
       "discardChanges": "¿Descartar los cambios no guardados?",
@@ -226,7 +235,8 @@
     "prompt": {
       "componentName": "Nombre del componente",
       "enterText": "Introducir texto",
-      "scriptName": "Nombre del script"
+      "scriptName": "Nombre del script",
+      "enterTextLive": "Escribe el texto (<> es el valor medido y sigue al modelo)"
     },
     "groups": {
       "file": "Archivo",
@@ -336,7 +346,8 @@
         "walk": "Arrastra arriba/abajo para caminar, izquierda/derecha para girar. Las flechas también funcionan.",
         "poscam": "Haz clic para situar allí la cámara a la altura de los ojos.",
         "copyAlongSource": "Selecciona los grupos o componentes que quieres copiar y haz clic en un recorrido.",
-        "copyAlongPath": "Haz clic en el recorrido: una línea de aristas o un grupo de aristas. Luego escribe un número de copias (7x) o una separación."
+        "copyAlongPath": "Haz clic en el recorrido: una línea de aristas o un grupo de aristas. Luego escribe un número de copias (7x) o una separación.",
+        "snappoint": "Haz clic en un punto de un grupo o componente: los demás se anclan a él al moverlos. Un clic en un punto de anclaje lo elimina."
       },
       "hints": {
         "square": "Cuadrado",
@@ -350,7 +361,8 @@
         "sameDistance": "Misma distancia a la esquina",
         "copyAlongPath": "Copiar a lo largo de este recorrido"
       },
-      "copyalong": "Copiar a lo largo"
+      "copyalong": "Copiar a lo largo",
+      "snappoint": "Punto de anclaje"
     },
     "editor": {
       "undone": "Deshecho: {action}",
@@ -360,7 +372,8 @@
       "faces": "{count} cara | {count} caras",
       "edges": "{count} arista | {count} aristas",
       "instances": "{count} grupo/componente | {count} grupos/componentes",
-      "actionCancelled": "Acción cancelada"
+      "actionCancelled": "Acción cancelada",
+      "error": "Error: {message}"
     },
     "inference": {
       "onRedAxis": "En el eje rojo",
@@ -383,7 +396,8 @@
       "extension": "En la prolongación de la arista",
       "fromPoint": "Desde el punto",
       "radiusOnFace": "Desde el radio en la cara",
-      "onProfile": "En el contorno"
+      "onProfile": "En el contorno",
+      "snapPoint": "Punto de anclaje"
     },
     "measure": {
       "grid": "Cuadrícula"
@@ -684,7 +698,17 @@
       "used": "Usado",
       "delete": "Eliminar material",
       "new": "Nuevo material",
-      "create": "Crear"
+      "create": "Crear",
+      "previewFlat": "Plano",
+      "previewCube": "Cubo",
+      "previewTitle": "Vista previa de los materiales",
+      "physical": "Físico (PBR)",
+      "roughness": "Rugosidad",
+      "metalness": "Metal",
+      "mapNormal": "Mapa de normales",
+      "mapAo": "Oclusión ambiental",
+      "loadMap": "Cargar imagen…",
+      "removeMap": "Quitar imagen"
     },
     "tags": {
       "add": "Añadir etiqueta",
@@ -697,7 +721,9 @@
       "toScenesVisible": "«{tag}» está visible – mostrarla en estas escenas:",
       "toScenesHidden": "«{tag}» está oculta – ocultarla en estas escenas:",
       "apply": "Aplicar",
-      "appliedToScenes": "«{tag}» aplicada a {count} escena | «{tag}» aplicada a {count} escenas"
+      "appliedToScenes": "«{tag}» aplicada a {count} escena | «{tag}» aplicada a {count} escenas",
+      "selectFirst": "Selecciona algo primero y haz clic para darle la etiqueta marcada.",
+      "scenesFirst": "El modelo aún no tiene escenas: añade una en el panel Escenas."
     },
     "scenes": {
       "add": "Añadir escena",
@@ -720,13 +746,16 @@
       "hint": "Suaviza las aristas entre caras de la selección cuyo ángulo sea menor que el valor ajustado.",
       "coplanar": "Suavizar coplanares",
       "apply": "Aplicar a la selección",
-      "reset": "Restablecer"
+      "reset": "Restablecer",
+      "selectFirst": "Selecciona primero caras o un grupo."
     },
     "shadows": {
       "show": "Mostrar sombras",
       "time": "Hora",
       "date": "Fecha",
-      "hint": "La posición del sol se calcula para unos 48° de latitud norte. Incluso sin sombras determina la iluminación de las caras."
+      "hint": "El sol sigue el lugar indicado aquí. Incluso sin sombras determina la iluminación de las caras.",
+      "latitude": "Latitud",
+      "north": "Norte (desde el eje verde)"
     },
     "outliner": {
       "filter": "Filtrar",
@@ -789,7 +818,14 @@
         "sketch": "Boceto",
         "night": "Noche",
         "white": "Blanco"
-      }
+      },
+      "environment": "Entorno (HDR, EXR)",
+      "environmentLoad": "Cargar…",
+      "environmentRemove": "Quitar el entorno",
+      "environmentBackground": "También como cielo",
+      "environmentIntensity": "Brillo",
+      "environmentTooBig": "El archivo supera los 32 MB.",
+      "sectionFill": "Rellenar secciones"
     },
     "instructor": {
       "select": {
@@ -992,7 +1028,11 @@
       "edge": "Arista",
       "solidComponent": "Componente sólido",
       "solidGroup": "Grupo sólido",
-      "elements": "{count} entidades ({summary})"
+      "elements": "{count} entidades ({summary})",
+      "attributes": "Atributos",
+      "attributeAdd": "Añadir atributo…",
+      "attributeRemove": "Quitar atributo",
+      "attributeName": "Nombre del atributo"
     },
     "shapes": {
       "cylinder": "Cilindro",
@@ -1039,7 +1079,10 @@
       "noMesh": "No se encontró ninguna malla – se esperan líneas como «v 1 2 3» y «f 1 2 3».",
       "invalidCoordinates": "Coordenadas no válidas en la malla",
       "imported": "{vertices} vértices, {faces} caras importados",
-      "fewAlready": "El objeto ya tiene muy pocos polígonos."
+      "fewAlready": "El objeto ya tiene muy pocos polígonos.",
+      "undoCircle": "Círculo: {count} segmentos",
+      "undoSubdivide": "Más polígonos",
+      "undoSubdivideRound": "Más polígonos (redondeado)"
     },
     "tour": {
       "welcome": {
@@ -1545,7 +1588,9 @@
       "confirmCommunity": "¿Instalar «{name}» de {author}? No viene del repositorio de Shap3D.ai y, como todo plugin, tiene acceso completo a la aplicación. Instálalo solo si confías en su origen.\n\n{url}",
       "confirmUrlInstall": "¿Instalar el plugin de esta dirección? Los plugins tienen acceso completo a la aplicación – instálalo solo si confías en su origen.\n\n{url}",
       "preview": "Vista previa",
-      "previewTitle": "Aún no publicado – construido desde la rama main del repositorio de Shap3D.ai, una vista previa de su próxima versión"
+      "previewTitle": "Aún no publicado – construido desde la rama main del repositorio de Shap3D.ai, una vista previa de su próxima versión",
+      "search": "Buscar plugins",
+      "noMatch": "Ningún plugin coincide."
     },
     "scriptEditor": {
       "loadExample": "Cargar ejemplo…",
@@ -1651,7 +1696,10 @@
         "async": "Los scripts asíncronos no se admiten – «await» se ignora.",
         "needsText3d": "El texto 3D necesita el plugin «Texto 3D» (administrador de plugins)",
         "unknownType": "Tipo de objeto desconocido: {type}",
-        "languageExists": "El lenguaje de script «{id}» ya existe"
+        "languageExists": "El lenguaje de script «{id}» ya existe",
+        "unknownCommand": "s3d.{name} no existe.",
+        "didYouMean": "¿Querías decir s3d.{name}?",
+        "line": "(línea {line})"
       }
     },
     "codeExport": {
@@ -1700,8 +1748,8 @@
       "count": "Copias",
       "spacing": "Separación",
       "align": "Girar a lo largo del recorrido",
-      "inputs": "Entradas",
-      "editInputs": "Editar entradas",
+      "inputs": "Hecho de",
+      "editInputs": "Editar sus partes",
       "editHint": "Ábrelo para editar sus grupos de entrada; el resultado se actualiza al salir. La geometría dibujada directamente dentro se sustituye con el siguiente resultado.",
       "undoParams": "Cambiar procedimiento",
       "names": {

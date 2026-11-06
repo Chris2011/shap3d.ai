@@ -7,6 +7,17 @@
     </div>
   </div>
   <input v-model="filter" class="s3d-input" :placeholder="t('materials.search')" />
+  <button v-for="panel in materialPanels" :key="panel.id" class="s3d-btn small mt-1.5" @click="showPanel(panel.id)">
+    {{ panel.label }} …
+  </button>
+  <div class="mt-1.5 flex items-center justify-end gap-1 text-[0.6875rem]" :title="t('materials.previewTitle')">
+    <button class="s3d-btn small" :class="{ primary: !previewAsCube }" @click="previewShape = 'flat'">
+      {{ t('materials.previewFlat') }}
+    </button>
+    <button class="s3d-btn small" :class="{ primary: previewAsCube }" @click="previewShape = 'cube'">
+      {{ t('materials.previewCube') }}
+    </button>
+  </div>
   <div class="my-2.5 grid grid-cols-[repeat(6,1fr)] gap-1.5">
     <div
       class="flex aspect-square cursor-pointer items-end justify-center rounded-[3px] border border-line-2 bg-[linear-gradient(135deg,var(--s3d-bg)_50%,#a4b2bf_50%)] text-[0.5625rem] text-[#333]"
@@ -19,12 +30,21 @@
     <div
       v-for="material in list"
       :key="material.name"
-      class="aspect-square cursor-pointer rounded-[3px] border border-line-2"
-      :class="{ [SELECTED_OUTLINE]: editor.ui.currentMaterial === material.name }"
-      :style="swatchStyle(material)"
+      class="relative aspect-square cursor-pointer rounded-[3px]"
+      :class="[{ [SELECTED_OUTLINE]: editor.ui.currentMaterial === material.name }, previewAsCube ? '' : 'border border-line-2']"
+      :style="previewAsCube ? undefined : swatchStyle(material)"
       :title="material.name"
       @click="choose(material.name)"
-    ></div>
+    >
+      <template v-if="previewAsCube">
+        <span
+          v-for="side in CUBE_SIDES"
+          :key="side.clip"
+          class="absolute inset-0"
+          :style="{ ...swatchStyle(material), clipPath: side.clip, filter: side.light }"
+        ></span>
+      </template>
+    </div>
   </div>
 
   <template v-if="cur">
@@ -73,6 +93,28 @@
         </optgroup>
       </select>
     </div>
+    <div v-if="!shader" class="s3d-section-title">{{ t('materials.physical') }}</div>
+    <template v-if="!shader">
+      <div v-for="value in PBR_VALUES" :key="value.key" class="s3d-row">
+        <span class="s3d-label">{{ t(value.label) }}</span
+        ><input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          class="flex-1"
+          :value="cur[value.key] ?? value.standard"
+          @input="setPbrValue(value.key, +($event.target as HTMLInputElement).value)"
+        /><span class="w-9 text-end tabular-nums">{{ (cur[value.key] ?? value.standard).toFixed(2) }}</span>
+      </div>
+      <div v-for="map in PBR_MAPS" :key="map.key" class="s3d-row">
+        <span class="s3d-label">{{ t(map.label) }}</span>
+        <button class="s3d-btn small" @click="loadMap(map.key)">
+          {{ cur.maps?.[map.key] ? t('materials.replaceImage') : t('materials.loadMap') }}
+        </button>
+        <button v-if="cur.maps?.[map.key]" class="s3d-btn small" :title="t('materials.removeMap')" @click="removeMap(map.key)">×</button>
+      </div>
+    </template>
     <div v-if="cur.image" class="s3d-row">
       <span class="s3d-label"></span><button class="s3d-btn small" @click="loadImage">{{ t('materials.replaceImage') }}</button>
     </div>
@@ -159,11 +201,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useEditor } from '../keys';
-import type { MaterialDef } from '../../core/document';
+import type { MaterialDef, MaterialMapKind } from '../../core/document';
 import type { Entities } from '../../core/model';
 import { TEXTURES, defaultTextureSize } from '../../core/textures';
 import { SURFACE_SHADERS, materialShader, shaderParam, shaderSize, type SurfaceShaderParam } from '../../engine/surfaceShaders';
 import { swatchStyle } from '../../utils/materialSwatch';
+import { PANEL_INFO, showPanel } from '../panelState';
+import { useLocalStorage } from '@vueuse/core';
 import { parseLength } from '../../core/units';
 import { pickFile } from '../../engine/commands';
 import { readImageFile } from '../../utils/imageFile';
@@ -172,6 +216,25 @@ import { t, localize, formatNumber } from '../../i18n';
 
 const editor = useEditor();
 const SELECTED_OUTLINE = 'outline-2 outline-offset-1 outline-blue';
+const materialPanels = computed(() => PANEL_INFO.filter((panel) => panel.inMaterials));
+const PBR_VALUES = [
+  { key: 'roughness', label: 'materials.roughness', standard: 0.8 },
+  { key: 'metalness', label: 'materials.metalness', standard: 0 },
+] as const;
+const PBR_MAPS = [
+  { key: 'normal', label: 'materials.mapNormal' },
+  { key: 'roughness', label: 'materials.roughness' },
+  { key: 'metalness', label: 'materials.metalness' },
+  { key: 'ao', label: 'materials.mapAo' },
+] as const;
+/** the swatches as a flat square or a small cube – remembered in the browser */
+const previewShape = useLocalStorage<'flat' | 'cube'>('s3d:material-preview', 'flat');
+const previewAsCube = computed(() => previewShape.value === 'cube');
+const CUBE_SIDES = [
+  { clip: 'polygon(50% 4%, 94% 27%, 50% 50%, 6% 27%)', light: 'brightness(1.1)' },
+  { clip: 'polygon(6% 27%, 50% 50%, 50% 96%, 6% 73%)', light: 'brightness(0.85)' },
+  { clip: 'polygon(94% 27%, 50% 50%, 50% 96%, 94% 73%)', light: 'brightness(0.65)' },
+];
 const filter = ref('');
 const newName = ref('');
 const newColor = ref('#c08040');
@@ -274,6 +337,28 @@ const setSurface = (value: string, select?: HTMLSelectElement) => {
   }
   editor.invalidate();
   editor.ui.saved = false;
+};
+const setPbrValue = (key: 'roughness' | 'metalness', value: number) => {
+  if (cur.value) {
+    cur.value[key] = value;
+    editor.invalidate();
+    editor.ui.saved = false;
+  }
+};
+const loadMap = async (key: MaterialMapKind) => {
+  const file = await pickFile('image/*');
+  if (file && cur.value) {
+    cur.value.maps = { ...cur.value.maps, [key]: (await readImageFile(file)).url };
+    editor.invalidate();
+    editor.ui.saved = false;
+  }
+};
+const removeMap = (key: MaterialMapKind) => {
+  if (cur.value?.maps) {
+    delete cur.value.maps[key];
+    editor.invalidate();
+    editor.ui.saved = false;
+  }
 };
 const setParam = (param: SurfaceShaderParam, value: number | string) => {
   const material = cur.value;

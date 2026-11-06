@@ -8,8 +8,21 @@
   </div>
   <label class="s3d-check"><input type="checkbox" v-model="coplanar" /> {{ t('soften.coplanar') }}</label>
   <div class="mt-2 flex gap-1.5">
-    <button class="s3d-btn small" :disabled="!editor.selection.size" @click="apply">{{ t('soften.apply') }}</button
-    ><button class="s3d-btn small" :disabled="!editor.selection.size" @click="clear">{{ t('soften.reset') }}</button>
+    <button
+      class="s3d-btn small"
+      :disabled="!editor.selection.size"
+      :title="editor.selection.size ? '' : t('soften.selectFirst')"
+      @click="apply"
+    >
+      {{ t('soften.apply') }}</button
+    ><button
+      class="s3d-btn small"
+      :disabled="!editor.selection.size"
+      :title="editor.selection.size ? '' : t('soften.selectFirst')"
+      @click="clear"
+    >
+      {{ t('soften.reset') }}
+    </button>
   </div>
 </template>
 

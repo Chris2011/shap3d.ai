@@ -17,7 +17,7 @@ The plugin is a package of its own with its own `package.json` and is **not** pa
 ## Features
 
 - **Simple and advanced**: the Animation panel opens in its **simple view** – Play, three steps to a first movement (a frame, a place, the I key), _Key every change_, **ready-made movements** (spin, bounce, swing, pulse, fade in and out, appear, disappear, follow a path), a camera where the view is or one that flies around the model or towards it, and the film. _Advanced_ shows every value: the scene's frame rate and range, the selected group's channels with a key diamond each, its pivot, path and look-at, cameras and shots, the sun, lights, material colours.
-- **Keys**: **I** keys the selected groups where they are shown (their place, turn and scale) – with nothing selected, the camera of the shot from the view. **Auto key** (_Key every change_) makes every move, turn or scale with the app's tools a key at the frame shown, in the same undo step. Without it, a moved group stays where it was put until the frame changes, so it can be keyed with I.
+- **Keys**: **I** keys the selected groups where they are shown (their place, turn and scale) – with nothing selected, the camera of the shot from the view, if the scene has one (otherwise it says what to do). **Auto key** (_Key every change_) makes every move, turn or scale with the app's tools a key at the frame shown, in the same undo step. Without it, a moved group stays where it was put until the frame changes, so it can be keyed with I.
 - **The timeline** (`animation` mode, or the command _Animation timeline_): play and pause, frame by frame and key to key, start and end, frames a second, play again from the start; the ruler scrubs (Ctrl + wheel zooms, Shift + wheel scrolls in time). Shots are marked on the ruler.
 - **Dope sheet**: a row per animated thing (and its channels when opened), a diamond per key – click to pick, Shift adds, drag to move by whole frames, right-click for the curve, handles, repeating (cycle) or deleting; Delete, Space, arrows, Home and End while the strip has the focus.
 - **Graph editor**: the curves of the chosen channels (or of the selected groups) – drag keys in time and value, drag the handles of smooth keys (the other side turns along), _Normalise_ to see channels of different sizes together.
@@ -63,7 +63,7 @@ npm run build
 
 Then in Shap3D.ai: _Plugins › Load plugin folder…_ and pick `plugins/animation/dist` (`plugin.js` and the README). The package has no dependencies of its own – the build tools come from the repository root.
 
-Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n` (texts in all languages). Screenshots: start the dev server in the repository root (`npm run dev`), build the package, then `npm run screenshots` (`--url`, `--only <name>`).
+Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n` (texts in all languages). Screenshots: start the dev server in the repository root (`npm run dev`), build the package, then `npm run screenshots -- animation` in the repository root (`--only <name>`). The package lists them under `screenshots` in its `package.json`.
 
 ## How it works
 

@@ -81,7 +81,8 @@
         "list": "Cuerpos y zonas",
         "listEmpty": "Aún no hay cuerpos.",
         "stepHint": "Pausa y avanza una décima de segundo – para verlo paso a paso",
-        "resetHint": "Vuelve al inicio: los cuerpos regresan a donde los tiene el modelo"
+        "resetHint": "Vuelve al inicio: los cuerpos regresan a donde los tiene el modelo",
+        "nothingFalls": "Aún no se mueve nada: haz clic en un objeto y elige «Cae»."
       },
       "settings": {
         "gravity": "Gravedad (m/s²)",
@@ -296,7 +297,8 @@
             "text": "Las demos muestran lo demás – brazos robóticos con programa, cuerdas y muelles, vuelo, agua, líquido y túnel de viento. Cada una se abre en el editor de scripts; Ejecutar la construye (sustituye el modelo) y la inicia. Todas están en los ejemplos bajo Física.",
             "done": "Has visto las demos."
           }
-        }
+        },
+        "confirmReplace": "Esto sustituye tu modelo actual por la escena de práctica. Ctrl+Z lo recupera. ¿Continuar?"
       },
       "basic": {
         "simple": "Sencillo",

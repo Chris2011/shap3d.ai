@@ -1,0 +1,93 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "marketplace": {
+      "plugin": {
+        "name": "Modell-Marktplatz",
+        "description": "Öffentliche 3D-Quellen durchsuchen, Vorschau, Autor und Lizenz sehen und ein Modell ins aktuelle Modell laden."
+      },
+      "commands": {
+        "open": "Modell-Marktplatz"
+      },
+      "panel": {
+        "title": "Modell-Marktplatz",
+        "search": "Suchen",
+        "source": "Quelle",
+        "placeholder": "Was suchst du? z. B. chair (Stuhl)",
+        "placePlaceholder": "Ort oder Adresse, z. B. Marienplatz München",
+        "searching": "Suche läuft…",
+        "nothing": "Nichts gefunden. Versuch ein anderes Wort, am besten auf Englisch.",
+        "more": "Mehr zeigen",
+        "privacy": "Es wird nichts gesendet, bevor du suchst. Eine Suche geht an {source}.",
+        "poweredBy": "Modelle bereitgestellt von {source}.",
+        "untested": "Noch nicht mit einem echten Schlüssel getestet. Falls etwas nicht klappt, sag uns bitte Bescheid."
+      },
+      "key": {
+        "short": "Schlüssel",
+        "forSearch": "{source} antwortet nur mit deinem eigenen Schlüssel.",
+        "forDownload": "Suchen geht ohne Schlüssel. Zum Laden eines Modells braucht {source} dein eigenes API-Token.",
+        "get": "Schlüssel holen",
+        "label": "Dein Schlüssel",
+        "stored": "Der Schlüssel bleibt in diesem Browser und geht nur an diese Quelle."
+      },
+      "category": {
+        "furniture": "Möbel",
+        "buildings": "Gebäude",
+        "plants": "Pflanzen",
+        "animals": "Tiere",
+        "people": "Menschen",
+        "vehicles": "Fahrzeuge",
+        "objects": "Objekte"
+      },
+      "item": {
+        "back": "‹ Zurück zu den Treffern",
+        "source": "Quelle",
+        "author": "Autor",
+        "license": "Lizenz",
+        "licenseUnknown": "unbekannt",
+        "licenseOnClick": "Lizenz: anklicken",
+        "triangles": "Dreiecke",
+        "open": "Bei der Quelle öffnen",
+        "load": "Ins Modell laden",
+        "cancel": "Abbrechen",
+        "linkOnly": "{source} erlaubt Downloads nur mit Anmeldung auf der eigenen Seite. Seite öffnen, Datei laden und importieren.",
+        "places": "Lädt die Gebäude im Umkreis von {radius} m als einfache Blöcke, mit Höhen, soweit die Karte sie kennt."
+      },
+      "license": {
+        "free": "Frei für alles nutzbar, keine Nennung nötig.",
+        "attribution": "Nenne den Autor und halte dich an die Lizenz, wenn du deine Arbeit weitergibst oder verkaufst. Manche Lizenzen verbieten kommerzielle Nutzung oder Änderungen: erst lesen.",
+        "unknown": "Die Lizenz ist noch nicht bekannt. Prüfe die Seite bei der Quelle, bevor du das Modell nutzt."
+      },
+      "load": {
+        "starting": "Anfrage läuft, das kann etwas dauern…",
+        "building": "Flächen entstehen…",
+        "received": "{size} MB empfangen…",
+        "millimetres": "Die Datei hat keine Einheit und war für Meter zu groß, sie wurde als Millimeter gelesen."
+      },
+      "credits": {
+        "tab": "In diesem Modell",
+        "hint": "Autor und Lizenz bleiben bei jedem geladenen Modell, auch in der gespeicherten Datei. Exporte in andere Formate nehmen sie nicht mit: kopiere sie, wenn du die Arbeit weitergibst.",
+        "empty": "Noch nichts aus einer Quelle geladen.",
+        "copy": "Alle Nachweise kopieren",
+        "copied": "Nachweise kopiert."
+      },
+      "errors": {
+        "network": "{source} ist nicht erreichbar. Bist du online? Der Dienst erlaubt vielleicht auch keine Aufrufe aus einer Webseite.",
+        "auth": "{source} verweigert den Zugriff. Prüfe deinen Schlüssel.",
+        "rate": "{source} hat zu viele Anfragen erhalten. Versuch es später nochmal.",
+        "server": "{source} hat gerade ein Problem. Versuch es später nochmal.",
+        "noBuildings": "Die Karte kennt rund um diesen Ort keine Gebäude.",
+        "noFile": "{source} bietet für dieses Modell keine Datei, die hier geladen werden kann.",
+        "tooLarge": "Das Modell ist größer als {limit} MB und wurde nicht geladen.",
+        "noModel": "Der Download enthält kein Modell in einem ladbaren Format.",
+        "broken": "Die geladene Datei ist beschädigt.",
+        "compressed": "Dieses Modell ist so komprimiert, dass es noch nicht gelesen werden kann.",
+        "remote": "Die Datei verweist auf eine Adresse außerhalb und wurde nicht geöffnet.",
+        "missingPart": "Im Download fehlt ein Teil des Modells.",
+        "format": "Die Datei hat ein Format, das hier nicht gelesen werden kann."
+      }
+    }
+  }
+}

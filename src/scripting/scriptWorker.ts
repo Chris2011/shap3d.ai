@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ScriptApi, type ScriptLog } from './api';
+import { scriptErrorText, ScriptApi, type ScriptLog } from './api';
 import { Model } from '../core/document';
 import type { Editor } from '../engine/editor';
 import { t } from '../i18n';
@@ -115,11 +115,27 @@ export const run = (request: ScriptWorkerRequest): ScriptWorkerResponse => {
     return {
       ok: false,
       logs: api.logs.slice(),
-      error: message + (error?.stack ? '\n' + String(error.stack).split('\n').slice(1, 3).join('\n') : ''),
+      error: scriptErrorText(error),
       durationMs: performance.now() - startedAt,
       // "s3d.xyz is not a function / is not defined" usually means a plugin-only extension
       retriable: /is not a function|is not defined/i.test(message),
     };
+  }
+};
+
+/**
+ * Scripts run with the model and nothing else. The parameters that shadow fetch and the like are easy to get around
+ * (`(() => {}).constructor('return self')()`), so what could reach out of this worker is gone from it before a script runs.
+ */
+const lockDown = () => {
+  const names = ['fetch', 'XMLHttpRequest', 'WebSocket', 'WebTransport', 'EventSource', 'RTCPeerConnection', 'importScripts'];
+  names.push('indexedDB', 'caches', 'cookieStore', 'Worker', 'SharedWorker', 'BroadcastChannel', 'FileSystemHandle', 'navigator');
+  for (let scope: object | null = self; scope; scope = Object.getPrototypeOf(scope)) {
+    for (const name of names) {
+      if (Object.prototype.hasOwnProperty.call(scope, name)) {
+        Reflect.deleteProperty(scope, name);
+      }
+    }
   }
 };
 
@@ -128,4 +144,7 @@ const postToOwner = (response: ScriptWorkerResponse) => {
   (self as unknown as { postMessage: (data: ScriptWorkerResponse) => void }).postMessage(response);
 };
 
-addEventListener('message', (event: MessageEvent<ScriptWorkerRequest>) => postToOwner(run(event.data)));
+addEventListener('message', (event: MessageEvent<ScriptWorkerRequest>) => {
+  lockDown();
+  postToOwner(run(event.data));
+});

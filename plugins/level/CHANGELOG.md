@@ -4,6 +4,7 @@
 
 ### Added
 
+- Every kind of level object explains itself when hovered. Plainer words for beginners, with the usual terms kept where they help: _Player start_ (spawn), _Rooms_ (blockout), starting number (seed).
 - What a procedure of the app is made from (its hidden inputs) does not count as level objects; the copies of _Copy along_ do.
 - The demos (arena, mansion blockout, patrolling enemies, generated floor plan, mansion at night, two storeys) as examples in the script editor, under _Level editor (plugin)_.
 - A guide through a first level (on the first visit of the level mode and as a command): eight steps from the blockout to the export, each with buttons that start it, ticking themselves off from the model (with their parts), with a progress bar. The guide, the Level and the Blockout panel show in the level mode only; taking a level tool outside it opens the mode.

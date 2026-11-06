@@ -43,6 +43,7 @@ const packageFiles = (): Plugin => ({
 
 export default defineConfig({
   publicDir: false,
+  worker: { format: 'es' },
   plugins: [packageFiles()],
   build: {
     outDir: 'dist',

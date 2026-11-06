@@ -5,6 +5,7 @@
 ### Added
 
 - German, French, Spanish and Arabic texts for ambient occlusion in the Styles panel, the rotation grips of the Move tool (tooltip and status line), switching snapping on and off, moving with the arrow keys, rounding corners with the 2-point arc, rectangles aligned with an edge, leaning against a face when rotating, moving from an outline edge, cancelling a running action with undo, and procedures with the Copy along tool.
+- Plainer German and English texts for beginners in the status line and messages; the German texts say "du" everywhere. French, Spanish and Arabic keep their wording, apart from the new messages about solids, opening files, scripts and greyed-out buttons.
 
 ## [1.0.3] – 2026-10-25 · Shap3D.ai 0.10.0
 

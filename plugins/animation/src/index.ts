@@ -15,12 +15,12 @@ import S3dAnimTimeline from './S3dAnimTimeline.vue';
 import { OBJECT_FORMAT, SCENE_FORMAT, validObjectAnimation, validSceneAnimation } from './data';
 import { DEMOS } from './demos';
 import { drawAnimation } from './drawing';
-import { addCamera, keyCamera, keySelected, selectedInstances } from './keying';
+import { addCamera, keySelected, selectedInstances } from './keying';
 import { GUIDE_PANEL, JOINT_TOOL_ID, MODE, PANEL, POSE_TOOL_ID } from './names';
 import { connect, jumpTo, setFrame, setLookThrough, togglePlay } from './player';
 import { applyRecipe } from './recipes';
 import { cancelRender, renderAnimation } from './render';
-import { keyPosedBones } from './rig';
+import { keyWhatIsMeant } from './rig';
 import { createJointTool, createPoseTool } from './rigTools';
 import { MESSAGES, useRuntime } from './runtime';
 import {
@@ -91,6 +91,7 @@ const plugin: S3dPlugin = {
       width: 320,
       component: S3dAnimPanel,
       tile: 'last',
+      inMode: true,
     });
     context.panels.register({
       id: GUIDE_PANEL,
@@ -99,6 +100,7 @@ const plugin: S3dPlugin = {
       width: 320,
       component: S3dAnimGuide,
       tile: 'last',
+      inMode: true,
     });
     context.tools.register({
       id: 'joint',
@@ -149,9 +151,7 @@ const plugin: S3dPlugin = {
         return;
       }
       event.preventDefault();
-      if (!keySelected() && !keyPosedBones()) {
-        keyCamera();
-      }
+      keyWhatIsMeant();
     };
     window.addEventListener('keydown', onKey);
     context.onDispose(() => window.removeEventListener('keydown', onKey));
@@ -294,25 +294,27 @@ const plugin: S3dPlugin = {
       label: 'animation.commands.open',
       icon: 'animation',
       keywords,
-      run: () => context.panels.open(PANEL),
+      run: () => {
+        context.modes.open(MODE);
+        context.panels.open(PANEL);
+      },
     });
     context.commands.register({
       id: 'guide',
       label: 'animation.commands.guide',
       icon: 'animation',
       keywords: 'guide tutorial help how animation anleitung hilfe', // i18n-ignore – search words
-      run: () => context.panels.open(GUIDE_PANEL),
+      run: () => {
+        context.modes.open(MODE);
+        context.panels.open(GUIDE_PANEL);
+      },
     });
     context.commands.register({
       id: 'key',
       label: 'animation.commands.key',
       icon: 'animation',
       shortcut: 'I',
-      run: () => {
-        if (!keySelected() && !keyPosedBones()) {
-          keyCamera();
-        }
-      },
+      run: () => keyWhatIsMeant(),
     });
     context.commands.register({
       id: 'autokey',

@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { Readable } from 'node:stream';
 import { convertBridge } from './tools/convertBridge';
 import { remoteApi } from './src/plugins/builtin/remote/server';
+import { refusal } from './tools/requestGuard';
+import { CONTENT_SECURITY_POLICY } from './tools/contentSecurityPolicy';
 
 /**
  * Dev-only proxy for AI providers that don't send CORS headers (e.g. LM Studio without CORS,
@@ -18,8 +20,7 @@ function aiProxy(): Plugin {
       server.middlewares.use('/__ai_proxy', async (req, res) => {
         try {
           const target = String(req.headers['x-ai-target'] ?? '');
-          const site = String(req.headers['sec-fetch-site'] ?? 'same-origin');
-          if (!/^https?:\/\//i.test(target) || site !== 'same-origin') {
+          if (!/^https?:\/\//i.test(target) || refusal(req) || req.headers['sec-fetch-site'] === 'none') {
             res.statusCode = 400;
             res.end('invalid proxy request');
             return;
@@ -44,7 +45,7 @@ function aiProxy(): Plugin {
           });
           res.statusCode = upstream.status;
           upstream.headers.forEach((v, k) => {
-            if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(k)) res.setHeader(k, v);
+            if (!['content-encoding', 'content-length', 'transfer-encoding', 'set-cookie'].includes(k)) res.setHeader(k, v);
           });
           // Web filters (e.g. Sophos) hold back application/x-ndjson until the response is complete but let real SSE
           // through – so every JSON line goes out as an SSE "data:" event (the client strips the prefix again).
@@ -74,10 +75,20 @@ function aiProxy(): Plugin {
   };
 }
 
+/** the built app says what its pages may load and run (the dev server needs inline code for its hot reload) */
+const securityPolicy = (): Plugin => ({
+  name: 'security-policy',
+  apply: 'build',
+  transformIndexHtml: () => [
+    { tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: CONTENT_SECURITY_POLICY }, injectTo: 'head-prepend' },
+    { tag: 'meta', attrs: { name: 'referrer', content: 'no-referrer' }, injectTo: 'head-prepend' },
+  ],
+});
+
 export default defineConfig({
   // the app's version – plugins may name the oldest one they work with (shap3d.minAppVersion)
   define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? JSON.parse(readFileSync('package.json', 'utf8')).version) },
-  plugins: [vue(), tailwindcss(), aiProxy(), convertBridge(), remoteApi()],
+  plugins: [vue(), tailwindcss(), aiProxy(), convertBridge(), remoteApi(), securityPolicy()],
   // Tauri (desktop app): keep its output visible, never switch ports, and don't watch the Rust side
   clearScreen: false,
   server: { strictPort: true, watch: { ignored: ['**/src-tauri/**'] } },

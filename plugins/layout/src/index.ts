@@ -17,7 +17,7 @@ const WORKSPACE = 'sheets';
 const plugin: S3dPlugin = {
   id: 'layout',
   name: 'layout.plugin.name',
-  version: '1.0.0',
+  version: '1.0.1',
   author: 'Shap3D.ai',
   description: 'layout.plugin.description',
   messages: MESSAGES,

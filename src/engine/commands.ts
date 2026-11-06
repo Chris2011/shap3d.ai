@@ -6,7 +6,9 @@ import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { autosaveOn } from './defaults';
 import { sceneToEntities } from './importMesh';
+import { openNewTab } from './modelTabs';
 import { createSolidProcedure, dropInputs, explodeToInputs, PROCEDURE_SOLID_OPS, type ProcedureSolidOp } from '../core/procedures';
 import { snapping } from './inference';
 import type { Editor } from './editor';
@@ -76,7 +78,9 @@ export const modelToThree = (editor: Editor): THREE.Group => {
       transparent: (material?.opacity ?? 1) < 1,
       opacity: material?.opacity ?? 1,
       side: THREE.DoubleSide,
-      roughness: 0.8,
+      // shortcut: values only, the pictures of physically based materials are not exported; add them with their UVs when needed
+      roughness: material?.roughness ?? 0.8,
+      metalness: material?.metalness ?? 0,
     });
     made.name = name ?? 'Standard';
     return made;
@@ -243,6 +247,10 @@ const convertLocally = async (ext: 'skp', file: File): Promise<ArrayBuffer> => {
   if (response.status === 404) {
     throw new Error(t('import.needsLocalServer'));
   }
+  if (response.status === 503) {
+    // the local server has no SketchUp SDK – what it says about that is for developers
+    throw new Error(t('import.skpNeedsSdk'));
+  }
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error(body.error ?? t('import.conversionFailed', { status: response.status }));
@@ -271,10 +279,31 @@ const loadForeign = async (ext: string, file: File): Promise<LoadedScene> => {
     case 'skp':
       return { object: (await new GLTFLoader().parseAsync(await convertLocally('skp', file), '')).scene, upY: false, scale: 1 };
   }
-  throw new Error(t('import.unsupported', { ext }));
+  throw new Error(t('import.unsupported', { ext }) + (pluginImporters.has('fbx') ? '' : ` ${t('import.morePlugin')}`));
 };
 
-export const importFile = async (editor: Editor, file: File) => {
+/**
+ * opens a file; what the parsers throw on a broken file ("Invalid typed array length") becomes a sentence.
+ * `onCreated` runs inside the import's undo step with the new group – not for formats a plugin imports itself or for a model file.
+ */
+export const importFile = async (editor: Editor, file: File, onCreated?: (instance: Instance) => void) => {
+  try {
+    await importFileUnchecked(editor, file, onCreated);
+  } catch (error) {
+    if (
+      error instanceof TypeError ||
+      error instanceof RangeError ||
+      error instanceof SyntaxError ||
+      /THREE\./.test(String((error as Error)?.message))
+    ) {
+      console.error(error);
+      throw new Error(t('import.unreadable', { name: file.name }));
+    }
+    throw error;
+  }
+};
+
+const importFileUnchecked = async (editor: Editor, file: File, onCreated?: (instance: Instance) => void) => {
   const ext = file.name.split('.').pop()!.toLowerCase();
   const pluginImporter = pluginImporters.get(ext);
   if (pluginImporter?.import) {
@@ -331,26 +360,31 @@ export const importFile = async (editor: Editor, file: File) => {
     conv.premultiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
   }
   const base = file.name.replace(/\.[^.]+$/, '');
-  let info = { triangles: 0, groups: 0, materials: 0, skipped: 0 };
+  // the faces are made in a worker – the app stays usable meanwhile
+  const statusBefore = editor.ui.status;
+  editor.ui.status = t('statusbar.building');
+  const info = await sceneToEntities(obj, editor.model, conv, base).finally(() => {
+    editor.ui.status = statusBefore;
+  });
   editor.commit('undo.import', () => {
-    const result = sceneToEntities(obj, editor.model, conv, base);
-    info = result;
-    if (!result.root.faces.size && !result.root.instances.size) {
+    const root = info.build();
+    if (!root.faces.size && !root.instances.size) {
       throw new Error(t('import.noFaces'));
     }
     // put it on the ground, centred on the origin
-    const box = result.root.bounds();
+    const box = root.bounds();
     const shift = new THREE.Matrix4().makeTranslation(-(box.min.x + box.max.x) / 2, -(box.min.y + box.max.y) / 2, -box.min.z);
-    for (const vertex of result.root.vertices.values()) {
+    for (const vertex of root.vertices.values()) {
       vertex.position.applyMatrix4(shift);
     }
-    result.root.invalidateHash();
-    for (const instance of result.root.instances.values()) {
+    root.invalidateHash();
+    for (const instance of root.instances.values()) {
       instance.matrix.premultiply(shift);
     }
-    const def = editor.model.newDefinition(editor.model.uniqueDefName(base), true, result.root);
+    const def = editor.model.newDefinition(editor.model.uniqueDefName(base), true, root);
     const inst = editor.entities.addInstance(def, new THREE.Matrix4(), '');
     editor.select([{ kind: 'instance', id: inst.id }]);
+    onCreated?.(inst);
   });
   const counts = [t('import.triangles', { count: info.triangles })];
   if (info.groups) {
@@ -897,6 +931,7 @@ const COMMAND_LIST: CommandDefinition[] = [
       }
     },
   },
+  { id: 'newTab', group: 'file', run: (editor) => openNewTab(editor) },
   {
     id: 'open',
     shortcut: 'Ctrl+O',
@@ -909,6 +944,18 @@ const COMMAND_LIST: CommandDefinition[] = [
     },
   },
   { id: 'save', shortcut: 'Ctrl+S', group: 'file', run: (editor) => saveModel(editor) },
+  {
+    id: 'toggleAutosave',
+    group: 'file',
+    run: () => {
+      autosaveOn.value = !autosaveOn.value;
+      if (!autosaveOn.value) {
+        // off means nothing comes back after a reload either
+        localStorage.removeItem('s3d:autosave');
+      }
+    },
+    checked: () => autosaveOn.value,
+  },
   {
     id: 'togglePurgeReminder',
     group: 'file',

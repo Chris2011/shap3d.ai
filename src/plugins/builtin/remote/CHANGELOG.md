@@ -1,8 +1,16 @@
 # Changelog – Remote API
 
-## [Unreleased]
+## [1.0.1] – Unreleased
 
-Nothing yet.
+### Changed
+
+- No tile in the right-hand bar: the panel opens from the _Plugins_ menu or the command palette.
+
+### Security
+
+- REST, MCP, AI proxy and converter check the Host header (DNS rebinding) and the connection: from elsewhere only with the token `S3D_REMOTE_TOKEN`. Browsers only from the app's own origin – not from another port of this computer.
+- `export_model` writes only below `exports/` (or `S3D_EXPORT_DIR`), with the format's file ending and not through links.
+- At most 64 messages in one MCP batch; `nosniff` and `no-store` on answers, Swagger UI not in frames.
 
 ## [1.0.0] – 2026-10-22 · Shap3D.ai 0.7.0
 

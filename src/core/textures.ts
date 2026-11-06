@@ -261,15 +261,19 @@ export const onImageTextureLoad = (listener: () => void) => {
 };
 
 /** A texture of an image (data URL), shared by every material showing it. It stays empty until the image has loaded. */
-export const imageTexture = (url: string): THREE.Texture => {
-  let texture = imageCache.get(url);
+export const imageTexture = (url: string, isData = false): THREE.Texture => {
+  // normal, roughness … maps are numbers, not colours
+  const key = (isData ? 'data:' : 'color:') + url;
+  let texture = imageCache.get(key);
   if (texture) {
     return texture;
   }
   const image = new Image();
   texture = new THREE.Texture(image);
+  // images are saved in the model: a file with an address elsewhere would tell that server who opened it
+  const isOwnData = /^(data:image\/|blob:)/i.test(url);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.colorSpace = isData ? THREE.NoColorSpace : THREE.SRGBColorSpace;
   texture.anisotropy = 4;
   // photos stay JPEG in glTF exports instead of growing into PNGs
   texture.userData.mimeType = url.startsWith('data:image/jpeg') ? 'image/jpeg' : 'image/png';
@@ -278,9 +282,21 @@ export const imageTexture = (url: string): THREE.Texture => {
     loaded.needsUpdate = true;
     imageListeners.forEach((listener) => listener());
   };
-  image.src = url;
-  imageCache.set(url, texture);
+  if (isOwnData) {
+    image.src = url;
+  }
+  imageCache.set(key, texture);
   return texture;
+};
+
+/** frees the textures of images no longer in use; they come back from the model's data when needed again (undo) */
+export const releaseImageTextures = (used: Set<string>) => {
+  for (const [key, texture] of imageCache) {
+    if (!used.has(key.slice(key.indexOf(':') + 1))) {
+      texture.dispose();
+      imageCache.delete(key);
+    }
+  }
 };
 
 /** resolves once every image texture made so far has loaded (or failed) – exporters need the pixels */
@@ -308,6 +324,24 @@ export const defaultTextureSize = (material: Pick<MaterialDef, 'texture' | 'imag
   !material.image && isTextureKind(material.texture) ? TEXTURE_SIZE[material.texture] : 1;
 
 /** the material's image or procedural texture with its layout – undefined for plain colours */
+/** is the material physically based? */
+export const isPbrMaterial = (material: Pick<MaterialDef, 'roughness' | 'metalness' | 'maps'> | undefined) =>
+  !!material && (material.roughness !== undefined || material.metalness !== undefined || !!Object.keys(material.maps ?? {}).length);
+
+/** how a physically based material's pictures lie on a face, without a colour picture too */
+export const mapTile = (material: TexturedMaterial): Omit<TextureTile, 'map'> => {
+  const width = material.textureSize ?? 1;
+  const angle = THREE.MathUtils.degToRad(material.textureRotation ?? 0);
+  return {
+    width,
+    height: width * (material.imageAspect ?? 1),
+    offsetU: material.textureOffset?.[0] ?? 0,
+    offsetV: material.textureOffset?.[1] ?? 0,
+    cos: Math.cos(angle),
+    sin: Math.sin(angle),
+  };
+};
+
 export const textureTile = (material: TexturedMaterial | undefined): TextureTile | undefined => {
   if (!material) {
     return undefined;

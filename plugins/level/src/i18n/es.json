@@ -436,6 +436,21 @@
           "name": "Dos plantas",
           "description": "Un vestíbulo con escalera a una galería sobre su mitad trasera y una llave arriba. Vacía el modelo."
         }
+      },
+      "kindHints": {
+        "spawn": "Aquí empieza el jugador",
+        "enemy": "Un personaje que hace su ronda y persigue al jugador",
+        "waypoint": "Un punto de la ronda de un enemigo",
+        "trigger": "Una caja invisible: cuando el jugador entra, pasa algo",
+        "hazard": "Una zona que hiere al jugador",
+        "soundzone": "Una zona con sonido propio",
+        "pickup": "Algo que recoger: salud, una llave…",
+        "door": "Se abre y se cierra, se puede bloquear",
+        "savepoint": "El jugador vuelve aquí",
+        "camera": "Una vista fija para el juego",
+        "jumppad": "Lanza al jugador por el aire",
+        "teleporter": "Lleva al jugador a otro lugar",
+        "light": "Una lámpara o un foco"
       }
     }
   }

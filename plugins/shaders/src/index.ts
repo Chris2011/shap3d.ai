@@ -41,7 +41,7 @@ const plugin: S3dPlugin = {
       icon: 'shaders',
       width: 320,
       component: S3dShaderLibrary,
-      tile: 'last',
+      inMaterials: true,
     });
     context.commands.register({
       id: 'open',

@@ -754,16 +754,23 @@ interface TimelineFrame {
 
 const FRAME_STEP = 1 / 30;
 const TIMELINE_SECONDS = 120;
+/** liquids fill memory fast: recording stops here, the simulation goes on */
+const TIMELINE_BYTES = 256 * 1024 * 1024;
 let timeline: TimelineFrame[] = [];
+const frameBytes = (frame: TimelineFrame) =>
+  frame.places.byteLength + frame.centres.byteLength + frame.drops.reduce((sum, drops) => sum + drops.byteLength, 0);
+let timelineBytes = 0;
 
 const record = (state: Simulation, places: Float32Array) => {
   const last = timeline[timeline.length - 1];
-  if ((last && state.time < last.time + FRAME_STEP * 0.9) || state.time > TIMELINE_SECONDS) {
+  if ((last && state.time < last.time + FRAME_STEP * 0.9) || state.time > TIMELINE_SECONDS || timelineBytes > TIMELINE_BYTES) {
     return;
   }
   const centres = new Float32Array(state.bodies.length * 3);
   state.bodies.forEach((body, index) => centres.set(new THREE.Vector3().setFromMatrixPosition(body.shown).toArray(), index * 3));
-  timeline.push({ time: state.time, places, centres, drops: state.liquids.map((liquid) => liquid.positions.slice()) });
+  const frame = { time: state.time, places, centres, drops: state.liquids.map((liquid) => liquid.positions.slice()) };
+  timeline.push(frame);
+  timelineBytes += frameBytes(frame);
   usePhysicsState().recorded = state.time;
 };
 
@@ -826,6 +833,7 @@ const leaveScrub = async () => {
     return;
   }
   timeline = timeline.filter((frame) => frame.time <= at + 1e-6);
+  timelineBytes = timeline.reduce((sum, frame) => sum + frameBytes(frame), 0);
   resetSim({ keepTimeline: true });
   status.status = 'loading';
   // let the panel show it is working – going far back can take a moment
@@ -835,6 +843,21 @@ const leaveScrub = async () => {
 };
 
 // ------------------------------------------------------------ start, pause, reset
+
+/** simulates many seconds at once without stopping the app: a slice of a frame's length, then the app's turn */
+const advanceInSlices = async (state: Simulation, seconds: number) => {
+  usePhysicsState().status = 'loading';
+  let left = seconds;
+  while (left > 0 && sim === state) {
+    const started = performance.now();
+    while (left > 0 && performance.now() - started < 12) {
+      const slice = Math.min(left, STEP);
+      advance(state, slice);
+      left -= slice;
+    }
+    await new Promise((resolve) => setTimeout(resolve));
+  }
+};
 
 /**
  * Starts the simulation (or goes on after a pause). `at`: seconds simulated at once before it is shown – e.g. to
@@ -852,6 +875,10 @@ export const startSim = async (options: { at?: number; pause?: boolean } = {}) =
     try {
       const rapier = await loadRapier();
       sim = build(rapier);
+      // it would run with nothing to see: say what is missing
+      if (!sim.bodies.some((body) => body.rb.isDynamic())) {
+        pluginContext().ui.toast(t('physics.panel.nothingFalls'));
+      }
     } catch (error) {
       status.status = 'stopped';
       status.error = t('physics.errors.load', { error: String((error as Error)?.message ?? error) });
@@ -860,7 +887,12 @@ export const startSim = async (options: { at?: number; pause?: boolean } = {}) =
     }
   }
   if (options.at && options.at > sim.time) {
-    advance(sim, options.at - sim.time);
+    const running = sim;
+    await advanceInSlices(running, options.at - running.time);
+    // reset meanwhile
+    if (sim !== running) {
+      return;
+    }
   }
   showBodies(sim);
   sim.last = performance.now();
@@ -899,6 +931,7 @@ export const resetSim = (options: { keepTimeline?: boolean } = {}) => {
   const status = usePhysicsState();
   if (!options.keepTimeline) {
     timeline = [];
+    timelineBytes = 0;
     Object.assign(status, { recorded: 0, scrub: null });
   }
   if (!state) {

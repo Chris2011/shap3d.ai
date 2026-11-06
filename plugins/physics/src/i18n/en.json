@@ -81,7 +81,8 @@
         "list": "Bodies and regions",
         "listEmpty": "No bodies yet.",
         "stepHint": "Pauses and goes a tenth of a second further – watch it step by step",
-        "resetHint": "Back to the start: the bodies show where the model has them"
+        "resetHint": "Back to the start: the bodies show where the model has them",
+        "nothingFalls": "Nothing moves yet: click an object and choose “Falls”."
       },
       "settings": {
         "gravity": "Gravity (m/s²)",
@@ -296,7 +297,8 @@
             "text": "The demos show what else it can do – robot arms on programs, ropes and springs, flight, water, a liquid and a wind tunnel. Each one opens in the script editor; Run builds it (it replaces the model) and starts it. All are in the script editor’s examples under Physics.",
             "done": "You have seen the demos."
           }
-        }
+        },
+        "confirmReplace": "This replaces your current model with the practice scene. Ctrl+Z brings it back. Continue?"
       },
       "basic": {
         "simple": "Simple",

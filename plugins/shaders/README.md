@@ -52,4 +52,4 @@ npm run build
 
 Then in Shap3D.ai _Plugins › Load plugin folder…_ and pick `plugins/shaders/dist`.
 
-Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n`. Screenshot: `npm run screenshots` (Windows) or `npm run screenshots:sh` (Linux/macOS), with the app's dev server running.
+Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n`. Screenshot: `npm run screenshots -- shaders` in the repository root, with the app's dev server running.

@@ -125,6 +125,11 @@ const download = (name: string, blob: Blob) => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
+const printTitle = () => pluginContext().editor.model.name.replace(/[&<>"]/g, (char) => `&#${char.charCodeAt(0)};`); // i18n-ignore – markup
+
+/** a page's id in the print frame's style – model files can hold anything */
+const cssName = (id: string) => String(id).replace(/[^w-]/g, ''); // i18n-ignore – markup
+
 const safeName = (name: string) => name.replace(/[\\/:*?"<>|]+/g, '_').trim() || 'layout'; // i18n-ignore – file name
 
 export const exportPageSvg = (page: LayoutPage) => {
@@ -143,17 +148,17 @@ export const printSheets = () => {
   const signature = modelSignature();
   const pages = document.pages
     .map((page) => {
-      const [width, height] = pageSize(page);
-      return `<section style="width:${width}mm;height:${height}mm;page:p${page.id}">${pageSvg(document, page, signature)}</section>`;
+      const [width, height] = pageSize(page).map(Number);
+      return `<section style="width:${width}mm;height:${height}mm;page:p${cssName(page.id)}">${pageSvg(document, page, signature)}</section>`;
     })
     .join('');
   const pageRules = document.pages
     .map((page) => {
-      const [width, height] = pageSize(page);
-      return `@page p${page.id} { size: ${width}mm ${height}mm; margin: 0; }`;
+      const [width, height] = pageSize(page).map(Number);
+      return `@page p${cssName(page.id)} { size: ${width}mm ${height}mm; margin: 0; }`;
     })
     .join('\n');
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${pluginContext().editor.model.name}</title><style>
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${printTitle()}</title><style>
 ${pageRules}
 html, body { margin: 0; padding: 0; }
 section { overflow: hidden; break-after: page; }

@@ -130,6 +130,7 @@ const fromMesh = (mesh: THREE.Mesh): Entities => {
   }
   ents.removeLooseInnerEdges([...ents.edges.keys()]);
   ents.removeOrphanVertices();
+  ents.softenFlatEdges(ents.edges.keys());
   ents.healCollinear([...ents.vertices.keys()]);
   ents.autoSoften([...ents.edges.keys()], 20);
   return ents;

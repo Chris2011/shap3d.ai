@@ -51,6 +51,7 @@ const ICONS: Record<string, string> = {
   dimension: `<path d="M4 6v12M20 6v12M4 12h16" ${STROKE}/><path d="M7 9.5 4 12l3 2.5M17 9.5l3 2.5-3 2.5" ${STROKE}/>`,
   text: `<path d="M3 20 9 14" ${STROKE}/><rect x="9" y="5" width="12" height="9" style="fill:var(--s3d-icon-fill)" ${STROKE}/><path d="M12 8h6M12 11h4" ${STROKE}/>`,
   text3d: `<path d="M5 6h12M11 6v13" stroke="#d0312d" stroke-width="2.4"/><path d="M8 4h12M14 4v13" ${STROKE} opacity=".5"/>`,
+  snappoint: `<path d="M4 20 20 4" ${STROKE}/><circle cx="12" cy="12" r="3.2" fill="#fff" ${STROKE_RED}/><path d="M12 10.6v2.8M10.6 12h2.8" ${STROKE_RED}/>`,
   section: `<path d="M4 7h14l2 3v8H6l-2-3z" fill="#fff3e0" stroke="#e07000" stroke-width="1.6"/><path d="M9 13l3-3 3 3M12 10v7" stroke="#e07000" stroke-width="1.6"/>`,
   orbit: `<ellipse cx="12" cy="12" rx="8.5" ry="4" ${STROKE_BLUE}/><path d="M12 3.5v17" ${STROKE} opacity=".55"/><path d="M17 6.7l2.6 1.5-.6 2.8" ${STROKE_BLUE}/>`,
   pan: `<path d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11V4.5a1.5 1.5 0 0 1 3 0V11V5.5a1.5 1.5 0 0 1 3 0V12V8.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6.5 7S8 19.5 6 17l-2.5-3.5A1.5 1.5 0 0 1 6 11.6L8 14" style="fill:var(--s3d-icon-fill)" ${STROKE}/>`,

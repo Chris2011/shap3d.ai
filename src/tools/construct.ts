@@ -4,6 +4,7 @@ import type { Overlay } from '../engine/overlay';
 import { PointTool, onPlane } from './base';
 import { AXES, snapping } from '../engine/inference';
 import { newId } from '../core/model';
+import type { Label } from '../core/document';
 import { formatAngle } from '../core/units';
 import { t, formatDecimal } from '../i18n';
 
@@ -393,6 +394,8 @@ export class TextTool extends PointTool {
   anchor: V3 | null = null;
   current: V3 | null = null;
   defText = '';
+  /** what the text was placed on – its `<>` follows it */
+  source: Label['source'];
   status() {
     return this.anchor ? t('tools.status.textPlace') : t('tools.status.textAnchor');
   }
@@ -411,11 +414,14 @@ export class TextTool extends PointTool {
     const inference = this.pick(pointer, null);
     if (!this.anchor) {
       this.anchor = inference.point.clone();
+      this.source = undefined;
       if (inference.kind === 'face' && inference.face) {
         const face = inference.face.context.entities.faces.get(inference.face.faceId);
         this.defText = face ? editor.fmtArea(inference.face.context.entities.faceArea(face)) : '';
+        this.source = face && { kind: 'face', id: face.id, path: inference.face.context.path.map((instance) => instance.id) };
       } else if ((inference.kind === 'edge' || inference.kind === 'midpoint') && inference.edge) {
         this.defText = editor.fmt(inference.edge.start.distanceTo(inference.edge.end));
+        this.source = { kind: 'edge', id: inference.edge.edgeId, path: inference.edge.context.path.map((instance) => instance.id) };
       } else {
         const point = inference.point;
         this.defText = `[${editor.fmt(point.x)}; ${editor.fmt(point.y)}; ${editor.fmt(point.z)}]`;
@@ -425,9 +431,12 @@ export class TextTool extends PointTool {
     const anchor = this.anchor,
       off = inference.point.clone().sub(anchor);
     this.anchor = null;
-    editor.prompt(t('prompt.enterText'), this.defText, true).then((text) => {
+    const source = this.source;
+    editor.prompt(t(source ? 'prompt.enterTextLive' : 'prompt.enterText'), source ? '<>' : this.defText, true).then((text) => {
       if (text) {
-        editor.commit('tools.text', () => editor.model.labels.push({ id: newId(), point: anchor, text: text, offset: off }));
+        editor.commit('tools.text', () =>
+          editor.model.labels.push({ id: newId(), point: anchor, text: text, offset: off, ...(text.includes('<>') ? { source } : {}) }),
+        );
       }
     });
   }
@@ -436,6 +445,40 @@ export class TextTool extends PointTool {
       overlay.line(this.anchor, this.current, '#000', 1);
       overlay.text(this.current, this.defText, { background: '#ffffffd0', align: 'left', offsetX: 4 });
     }
+    this.drawInference(overlay);
+  }
+}
+
+// ===================================================================== Snap point
+/** Sets points on a group or component that others dock to when moved; a click on one removes it. */
+export class SnapPointTool extends PointTool {
+  id = 'snappoint';
+  name = 'tools.snappoint';
+  cursor = 'crosshair';
+  status() {
+    return t('tools.status.snappoint');
+  }
+  onMove(pointer: PEvt) {
+    this.pick(pointer, null);
+  }
+  onDown(pointer: PEvt) {
+    const editor = this.editor;
+    const inference = this.pick(pointer, null);
+    if (inference.snap) {
+      const { context, vertexId } = inference.snap;
+      editor.commit('undo.snapPoint', () => context.path[context.path.length - 1].definition.snaps!.splice(vertexId, 1));
+      return;
+    }
+    const context = inference.face?.context ?? inference.edge?.context ?? inference.vert?.context;
+    const definition = context?.path[context.path.length - 1]?.definition;
+    if (!context || !definition) {
+      editor.toast(t('toast.snapPointNeedsGroup'));
+      return;
+    }
+    const local = inference.point.clone().applyMatrix4(context.world.clone().invert());
+    editor.commit('undo.snapPoint', () => (definition.snaps ??= []).push([local.x, local.y, local.z]));
+  }
+  draw(overlay: Overlay) {
     this.drawInference(overlay);
   }
 }

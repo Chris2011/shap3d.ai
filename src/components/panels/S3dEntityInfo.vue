@@ -83,6 +83,13 @@
         ><span>{{ info.volume }}</span>
       </div>
       <label class="s3d-check"><input type="checkbox" :checked="info.locked" @change="toggle('locked')" /> {{ t('toast.locked') }}</label>
+      <div class="s3d-section-title">{{ t('entityInfo.attributes') }}</div>
+      <div v-for="(value, key) in info.attributes" :key="key" class="s3d-row">
+        <span class="s3d-label truncate" :title="String(key)">{{ key }}</span
+        ><input class="s3d-input" :value="value" @change="setAttribute(String(key), ($event.target as HTMLInputElement).value)" />
+        <button class="s3d-btn small" :title="t('entityInfo.attributeRemove')" @click="setAttribute(String(key), null)">×</button>
+      </div>
+      <button class="s3d-btn small" @click="addAttribute">{{ t('entityInfo.attributeAdd') }}</button>
       <S3dProcedureInfo />
     </template>
     <template v-if="info.kind === 'face'">
@@ -196,6 +203,7 @@ const info = useSelection<any>(() => {
       ),
       name: instance.name,
       defName: instance.definition.name,
+      attributes: instance.definition.attributes ?? {},
       isComponent: instance.definition.isComponent,
       count,
       material: instance.material,
@@ -296,6 +304,23 @@ const setName = (name: string) => {
       instance.name = name;
     }
   }, 'undo.rename');
+};
+const setAttribute = (key: string, value: string | null) => {
+  each((entityRef, entities) => {
+    const definition = entities.instances.get(entityRef.id)?.definition;
+    if (definition && value === null) {
+      delete definition.attributes?.[key];
+    } else if (definition) {
+      // no prototype on it: a key may be called anything
+      (definition.attributes ??= Object.create(null) as Record<string, string>)[key] = value!;
+    }
+  }, 'undo.attribute');
+};
+const addAttribute = async () => {
+  const key = (await editor.prompt(t('entityInfo.attributeName')))?.trim();
+  if (key) {
+    setAttribute(key, '');
+  }
 };
 const setDefName = (name: string) => {
   each((entityRef, entities) => {

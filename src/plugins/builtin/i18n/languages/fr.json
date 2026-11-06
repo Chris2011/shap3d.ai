@@ -108,7 +108,9 @@
       "view-left": "Gauche",
       "view-bottom": "Dessous",
       "toggleSnapping": "Accrochage",
-      "explodeToInputs": "Éclater en entrées"
+      "explodeToInputs": "Défaire en ses parties",
+      "newTab": "Nouvel onglet",
+      "toggleAutosave": "Enregistrement automatique (dans le navigateur)"
     },
     "names": {
       "model": "Modèle",
@@ -121,10 +123,10 @@
       "sectionNumbered": "Coupe {number}"
     },
     "import": {
-      "converterUnreachable": "Le convertisseur local est injoignable – lancez l’app avec « npm run dev » ou « npm run preview ».",
-      "needsLocalServer": "Les fichiers .skp et .blend ne fonctionnent qu’avec le serveur local (« npm run dev » ou « npm run preview »).",
+      "converterUnreachable": "Les fichiers SketchUp et Blender nécessitent un convertisseur local qui ne fonctionne pas ici. Enregistrez le fichier en glTF, FBX ou OBJ dans l’autre programme et ouvrez-le. (Développeurs : lancez l’app avec « npm run dev ».)",
+      "needsLocalServer": "Les fichiers SketchUp et Blender nécessitent un convertisseur local qui ne fonctionne pas ici. Enregistrez le fichier en glTF, FBX ou OBJ dans l’autre programme et ouvrez-le. (Développeurs : lancez l’app avec « npm run dev ».)",
       "conversionFailed": "Échec de la conversion (HTTP {status})",
-      "unsupported": "Le format .{ext} n’est pas pris en charge – d’autres formats (FBX, Collada, 3DS, Blender …) sont fournis par le plugin « Formats d’import » (Plugins › Gérer les plugins).",
+      "unsupported": "Les fichiers .{ext} ne peuvent pas être ouverts. Enregistrez le fichier en glTF, OBJ ou STL dans l’autre programme et ouvrez-le.",
       "unknownJson": "Format JSON inconnu",
       "maxFile": "Seul 3ds Max peut lire les fichiers 3ds Max (.max) – enregistrez-les via Fichier › Exporter en FBX (ou .3ds/.obj) et importez ce fichier.",
       "detectedMillimetres": "millimètres détectés",
@@ -134,7 +136,10 @@
       "groups": "{count} groupe | {count} groupes",
       "materials": "{count} matériau | {count} matériaux",
       "skipped": "{count} triangle au-delà de la limite ignoré | {count} triangles au-delà de la limite ignorés",
-      "part": "partie"
+      "part": "partie",
+      "morePlugin": "Le plugin Formats d’import (Plugins) ajoute FBX, Collada, 3DS et plus.",
+      "unreadable": "« {name} » n’a pas pu être lu – il est peut-être endommagé ou ne correspond pas à son extension.",
+      "skpNeedsSdk": "Les fichiers SketchUp ne peuvent pas être ouverts directement ici. Dans SketchUp, exportez le modèle en DAE ou glTF et ouvrez ce fichier. (Développeurs : il faut le SDK SketchUp dans tools/sketchup-sdk.)"
     },
     "units": {
       "centimetres": "Centimètres",
@@ -192,15 +197,18 @@
       "tagsToScenes": "Balises vers scènes",
       "nudge": "Déplacer avec les flèches",
       "roundCorner": "Arrondir le coin",
-      "unroundCorner": "Rétablir le coin"
+      "unroundCorner": "Rétablir le coin",
+      "snapPoint": "Modifier le point d’ancrage",
+      "attribute": "Modifier l’attribut",
+      "environment": "Modifier l’environnement"
     },
     "toast": {
       "nothingSelected": "Rien n’est sélectionné",
       "cut": "Coupé",
       "copied": "Copié",
       "selectTwoFaces": "Sélectionnez au moins deux faces.",
-      "selectTwoSolids": "Sélectionnez deux groupes ou composants (solides).",
-      "notASolid": "« {name} » n’est pas un solide.",
+      "selectTwoSolids": "Sélectionnez au moins deux groupes ou composants qui sont des corps fermés.",
+      "notASolid": "« {name} » n’est pas un corps fermé : chaque arête doit border exactement deux faces, donc ni trou ni ligne libre.",
       "solidFailed": "L’opération sur les solides a échoué : {error}",
       "alreadyEmpty": "L’espace de travail est déjà vide",
       "cleared": "Espace de travail vidé – Ctrl+Z rétablit tout",
@@ -215,7 +223,8 @@
       "snappingOff": "Accrochage désactivé – les points restent sous le curseur (F3)",
       "roundCornerTwoEdges": "Seul un coin formé d’exactement deux arêtes peut être arrondi.",
       "roundCornerTooShort": "Les arêtes de ce coin sont trop courtes pour cet arrondi.",
-      "unroundNoCorner": "Cet arc ne se trouve pas entre deux arêtes droites qui se rejoignent en un coin."
+      "unroundNoCorner": "Cet arc ne se trouve pas entre deux arêtes droites qui se rejoignent en un coin.",
+      "snapPointNeedsGroup": "Les points d’ancrage appartiennent à un groupe ou un composant. Cliquez sur l’un d’eux."
     },
     "confirm": {
       "discardChanges": "Abandonner les modifications non enregistrées ?",
@@ -226,7 +235,8 @@
     "prompt": {
       "componentName": "Nom du composant",
       "enterText": "Saisir le texte",
-      "scriptName": "Nom du script"
+      "scriptName": "Nom du script",
+      "enterTextLive": "Saisir le texte (<> est la valeur mesurée et suit le modèle)"
     },
     "groups": {
       "file": "Fichier",
@@ -336,7 +346,8 @@
         "walk": "Faites glisser vers le haut/bas pour marcher, à gauche/droite pour tourner. Les flèches fonctionnent aussi.",
         "poscam": "Cliquez pour placer la caméra à hauteur des yeux.",
         "copyAlongSource": "Sélectionnez les groupes ou composants à copier, puis cliquez sur un chemin.",
-        "copyAlongPath": "Cliquez sur le chemin : une ligne d’arêtes ou un groupe d’arêtes. Saisissez ensuite un nombre de copies (7x) ou un espacement."
+        "copyAlongPath": "Cliquez sur le chemin : une ligne d’arêtes ou un groupe d’arêtes. Saisissez ensuite un nombre de copies (7x) ou un espacement.",
+        "snappoint": "Cliquez sur un point d’un groupe ou d’un composant : les autres s’y ancrent lors du déplacement. Un clic sur un point d’ancrage le supprime."
       },
       "hints": {
         "square": "Carré",
@@ -350,7 +361,8 @@
         "sameDistance": "Même distance du coin",
         "copyAlongPath": "Copier le long de ce chemin"
       },
-      "copyalong": "Copier le long"
+      "copyalong": "Copier le long",
+      "snappoint": "Point d’ancrage"
     },
     "editor": {
       "undone": "Annulé : {action}",
@@ -360,7 +372,8 @@
       "faces": "{count} face | {count} faces",
       "edges": "{count} arête | {count} arêtes",
       "instances": "{count} groupe/composant | {count} groupes/composants",
-      "actionCancelled": "Action annulée"
+      "actionCancelled": "Action annulée",
+      "error": "Erreur : {message}"
     },
     "inference": {
       "onRedAxis": "Sur l’axe rouge",
@@ -383,7 +396,8 @@
       "extension": "Sur le prolongement de l’arête",
       "fromPoint": "Depuis le point",
       "radiusOnFace": "Du rayon sur la face",
-      "onProfile": "Sur le contour"
+      "onProfile": "Sur le contour",
+      "snapPoint": "Point d’ancrage"
     },
     "measure": {
       "grid": "Grille"
@@ -684,7 +698,17 @@
       "used": "Utilisé",
       "delete": "Supprimer le matériau",
       "new": "Nouveau matériau",
-      "create": "Créer"
+      "create": "Créer",
+      "previewFlat": "Plat",
+      "previewCube": "Cube",
+      "previewTitle": "Aperçu des matériaux",
+      "physical": "Physique (PBR)",
+      "roughness": "Rugosité",
+      "metalness": "Métal",
+      "mapNormal": "Carte de normales",
+      "mapAo": "Occlusion ambiante",
+      "loadMap": "Charger une image…",
+      "removeMap": "Retirer l’image"
     },
     "tags": {
       "add": "Ajouter une balise",
@@ -697,7 +721,9 @@
       "toScenesVisible": "« {tag} » est visible – l’afficher dans ces scènes :",
       "toScenesHidden": "« {tag} » est masquée – la masquer dans ces scènes :",
       "apply": "Appliquer",
-      "appliedToScenes": "« {tag} » appliquée à {count} scène | « {tag} » appliquée à {count} scènes"
+      "appliedToScenes": "« {tag} » appliquée à {count} scène | « {tag} » appliquée à {count} scènes",
+      "selectFirst": "Sélectionnez d’abord quelque chose, puis cliquez pour lui donner la balise marquée.",
+      "scenesFirst": "Le modèle n’a pas encore de scènes – ajoutez-en une dans le panneau Scènes."
     },
     "scenes": {
       "add": "Ajouter une scène",
@@ -720,13 +746,16 @@
       "hint": "Adoucit les arêtes entre les faces de la sélection dont l’angle est inférieur à la valeur réglée.",
       "coplanar": "Adoucir les coplanaires",
       "apply": "Appliquer à la sélection",
-      "reset": "Réinitialiser"
+      "reset": "Réinitialiser",
+      "selectFirst": "Sélectionnez d’abord des faces ou un groupe."
     },
     "shadows": {
       "show": "Afficher les ombres",
       "time": "Heure",
       "date": "Date",
-      "hint": "La position du soleil est calculée pour environ 48° de latitude nord. Même sans ombres, elle détermine l’éclairage des faces."
+      "hint": "Le soleil suit le lieu réglé ici. Même sans ombres, il définit l’éclairage des faces.",
+      "latitude": "Latitude",
+      "north": "Nord (depuis l’axe vert)"
     },
     "outliner": {
       "filter": "Filtrer",
@@ -789,7 +818,14 @@
         "sketch": "Croquis",
         "night": "Nuit",
         "white": "Blanc"
-      }
+      },
+      "environment": "Environnement (HDR, EXR)",
+      "environmentLoad": "Charger…",
+      "environmentRemove": "Retirer l’environnement",
+      "environmentBackground": "Aussi comme ciel",
+      "environmentIntensity": "Luminosité",
+      "environmentTooBig": "Le fichier dépasse 32 Mo.",
+      "sectionFill": "Remplir les coupes"
     },
     "instructor": {
       "select": {
@@ -992,7 +1028,11 @@
       "edge": "Arête",
       "solidComponent": "Composant solide",
       "solidGroup": "Groupe solide",
-      "elements": "{count} entités ({summary})"
+      "elements": "{count} entités ({summary})",
+      "attributes": "Attributs",
+      "attributeAdd": "Ajouter un attribut…",
+      "attributeRemove": "Supprimer l’attribut",
+      "attributeName": "Nom de l’attribut"
     },
     "shapes": {
       "cylinder": "Cylindre",
@@ -1039,7 +1079,10 @@
       "noMesh": "Aucun maillage trouvé – des lignes comme « v 1 2 3 » et « f 1 2 3 » sont attendues.",
       "invalidCoordinates": "Coordonnées invalides dans le maillage",
       "imported": "{vertices} sommets, {faces} faces importés",
-      "fewAlready": "L’objet a déjà très peu de polygones."
+      "fewAlready": "L’objet a déjà très peu de polygones.",
+      "undoCircle": "Cercle : {count} segments",
+      "undoSubdivide": "Plus de polygones",
+      "undoSubdivideRound": "Plus de polygones (arrondi)"
     },
     "tour": {
       "welcome": {
@@ -1545,7 +1588,9 @@
       "confirmCommunity": "Installer « {name} » de {author} ? Il ne vient pas du dépôt Shap3D.ai et s’exécute, comme tout plugin, avec un accès complet à l’application. Ne l’installez que si vous faites confiance à sa source.\n\n{url}",
       "confirmUrlInstall": "Installer le plugin à cette adresse ? Les plugins ont un accès complet à l’application – ne l’installez que si vous faites confiance à sa source.\n\n{url}",
       "preview": "Aperçu",
-      "previewTitle": "Pas encore publié – construit depuis la branche main du dépôt Shap3D.ai, un aperçu de sa prochaine version"
+      "previewTitle": "Pas encore publié – construit depuis la branche main du dépôt Shap3D.ai, un aperçu de sa prochaine version",
+      "search": "Rechercher des plugins",
+      "noMatch": "Aucun plugin ne correspond."
     },
     "scriptEditor": {
       "loadExample": "Charger un exemple…",
@@ -1651,7 +1696,10 @@
         "async": "Les scripts asynchrones ne sont pas pris en charge – « await » est ignoré.",
         "needsText3d": "Le texte 3D nécessite le plugin « Texte 3D » (gestionnaire de plugins)",
         "unknownType": "Type d’objet inconnu : {type}",
-        "languageExists": "Le langage de script « {id} » existe déjà"
+        "languageExists": "Le langage de script « {id} » existe déjà",
+        "unknownCommand": "s3d.{name} n’existe pas.",
+        "didYouMean": "Vouliez-vous dire s3d.{name} ?",
+        "line": "(ligne {line})"
       }
     },
     "codeExport": {
@@ -1700,8 +1748,8 @@
       "count": "Copies",
       "spacing": "Espacement",
       "align": "Tourner le long du chemin",
-      "inputs": "Entrées",
-      "editInputs": "Modifier les entrées",
+      "inputs": "Composé de",
+      "editInputs": "Modifier ses parties",
       "editHint": "Ouvrez-la pour modifier ses groupes d’entrée ; le résultat suit en la quittant. La géométrie dessinée directement à l’intérieur est remplacée par le résultat suivant.",
       "undoParams": "Modifier la procédure",
       "names": {

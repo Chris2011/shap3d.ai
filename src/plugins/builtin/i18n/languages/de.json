@@ -108,7 +108,9 @@
       "view-left": "Links",
       "view-bottom": "Unten",
       "toggleSnapping": "Fangen",
-      "explodeToInputs": "In Eingaben auflösen"
+      "explodeToInputs": "In seine Teile zerlegen",
+      "newTab": "Neuer Tab",
+      "toggleAutosave": "Automatisch speichern (im Browser)"
     },
     "names": {
       "model": "Modell",
@@ -121,10 +123,10 @@
       "sectionNumbered": "Schnitt {number}"
     },
     "import": {
-      "converterUnreachable": "Der lokale Konverter ist nicht erreichbar – die App über „npm run dev“ oder „npm run preview“ starten.",
-      "needsLocalServer": ".skp- und .blend-Dateien gehen nur mit dem lokalen Server („npm run dev“ oder „npm run preview“).",
+      "converterUnreachable": "SketchUp- und Blender-Dateien brauchen einen lokalen Konverter, der hier nicht läuft. Speichere die Datei im anderen Programm als glTF, FBX oder OBJ und öffne diese. (Für Entwickler: App mit „npm run dev“ starten.)",
+      "needsLocalServer": "SketchUp- und Blender-Dateien brauchen einen lokalen Konverter, der hier nicht läuft. Speichere die Datei im anderen Programm als glTF, FBX oder OBJ und öffne diese. (Für Entwickler: App mit „npm run dev“ starten.)",
       "conversionFailed": "Konvertierung fehlgeschlagen (HTTP {status})",
-      "unsupported": "Das Format .{ext} wird nicht unterstützt – weitere Formate (FBX, Collada, 3DS, Blender …) bringt das Plugin „Importformate“ mit (Plugins › Plugins verwalten).",
+      "unsupported": "Dateien vom Typ .{ext} lassen sich nicht öffnen. Speichere die Datei im anderen Programm als glTF, OBJ oder STL und öffne diese.",
       "unknownJson": "Unbekanntes JSON-Format",
       "maxFile": "3ds-Max-Dateien (.max) kann nur 3ds Max selbst lesen – dort über Datei › Exportieren als FBX (oder .3ds/.obj) speichern und diese Datei importieren.",
       "detectedMillimetres": "Millimeter erkannt",
@@ -134,7 +136,10 @@
       "groups": "{count} Gruppe | {count} Gruppen",
       "materials": "{count} Material | {count} Materialien",
       "skipped": "{count} Dreieck über dem Limit ausgelassen | {count} Dreiecke über dem Limit ausgelassen",
-      "part": "Teil"
+      "part": "Teil",
+      "morePlugin": "Das Plugin „Importformate“ (Plugins) ergänzt FBX, Collada, 3DS und mehr.",
+      "unreadable": "„{name}“ ließ sich nicht lesen – sie ist vielleicht beschädigt oder nicht das, was ihre Endung sagt.",
+      "skpNeedsSdk": "SketchUp-Dateien lassen sich hier nicht direkt öffnen. Exportiere das Modell in SketchUp als DAE oder glTF und öffne diese Datei. (Für Entwickler: Das braucht das SketchUp SDK in tools/sketchup-sdk.)"
     },
     "units": {
       "centimetres": "Zentimeter",
@@ -192,15 +197,18 @@
       "tagsToScenes": "Tags auf Szenen",
       "nudge": "Mit Pfeiltasten verschieben",
       "roundCorner": "Ecke abrunden",
-      "unroundCorner": "Ecke zurück"
+      "unroundCorner": "Ecke zurück",
+      "snapPoint": "Andockpunkt ändern",
+      "attribute": "Attribut ändern",
+      "environment": "Umgebung ändern"
     },
     "toast": {
       "nothingSelected": "Nichts ausgewählt",
       "cut": "Ausgeschnitten",
       "copied": "Kopiert",
-      "selectTwoFaces": "Wählen Sie mindestens zwei Flächen aus.",
-      "selectTwoSolids": "Wählen Sie zwei Gruppen oder Komponenten (Volumenkörper) aus.",
-      "notASolid": "„{name}“ ist kein Volumenkörper.",
+      "selectTwoFaces": "Wähle mindestens zwei Flächen aus.",
+      "selectTwoSolids": "Wähle mindestens zwei Gruppen oder Komponenten aus, die geschlossene Körper sind.",
+      "notASolid": "„{name}“ ist kein geschlossener Körper: Jede Kante muss an genau zwei Flächen grenzen, also keine Löcher und keine losen Linien.",
       "solidFailed": "Volumenkörper-Operation fehlgeschlagen: {error}",
       "alreadyEmpty": "Die Arbeitsfläche ist bereits leer",
       "cleared": "Arbeitsfläche geleert – Strg+Z holt alles zurück",
@@ -209,24 +217,26 @@
       "noSavedModel": "Kein gespeichertes Modell",
       "loadFailed": "Laden fehlgeschlagen",
       "locked": "Gesperrt",
-      "selectFirst": "Wählen Sie zuerst Objekte aus.",
+      "selectFirst": "Wähle zuerst Objekte aus.",
       "noValidPath": "Kein gültiger Pfad ausgewählt.",
       "snappingOn": "Fangen ein (F3)",
       "snappingOff": "Fangen aus – Punkte bleiben, wo der Mauszeiger ist (F3)",
       "roundCornerTwoEdges": "Nur eine Ecke aus genau zwei Kanten lässt sich abrunden.",
       "roundCornerTooShort": "Die Kanten dieser Ecke sind für diese Rundung zu kurz.",
-      "unroundNoCorner": "Dieser Bogen liegt nicht zwischen zwei geraden Kanten, die sich in einer Ecke treffen."
+      "unroundNoCorner": "Dieser Bogen liegt nicht zwischen zwei geraden Kanten, die sich in einer Ecke treffen.",
+      "snapPointNeedsGroup": "Andockpunkte gehören zu einer Gruppe oder Komponente. Klicke auf eine."
     },
     "confirm": {
       "discardChanges": "Ungespeicherte Änderungen verwerfen?",
-      "resizeGroup": "Möchten Sie die Größe des Gruppeninhalts ändern? (Faktor {factor})",
-      "resizeModel": "Möchten Sie die Größe des Modells ändern? (Faktor {factor})",
+      "resizeGroup": "Möchtest du die Größe des Gruppeninhalts ändern? (Faktor {factor})",
+      "resizeModel": "Möchtest du die Größe des Modells ändern? (Faktor {factor})",
       "purgeOnSave": "{count} unbenutzte Gruppe oder Komponente – vor dem Speichern bereinigen? | {count} unbenutzte Gruppen oder Komponenten – vor dem Speichern bereinigen?"
     },
     "prompt": {
       "componentName": "Name der Komponente",
       "enterText": "Text eingeben",
-      "scriptName": "Name des Skripts"
+      "scriptName": "Name des Skripts",
+      "enterTextLive": "Text eingeben (<> ist der gemessene Wert und passt sich dem Modell an)"
     },
     "groups": {
       "file": "Datei",
@@ -272,71 +282,72 @@
       "walk": "Gehen",
       "place": "Platzieren",
       "status": {
-        "place": "„{name}“ platzieren: Klicken Sie auf die Zielposition. Pfeiltasten drehen um 90°.",
+        "place": "„{name}“ platzieren: Klicke auf die Zielposition. Pfeiltasten drehen um 90°.",
         "placeNothing": "Nichts zu platzieren.",
         "select": "Klicken oder Ziehen, um Objekte auszuwählen. Umschalttaste = Hinzufügen/Entfernen. Strg-Taste = Hinzufügen. Umschalttaste + Strg = Entfernen.",
-        "lasso": "Ziehen Sie eine Schleife um Objekte. Im Uhrzeigersinn = vollständig enthalten, gegen den Uhrzeigersinn = berührt.",
-        "eraser": "Klicken oder ziehen Sie über Kanten, um sie zu löschen. Umschalt = Ausblenden, Strg = Abmildern.",
+        "lasso": "Zieh eine Schleife um Objekte. Im Uhrzeigersinn = vollständig enthalten, gegen den Uhrzeigersinn = berührt.",
+        "eraser": "Klicke oder zieh über Kanten, um sie zu löschen. Umschalt = Ausblenden, Strg = Abmildern.",
         "paint": "Material „{material}“: Klicken, um Flächen zu bemalen. Alt = Material aufnehmen, Strg = verbundene Flächen, Umschalt = alle passenden Flächen.",
-        "sample": "Klicken Sie auf eine Fläche, um ihr Material aufzunehmen.",
-        "lineEnd": "Klicken, um den Endpunkt festzulegen, oder Länge eingeben. | Pfeiltasten = Ableitungsrichtung fixieren ein/aus. Umschalt = Ableitung fixieren.",
-        "lineStart": "Klicken, um den ersten Endpunkt festzulegen. | Pfeiltasten = Ableitungsrichtung fixieren ein/aus.",
-        "freehand": "Klicken und ziehen Sie, um eine Freihandkurve zu zeichnen.",
+        "sample": "Klicke auf eine Fläche, um ihr Material aufzunehmen.",
+        "lineEnd": "Klicken, um den Endpunkt festzulegen, oder Länge eingeben. | Pfeiltasten = Richtung festhalten ein/aus. Umschalt halten = angezeigte Richtung festhalten.",
+        "lineStart": "Klicken, um den ersten Endpunkt festzulegen. | Pfeiltasten = Richtung festhalten ein/aus.",
+        "freehand": "Klicke und zieh, um eine Freihandkurve zu zeichnen.",
         "rectangleCorner": "Klicken, um die gegenüberliegende Ecke festzulegen, oder Länge und Breite eingeben (z. B. 2000; 1500). | Pfeil nach unten = an der zuletzt berührten Kante, nochmal = an den Achsen.",
         "rectangleStart": "Klicken, um die erste Ecke festzulegen. | Beginnt das Rechteck auf einer Kante, richtet es sich an ihr aus.",
-        "rotrect1": "Wählen Sie die erste Ecke aus.",
-        "rotrect2": "Wählen Sie die zweite Ecke (Länge und Richtung) aus.",
-        "rotrect3": "Wählen Sie die Breite und den Winkel aus.",
-        "circleRadius": "Wählen Sie den Radius aus oder geben Sie ihn ein. ({count} Segmente; „12s“ ändert die Anzahl)",
-        "polygonRadius": "Wählen Sie den Radius aus oder geben Sie ihn ein. ({count} Seiten; „12s“ ändert die Anzahl)",
-        "circleCenter": "Wählen Sie den Mittelpunkt aus. Geben Sie z. B. „48s“ ein, um die Segmente zu ändern.",
-        "polygonCenter": "Wählen Sie den Mittelpunkt aus. Geben Sie z. B. „8s“ ein, um die Seiten zu ändern.",
-        "arc2Start": "Wählen Sie den Startpunkt des Bogens aus. | Punkte auf zwei Kanten einer Ecke runden sie ab. Doppelklick auf eine Ecke = wie die letzte abrunden, auf einen Bogen = Ecke zurück.",
-        "pickEnd": "Wählen Sie den Endpunkt aus.",
-        "arc2Bulge": "Wählen Sie die Wölbung aus oder geben Sie sie ein.",
-        "pickCenter": "Wählen Sie den Mittelpunkt aus.",
-        "arcStart": "Wählen Sie den Startpunkt (Radius) aus.",
-        "arcEnd": "Wählen Sie den Endwinkel aus.",
-        "pickStart": "Wählen Sie den Startpunkt aus.",
-        "arc3Second": "Wählen Sie einen zweiten Punkt auf dem Bogen aus.",
+        "rotrect1": "Wähle die erste Ecke aus.",
+        "rotrect2": "Wähle die zweite Ecke (Länge und Richtung) aus.",
+        "rotrect3": "Wähle die Breite und den Winkel aus.",
+        "circleRadius": "Wähle den Radius aus oder gib ihn ein. ({count} Segmente; „12s“ ändert die Anzahl)",
+        "polygonRadius": "Wähle den Radius aus oder gib ihn ein. ({count} Seiten; „12s“ ändert die Anzahl)",
+        "circleCenter": "Wähle den Mittelpunkt aus. Gib z. B. „48s“ ein, um die Segmente zu ändern.",
+        "polygonCenter": "Wähle den Mittelpunkt aus. Gib z. B. „8s“ ein, um die Seiten zu ändern.",
+        "arc2Start": "Wähle den Startpunkt des Bogens aus. | Punkte auf zwei Kanten einer Ecke runden sie ab. Doppelklick auf eine Ecke = wie die letzte abrunden, auf einen Bogen = Ecke zurück.",
+        "pickEnd": "Wähle den Endpunkt aus.",
+        "arc2Bulge": "Wähle die Wölbung aus oder gib sie ein.",
+        "pickCenter": "Wähle den Mittelpunkt aus.",
+        "arcStart": "Wähle den Startpunkt (Radius) aus.",
+        "arcEnd": "Wähle den Endwinkel aus.",
+        "pickStart": "Wähle den Startpunkt aus.",
+        "arc3Second": "Wähle einen zweiten Punkt auf dem Bogen aus.",
         "newFaceOff": "Strg = neue Fläche aus.",
         "newFaceOn": "Strg = neue Fläche ein.",
         "pushpullDistance": "Klicken, um die Distanz festzulegen, oder Abstand eingeben. | Auf Ecken, Kanten und Flächen einrasten. {mode}",
         "pushpullPick": "Klicken, um die zu drückende oder zu ziehende Fläche auszuwählen. | Doppelklick = letzte Distanz wiederholen. {mode}",
-        "offsetDistance": "Bewegen Sie den Cursor, um den Versatz festzulegen, oder geben Sie eine Distanz ein.",
-        "offsetPick": "Wählen Sie eine Fläche für den Versatz aus.",
-        "moveTarget": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. | Strg = Kopie ein/aus. Pfeiltasten = Ableitungsrichtung fixieren.",
-        "moveTargetCopy": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. (Kopie) | Strg = Kopie ein/aus. Pfeiltasten = Ableitungsrichtung fixieren.",
+        "offsetDistance": "Beweg den Cursor, um den Versatz festzulegen, oder gib eine Distanz ein.",
+        "offsetPick": "Wähle eine Fläche für den Versatz aus.",
+        "moveTarget": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. | Strg = Kopie ein/aus. Pfeiltasten = Richtung festhalten.",
+        "moveTargetCopy": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. (Kopie) | Strg = Kopie ein/aus. Pfeiltasten = Richtung festhalten.",
         "moveStart": "Klicken, um den Startpunkt festzulegen. Rote Kreuze am Rahmen einer Gruppe drehen sie. | Strg = Kopie ein/aus.",
-        "rotateCenter": "Wählen Sie den Drehpunkt aus. Pfeiltasten richten den Winkelmesser aus.",
-        "rotateStart": "Wählen Sie den Startpunkt des Drehwinkels aus.",
-        "rotateAngle": "Wählen Sie den Drehwinkel aus oder geben Sie ihn ein. Strg = Kopie.",
-        "scaleDrag": "Ziehen Sie, um zu skalieren, oder geben Sie einen Faktor ein. Strg = um die Mitte, Umschalt = gleichmäßig.",
-        "scaleGrip": "Wählen Sie einen Ziehpunkt aus.",
-        "scalePick": "Wählen Sie die zu skalierenden Objekte aus.",
-        "followmeProfile": "Klicken Sie auf die Profilfläche, die dem ausgewählten Pfad folgen soll.",
-        "followmePath": "Wählen Sie zuerst Kanten als Pfad aus (z. B. Doppelklick auf eine Fläche wählt ihre Kanten), dann dieses Werkzeug.",
-        "tapeEnd": "Wählen Sie den Endpunkt aus. Strg wechselt: Messen › Hilfslinie › Hilfspunkt.",
-        "tapeStart": "Wählen Sie den Startpunkt (Punkt oder Kante) aus.",
-        "tapeStartGuides": "Wählen Sie den Startpunkt (Punkt oder Kante) aus. Hilfslinien werden erstellt.",
-        "tapeStartPoint": "Wählen Sie den Startpunkt (Punkt oder Kante) aus. Am Endpunkt entsteht ein Hilfspunkt.",
-        "protractorVertex": "Wählen Sie den Scheitelpunkt aus.",
-        "protractorFirst": "Wählen Sie den ersten Schenkel aus.",
-        "protractorAngle": "Wählen Sie den Winkel aus (erstellt eine Hilfslinie).",
-        "dimensionStart": "Wählen Sie den Startpunkt der Bemaßung oder eine Kante aus.",
-        "dimensionPlace": "Ziehen Sie die Bemaßung an ihre Position.",
-        "textPlace": "Wählen Sie die Position des Textes aus.",
-        "textAnchor": "Wählen Sie den Punkt aus, auf den der Text zeigen soll.",
-        "section": "Klicken Sie auf eine Fläche, um eine Schnittebene zu platzieren. Pfeiltasten richten sie an den Achsen aus.",
-        "orbit": "Ziehen Sie, um die Ansicht zu drehen. Umschalt = Schwenken.",
-        "pan": "Ziehen Sie, um die Ansicht zu schwenken.",
-        "zoom": "Ziehen Sie nach oben/unten zum Zoomen. Umschalt = Sichtfeld ändern. Geben Sie einen Sichtfeldwinkel ein (z. B. 35°).",
-        "zoomwindow": "Ziehen Sie ein Rechteck auf, um in diesen Bereich zu zoomen.",
-        "lookaround": "Ziehen Sie, um sich umzusehen (Kamera dreht sich um ihren Standpunkt).",
-        "walk": "Ziehen Sie nach oben/unten zum Gehen, links/rechts zum Drehen. Pfeiltasten funktionieren auch.",
-        "poscam": "Klicken Sie, um die Kamera dort in Augenhöhe zu positionieren.",
-        "copyAlongSource": "Wählen Sie die zu kopierenden Gruppen oder Komponenten aus und klicken Sie dann auf einen Pfad.",
-        "copyAlongPath": "Klicken Sie auf den Pfad: eine Linie aus Kanten oder eine Gruppe aus Kanten. Danach Anzahl (7x) oder Abstand eingeben."
+        "rotateCenter": "Wähle den Drehpunkt aus. Pfeiltasten richten den Winkelmesser aus.",
+        "rotateStart": "Wähle den Startpunkt des Drehwinkels aus.",
+        "rotateAngle": "Wähle den Drehwinkel aus oder gib ihn ein. Strg = Kopie.",
+        "scaleDrag": "Zieh, um zu skalieren, oder gib einen Faktor ein. Strg = um die Mitte, Umschalt = gleichmäßig.",
+        "scaleGrip": "Wähle einen grünen Griff aus.",
+        "scalePick": "Wähle die zu skalierenden Objekte aus.",
+        "followmeProfile": "Klicke auf die Profilfläche, die dem ausgewählten Pfad folgen soll.",
+        "followmePath": "Wähle zuerst Kanten als Pfad aus (z. B. Doppelklick auf eine Fläche wählt ihre Kanten), dann dieses Werkzeug.",
+        "tapeEnd": "Wähle den Endpunkt aus. Strg wechselt: Messen › Hilfslinie › Hilfspunkt.",
+        "tapeStart": "Wähle den Startpunkt (Punkt oder Kante) aus.",
+        "tapeStartGuides": "Wähle den Startpunkt (Punkt oder Kante) aus. Hilfslinien werden erstellt.",
+        "tapeStartPoint": "Wähle den Startpunkt (Punkt oder Kante) aus. Am Endpunkt entsteht ein Hilfspunkt.",
+        "protractorVertex": "Klicke auf die Ecke des Winkels.",
+        "protractorFirst": "Klicke auf einen Punkt der ersten Winkelseite.",
+        "protractorAngle": "Wähle den Winkel aus (erstellt eine Hilfslinie).",
+        "dimensionStart": "Wähle den Startpunkt der Bemaßung oder eine Kante aus.",
+        "dimensionPlace": "Zieh die Bemaßung an ihre Position.",
+        "textPlace": "Wähle die Position des Textes aus.",
+        "textAnchor": "Wähle den Punkt aus, auf den der Text zeigen soll.",
+        "section": "Klicke auf eine Fläche, um eine Schnittebene zu platzieren. Pfeiltasten richten sie an den Achsen aus.",
+        "orbit": "Zieh, um die Ansicht zu drehen. Umschalt = Schwenken.",
+        "pan": "Zieh, um die Ansicht zu schwenken.",
+        "zoom": "Zieh nach oben/unten zum Zoomen. Umschalt = Sichtfeld ändern. Gib einen Sichtfeldwinkel ein (z. B. 35°).",
+        "zoomwindow": "Zieh ein Rechteck auf, um in diesen Bereich zu zoomen.",
+        "lookaround": "Zieh, um sich umzusehen (Kamera dreht sich um ihren Standpunkt).",
+        "walk": "Zieh nach oben/unten zum Gehen, links/rechts zum Drehen. Pfeiltasten funktionieren auch.",
+        "poscam": "Klicke, um die Kamera dort in Augenhöhe zu positionieren.",
+        "copyAlongSource": "Wähle die zu kopierenden Gruppen oder Komponenten aus und klicke dann auf einen Pfad.",
+        "copyAlongPath": "Klicke auf den Pfad: eine Linie aus Kanten oder eine Gruppe aus Kanten. Danach Anzahl (7x) oder Abstand eingeben.",
+        "snappoint": "Klicke einen Punkt auf einer Gruppe oder Komponente an: Andere docken beim Verschieben dort an. Ein Klick auf einen Andockpunkt entfernt ihn."
       },
       "hints": {
         "square": "Quadrat",
@@ -350,7 +361,8 @@
         "sameDistance": "Gleicher Abstand zur Ecke",
         "copyAlongPath": "Entlang dieses Pfads kopieren"
       },
-      "copyalong": "Entlang kopieren"
+      "copyalong": "Entlang kopieren",
+      "snappoint": "Andockpunkt"
     },
     "editor": {
       "undone": "Rückgängig: {action}",
@@ -360,7 +372,8 @@
       "faces": "{count} Fläche | {count} Flächen",
       "edges": "{count} Kante | {count} Kanten",
       "instances": "{count} Gruppe/Komponente | {count} Gruppen/Komponenten",
-      "actionCancelled": "Aktion abgebrochen"
+      "actionCancelled": "Aktion abgebrochen",
+      "error": "Fehler: {message}"
     },
     "inference": {
       "onRedAxis": "Auf roter Achse",
@@ -383,7 +396,8 @@
       "extension": "Auf Kantenverlängerung",
       "fromPoint": "Von Punkt",
       "radiusOnFace": "Vom Radius auf Fläche",
-      "onProfile": "Auf Umriss"
+      "onProfile": "Auf Umriss",
+      "snapPoint": "Andockpunkt"
     },
     "measure": {
       "grid": "Raster"
@@ -658,7 +672,7 @@
         "stone": "Stein & Mineral",
         "fabric": "Stoff & Leder"
       },
-      "hint": "Klicken Sie ein Material an, dann auf Flächen (Farbeimer, B).",
+      "hint": "Klicke ein Material an, dann auf Flächen (Farbeimer, B).",
       "search": "Materialien durchsuchen",
       "defaultShort": "Std",
       "edit": "Bearbeiten",
@@ -684,20 +698,32 @@
       "used": "Verwendet",
       "delete": "Material löschen",
       "new": "Neues Material",
-      "create": "Erstellen"
+      "create": "Erstellen",
+      "previewFlat": "Flach",
+      "previewCube": "Würfel",
+      "previewTitle": "Vorschau der Materialien",
+      "physical": "Physikalisch (PBR)",
+      "roughness": "Rauheit",
+      "metalness": "Metall",
+      "mapNormal": "Normal-Map",
+      "mapAo": "Umgebungsverdeckung",
+      "loadMap": "Bild laden…",
+      "removeMap": "Bild entfernen"
     },
     "tags": {
       "add": "Tag hinzufügen",
       "assignTitle": "Auswahl dem markierten Tag zuweisen",
       "assign": "Zuweisen",
       "untagged": "Ohne Tag",
-      "hint": "Doppelklick benennt um. Ausgeblendete Tags verbergen alle Elemente mit diesem Tag.",
+      "hint": "Tags sind wie Ebenen: Gib Dingen ein Tag und blende sie gemeinsam ein oder aus. Doppelklick benennt ein Tag um.",
       "toScenes": "Auf Szenen…",
       "toScenesTitle": "Sichtbarkeit des markierten Tags auf Szenen übertragen",
       "toScenesVisible": "„{tag}“ ist sichtbar – in diesen Szenen einblenden:",
       "toScenesHidden": "„{tag}“ ist ausgeblendet – in diesen Szenen ausblenden:",
       "apply": "Übernehmen",
-      "appliedToScenes": "„{tag}“ auf {count} Szene übertragen | „{tag}“ auf {count} Szenen übertragen"
+      "appliedToScenes": "„{tag}“ auf {count} Szene übertragen | „{tag}“ auf {count} Szenen übertragen",
+      "selectFirst": "Wähle zuerst etwas aus und klicke dann, um ihm das markierte Tag zu geben.",
+      "scenesFirst": "Das Modell hat noch keine Szenen – leg eine im Panel Szenen an."
     },
     "scenes": {
       "add": "Szene hinzufügen",
@@ -709,24 +735,27 @@
     },
     "components": {
       "inModel": "Im Modell",
-      "empty": "Keine Komponenten. Wählen Sie Geometrie aus und drücken Sie „G“.",
+      "empty": "Keine Komponenten. Wähle Geometrie aus und drück „G“.",
       "clickToPlace": "Klicken zum Platzieren: {name}",
       "people": "Personen",
       "placePerson": "{name} platzieren (dreht sich immer zur Kamera)",
       "library": "Bibliothek",
-      "libraryHint": "Bibliotheksobjekte werden per Skript erzeugt und anschließend am Cursor platziert."
+      "libraryHint": "Klick eines an und dann in die 3D-Ansicht, um es zu platzieren."
     },
     "soften": {
       "hint": "Mildert Kanten zwischen Flächen der Auswahl ab, deren Winkel kleiner als der eingestellte Wert ist.",
-      "coplanar": "Koplanare abmildern",
+      "coplanar": "Auch Flächen in einer Ebene abmildern",
       "apply": "Auf Auswahl anwenden",
-      "reset": "Zurücksetzen"
+      "reset": "Zurücksetzen",
+      "selectFirst": "Wähle zuerst Flächen oder eine Gruppe aus."
     },
     "shadows": {
       "show": "Schatten anzeigen",
       "time": "Uhrzeit",
       "date": "Datum",
-      "hint": "Der Sonnenstand wird für ca. 48° nördlicher Breite berechnet. Auch ohne Schatten bestimmt er die Beleuchtung der Flächen."
+      "hint": "Die Sonne richtet sich nach dem hier eingestellten Ort. Auch ohne Schatten bestimmt sie die Beleuchtung der Flächen.",
+      "latitude": "Breitengrad",
+      "north": "Norden (von der grünen Achse aus)"
     },
     "outliner": {
       "filter": "Filter",
@@ -753,10 +782,10 @@
       "statistics": "Statistik",
       "faces": "Flächen",
       "edges": "Kanten",
-      "definitions": "Definitionen",
+      "definitions": "Gruppen und Komponenten",
       "extent": "Ausdehnung",
-      "purge": "Nicht verwendete bereinigen",
-      "purged": "Nicht verwendete Definitionen entfernt"
+      "purge": "Unbenutztes entfernen",
+      "purged": "Unbenutzte Gruppen und Komponenten entfernt"
     },
     "styles": {
       "presets": "Vorlagen",
@@ -789,13 +818,20 @@
         "sketch": "Skizze",
         "night": "Nacht",
         "white": "Weiß"
-      }
+      },
+      "environment": "Umgebung (HDR, EXR)",
+      "environmentLoad": "Laden…",
+      "environmentRemove": "Umgebung entfernen",
+      "environmentBackground": "Auch als Himmel",
+      "environmentIntensity": "Helligkeit",
+      "environmentTooBig": "Die Datei ist größer als 32 MB.",
+      "sectionFill": "Schnittflächen füllen"
     },
     "instructor": {
       "select": {
         "desc": "Wählt Elemente für andere Werkzeuge und Befehle aus.",
-        "step1": "Klicken Sie auf ein Element.",
-        "step2": "Ziehen Sie von links nach rechts (Fenster) oder rechts nach links (Kreuzen).",
+        "step1": "Klicke auf ein Element.",
+        "step2": "Zieh von links nach rechts (Fenster) oder rechts nach links (Kreuzen).",
         "step3": "Doppelklick: Fläche mit Kanten bzw. Gruppe öffnen. Dreifachklick: alles Verbundene.",
         "mod1": "Strg: hinzufügen",
         "mod2": "Umschalt: hinzufügen/entfernen",
@@ -803,8 +839,8 @@
       },
       "line": {
         "desc": "Zeichnet Kanten. Geschlossene Kanten in einer Ebene bilden automatisch eine Fläche.",
-        "step1": "Klicken Sie auf den Startpunkt.",
-        "step2": "Klicken Sie auf den Endpunkt oder geben Sie eine Länge ein.",
+        "step1": "Klicke auf den Startpunkt.",
+        "step2": "Klicke auf den Endpunkt oder gib eine Länge ein.",
         "step3": "Weiterzeichnen oder Esc zum Beenden.",
         "mod1": "Pfeiltasten: Achse sperren",
         "mod2": "Umschalt: Inferenz sperren",
@@ -812,15 +848,15 @@
       },
       "rectangle": {
         "desc": "Zeichnet rechteckige Flächen auf dem Boden oder auf vorhandenen Flächen.",
-        "step1": "Klicken Sie auf die erste Ecke.",
-        "step2": "Klicken Sie auf die gegenüberliegende Ecke.",
-        "step3": "Geben Sie z. B. „3m;4m“ ein, um die Maße festzulegen (auch nachträglich)."
+        "step1": "Klicke auf die erste Ecke.",
+        "step2": "Klicke auf die gegenüberliegende Ecke.",
+        "step3": "Gib z. B. „3m;4m“ ein, um die Maße festzulegen (auch nachträglich)."
       },
       "circle": {
         "desc": "Zeichnet einen Kreis (Polygon mit vielen Segmenten).",
         "step1": "Optional: Segmentanzahl eingeben (z. B. „48“).",
-        "step2": "Klicken Sie auf den Mittelpunkt.",
-        "step3": "Klicken Sie für den Radius oder geben Sie ihn ein."
+        "step2": "Klicke auf den Mittelpunkt.",
+        "step3": "Klicke für den Radius oder gib ihn ein."
       },
       "polygon": {
         "desc": "Zeichnet ein regelmäßiges Polygon.",
@@ -865,14 +901,14 @@
       },
       "pushpull": {
         "desc": "Extrudiert Flächen zu 3D-Körpern oder verschiebt sie.",
-        "step1": "Klicken Sie auf eine Fläche.",
-        "step2": "Bewegen Sie die Maus und klicken Sie erneut oder geben Sie eine Distanz ein.",
+        "step1": "Klicke auf eine Fläche.",
+        "step2": "Beweg die Maus und klicke erneut oder gib eine Distanz ein.",
         "step3": "Doppelklick auf eine andere Fläche wiederholt die letzte Distanz."
       },
       "offset": {
         "desc": "Erzeugt eine parallele Kopie der Flächenkante nach innen oder außen.",
-        "step1": "Klicken Sie auf eine Fläche.",
-        "step2": "Bewegen Sie den Cursor und klicken Sie oder geben Sie den Abstand ein."
+        "step1": "Klicke auf eine Fläche.",
+        "step2": "Beweg den Cursor und klicke oder gib den Abstand ein."
       },
       "move": {
         "desc": "Verschiebt, streckt oder kopiert Elemente.",
@@ -892,9 +928,9 @@
         "mod2": "Pfeiltasten: Winkelmesser an Achse ausrichten"
       },
       "scale": {
-        "desc": "Skaliert die Auswahl über Ziehpunkte.",
+        "desc": "Skaliert die Auswahl über die grünen Griffe.",
         "step1": "Auswahl treffen.",
-        "step2": "Ziehpunkt (grün) anklicken.",
+        "step2": "Grünen Griff anklicken.",
         "step3": "Ziehen oder Faktor eingeben (z. B. „2“ oder „1;2;1“, auch Länge „3m“).",
         "mod1": "Strg: um die Mitte skalieren",
         "mod2": "Umschalt: gleichmäßig/ungleichmäßig umschalten"
@@ -909,8 +945,8 @@
       },
       "protractor": {
         "desc": "Misst Winkel und erzeugt geneigte Hilfslinien.",
-        "step1": "Scheitelpunkt klicken.",
-        "step2": "Ersten Schenkel klicken.",
+        "step1": "Ecke des Winkels anklicken.",
+        "step2": "Punkt auf der ersten Winkelseite anklicken.",
         "step3": "Winkel klicken oder eingeben."
       },
       "dimension": {
@@ -920,8 +956,8 @@
       },
       "text": {
         "desc": "Erzeugt Beschriftungen mit Führungslinie.",
-        "step1": "Klicken Sie auf ein Element (Fläche zeigt die Fläche, Kante die Länge).",
-        "step2": "Klicken Sie die Textposition.",
+        "step1": "Klicke auf ein Element (Fläche zeigt die Fläche, Kante die Länge).",
+        "step2": "Klicke die Textposition.",
         "step3": "Text eingeben."
       },
       "section": {
@@ -992,7 +1028,11 @@
       "edge": "Kante",
       "solidComponent": "Volumenkörper-Komponente",
       "solidGroup": "Volumenkörper-Gruppe",
-      "elements": "{count} Elemente ({summary})"
+      "elements": "{count} Elemente ({summary})",
+      "attributes": "Attribute",
+      "attributeAdd": "Attribut hinzufügen…",
+      "attributeRemove": "Attribut entfernen",
+      "attributeName": "Name des Attributs"
     },
     "shapes": {
       "cylinder": "Zylinder",
@@ -1039,12 +1079,15 @@
       "noMesh": "Kein Mesh gefunden – erwartet werden Zeilen wie „v 1 2 3“ und „f 1 2 3“.",
       "invalidCoordinates": "Ungültige Koordinaten im Mesh",
       "imported": "{vertices} Ecken, {faces} Flächen importiert",
-      "fewAlready": "Das Objekt hat schon sehr wenige Polygone."
+      "fewAlready": "Das Objekt hat schon sehr wenige Polygone.",
+      "undoCircle": "Kreis: {count} Segmente",
+      "undoSubdivide": "Mehr Polygone",
+      "undoSubdivideRound": "Mehr Polygone (abrunden)"
     },
     "tour": {
       "welcome": {
         "title": "Willkommen bei {name}",
-        "text": "Easy 3D-Modellieren direkt im Browser – mit einer KI, die auf deinem eigenen Rechner läuft. In ein paar kurzen Schritten zeigen wir dir das Wichtigste."
+        "text": "Einfaches 3D-Modellieren direkt im Browser – mit einer KI, die auf deinem eigenen Rechner läuft. In ein paar kurzen Schritten zeigen wir dir das Wichtigste."
       },
       "draw": {
         "title": "Zeichnen und hochziehen",
@@ -1545,7 +1588,9 @@
       "confirmCommunity": "„{name}“ von {author} installieren? Es stammt nicht aus dem Shap3D.ai-Repository und läuft wie jedes Plugin mit vollem Zugriff auf die App. Nur installieren, wenn du der Quelle vertraust.\n\n{url}",
       "confirmUrlInstall": "Das Plugin von dieser Adresse installieren? Plugins laufen mit vollem Zugriff auf die App – nur installieren, wenn du der Quelle vertraust.\n\n{url}",
       "preview": "Vorschau",
-      "previewTitle": "Noch nicht veröffentlicht – aus dem main-Zweig des Shap3D.ai-Repositorys gebaut, eine Vorschau der nächsten Version"
+      "previewTitle": "Noch nicht veröffentlicht – aus dem main-Zweig des Shap3D.ai-Repositorys gebaut, eine Vorschau der nächsten Version",
+      "search": "Plugins durchsuchen",
+      "noMatch": "Kein Plugin passt."
     },
     "scriptEditor": {
       "loadExample": "Beispiel laden…",
@@ -1651,7 +1696,10 @@
         "async": "Asynchrone Skripte werden nicht unterstützt – „await“ wird ignoriert.",
         "needsText3d": "3D-Text braucht das Plugin „3D-Text“ (Plugins-Verwaltung)",
         "unknownType": "Unbekannter Objekttyp: {type}",
-        "languageExists": "Skriptsprache „{id}“ gibt es schon"
+        "languageExists": "Skriptsprache „{id}“ gibt es schon",
+        "unknownCommand": "s3d.{name} gibt es nicht.",
+        "didYouMean": "Meintest du s3d.{name}?",
+        "line": "(Zeile {line})"
       }
     },
     "codeExport": {
@@ -1667,7 +1715,7 @@
       "noFaces": "Der Code erzeugt keine Flächen"
     },
     "brand": {
-      "tagline": "Easy 3D-Modellieren mit KI",
+      "tagline": "Einfach 3D-Modellieren mit KI",
       "pronounce": "sprich „{name}“"
     },
     "splash": {
@@ -1689,9 +1737,9 @@
     },
     "procedures": {
       "kinds": {
-        "solid": "Procedure: Solid-Werkzeug",
-        "followme": "Procedure: Folge mir",
-        "copyalong": "Procedure: Entlang kopieren"
+        "solid": "Bleibt bearbeitbar: Volumenkörper",
+        "followme": "Bleibt bearbeitbar: Folge mir",
+        "copyalong": "Bleibt bearbeitbar: Entlang kopieren"
       },
       "operation": "Operation",
       "distribute": "Verteilen",
@@ -1700,10 +1748,10 @@
       "count": "Kopien",
       "spacing": "Abstand",
       "align": "Entlang des Pfads drehen",
-      "inputs": "Eingaben",
-      "editInputs": "Eingaben bearbeiten",
-      "editHint": "Öffnen Sie sie, um ihre Eingabe-Gruppen zu bearbeiten; das Ergebnis folgt beim Verlassen. Direkt darin gezeichnete Geometrie wird vom nächsten Ergebnis ersetzt.",
-      "undoParams": "Procedure ändern",
+      "inputs": "Besteht aus",
+      "editInputs": "Teile bearbeiten",
+      "editHint": "Öffne es, um die Gruppen zu ändern, aus denen es besteht; das Ergebnis folgt beim Verlassen. Was du direkt darin zeichnest, ersetzt das nächste Ergebnis.",
+      "undoParams": "Einstellungen ändern",
       "names": {
         "copyAlong": "Entlang kopieren",
         "followMe": "Folge mir",
@@ -1711,13 +1759,13 @@
         "profile": "Profil"
       },
       "errors": {
-        "missingInput": "Eine Eingabe der Procedure fehlt – das letzte Ergebnis bleibt.",
-        "notSolid": "Eine Eingabe der Procedure ist kein Solid mehr – das letzte Ergebnis bleibt.",
-        "empty": "Mit diesen Eingaben hat die Procedure kein Ergebnis – das letzte Ergebnis bleibt.",
-        "noPath": "Der Pfad der Procedure ist keine einzelne Linie aus Kanten – das letzte Ergebnis bleibt.",
+        "missingInput": "Ein Teil, aus dem es besteht, fehlt – das letzte Ergebnis bleibt.",
+        "notSolid": "Ein Teil, aus dem es besteht, ist kein geschlossener Körper mehr – das letzte Ergebnis bleibt.",
+        "empty": "Mit diesen Teilen gibt es kein Ergebnis – das letzte Ergebnis bleibt.",
+        "noPath": "Der Pfad ist keine einzelne Linie aus Kanten – das letzte Ergebnis bleibt.",
         "followMe": "Das Profil konnte diesem Pfad nicht folgen – das letzte Ergebnis bleibt.",
         "tooMany": "Das wären mehr als 2000 Kopien – das letzte Ergebnis bleibt.",
-        "failed": "Die Procedure ließ sich nicht aufbauen – das letzte Ergebnis bleibt."
+        "failed": "Das Ergebnis ließ sich nicht berechnen – das letzte Ergebnis bleibt."
       }
     }
   }

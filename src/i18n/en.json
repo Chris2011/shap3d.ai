@@ -108,7 +108,9 @@
       "view-left": "Left",
       "view-bottom": "Bottom",
       "toggleSnapping": "Snapping",
-      "explodeToInputs": "Explode to inputs"
+      "explodeToInputs": "Take apart into its parts",
+      "newTab": "New tab",
+      "toggleAutosave": "Autosave (in the browser)"
     },
     "names": {
       "model": "Model",
@@ -121,10 +123,10 @@
       "sectionNumbered": "Section {number}"
     },
     "import": {
-      "converterUnreachable": "The local converter cannot be reached – start the app with “npm run dev” or “npm run preview”.",
-      "needsLocalServer": ".skp and .blend files only work with the local server (“npm run dev” or “npm run preview”).",
+      "converterUnreachable": "SketchUp and Blender files need a local converter that is not running here. Save the file as glTF, FBX or OBJ in the other program and open that. (Developers: start the app with “npm run dev”.)",
+      "needsLocalServer": "SketchUp and Blender files need a local converter that is not running here. Save the file as glTF, FBX or OBJ in the other program and open that. (Developers: start the app with “npm run dev”.)",
       "conversionFailed": "Conversion failed (HTTP {status})",
-      "unsupported": "The format .{ext} is not supported – more formats (FBX, Collada, 3DS, Blender …) come with the plugin “Import formats” (Plugins › Manage plugins).",
+      "unsupported": "Files of the type .{ext} cannot be opened. Save the file as glTF, OBJ or STL in the other program and open that.",
       "unknownJson": "Unknown JSON format",
       "maxFile": "3ds Max files (.max) can only be read by 3ds Max itself – save them there via File › Export as FBX (or .3ds/.obj) and import that file.",
       "detectedMillimetres": "millimetres detected",
@@ -134,7 +136,10 @@
       "groups": "{count} group | {count} groups",
       "materials": "{count} material | {count} materials",
       "skipped": "{count} triangle over the limit skipped | {count} triangles over the limit skipped",
-      "part": "part"
+      "part": "part",
+      "morePlugin": "The Import formats plugin (Plugins) adds FBX, Collada, 3DS and more.",
+      "unreadable": "“{name}” could not be read – it may be damaged or not what its ending says.",
+      "skpNeedsSdk": "SketchUp files cannot be opened directly here. In SketchUp, export the model as DAE or glTF and open that file. (Developers: this needs the SketchUp SDK in tools/sketchup-sdk.)"
     },
     "units": {
       "centimetres": "Centimetres",
@@ -192,15 +197,18 @@
       "tagsToScenes": "Tags to scenes",
       "nudge": "Move with arrow keys",
       "roundCorner": "Round corner",
-      "unroundCorner": "Corner back"
+      "unroundCorner": "Corner back",
+      "snapPoint": "Change snap point",
+      "attribute": "Change attribute",
+      "environment": "Change environment"
     },
     "toast": {
       "nothingSelected": "Nothing selected",
       "cut": "Cut",
       "copied": "Copied",
       "selectTwoFaces": "Select at least two faces.",
-      "selectTwoSolids": "Select two groups or components (solids).",
-      "notASolid": "“{name}” is not a solid.",
+      "selectTwoSolids": "Select at least two groups or components that are closed bodies.",
+      "notASolid": "“{name}” is not a closed body: every edge must border exactly two faces, so no holes and no loose lines.",
       "solidFailed": "Solid operation failed: {error}",
       "alreadyEmpty": "The workspace is already empty",
       "cleared": "Workspace cleared – Ctrl+Z brings everything back",
@@ -215,7 +223,8 @@
       "snappingOff": "Snapping off – points stay where the cursor is (F3)",
       "roundCornerTwoEdges": "Only a corner of exactly two edges can be rounded.",
       "roundCornerTooShort": "The edges of this corner are too short for that rounding.",
-      "unroundNoCorner": "This arc does not lie between two straight edges that meet in a corner."
+      "unroundNoCorner": "This arc does not lie between two straight edges that meet in a corner.",
+      "snapPointNeedsGroup": "Snap points belong to a group or component. Click on one."
     },
     "confirm": {
       "discardChanges": "Discard unsaved changes?",
@@ -226,7 +235,8 @@
     "prompt": {
       "componentName": "Component name",
       "enterText": "Enter text",
-      "scriptName": "Script name"
+      "scriptName": "Script name",
+      "enterTextLive": "Enter text (<> is the measured value and follows the model)"
     },
     "groups": {
       "file": "File",
@@ -279,8 +289,8 @@
         "eraser": "Click or drag over edges to delete them. Shift = hide, Ctrl = soften.",
         "paint": "Material “{material}”: click to paint faces. Alt = sample material, Ctrl = connected faces, Shift = all matching faces.",
         "sample": "Click a face to pick up its material.",
-        "lineEnd": "Click to set the end point, or type a length. | Arrow keys = lock inference direction on/off. Shift = lock inference.",
-        "lineStart": "Click to set the first end point. | Arrow keys = lock inference direction on/off.",
+        "lineEnd": "Click to set the end point, or type a length. | Arrow keys = keep to a direction on/off. Hold Shift = keep to the direction shown.",
+        "lineStart": "Click to set the first end point. | Arrow keys = keep to a direction on/off.",
         "freehand": "Click and drag to draw a freehand curve.",
         "rectangleCorner": "Click to set the opposite corner, or type length and width (e.g. 2000; 1500). | Down arrow = along the edge touched last, again = along the axes.",
         "rectangleStart": "Click to set the first corner. | Starting on an edge aligns the rectangle with it.",
@@ -305,14 +315,14 @@
         "pushpullPick": "Click the face to push or pull. | Double-click = repeat the last distance. {mode}",
         "offsetDistance": "Move the cursor to set the offset, or type a distance.",
         "offsetPick": "Pick a face to offset.",
-        "moveTarget": "Click to set the target point, or type a distance. | Ctrl = copy on/off. Arrow keys = lock inference direction.",
-        "moveTargetCopy": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = lock inference direction.",
+        "moveTarget": "Click to set the target point, or type a distance. | Ctrl = copy on/off. Arrow keys = keep to a direction.",
+        "moveTargetCopy": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = keep to a direction.",
         "moveStart": "Click to set the start point. Red crosses on a group's box rotate it. | Ctrl = copy on/off.",
         "rotateCenter": "Pick the centre of rotation. Arrow keys align the protractor.",
         "rotateStart": "Pick the start point of the rotation angle.",
         "rotateAngle": "Pick or type the rotation angle. Ctrl = copy.",
         "scaleDrag": "Drag to scale, or type a factor. Ctrl = about the centre, Shift = uniform.",
-        "scaleGrip": "Pick a grip.",
+        "scaleGrip": "Pick a green grip.",
         "scalePick": "Select the objects to scale.",
         "followmeProfile": "Click the profile face that should follow the selected path.",
         "followmePath": "First select edges as the path (e.g. double-clicking a face selects its edges), then this tool.",
@@ -320,8 +330,8 @@
         "tapeStart": "Pick the start point (point or edge).",
         "tapeStartGuides": "Pick the start point (point or edge). Guides are created.",
         "tapeStartPoint": "Pick the start point (point or edge). A guide point is created at the end point.",
-        "protractorVertex": "Pick the vertex.",
-        "protractorFirst": "Pick the first leg.",
+        "protractorVertex": "Click the corner of the angle.",
+        "protractorFirst": "Click a point on the first side of the angle.",
         "protractorAngle": "Pick the angle (creates a guide).",
         "dimensionStart": "Pick the start point of the dimension or an edge.",
         "dimensionPlace": "Drag the dimension to its position.",
@@ -336,7 +346,8 @@
         "walk": "Drag up/down to walk, left/right to turn. Arrow keys work too.",
         "poscam": "Click to place the camera there at eye height.",
         "copyAlongSource": "Select the groups or components to copy, then click a path.",
-        "copyAlongPath": "Click the path: a line of edges or a group of edges. Then type a number of copies (7x) or a spacing."
+        "copyAlongPath": "Click the path: a line of edges or a group of edges. Then type a number of copies (7x) or a spacing.",
+        "snappoint": "Click a point on a group or component: others dock to it when moved. Click a snap point to remove it."
       },
       "hints": {
         "square": "Square",
@@ -350,7 +361,8 @@
         "sameDistance": "Same distance from the corner",
         "copyAlongPath": "Copy along this path"
       },
-      "copyalong": "Copy along"
+      "copyalong": "Copy along",
+      "snappoint": "Snap point"
     },
     "editor": {
       "undone": "Undone: {action}",
@@ -360,7 +372,8 @@
       "faces": "{count} face | {count} faces",
       "edges": "{count} edge | {count} edges",
       "instances": "{count} group/component | {count} groups/components",
-      "actionCancelled": "Action cancelled"
+      "actionCancelled": "Action cancelled",
+      "error": "Error: {message}"
     },
     "inference": {
       "onRedAxis": "On red axis",
@@ -383,7 +396,8 @@
       "extension": "On edge extension",
       "fromPoint": "From point",
       "radiusOnFace": "From radius on face",
-      "onProfile": "On outline"
+      "onProfile": "On outline",
+      "snapPoint": "Snap point"
     },
     "measure": {
       "grid": "Grid"
@@ -684,20 +698,32 @@
       "used": "Used",
       "delete": "Delete material",
       "new": "New material",
-      "create": "Create"
+      "create": "Create",
+      "previewFlat": "Flat",
+      "previewCube": "Cube",
+      "previewTitle": "Preview of the materials",
+      "physical": "Physical (PBR)",
+      "roughness": "Roughness",
+      "metalness": "Metal",
+      "mapNormal": "Normal map",
+      "mapAo": "Ambient occlusion",
+      "loadMap": "Load picture…",
+      "removeMap": "Remove picture"
     },
     "tags": {
       "add": "Add tag",
       "assignTitle": "Assign the selection to the highlighted tag",
       "assign": "Assign",
       "untagged": "Untagged",
-      "hint": "Double-click renames. Hidden tags hide every entity with that tag.",
+      "hint": "Tags are like layers: give things a tag and show or hide them together. Double-click renames a tag.",
       "toScenes": "To scenes…",
       "toScenesTitle": "Apply the visibility of the highlighted tag to scenes",
       "toScenesVisible": "“{tag}” is visible – show it in these scenes:",
       "toScenesHidden": "“{tag}” is hidden – hide it in these scenes:",
       "apply": "Apply",
-      "appliedToScenes": "“{tag}” applied to {count} scene | “{tag}” applied to {count} scenes"
+      "appliedToScenes": "“{tag}” applied to {count} scene | “{tag}” applied to {count} scenes",
+      "selectFirst": "Select something first, then click to give it the marked tag.",
+      "scenesFirst": "The model has no scenes yet – add one in the Scenes panel."
     },
     "scenes": {
       "add": "Add scene",
@@ -714,19 +740,22 @@
       "people": "People",
       "placePerson": "Place {name} (always turns to the camera)",
       "library": "Library",
-      "libraryHint": "Library objects are built by a script and then placed at the cursor."
+      "libraryHint": "Click one and then click in the 3D view to place it."
     },
     "soften": {
       "hint": "Softens edges between faces of the selection whose angle is smaller than the value set.",
-      "coplanar": "Soften coplanar",
+      "coplanar": "Also soften faces in one plane",
       "apply": "Apply to selection",
-      "reset": "Reset"
+      "reset": "Reset",
+      "selectFirst": "Select faces or a group first."
     },
     "shadows": {
       "show": "Show shadows",
       "time": "Time",
       "date": "Date",
-      "hint": "The sun position is calculated for about 48° north. Even without shadows it sets the lighting of the faces."
+      "hint": "The sun follows the place set here. Even without shadows it sets the lighting of the faces.",
+      "latitude": "Latitude",
+      "north": "North (from the green axis)"
     },
     "outliner": {
       "filter": "Filter",
@@ -753,10 +782,10 @@
       "statistics": "Statistics",
       "faces": "Faces",
       "edges": "Edges",
-      "definitions": "Definitions",
+      "definitions": "Groups and components",
       "extent": "Extent",
-      "purge": "Purge unused",
-      "purged": "Unused definitions removed"
+      "purge": "Remove unused",
+      "purged": "Unused groups and components removed"
     },
     "styles": {
       "presets": "Presets",
@@ -789,7 +818,14 @@
         "sketch": "Sketch",
         "night": "Night",
         "white": "White"
-      }
+      },
+      "environment": "Environment (HDR, EXR)",
+      "environmentLoad": "Load…",
+      "environmentRemove": "Remove the environment",
+      "environmentBackground": "Also as the sky",
+      "environmentIntensity": "Brightness",
+      "environmentTooBig": "The file is larger than 32 MB.",
+      "sectionFill": "Fill section cuts"
     },
     "instructor": {
       "select": {
@@ -992,7 +1028,11 @@
       "edge": "Edge",
       "solidComponent": "Solid component",
       "solidGroup": "Solid group",
-      "elements": "{count} entities ({summary})"
+      "elements": "{count} entities ({summary})",
+      "attributes": "Attributes",
+      "attributeAdd": "Add attribute…",
+      "attributeRemove": "Remove attribute",
+      "attributeName": "Name of the attribute"
     },
     "shapes": {
       "cylinder": "Cylinder",
@@ -1039,7 +1079,10 @@
       "noMesh": "No mesh found – expected lines like “v 1 2 3” and “f 1 2 3”.",
       "invalidCoordinates": "Invalid coordinates in the mesh",
       "imported": "{vertices} vertices, {faces} faces imported",
-      "fewAlready": "The object already has very few polygons."
+      "fewAlready": "The object already has very few polygons.",
+      "undoCircle": "Circle: {count} segments",
+      "undoSubdivide": "More polygons",
+      "undoSubdivideRound": "More polygons (rounded)"
     },
     "tour": {
       "welcome": {
@@ -1545,7 +1588,9 @@
       "confirmCommunity": "Install “{name}” by {author}? It does not come from the Shap3D.ai repository and runs with full access to the app, like every plugin. Only install it if you trust its source.\n\n{url}",
       "confirmUrlInstall": "Install the plugin at this address? Plugins run with full access to the app – only install it if you trust its source.\n\n{url}",
       "preview": "Preview",
-      "previewTitle": "Not released yet – built from the main branch of the Shap3D.ai repository, a preview of its next version"
+      "previewTitle": "Not released yet – built from the main branch of the Shap3D.ai repository, a preview of its next version",
+      "search": "Search plugins",
+      "noMatch": "No plugin matches."
     },
     "scriptEditor": {
       "loadExample": "Load example…",
@@ -1651,7 +1696,10 @@
         "async": "Asynchronous scripts are not supported – “await” is ignored.",
         "needsText3d": "3D text needs the plugin “3D text” (plugin manager)",
         "unknownType": "Unknown object type: {type}",
-        "languageExists": "Script language “{id}” already exists"
+        "languageExists": "Script language “{id}” already exists",
+        "unknownCommand": "s3d.{name} does not exist.",
+        "didYouMean": "Did you mean s3d.{name}?",
+        "line": "(line {line})"
       }
     },
     "codeExport": {
@@ -1671,9 +1719,9 @@
     },
     "procedures": {
       "kinds": {
-        "solid": "Procedure: solid tool",
-        "followme": "Procedure: Follow Me",
-        "copyalong": "Procedure: Copy Along"
+        "solid": "Stays editable: solid tool",
+        "followme": "Stays editable: Follow Me",
+        "copyalong": "Stays editable: Copy Along"
       },
       "operation": "Operation",
       "distribute": "Distribute",
@@ -1682,10 +1730,10 @@
       "count": "Copies",
       "spacing": "Spacing",
       "align": "Turn along the path",
-      "inputs": "Inputs",
-      "editInputs": "Edit inputs",
-      "editHint": "Open it to edit its input groups; the result follows when you leave it. Geometry drawn directly inside it is replaced by the next result.",
-      "undoParams": "Change procedure",
+      "inputs": "Made from",
+      "editInputs": "Edit its parts",
+      "editHint": "Open it to change the groups it is made from; the result follows when you leave. Anything drawn directly inside it is replaced by the next result.",
+      "undoParams": "Change settings",
       "names": {
         "copyAlong": "Copy Along",
         "followMe": "Follow Me",
@@ -1693,13 +1741,13 @@
         "profile": "Profile"
       },
       "errors": {
-        "missingInput": "An input of the procedure is missing – the last result stays.",
-        "notSolid": "An input of the procedure is no longer a solid – the last result stays.",
-        "empty": "The procedure has no result with these inputs – the last result stays.",
-        "noPath": "The path of the procedure is not a single line of edges – the last result stays.",
+        "missingInput": "One of the parts it is made from is missing – the last result stays.",
+        "notSolid": "One of the parts it is made from is no longer a closed body – the last result stays.",
+        "empty": "With these parts there is no result – the last result stays.",
+        "noPath": "The path is not a single line of edges – the last result stays.",
         "followMe": "The profile could not follow this path – the last result stays.",
         "tooMany": "That would be more than 2000 copies – the last result stays.",
-        "failed": "The procedure could not be built – the last result stays."
+        "failed": "The result could not be built – the last result stays."
       }
     }
   }

@@ -15,12 +15,12 @@
         "print": "Pläne drucken / PDF…"
       },
       "sheets": "Blätter",
-      "sheet": "Blatt",
+      "sheet": "Leg ein Blatt an: Papier mit Schriftfeld.",
       "addSheet": "+ Blatt",
       "fromScenes": "Aus Szenen",
       "fromScenesTitle": "Ein neues Blatt mit bis zu vier Szenen als Ansichtsfenster – Parallelprojektionen bekommen einen passenden Maßstab",
-      "empty": "Noch keine Blätter. Beginnen Sie mit einem leeren Blatt oder bringen Sie die Szenen des Modells auf ein Blatt.",
-      "hint": "Ansichtsfenster zeigen ihre Szene live – ändern Sie Modell oder Szene, folgt das Blatt. Doppelklick auf ein Ansichtsfenster öffnet seine Ansicht im Modell.",
+      "empty": "Noch keine Blätter. Beginne mit einem leeren Blatt oder bring die Szenen des Modells auf ein Blatt.",
+      "hint": "Ansichtsfenster zeigen ihre Szene live – änderst du Modell oder Szene, folgt das Blatt. Doppelklick auf ein Ansichtsfenster öffnet seine Ansicht im Modell.",
       "remove": "Entfernen",
       "copyOf": "{name} (Kopie)",
       "defaultSheet": "Blatt {number}",
@@ -127,7 +127,8 @@
         "cannotOffset": "Dieses Element lässt sich nicht versetzen.",
         "cannotSplit": "Hier gibt es nichts zu teilen.",
         "nothingToReach": "In dieser Richtung gibt es keine Linie zum Verlängern.",
-        "cannotJoinCorner": "Die Linien treffen sich nicht in einer Ecke (oder der Abstand ist zu groß)."
+        "cannotJoinCorner": "Die Linien treffen sich nicht in einer Ecke (oder der Abstand ist zu groß).",
+        "emptySheet": "Das Blatt ist leer: Nimm oben „Ansichtsfenster“ und zieh ein Rechteck auf dem Papier auf, um dein Modell zu zeigen."
       },
       "elements": {
         "viewport": "Ansichtsfenster",
@@ -320,7 +321,7 @@
         "remove": "Ebene löschen",
         "name": "Name der Ebene",
         "newName": "Ebene {number}",
-        "removeConfirm": "Die Ebene „{name}“ löschen? Ihre Elemente kommen auf die unterste Ebene.",
+        "removeConfirm": "Die Ebene „{name}“ löschen? deine Elemente kommen auf die unterste Ebene.",
         "default": "Standard",
         "layer": "Ebene",
         "lockedActive": "Die aktive Ebene ist gesperrt – entsperren oder eine andere wählen."
@@ -355,7 +356,13 @@
       },
       "context": {
         "openInModel": "Im Modell öffnen"
-      }
+      },
+      "steps": {
+        "sheet": "Leg ein Blatt an: Papier mit Schriftfeld.",
+        "viewport": "Nimm „Ansichtsfenster“ und zieh ein Rechteck auf: Dein Modell erscheint auf dem Papier.",
+        "finish": "Ergänze Text und Maße, dann „Drucken / PDF“."
+      },
+      "noScenes": "Das Modell hat noch keine Szenen. Speichere eine Ansicht im Panel Szenen – oder leg einfach ein Blatt an und zieh ein Ansichtsfenster auf."
     }
   }
 }

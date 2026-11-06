@@ -3,7 +3,7 @@ import type { Entities } from '../../../src/core/model';
 import type { Engine } from './engine';
 import { t } from './i18n';
 import type { ConsoleLine } from './off';
-import { addToModel } from './scripting';
+import { addToModel, meshOptions } from './scripting';
 import { scaleOf, unitLabel, type Settings } from './settings';
 
 /** "“name” imported – 120 facets, 2 warnings" */
@@ -22,8 +22,8 @@ export const registerFiles = (context: PluginContext, engine: Engine, settings: 
     extensions: ['scad'],
     label: 'OpenSCAD',
     import: async (file) => {
-      const { mesh, lines } = engine.compile(await engine.instanceAsync(), await file.text(), file.name);
-      addToModel(context, settings, mesh, file.name.replace(/\.scad$/i, ''));
+      const { mesh, lines } = await engine.compile(await file.text(), file.name);
+      await addToModel(context, settings, mesh, file.name.replace(/\.scad$/i, ''));
       editor.zoomExtents();
       context.ui.toast(resultToast('imported', file.name, mesh.faces.length, lines));
     },
@@ -169,13 +169,13 @@ export const registerFiles = (context: PluginContext, engine: Engine, settings: 
       return out.join('\n') + '\n';
     },
     evaluate: async (code, sandbox) => {
-      const { mesh } = engine.compile(await engine.instanceAsync(), code);
+      const { mesh } = await engine.compile(code);
       for (const [name, material] of Object.entries(mesh.materials)) {
         if (!sandbox.model.materials.some((existing) => existing.name === name)) {
           sandbox.model.materials.push({ name, color: material.color, opacity: material.opacity ?? 1 });
         }
       }
-      context.meshes.build(sandbox.entities, mesh, { scale: scaleOf(settings), smooth: 25 });
+      context.meshes.build(sandbox.entities, mesh, meshOptions(settings));
     },
   });
 
@@ -183,8 +183,8 @@ export const registerFiles = (context: PluginContext, engine: Engine, settings: 
   const openFromLibrary = async (path: string) => {
     try {
       const code = new TextDecoder().decode(engine.library.get(path));
-      const { mesh, lines } = engine.compile(await engine.instanceAsync(), code, path);
-      addToModel(
+      const { mesh, lines } = await engine.compile(code, path);
+      await addToModel(
         context,
         settings,
         mesh,

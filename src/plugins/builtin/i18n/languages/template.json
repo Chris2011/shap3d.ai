@@ -384,7 +384,11 @@
       "toggleSnapping": "",
       "toggleSnapping#en": "Snapping",
       "explodeToInputs": "",
-      "explodeToInputs#en": "Explode to inputs"
+      "explodeToInputs#en": "Take apart into its parts",
+      "newTab": "",
+      "newTab#en": "New tab",
+      "toggleAutosave": "",
+      "toggleAutosave#en": "Autosave (in the browser)"
     },
     "names": {
       "model": "",
@@ -406,13 +410,13 @@
     },
     "import": {
       "converterUnreachable": "",
-      "converterUnreachable#en": "The local converter cannot be reached – start the app with “npm run dev” or “npm run preview”.",
+      "converterUnreachable#en": "SketchUp and Blender files need a local converter that is not running here. Save the file as glTF, FBX or OBJ in the other program and open that. (Developers: start the app with “npm run dev”.)",
       "needsLocalServer": "",
-      "needsLocalServer#en": ".skp and .blend files only work with the local server (“npm run dev” or “npm run preview”).",
+      "needsLocalServer#en": "SketchUp and Blender files need a local converter that is not running here. Save the file as glTF, FBX or OBJ in the other program and open that. (Developers: start the app with “npm run dev”.)",
       "conversionFailed": "",
       "conversionFailed#en": "Conversion failed (HTTP {status})",
       "unsupported": "",
-      "unsupported#en": "The format .{ext} is not supported – more formats (FBX, Collada, 3DS, Blender …) come with the plugin “Import formats” (Plugins › Manage plugins).",
+      "unsupported#en": "Files of the type .{ext} cannot be opened. Save the file as glTF, OBJ or STL in the other program and open that.",
       "unknownJson": "",
       "unknownJson#en": "Unknown JSON format",
       "maxFile": "",
@@ -432,7 +436,13 @@
       "skipped": "",
       "skipped#en": "{count} triangle over the limit skipped | {count} triangles over the limit skipped",
       "part": "",
-      "part#en": "part"
+      "part#en": "part",
+      "morePlugin": "",
+      "morePlugin#en": "The Import formats plugin (Plugins) adds FBX, Collada, 3DS and more.",
+      "unreadable": "",
+      "unreadable#en": "“{name}” could not be read – it may be damaged or not what its ending says.",
+      "skpNeedsSdk": "",
+      "skpNeedsSdk#en": "SketchUp files cannot be opened directly here. In SketchUp, export the model as DAE or glTF and open that file. (Developers: this needs the SketchUp SDK in tools/sketchup-sdk.)"
     },
     "units": {
       "centimetres": "",
@@ -542,7 +552,13 @@
       "roundCorner": "",
       "roundCorner#en": "Round corner",
       "unroundCorner": "",
-      "unroundCorner#en": "Corner back"
+      "unroundCorner#en": "Corner back",
+      "snapPoint": "",
+      "snapPoint#en": "Change snap point",
+      "attribute": "",
+      "attribute#en": "Change attribute",
+      "environment": "",
+      "environment#en": "Change environment"
     },
     "toast": {
       "nothingSelected": "",
@@ -554,9 +570,9 @@
       "selectTwoFaces": "",
       "selectTwoFaces#en": "Select at least two faces.",
       "selectTwoSolids": "",
-      "selectTwoSolids#en": "Select two groups or components (solids).",
+      "selectTwoSolids#en": "Select at least two groups or components that are closed bodies.",
       "notASolid": "",
-      "notASolid#en": "“{name}” is not a solid.",
+      "notASolid#en": "“{name}” is not a closed body: every edge must border exactly two faces, so no holes and no loose lines.",
       "solidFailed": "",
       "solidFailed#en": "Solid operation failed: {error}",
       "alreadyEmpty": "",
@@ -586,7 +602,9 @@
       "roundCornerTooShort": "",
       "roundCornerTooShort#en": "The edges of this corner are too short for that rounding.",
       "unroundNoCorner": "",
-      "unroundNoCorner#en": "This arc does not lie between two straight edges that meet in a corner."
+      "unroundNoCorner#en": "This arc does not lie between two straight edges that meet in a corner.",
+      "snapPointNeedsGroup": "",
+      "snapPointNeedsGroup#en": "Snap points belong to a group or component. Click on one."
     },
     "confirm": {
       "discardChanges": "",
@@ -604,7 +622,9 @@
       "enterText": "",
       "enterText#en": "Enter text",
       "scriptName": "",
-      "scriptName#en": "Script name"
+      "scriptName#en": "Script name",
+      "enterTextLive": "",
+      "enterTextLive#en": "Enter text (<> is the measured value and follows the model)"
     },
     "groups": {
       "file": "",
@@ -705,9 +725,9 @@
         "sample": "",
         "sample#en": "Click a face to pick up its material.",
         "lineEnd": "",
-        "lineEnd#en": "Click to set the end point, or type a length. | Arrow keys = lock inference direction on/off. Shift = lock inference.",
+        "lineEnd#en": "Click to set the end point, or type a length. | Arrow keys = keep to a direction on/off. Hold Shift = keep to the direction shown.",
         "lineStart": "",
-        "lineStart#en": "Click to set the first end point. | Arrow keys = lock inference direction on/off.",
+        "lineStart#en": "Click to set the first end point. | Arrow keys = keep to a direction on/off.",
         "freehand": "",
         "freehand#en": "Click and drag to draw a freehand curve.",
         "rectangleCorner": "",
@@ -757,9 +777,9 @@
         "offsetPick": "",
         "offsetPick#en": "Pick a face to offset.",
         "moveTarget": "",
-        "moveTarget#en": "Click to set the target point, or type a distance. | Ctrl = copy on/off. Arrow keys = lock inference direction.",
+        "moveTarget#en": "Click to set the target point, or type a distance. | Ctrl = copy on/off. Arrow keys = keep to a direction.",
         "moveTargetCopy": "",
-        "moveTargetCopy#en": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = lock inference direction.",
+        "moveTargetCopy#en": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = keep to a direction.",
         "moveStart": "",
         "moveStart#en": "Click to set the start point. Red crosses on a group's box rotate it. | Ctrl = copy on/off.",
         "rotateCenter": "",
@@ -771,7 +791,7 @@
         "scaleDrag": "",
         "scaleDrag#en": "Drag to scale, or type a factor. Ctrl = about the centre, Shift = uniform.",
         "scaleGrip": "",
-        "scaleGrip#en": "Pick a grip.",
+        "scaleGrip#en": "Pick a green grip.",
         "scalePick": "",
         "scalePick#en": "Select the objects to scale.",
         "followmeProfile": "",
@@ -787,9 +807,9 @@
         "tapeStartPoint": "",
         "tapeStartPoint#en": "Pick the start point (point or edge). A guide point is created at the end point.",
         "protractorVertex": "",
-        "protractorVertex#en": "Pick the vertex.",
+        "protractorVertex#en": "Click the corner of the angle.",
         "protractorFirst": "",
-        "protractorFirst#en": "Pick the first leg.",
+        "protractorFirst#en": "Click a point on the first side of the angle.",
         "protractorAngle": "",
         "protractorAngle#en": "Pick the angle (creates a guide).",
         "dimensionStart": "",
@@ -819,7 +839,9 @@
         "copyAlongSource": "",
         "copyAlongSource#en": "Select the groups or components to copy, then click a path.",
         "copyAlongPath": "",
-        "copyAlongPath#en": "Click the path: a line of edges or a group of edges. Then type a number of copies (7x) or a spacing."
+        "copyAlongPath#en": "Click the path: a line of edges or a group of edges. Then type a number of copies (7x) or a spacing.",
+        "snappoint": "",
+        "snappoint#en": "Click a point on a group or component: others dock to it when moved. Click a snap point to remove it."
       },
       "hints": {
         "square": "",
@@ -844,7 +866,9 @@
         "copyAlongPath#en": "Copy along this path"
       },
       "copyalong": "",
-      "copyalong#en": "Copy along"
+      "copyalong#en": "Copy along",
+      "snappoint": "",
+      "snappoint#en": "Snap point"
     },
     "editor": {
       "undone": "",
@@ -862,7 +886,9 @@
       "instances": "",
       "instances#en": "{count} group/component | {count} groups/components",
       "actionCancelled": "",
-      "actionCancelled#en": "Action cancelled"
+      "actionCancelled#en": "Action cancelled",
+      "error": "",
+      "error#en": "Error: {message}"
     },
     "inference": {
       "onRedAxis": "",
@@ -906,7 +932,9 @@
       "radiusOnFace": "",
       "radiusOnFace#en": "From radius on face",
       "onProfile": "",
-      "onProfile#en": "On outline"
+      "onProfile#en": "On outline",
+      "snapPoint": "",
+      "snapPoint#en": "Snap point"
     },
     "measure": {
       "grid": "",
@@ -1458,7 +1486,27 @@
       "new": "",
       "new#en": "New material",
       "create": "",
-      "create#en": "Create"
+      "create#en": "Create",
+      "previewFlat": "",
+      "previewFlat#en": "Flat",
+      "previewCube": "",
+      "previewCube#en": "Cube",
+      "previewTitle": "",
+      "previewTitle#en": "Preview of the materials",
+      "physical": "",
+      "physical#en": "Physical (PBR)",
+      "roughness": "",
+      "roughness#en": "Roughness",
+      "metalness": "",
+      "metalness#en": "Metal",
+      "mapNormal": "",
+      "mapNormal#en": "Normal map",
+      "mapAo": "",
+      "mapAo#en": "Ambient occlusion",
+      "loadMap": "",
+      "loadMap#en": "Load picture…",
+      "removeMap": "",
+      "removeMap#en": "Remove picture"
     },
     "tags": {
       "add": "",
@@ -1470,7 +1518,7 @@
       "untagged": "",
       "untagged#en": "Untagged",
       "hint": "",
-      "hint#en": "Double-click renames. Hidden tags hide every entity with that tag.",
+      "hint#en": "Tags are like layers: give things a tag and show or hide them together. Double-click renames a tag.",
       "toScenes": "",
       "toScenes#en": "To scenes…",
       "toScenesTitle": "",
@@ -1482,7 +1530,11 @@
       "apply": "",
       "apply#en": "Apply",
       "appliedToScenes": "",
-      "appliedToScenes#en": "“{tag}” applied to {count} scene | “{tag}” applied to {count} scenes"
+      "appliedToScenes#en": "“{tag}” applied to {count} scene | “{tag}” applied to {count} scenes",
+      "selectFirst": "",
+      "selectFirst#en": "Select something first, then click to give it the marked tag.",
+      "scenesFirst": "",
+      "scenesFirst#en": "The model has no scenes yet – add one in the Scenes panel."
     },
     "scenes": {
       "add": "",
@@ -1512,17 +1564,19 @@
       "library": "",
       "library#en": "Library",
       "libraryHint": "",
-      "libraryHint#en": "Library objects are built by a script and then placed at the cursor."
+      "libraryHint#en": "Click one and then click in the 3D view to place it."
     },
     "soften": {
       "hint": "",
       "hint#en": "Softens edges between faces of the selection whose angle is smaller than the value set.",
       "coplanar": "",
-      "coplanar#en": "Soften coplanar",
+      "coplanar#en": "Also soften faces in one plane",
       "apply": "",
       "apply#en": "Apply to selection",
       "reset": "",
-      "reset#en": "Reset"
+      "reset#en": "Reset",
+      "selectFirst": "",
+      "selectFirst#en": "Select faces or a group first."
     },
     "shadows": {
       "show": "",
@@ -1532,7 +1586,11 @@
       "date": "",
       "date#en": "Date",
       "hint": "",
-      "hint#en": "The sun position is calculated for about 48° north. Even without shadows it sets the lighting of the faces."
+      "hint#en": "The sun follows the place set here. Even without shadows it sets the lighting of the faces.",
+      "latitude": "",
+      "latitude#en": "Latitude",
+      "north": "",
+      "north#en": "North (from the green axis)"
     },
     "outliner": {
       "filter": "",
@@ -1580,13 +1638,13 @@
       "edges": "",
       "edges#en": "Edges",
       "definitions": "",
-      "definitions#en": "Definitions",
+      "definitions#en": "Groups and components",
       "extent": "",
       "extent#en": "Extent",
       "purge": "",
-      "purge#en": "Purge unused",
+      "purge#en": "Remove unused",
       "purged": "",
-      "purged#en": "Unused definitions removed"
+      "purged#en": "Unused groups and components removed"
     },
     "styles": {
       "presets": "",
@@ -1648,7 +1706,21 @@
         "night#en": "Night",
         "white": "",
         "white#en": "White"
-      }
+      },
+      "environment": "",
+      "environment#en": "Environment (HDR, EXR)",
+      "environmentLoad": "",
+      "environmentLoad#en": "Load…",
+      "environmentRemove": "",
+      "environmentRemove#en": "Remove the environment",
+      "environmentBackground": "",
+      "environmentBackground#en": "Also as the sky",
+      "environmentIntensity": "",
+      "environmentIntensity#en": "Brightness",
+      "environmentTooBig": "",
+      "environmentTooBig#en": "The file is larger than 32 MB.",
+      "sectionFill": "",
+      "sectionFill#en": "Fill section cuts"
     },
     "instructor": {
       "select": {
@@ -1996,7 +2068,15 @@
       "solidGroup": "",
       "solidGroup#en": "Solid group",
       "elements": "",
-      "elements#en": "{count} entities ({summary})"
+      "elements#en": "{count} entities ({summary})",
+      "attributes": "",
+      "attributes#en": "Attributes",
+      "attributeAdd": "",
+      "attributeAdd#en": "Add attribute…",
+      "attributeRemove": "",
+      "attributeRemove#en": "Remove attribute",
+      "attributeName": "",
+      "attributeName#en": "Name of the attribute"
     },
     "shapes": {
       "cylinder": "",
@@ -2086,7 +2166,13 @@
       "imported": "",
       "imported#en": "{vertices} vertices, {faces} faces imported",
       "fewAlready": "",
-      "fewAlready#en": "The object already has very few polygons."
+      "fewAlready#en": "The object already has very few polygons.",
+      "undoCircle": "",
+      "undoCircle#en": "Circle: {count} segments",
+      "undoSubdivide": "",
+      "undoSubdivide#en": "More polygons",
+      "undoSubdivideRound": "",
+      "undoSubdivideRound#en": "More polygons (rounded)"
     },
     "tour": {
       "welcome": {
@@ -2956,7 +3042,11 @@
       "preview": "",
       "preview#en": "Preview",
       "previewTitle": "",
-      "previewTitle#en": "Not released yet – built from the main branch of the Shap3D.ai repository, a preview of its next version"
+      "previewTitle#en": "Not released yet – built from the main branch of the Shap3D.ai repository, a preview of its next version",
+      "search": "",
+      "search#en": "Search plugins",
+      "noMatch": "",
+      "noMatch#en": "No plugin matches."
     },
     "scriptEditor": {
       "loadExample": "",
@@ -3137,7 +3227,13 @@
         "unknownType": "",
         "unknownType#en": "Unknown object type: {type}",
         "languageExists": "",
-        "languageExists#en": "Script language “{id}” already exists"
+        "languageExists#en": "Script language “{id}” already exists",
+        "unknownCommand": "",
+        "unknownCommand#en": "s3d.{name} does not exist.",
+        "didYouMean": "",
+        "didYouMean#en": "Did you mean s3d.{name}?",
+        "line": "",
+        "line#en": "(line {line})"
       }
     },
     "codeExport": {
@@ -3169,11 +3265,11 @@
     "procedures": {
       "kinds": {
         "solid": "",
-        "solid#en": "Procedure: solid tool",
+        "solid#en": "Stays editable: solid tool",
         "followme": "",
-        "followme#en": "Procedure: Follow Me",
+        "followme#en": "Stays editable: Follow Me",
         "copyalong": "",
-        "copyalong#en": "Procedure: Copy Along"
+        "copyalong#en": "Stays editable: Copy Along"
       },
       "operation": "",
       "operation#en": "Operation",
@@ -3190,13 +3286,13 @@
       "align": "",
       "align#en": "Turn along the path",
       "inputs": "",
-      "inputs#en": "Inputs",
+      "inputs#en": "Made from",
       "editInputs": "",
-      "editInputs#en": "Edit inputs",
+      "editInputs#en": "Edit its parts",
       "editHint": "",
-      "editHint#en": "Open it to edit its input groups; the result follows when you leave it. Geometry drawn directly inside it is replaced by the next result.",
+      "editHint#en": "Open it to change the groups it is made from; the result follows when you leave. Anything drawn directly inside it is replaced by the next result.",
       "undoParams": "",
-      "undoParams#en": "Change procedure",
+      "undoParams#en": "Change settings",
       "names": {
         "copyAlong": "",
         "copyAlong#en": "Copy Along",
@@ -3209,19 +3305,19 @@
       },
       "errors": {
         "missingInput": "",
-        "missingInput#en": "An input of the procedure is missing – the last result stays.",
+        "missingInput#en": "One of the parts it is made from is missing – the last result stays.",
         "notSolid": "",
-        "notSolid#en": "An input of the procedure is no longer a solid – the last result stays.",
+        "notSolid#en": "One of the parts it is made from is no longer a closed body – the last result stays.",
         "empty": "",
-        "empty#en": "The procedure has no result with these inputs – the last result stays.",
+        "empty#en": "With these parts there is no result – the last result stays.",
         "noPath": "",
-        "noPath#en": "The path of the procedure is not a single line of edges – the last result stays.",
+        "noPath#en": "The path is not a single line of edges – the last result stays.",
         "followMe": "",
         "followMe#en": "The profile could not follow this path – the last result stays.",
         "tooMany": "",
         "tooMany#en": "That would be more than 2000 copies – the last result stays.",
         "failed": "",
-        "failed#en": "The procedure could not be built – the last result stays."
+        "failed#en": "The result could not be built – the last result stays."
       }
     },
     "brand": {

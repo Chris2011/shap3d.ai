@@ -1,3 +1,4 @@
+import { safeSvg } from './safeSvg';
 import type { ViewLines, ViewRequest } from '../../../src/plugins/types';
 import {
   MARGIN,
@@ -38,6 +39,7 @@ const EDGE_WIDTH = 0.18;
 const PROFILE_WIDTH = 0.45;
 const LINE_WIDTH = 0.35;
 
+/* sheets come from model files – pageSvg lets only drawing through */
 const escapeXml = (value: string) => value.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]!);
 const mm = (value: number) => Number(value.toFixed(3));
 
@@ -513,9 +515,9 @@ const titleBlockSvg = (page: LayoutPage, pageNumber: number, pageCount: number) 
  * click areas); `signature` changes whenever the model changes, so viewports are rendered again then.
  */
 export const pageSvg = (document: LayoutDocument, page: LayoutPage, signature: string, interactive = false) => {
-  const [width, height] = pageSize(page);
+  const [width, height] = pageSize(page).map(Number);
   const pageNumber = document.pages.findIndex((candidate) => candidate.id === page.id) + 1;
-  return [
+  const markup = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}mm" height="${height}mm" viewBox="0 0 ${width} ${height}" font-family="Helvetica, Arial, sans-serif">`,
     `<rect width="${width}" height="${height}" fill="#fff"/>`,
     patternDefs(),
@@ -523,4 +525,5 @@ export const pageSvg = (document: LayoutDocument, page: LayoutPage, signature: s
     page.titleBlock ? titleBlockSvg(page, pageNumber, document.pages.length) : '',
     '</svg>',
   ].join('');
+  return safeSvg(markup);
 };

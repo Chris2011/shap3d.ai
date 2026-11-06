@@ -81,6 +81,10 @@ The details live in the [wiki](docs/wiki/README.md):
 
 Changes are listed in the [CHANGELOG](CHANGELOG.md).
 
+## Security
+
+What can be attacked, what counts as code and how to report a problem: [SECURITY.md](SECURITY.md).
+
 ## License
 
 Shap3D.ai is licensed under the **Apache License 2.0** – see [LICENSE](LICENSE) and [NOTICE](NOTICE).

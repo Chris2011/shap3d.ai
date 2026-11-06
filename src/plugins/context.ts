@@ -3,11 +3,13 @@ import * as Vue from 'vue';
 import { defineComponent, h, onMounted, onBeforeUnmount, shallowRef, watch } from 'vue';
 import { Tool, type Editor } from '../engine/editor';
 import { PointTool } from '../tools/base';
-import { COMMANDS, runCommand, download } from '../engine/commands';
+import { COMMANDS, runCommand, download, importFile } from '../engine/commands';
 import { TOOL_INFO, TOOL_SHORTCUTS, PLUGIN_TOOLS } from '../engine/setup';
 import { addPanel, openPanel, showPanel, PANEL_INFO } from '../components/panelState';
 import { registerIcon } from '../components/iconRegistry';
-import { ScriptApi, runScript } from '../scripting/api';
+import { PLUGIN_EXTENSIONS, ScriptApi, runScript } from '../scripting/api';
+import { runMeshJob } from '../scripting/meshJobs';
+import { isPreparedMesh, unpackInto, type PreparedMesh } from '../scripting/preparedMesh';
 import { API_CATALOG } from '../scripting/catalog';
 import { PLUGIN_EXAMPLES } from '../scripting/examples';
 import { registerImporter } from './fileFormats';
@@ -73,13 +75,33 @@ const domPanel = (mount: NonNullable<PluginPanel['mount']>) =>
     },
   });
 
-/** Builds a plugin mesh into `entities` in its own coordinates (scaled to metres). */
-const buildPluginMesh = (entities: Entities, mesh: PluginMesh, options: PluginMeshOptions = {}) =>
-  buildMesh(
-    entities,
-    { verts: mesh.vertices.map(([x, y, z]) => new THREE.Vector3(x, y, z)), faces: mesh.faces, materials: mesh.faceMaterials },
-    { fit: false, yUp: false, scale: options.scale ?? 1, smooth: options.smooth ?? 20 },
-  );
+/** Builds a plugin mesh into `entities` in its own coordinates (scaled to metres); a prepared one is only put in. */
+const buildPluginMesh = (entities: Entities, mesh: PluginMesh | PreparedMesh, options: PluginMeshOptions = {}) =>
+  isPreparedMesh(mesh)
+    ? unpackInto(entities, mesh)
+    : buildMesh(
+        entities,
+        { verts: mesh.vertices.map(([x, y, z]) => new THREE.Vector3(x, y, z)), faces: mesh.faces, materials: mesh.faceMaterials },
+        { fit: false, yUp: false, scale: options.scale ?? 1, smooth: options.smooth ?? 20 },
+      );
+
+/** Turns plugin meshes into faces in one worker, so big ones do not stop the app. */
+const preparePluginMeshes = (list: { mesh: PluginMesh; options?: PluginMeshOptions }[]): Promise<PreparedMesh[]> => {
+  const materialNames = [...new Set(list.flatMap(({ mesh }) => (mesh.faceMaterials ?? []).filter((name): name is string => !!name)))];
+  const materialIndex = new Map(materialNames.map((name, index) => [name, index]));
+  return runMeshJob({
+    kind: 'meshes',
+    materialNames,
+    meshes: list.map(({ mesh, options = {} }) => ({
+      positions: Float64Array.from(mesh.vertices.flat()),
+      faceSizes: Int32Array.from(mesh.faces, (face) => face.length),
+      faceIndices: Int32Array.from(mesh.faces.flat()),
+      faceMaterials: Int32Array.from(mesh.faces, (_, index) => materialIndex.get(mesh.faceMaterials?.[index] ?? '') ?? -1),
+      scale: options.scale ?? 1,
+      smooth: options.smooth ?? 20,
+    })),
+  });
+};
 
 /**
  * Builds the API object a plugin receives in `activate`. Every registration is recorded in
@@ -181,12 +203,13 @@ export const createPluginContext = (
             component,
             tile: !!panel.tile || !!panel.inMode,
             inMode: !!panel.inMode,
+            inMaterials: !!panel.inMaterials,
           },
           ['label'],
         );
         track(addPanel(info, panel.tile === 'first'));
         // a tile is found in the palette like the built-in panels; without one a menu/palette entry opens the panel
-        if (panel.tile || panel.inMode) {
+        if (panel.tile || panel.inMode || panel.inMaterials) {
           return () => {};
         }
         const command = {
@@ -220,6 +243,7 @@ export const createPluginContext = (
         prototype[name] = function (this: ScriptApi, ...args: unknown[]) {
           return implementation(this, ...args);
         };
+        PLUGIN_EXTENSIONS.add(name);
         const entry = {
           id: qualified(name),
           plugin: plugin.id,
@@ -300,6 +324,8 @@ export const createPluginContext = (
     },
 
     meshes: {
+      prepare: async (mesh, options) => (await preparePluginMeshes([{ mesh, options }]))[0],
+      prepareAll: preparePluginMeshes,
       build: (entities, mesh, options) => buildPluginMesh(entities, mesh, options),
       add: (mesh, options = {}) => {
         const name = options.name ?? plugin.name;
@@ -357,6 +383,7 @@ export const createPluginContext = (
     code: { registerFormat: (format) => track(registerCodeFormat(format)) },
 
     files: {
+      importFile: (file, onCreated) => importFile(editor, file, onCreated),
       registerImporter: (importer) =>
         track(registerImporter(importer.extensions, { label: importer.label, import: importer.import, loadScene: importer.loadScene })),
       registerExporter: (exporter) => {
@@ -368,7 +395,14 @@ export const createPluginContext = (
           icon: 'export',
           run: async (target: Editor) => {
             try {
-              download(exporter.fileName(target), await exporter.export(target), exporter.mimeType ?? 'application/octet-stream');
+              const options = exporter.options?.length ? await target.askOptions(localize(exporter.label), exporter.options) : {};
+              if (options) {
+                download(
+                  exporter.fileName(target),
+                  await exporter.export(target, options),
+                  exporter.mimeType ?? 'application/octet-stream',
+                );
+              }
             } catch (error: any) {
               target.toast(`${localize(plugin.name)}: ${error?.message ?? error}`);
             }
@@ -573,6 +607,14 @@ export const createPluginContext = (
     render: {
       image: (request) => renderViewImage(editor, request),
       lines: (request) => renderViewLines(editor, request),
+      pass: (draw) => {
+        editor.viewer.renderPasses.add(draw);
+        editor.redraw();
+        return track(() => {
+          editor.viewer.renderPasses.delete(draw);
+          editor.redraw();
+        });
+      },
     },
 
     data: {

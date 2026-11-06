@@ -1,8 +1,11 @@
 # Changelog – Import formats
 
-## [Unreleased]
+## [1.2.0] – Unreleased
 
-Nothing yet.
+### Added
+
+- Export as **USDZ** (Apple AR, Pixar USD).
+- Export of the **view as SVG**: the visible edges and outlines of the 3D view as vector lines, with a choice of width.
 
 ## [1.1.0] – 2026-10-20 · Shap3D.ai 0.6.0
 

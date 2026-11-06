@@ -4,6 +4,16 @@
  * page, from the repository variable APP_URL – without one the buttons copy the plugin's address instead).
  */
 
+/** a link address from a catalog: only web addresses – `javascript:` would run in the portal when clicked */
+const webUrl = (value: unknown) => {
+  try {
+    const url = new URL(String(value));
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export interface PortalPlugin {
   id: string;
   name: string;
@@ -46,13 +56,13 @@ export const loadCatalog = async (): Promise<{ plugins: PortalPlugin[]; updated?
       description: String(plugin.description ?? ''),
       license: plugin.license ? String(plugin.license) : undefined,
       author: plugin.author ? String(plugin.author) : undefined,
-      homepage: plugin.homepage ? String(plugin.homepage) : undefined,
+      homepage: webUrl(plugin.homepage),
       minAppVersion: plugin.minAppVersion ? String(plugin.minAppVersion) : null,
       source: plugin.source === 'community' ? 'community' : 'official',
       preview: plugin.preview === true,
       // folders in the catalog are relative to it; the newest version stays at latest/, so the app can update from there
       installUrl: new URL(String(plugin.latest ?? plugin.url), url).href,
-      zip: plugin.zip ? String(plugin.zip) : undefined,
+      zip: webUrl(plugin.zip),
       thumbnail: plugin.thumbnail ? new URL(String(plugin.thumbnail), url).href : undefined,
       readme: plugin.readme ? new URL(String(plugin.readme), url).href : undefined,
       readmeBase: plugin.readmeBase ? new URL(String(plugin.readmeBase), url).href : undefined,

@@ -1,8 +1,19 @@
 # Changelog – LayOut plugin
 
-## [Unreleased]
+## [1.0.1] – Unreleased
 
-Nothing yet.
+### Added
+
+- First steps on the empty workspace (a sheet, a viewport, text and printing) and a hint on an empty sheet.
+- _From scenes_ says why it is greyed out while the model has no scenes.
+
+### Security
+
+- Sheets from a model file could run code when shown, exported or printed: a value such as a text's size went into the SVG as it was. Every sheet now goes through an allow-list of drawing elements and attributes, images must be stored in the file, and the print frame takes the model's name and the page ids as text.
+
+### Changed
+
+- The German texts say "du", like the rest of the app.
 
 ## [1.0.0] – 2026-10-25 · Shap3D.ai (unreleased)
 

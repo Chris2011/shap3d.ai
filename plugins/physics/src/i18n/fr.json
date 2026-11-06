@@ -81,7 +81,8 @@
         "list": "Corps et zones",
         "listEmpty": "Aucun corps pour l’instant.",
         "stepHint": "Met en pause et avance d’un dixième de seconde – pour regarder pas à pas",
-        "resetHint": "Retour au départ : les corps reviennent là où le modèle les place"
+        "resetHint": "Retour au départ : les corps reviennent là où le modèle les place",
+        "nothingFalls": "Rien ne bouge encore : cliquez sur un objet et choisissez « Tombe »."
       },
       "settings": {
         "gravity": "Gravité (m/s²)",
@@ -296,7 +297,8 @@
             "text": "Les démos montrent le reste – bras robotisés programmés, cordes et ressorts, vol, eau, liquide et soufflerie. Chacune s’ouvre dans l’éditeur de scripts ; Exécuter la construit (remplace le modèle) et la démarre. Toutes sont dans les exemples sous Physique.",
             "done": "Vous avez vu les démos."
           }
-        }
+        },
+        "confirmReplace": "Cela remplace votre modèle actuel par la scène d’exercice. Ctrl+Z le rétablit. Continuer ?"
       },
       "basic": {
         "simple": "Simple",

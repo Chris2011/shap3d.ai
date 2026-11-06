@@ -42,7 +42,7 @@
         "world": "Cameras and movement"
       },
       "kinds": {
-        "spawn": "Spawn",
+        "spawn": "Player start",
         "enemy": "Enemy",
         "waypoint": "Waypoint",
         "trigger": "Trigger",
@@ -213,8 +213,8 @@
         "guide": "Level guide"
       },
       "blockout": {
-        "title": "Blockout",
-        "tool": "Draw blockout",
+        "title": "Rooms",
+        "tool": "Draw rooms",
         "groupName": "Blockout",
         "draw": "Draw",
         "pieces": "Pieces ({count})",
@@ -309,8 +309,8 @@
       },
       "generate": {
         "title": "Generate a floor plan",
-        "seed": "Seed",
-        "dice": "Another seed",
+        "seed": "Starting number (seed)",
+        "dice": "Another layout",
         "rooms": "Rooms",
         "size": "Area (m)",
         "objects": "With game objects (start, lights, enemies, health, save point, goal)",
@@ -327,7 +327,7 @@
         "hint": "Sound zones and the action Play sound play a sound by its name – a file of that name (without its extension, e.g. door-creak.ogg for door-creak). Names without a file play a stand-in in the test run."
       },
       "guide": {
-        "title": "Guide",
+        "title": "Level guide",
         "progress": "{done} of {count}",
         "intro": "Step by step to a first playable level. Each step ticks itself off once the model shows it – you can do them in any order.",
         "back": "‹ Back",
@@ -355,9 +355,9 @@
         },
         "steps": {
           "blockout": {
-            "title": "Block out the rooms",
-            "text": "Draw rooms by dragging a rectangle on the grid, corridors by clicking their start and end, stairs the way they go up. Floor height, room height and ceilings come from the Blockout panel. No time? Generate a floor plan from a seed.",
-            "done": "The level has a blockout – change or remove pieces in the Blockout panel."
+            "title": "Draw the rooms",
+            "text": "Draw rooms by dragging a rectangle on the grid, corridors by clicking their start and end, stairs the way they go up. Floor height, room height and ceilings come from the Rooms panel. No time? Let a floor plan be made for you.",
+            "done": "The level has rooms – change or remove them in the Rooms panel."
           },
           "spawn": {
             "title": "Place the player’s start",
@@ -436,6 +436,21 @@
           "name": "Two storeys",
           "description": "A hall with stairs up to a gallery over its back half and a key up there. Clears the model."
         }
+      },
+      "kindHints": {
+        "spawn": "Where the player starts",
+        "enemy": "A character that walks its round and chases the player",
+        "waypoint": "A point on an enemy’s round",
+        "trigger": "An invisible box: when the player walks in, something happens",
+        "hazard": "An area that hurts the player",
+        "soundzone": "An area with its own sound",
+        "pickup": "Something the player collects: health, a key …",
+        "door": "Opens and closes, can be locked",
+        "savepoint": "The player comes back here",
+        "camera": "A fixed view for the game",
+        "jumppad": "Throws the player into the air",
+        "teleporter": "Takes the player to another place",
+        "light": "A lamp or spotlight"
       }
     }
   }

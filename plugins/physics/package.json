@@ -12,8 +12,7 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
-    "i18n": "node ../../scripts/i18n.mjs check --package .",
-    "screenshots": "node docs/screenshots.mjs"
+    "i18n": "node ../../scripts/i18n.mjs check --package ."
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.21.0"
@@ -32,5 +31,70 @@
   },
   "portal": {
     "thumbnail": "docs/physics.png"
-  }
+  },
+  "screenshots": [
+    {
+      "name": "physics",
+      "file": "demo.js",
+      "command": "physics.pause,physics.open",
+      "camera": "2.5,-15,8",
+      "target": "3.5,0,1"
+    },
+    {
+      "name": "physics-guide",
+      "file": "demo.js",
+      "command": "physics.pause,physics.guide",
+      "camera": "2.5,-15,8",
+      "target": "3.5,0,1"
+    },
+    {
+      "name": "physics-robot",
+      "file": "demo-robot.js",
+      "command": "physics.pause,physics.open",
+      "camera": "5.1,-6.6,3.9",
+      "target": "0.6,0,0.9"
+    },
+    {
+      "name": "physics-machines",
+      "file": "demo-machines.js",
+      "command": "physics.pause,physics.open",
+      "camera": "5.5,-12.5,7",
+      "target": "5.5,0.5,1.2"
+    },
+    {
+      "name": "physics-ropes",
+      "file": "demo-crane.js",
+      "command": "physics.pause,physics.open",
+      "camera": "1,-18,8",
+      "target": "2.5,0,2.5"
+    },
+    {
+      "name": "physics-flight",
+      "file": "demo-flight.js",
+      "command": "physics.pause,physics.open",
+      "camera": "-1,-30,9",
+      "target": "0,0,4"
+    },
+    {
+      "name": "physics-water",
+      "file": "demo-water.js",
+      "command": "physics.pause,physics.open",
+      "camera": "4,-8,8",
+      "target": "4,2.5,0.5"
+    },
+    {
+      "name": "physics-liquid",
+      "file": "demo-liquid.js",
+      "command": "physics.pause,physics.open",
+      "camera": "4.5,-4.2,4.2",
+      "target": "2.4,0.6,0.2"
+    },
+    {
+      "name": "physics-tunnel",
+      "file": "demo-tunnel.js",
+      "command": "physics.pause,physics.open",
+      "camera": "1.5,-13,9",
+      "target": "3,0,0.8"
+    }
+  ]
 }

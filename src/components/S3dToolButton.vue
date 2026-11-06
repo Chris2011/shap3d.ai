@@ -2,6 +2,8 @@
   <button
     class="s3d-iconbtn"
     :class="{ active: editor.ui.tool === tool }"
+    :aria-label="info.name"
+    :aria-pressed="editor.ui.tool === tool"
     @click="editor.setTool(tool)"
     @mouseenter="hover = true"
     @mouseleave="hover = false"

@@ -156,7 +156,8 @@ export const sceneFromSelection = (editor: Editor): CodeScene => {
       : refs.length
         ? `Auswahl (${count} ${count === 1 ? 'Element' : 'Elemente'})`
         : `„${editor.model.name || 'Modell'}“`;
-  return { title, materials: usedMaterials(root, editor.model), root };
+  // the title ends up in a comment of the code: a line break in a name must not start a line of code
+  return { title: title.replace(/[\r\n\u2028\u2029]+/g, ' '), materials: usedMaterials(root, editor.model), root };
 };
 
 /** Largest side of the scene in metres (OBJ files carry no size). */
@@ -177,7 +178,14 @@ export const sceneSize = (scene: CodeScene) => {
 };
 
 // ------------------------------------------------------------ generators
-const quote = (text: string) => `'${text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'`;
+const quote = (text: string) =>
+  `'${text
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')}'`;
 const pointList = (points: CodePoint[], indent: string) => {
   const parts = points.map((point) => `[${point.join(', ')}]`);
   const lines: string[] = [];

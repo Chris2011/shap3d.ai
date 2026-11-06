@@ -32,6 +32,7 @@ export const registerPanel = (context: PluginContext, engine: Engine, settings: 
     label: 'OpenSCAD',
     icon: 'openscad',
     width: 320,
+    tile: 'last',
     mount(element) {
       const render = () => {
         element.innerHTML = `

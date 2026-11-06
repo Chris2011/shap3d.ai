@@ -81,7 +81,8 @@
         "list": "Körper und Bereiche",
         "listEmpty": "Noch keine Körper.",
         "stepHint": "Hält an und rechnet eine Zehntelsekunde weiter – so lässt es sich Schritt für Schritt ansehen",
-        "resetHint": "Zurück zum Anfang: die Körper stehen wieder, wo das Modell sie hat"
+        "resetHint": "Zurück zum Anfang: die Körper stehen wieder, wo das Modell sie hat",
+        "nothingFalls": "Noch bewegt sich nichts: Klick ein Objekt an und wähle „Fällt“."
       },
       "settings": {
         "gravity": "Schwerkraft (m/s²)",
@@ -296,7 +297,8 @@
             "text": "Die Demos zeigen, was sonst noch geht – Roboterarme mit Programm, Seile und Federn, Fliegen, Wasser, Flüssigkeit und ein Windkanal. Jede öffnet sich im Skript-Editor; Ausführen baut sie (ersetzt das Modell) und startet sie. Alle stehen in den Beispielen des Skript-Editors unter Physik.",
             "done": "Du hast die Demos gesehen."
           }
-        }
+        },
+        "confirmReplace": "Das ersetzt dein aktuelles Modell durch die Übungsszene. Strg+Z holt es zurück. Weitermachen?"
       },
       "basic": {
         "simple": "Einfach",

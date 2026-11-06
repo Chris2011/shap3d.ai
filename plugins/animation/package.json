@@ -12,8 +12,7 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
-    "i18n": "node ../../scripts/i18n.mjs check --package .",
-    "screenshots": "node docs/screenshots.mjs"
+    "i18n": "node ../../scripts/i18n.mjs check --package ."
   },
   "lint-staged": {
     "src/**/*.{js,mjs,ts,vue}": [
@@ -30,5 +29,42 @@
   },
   "portal": {
     "thumbnail": "docs/animation.png"
-  }
+  },
+  "screenshots": [
+    {
+      "name": "animation",
+      "file": "demo.js",
+      "command": "animation.shot",
+      "camera": "-4,-21,10",
+      "target": "0,0,0.5"
+    },
+    {
+      "name": "animation-guide",
+      "file": "demo.js",
+      "command": "animation.timeline,animation.guide",
+      "camera": "-4,-21,10",
+      "target": "0,0,0.5"
+    },
+    {
+      "name": "animation-robot",
+      "file": "demo-robot.js",
+      "command": "animation.shot",
+      "camera": "6,-8,4.5",
+      "target": "0.4,0,1.6"
+    },
+    {
+      "name": "animation-camera",
+      "file": "demo-camera.js",
+      "command": "animation.shot",
+      "camera": "-10,-4,6",
+      "target": "0,0,1.5"
+    },
+    {
+      "name": "animation-colors",
+      "file": "demo-colors.js",
+      "command": "animation.shot",
+      "camera": "4.5,-10,4.5",
+      "target": "4.5,0,0.6"
+    }
+  ]
 }

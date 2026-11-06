@@ -301,7 +301,8 @@ export const ACTIONS: RemoteAction[] = [
         format: { type: 'string', enum: [...EXPORT_FORMATS] },
         path: {
           type: 'string',
-          description: 'MCP only: file to write (absolute or relative to the project; default exports/<model>.<format>)',
+          description:
+            'MCP only: file to write, below the export folder (exports/ or S3D_EXPORT_DIR), with the file ending of the format; default <model>.<format>',
         },
       },
     },

@@ -3,8 +3,8 @@
  * Served as "Streamable HTTP" at /mcp (plain JSON answers, no server-sent events);
  * mcpStdio.mjs (next to this file) offers the same over stdio for clients without HTTP support.
  */
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, isAbsolute, resolve } from 'node:path';
+import { lstat, mkdir, realpath, writeFile } from 'node:fs/promises';
+import { dirname, extname, isAbsolute, relative, resolve } from 'node:path';
 import { ACTIONS, type RemoteAction } from './actions';
 import { RemoteError, type Bridge } from './bridge';
 
@@ -39,6 +39,37 @@ const toolDefinition = (action: RemoteAction) => ({
   },
 });
 
+/**
+ * Where export_model may write: only below the export folder (exports/ in the project, or S3D_EXPORT_DIR), with the
+ * format's own file ending. Otherwise whoever reaches the tool could put text of their choosing into any file of this
+ * computer – a startup script, say.
+ */
+const exportTarget = async (projectRoot: string, wanted: unknown, fileName: string) => {
+  const folder = resolve(projectRoot, process.env.S3D_EXPORT_DIR ?? 'exports');
+  const given = typeof wanted === 'string' && wanted ? wanted : fileName;
+  const file = isAbsolute(given) ? resolve(given) : resolve(folder, given.replace(/^exports[\\/]/, ''));
+  const outside = (root: string, path: string) => {
+    const way = relative(root, path);
+    return way === '' || way.startsWith('..') || isAbsolute(way);
+  };
+  if (outside(folder, file)) {
+    throw new Error(`Exports can only be written below ${folder}`);
+  }
+  if (extname(file).toLowerCase() !== extname(fileName).toLowerCase()) {
+    throw new Error(`The file must end in ${extname(fileName)}`);
+  }
+  await mkdir(dirname(file), { recursive: true });
+  // a link in the folder must not lead out of it
+  if (outside(await realpath(folder), resolve(await realpath(dirname(file)), 'x'))) {
+    throw new Error(`Exports can only be written below ${folder}`);
+  }
+  const existing = await lstat(file).catch(() => null);
+  if (existing?.isSymbolicLink()) {
+    throw new Error('The file is a link');
+  }
+  return file;
+};
+
 const text = (value: unknown) => ({ type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value) });
 
 export const createMcp = (bridge: Bridge, projectRoot: string) => {
@@ -59,9 +90,7 @@ export const createMcp = (bridge: Bridge, projectRoot: string) => {
         return { content: [{ type: 'image', data: answer.file.base64, mimeType: answer.file.mimeType }] };
       }
       if (answer.file) {
-        const target = typeof args.path === 'string' && args.path ? args.path : `exports/${answer.file.name}`;
-        const file = isAbsolute(target) ? target : resolve(projectRoot, target);
-        await mkdir(dirname(file), { recursive: true });
+        const file = await exportTarget(projectRoot, args.path, answer.file.name);
         const bytes = Buffer.from(answer.file.base64, 'base64');
         await writeFile(file, bytes);
         return { content: [text({ file, bytes: bytes.length, mimeType: answer.file.mimeType })] };

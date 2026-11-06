@@ -1,8 +1,8 @@
 import type { Instance } from '../../../src/core/model';
 import { objectAnimation, type BoneData, type ObjectAnimation, type RigPose, type Vec } from './data';
-import { editObjects, keyRotations, shownPlacementOf } from './keying';
+import { editObjects, keyCamera, keyRotations, keySelected, shownPlacementOf } from './keying';
 import { limitChannel, placementOf } from './pose';
-import { overrides } from './apply';
+import { currentScene, overrides } from './apply';
 import { pluginContext, t, THREE } from './runtime';
 import { animatedNodes, findInstance, pivotOf } from './scene';
 import { useAnimationState } from './state';
@@ -250,6 +250,21 @@ export const mirrorPose = (root: Instance) => {
     return limited(node, { rx: rest.rx + from.rx, ry: rest.ry - from.ry, rz: rest.rz - from.rz });
   });
   keyRotations(entries, t('animation.undo.pose'));
+};
+
+/**
+ * The I key: the selected groups, else the bones just posed, else the camera – only one that is already there: with
+ * nothing selected a new camera would appear out of nowhere, so it says what to do instead.
+ */
+export const keyWhatIsMeant = () => {
+  if (keySelected() || keyPosedBones()) {
+    return;
+  }
+  if (currentScene().cameras.length) {
+    keyCamera();
+  } else {
+    pluginContext().ui.toast(t('animation.timeline.keyNeedsSelection'));
+  }
 };
 
 /** keys the bones that were posed by hand at this frame (the I key with nothing selected) – false if there are none */

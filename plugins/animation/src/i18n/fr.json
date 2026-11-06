@@ -103,7 +103,8 @@
         "resize": "Glisser pour l’agrandir ou la réduire",
         "summary": "Animé",
         "allKeys": "Toutes les clés",
-        "empty": "Rien d’animé. Sélectionnez un groupe et appuyez sur I – ou choisissez un mouvement tout fait dans le panneau Animation."
+        "empty": "Rien d’animé. Sélectionnez un groupe et appuyez sur I – ou choisissez un mouvement tout fait dans le panneau Animation.",
+        "keyNeedsSelection": "Sélectionnez d’abord un groupe – I retient où il se trouve à cette image."
       },
       "graph": {
         "normalize": "Normaliser",
@@ -388,9 +389,10 @@
           },
           "more": {
             "title": "À essayer encore",
-            "text": "Les démos montrent les trajectoires, des pièces dans des pièces, des vols de caméra, le soleil, les lumières et les couleurs – ouvrez-en une dans l’éditeur de scripts et lancez-la."
+            "text": "Les démos montrent des chemins, des pièces imbriquées, des vols de caméra, le soleil, les lumières et les couleurs – ouvrez-en une dans l’éditeur de scripts et exécutez-la. Pour des figures articulées, essayez le pantin avec l’outil Poser à gauche."
           }
-        }
+        },
+        "confirmReplace": "Cela remplace votre modèle actuel par la scène d’exercice. Ctrl+Z le rétablit. Continuer ?"
       },
       "tools": {
         "joint": "Articulation",

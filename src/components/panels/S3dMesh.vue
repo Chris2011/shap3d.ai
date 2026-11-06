@@ -231,11 +231,11 @@ const applyRes = (value: number) => {
     setCircleSegments(editor, editor.entities, face.value, segments);
   }
 };
-const more = (round: boolean) => {
+const more = async (round: boolean) => {
   if (!inst.value) {
     return;
   }
-  const err = subdivideInstance(editor, inst.value, round);
+  const err = await subdivideInstance(editor, inst.value, round);
   editor.toast(err ?? t('mesh.moreDone'));
 };
 const less = async () => {

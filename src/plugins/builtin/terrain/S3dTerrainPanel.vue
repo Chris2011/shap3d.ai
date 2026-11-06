@@ -20,7 +20,7 @@
 
     <!-- chooser -->
     <div v-if="!terrainUi.active" class="overflow-auto px-3 pt-2 pb-3 text-xs">
-      <p class="mt-1 mb-2 leading-[1.4] text-ink-2" v-html="t('terrain.panel.tip')"></p>
+      <p class="mt-1 mb-2 leading-[1.4] text-ink-2" v-html="richText(t('terrain.panel.tip'))"></p>
       <div class="mb-1.5 grid grid-cols-[repeat(2,1fr)] gap-2 [&>label]:flex [&>label]:flex-col [&>label]:gap-0.75">
         <label
           >{{ t('terrain.panel.width') }}
@@ -88,7 +88,7 @@
           >{{ Math.round(terrainUi.brush.strength * 100) }} %</span
         ></label
       >
-      <p class="mt-1.5 mb-2 text-[0.6875rem]/[1.4] text-ink-2" v-html="t('terrain.panel.brushHint')"></p>
+      <p class="mt-1.5 mb-2 text-[0.6875rem]/[1.4] text-ink-2" v-html="richText(t('terrain.panel.brushHint'))"></p>
 
       <div class="mt-2.5 mb-1.25 flex items-center gap-2 s3d-caption text-navy">{{ t('terrain.panel.quick') }}</div>
       <div class="flex flex-wrap gap-1">
@@ -189,6 +189,7 @@
 </template>
 
 <script setup lang="ts">
+import { richText } from '../../../utils/safeHtml';
 import S3dCloseButton from '../../../components/ui/S3dCloseButton.vue';
 import { computed, useTemplateRef } from 'vue';
 import { useDraggable, useWindowSize } from '@vueuse/core';
