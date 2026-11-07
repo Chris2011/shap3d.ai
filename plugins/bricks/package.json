@@ -1,0 +1,42 @@
+{
+  "name": "s3d-plugin-bricks",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Clamp brick designer for Shap3D.ai: pick a brick and a colour, click to place it on the stud grid, stack, turn, delete, and get a parts list. A basic set works offline; more parts load from the LDraw library.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "test": "node --test test/*.test.ts"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "bricks",
+    "name": "Brick designer",
+    "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/bricks.png"
+  },
+  "screenshots": [
+    {
+      "name": "bricks",
+      "file": "demo.js",
+      "command": "bricks.open",
+      "camera": "-0.14,-0.3,0.17",
+      "target": "0.03,0.002,0.012"
+    }
+  ]
+}

@@ -39,6 +39,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **Autosave can be switched off**: _File › Autosave_ (on by default, remembered in the browser). Off, the saved copy is deleted and nothing comes back after a reload.
 - **Import**: a textured material in a glTF, FBX or other file now takes the mean colour of its picture instead of a neutral grey. The picture itself is not imported.
 - **Plugin API**: `files.importFile(file, onCreated?)` opens a file from a plugin like _Import…_; `onCreated` runs inside the undo step with the new group. _(Model marketplace 1.0.0: search public 3D sources and load models)_
+- **Plugin API**: `display.edges(shown)` leaves the lines along the edges of faces out of the view without changing the model's saved style. _(Brick designer 1.0.0: build with clamp bricks, lines hidden in its mode)_
 - **Plugin API**: `panels.register({ inMaterials: true })` opens a plugin's panel from a button in the Materials panel instead of a tile. _(Remote API 1.0.1: no tile)_
 - **Search in the plugin manager**: a field filters installed plugins, the catalog and the examples by name, description, author and id.
 - **Several models in tabs**: _File › New tab_ opens another model next to the one shown, each with its own undo steps and view. Tabs show once there is more than one; closing one with unsaved changes asks first. Autosave only covers the tab shown.

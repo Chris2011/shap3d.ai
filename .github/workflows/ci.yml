@@ -107,7 +107,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        plugin: [animation, ifc, layout, level, marketplace, noise, openscad, physics, roomplanner, shaders]
+        plugin: [animation, bricks, ifc, layout, level, marketplace, noise, openscad, physics, roomplanner, shaders]
     defaults:
       run:
         working-directory: plugins/${{ matrix.plugin }}

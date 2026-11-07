@@ -1,0 +1,172 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "bricks": {
+      "plugin": {
+        "name": "Concepteur de briques",
+        "description": "Construire avec des briques emboîtables : choisir une brique et une couleur, cliquer pour la poser sur la grille de tenons, empiler, tourner, supprimer et obtenir une liste de pièces. Une sélection de base fonctionne hors ligne, d'autres pièces viennent d'une bibliothèque libre."
+      },
+      "panel": "Briques",
+      "mode": "Briques",
+      "materialName": "Brique {color}",
+      "commands": {
+        "open": "Concepteur de briques"
+      },
+      "script": {
+        "brick": "Pose une brique du concepteur : identifiant de pièce, position en tenons, rotation en quarts de tour, hauteur en plaques (sans elle, la brique repose sur ce qui est dessous) et une couleur."
+      },
+      "steps": {
+        "color": "Choisissez une couleur.",
+        "brick": "Cliquez sur une brique. Elle suit maintenant le pointeur.",
+        "place": "Cliquez dans la vue 3D pour la poser, puis encore pour la suivante. Échap arrête."
+      },
+      "stop": "Arrêter de poser",
+      "color": "Couleur",
+      "catalog": "Briques",
+      "colors": {
+        "white": "Blanc",
+        "lightGrey": "Gris clair",
+        "darkGrey": "Gris foncé",
+        "black": "Noir",
+        "red": "Rouge",
+        "darkRed": "Rouge foncé",
+        "orange": "Orange",
+        "yellow": "Jaune",
+        "lime": "Citron vert",
+        "green": "Vert",
+        "lightBlue": "Bleu clair",
+        "blue": "Bleu",
+        "darkBlue": "Bleu foncé",
+        "pink": "Rose",
+        "purple": "Violet",
+        "tan": "Sable",
+        "brown": "Brun",
+        "clear": "Transparent"
+      },
+      "categories": {
+        "bricks": "Briques",
+        "plates": "Plaques",
+        "tiles": "Tuiles lisses",
+        "slopes": "Pentes",
+        "round": "Rondes",
+        "special": "Spéciales",
+        "baseplates": "Plaques de base",
+        "loaded": "Chargées"
+      },
+      "kinds": {
+        "brick": "Brique {size}",
+        "plate": "Plaque {size}",
+        "tile": "Tuile lisse {size}",
+        "baseplate": "Plaque de base {size}",
+        "slope45": "Pente 45° {size}",
+        "slope33": "Pente 33° {size}",
+        "slopeSmall": "Petite pente {size}",
+        "slopeInverted": "Pente inversée {size}",
+        "roundBrick": "Brique ronde {size}",
+        "roundPlate": "Plaque ronde {size}",
+        "cone": "Cône {size}",
+        "cornerBrick": "Brique d'angle {size}",
+        "cornerPlate": "Plaque d'angle {size}",
+        "arch": "Arche {size}",
+        "window": "Cadre de fenêtre {size}",
+        "door": "Cadre de porte {size}",
+        "panel": "Panneau {size}"
+      },
+      "selection": {
+        "many": "{count} briques sélectionnées",
+        "turnTitle": "Un quart de tour (R)",
+        "duplicate": "Copier dessus",
+        "remove": "Supprimer",
+        "hint": "Faites glisser une brique pour la déplacer. R la tourne, Suppr la supprime, une couleur ci-dessus la peint."
+      },
+      "tool": {
+        "name": "Construire avec des briques",
+        "status": "Choisissez une brique dans le panneau ou faites glisser une brique posée. R : tourner, Suppr : supprimer.",
+        "statusPlacing": "Cliquez pour poser. R : tourner. Page préc./suiv. : monter ou descendre. Échap : arrêter.",
+        "statusMoving": "Déplacez la brique et relâchez. R : tourner. Page préc./suiv. : monter ou descendre.",
+        "collides": "Une autre brique gêne."
+      },
+      "online": {
+        "title": "Plus de briques en ligne",
+        "intro": "Cherchez parmi les pièces courantes de la bibliothèque libre {source} ou saisissez un numéro de pièce. Une pièce est chargée une fois, puis fonctionne aussi hors ligne.",
+        "search": "Nom ou numéro de pièce",
+        "nothing": "Aucune pièce courante de ce nom.",
+        "loadNumber": "Charger la pièce numéro {number}",
+        "loading": "Chargement de la pièce {number} ({files} fichiers) …",
+        "cancel": "Annuler",
+        "keyTitle": "Chercher toutes les pièces avec {source} (clé personnelle)",
+        "untested": "Pas encore testé : la recherche {source} n'a jamais tourné avec une vraie clé.",
+        "keyHint": "{source} connaît chaque pièce par son nom. Il ne donne que le nom et le numéro, la forme vient toujours de la bibliothèque.",
+        "keyGet": "Obtenir une clé",
+        "keyLabel": "Votre clé d'API",
+        "keyStored": "La clé reste dans ce navigateur et ne va qu'au service, dans un en-tête.",
+        "credit": "Formes des pièces : bibliothèque de pièces {source}, CC BY."
+      },
+      "list": {
+        "title": "Liste des pièces",
+        "csv": "CSV",
+        "export": "Liste des pièces de briques (CSV)",
+        "empty": "Pas encore de briques.",
+        "total": "{count} briques au total",
+        "count": "Nombre",
+        "part": "Pièce",
+        "color": "Couleur",
+        "size": "Tenons",
+        "number": "Numéro de pièce",
+        "credit": "Pièce {number} : {author} – {license}",
+        "modelCredit": "{name} : {author} – {license}"
+      },
+      "undo": {
+        "place": "Poser une brique",
+        "move": "Déplacer une brique",
+        "remove": "Supprimer des briques",
+        "color": "Peindre des briques",
+        "duplicate": "Copier une brique"
+      },
+      "errors": {
+        "unknownPart": "Brique inconnue : {part}",
+        "prepare": "La brique n'a pas pu être préparée.",
+        "network": "Pas de connexion au service. Vérifiez que vous êtes en ligne. Vos propres briques fonctionnent sans.",
+        "notFound": "La bibliothèque n'a pas de pièce avec ce numéro.",
+        "tooLarge": "Cette pièce est trop grande pour construire.",
+        "noGeometry": "Cette pièce n'a pas de forme dans la bibliothèque.",
+        "auth": "Le service n'a pas accepté la clé.",
+        "rate": "Trop de requêtes. Patientez un instant et réessayez.",
+        "server": "Le service a répondu par une erreur. Réessayez plus tard.",
+        "badNumber": "Un numéro de pièce ne contient que des lettres, des chiffres et des tirets."
+      },
+      "models": {
+        "title": "Modèles finis",
+        "intro": "Cliquez sur un modèle. Il suit le pointeur comme une brique, un clic le pose. Les briques d'un modèle gardent leurs couleurs.",
+        "onlineTitle": "Ensembles complets de la collection LDraw (en ligne)",
+        "pieces": "{count} pièces",
+        "openFile": "Ouvrir un fichier de modèle…",
+        "fileHint": "Beaucoup d'autres ensembles en fichiers .mpd ou .ldr :",
+        "collection": "Collection de modèles LDraw",
+        "loading": "Chargement de {title} ({files} fichiers) …",
+        "missing": "{count} pièces de ce modèle ne sont pas dans la bibliothèque et ont été omises.",
+        "credit": "Chaque brique d'un ensemble a une seule couleur. Modèles : collection de modèles LDraw, CC BY.",
+        "unnamed": "Modèle",
+        "own": {
+          "house": "Maison",
+          "car": "Voiture",
+          "tree": "Arbre",
+          "lighthouse": "Phare",
+          "bridge": "Pont",
+          "rocket": "Fusée"
+        },
+        "themes": {
+          "city": "Ville",
+          "castle": "Château",
+          "pirates": "Pirates",
+          "space": "Espace",
+          "vehicles": "Véhicules",
+          "landmarks": "Monuments",
+          "adventure": "Aventure"
+        }
+      }
+    }
+  }
+}

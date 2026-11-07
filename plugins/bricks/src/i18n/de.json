@@ -1,0 +1,172 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "bricks": {
+      "plugin": {
+        "name": "Klemmbaustein-Designer",
+        "description": "Mit Klemmbausteinen bauen: Stein und Farbe wählen, per Klick auf dem Noppenraster setzen, stapeln, drehen, löschen und eine Stückliste bekommen. Eine Grundauswahl geht ohne Netz, weitere Teile kommen aus einer freien Bibliothek."
+      },
+      "panel": "Bausteine",
+      "mode": "Bausteine",
+      "materialName": "Stein {color}",
+      "commands": {
+        "open": "Klemmbaustein-Designer"
+      },
+      "script": {
+        "brick": "Setzt einen Stein des Designers: Teile-ID, Position in Noppen, Drehung in Vierteldrehungen, Höhe in Platten (ohne sie liegt der Stein auf dem, was darunter ist) und eine Farbe."
+      },
+      "steps": {
+        "color": "Farbe wählen.",
+        "brick": "Stein anklicken. Er folgt jetzt dem Mauszeiger.",
+        "place": "In der 3D-Ansicht klicken, um ihn zu setzen, und nochmal für den nächsten. Esc beendet."
+      },
+      "stop": "Setzen beenden",
+      "color": "Farbe",
+      "catalog": "Steine",
+      "colors": {
+        "white": "Weiß",
+        "lightGrey": "Hellgrau",
+        "darkGrey": "Dunkelgrau",
+        "black": "Schwarz",
+        "red": "Rot",
+        "darkRed": "Dunkelrot",
+        "orange": "Orange",
+        "yellow": "Gelb",
+        "lime": "Limette",
+        "green": "Grün",
+        "lightBlue": "Hellblau",
+        "blue": "Blau",
+        "darkBlue": "Dunkelblau",
+        "pink": "Rosa",
+        "purple": "Lila",
+        "tan": "Sand",
+        "brown": "Braun",
+        "clear": "Durchsichtig"
+      },
+      "categories": {
+        "bricks": "Steine",
+        "plates": "Platten",
+        "tiles": "Fliesen",
+        "slopes": "Schrägen",
+        "round": "Rund",
+        "special": "Besondere",
+        "baseplates": "Grundplatten",
+        "loaded": "Geladen"
+      },
+      "kinds": {
+        "brick": "Stein {size}",
+        "plate": "Platte {size}",
+        "tile": "Fliese {size}",
+        "baseplate": "Grundplatte {size}",
+        "slope45": "Schräge 45° {size}",
+        "slope33": "Schräge 33° {size}",
+        "slopeSmall": "Kleine Schräge {size}",
+        "slopeInverted": "Umgekehrte Schräge {size}",
+        "roundBrick": "Runder Stein {size}",
+        "roundPlate": "Runde Platte {size}",
+        "cone": "Kegel {size}",
+        "cornerBrick": "Eckstein {size}",
+        "cornerPlate": "Eckplatte {size}",
+        "arch": "Bogen {size}",
+        "window": "Fensterrahmen {size}",
+        "door": "Türrahmen {size}",
+        "panel": "Wandteil {size}"
+      },
+      "selection": {
+        "many": "{count} Steine ausgewählt",
+        "turnTitle": "Eine Vierteldrehung (R)",
+        "duplicate": "Kopie obendrauf",
+        "remove": "Löschen",
+        "hint": "Stein ziehen zum Verschieben. R dreht, Entf löscht, eine Farbe oben malt ihn an."
+      },
+      "tool": {
+        "name": "Mit Steinen bauen",
+        "status": "Stein im Panel wählen oder gesetzten Stein ziehen. R: drehen, Entf: löschen.",
+        "statusPlacing": "Klicken zum Setzen. R: drehen. Bild auf/ab: höher oder tiefer. Esc: beenden.",
+        "statusMoving": "Stein bewegen und loslassen. R: drehen. Bild auf/ab: höher oder tiefer.",
+        "collides": "Dort ist schon ein anderer Stein."
+      },
+      "online": {
+        "title": "Mehr Steine online",
+        "intro": "Die gängigen Teile der freien {source}-Bibliothek durchsuchen oder eine Teilenummer eingeben. Ein Teil wird einmal geladen und geht danach auch ohne Netz.",
+        "search": "Name oder Teilenummer",
+        "nothing": "Kein gängiges Teil mit diesem Namen.",
+        "loadNumber": "Teilenummer {number} laden",
+        "loading": "Teil {number} wird geladen ({files} Dateien) …",
+        "cancel": "Abbrechen",
+        "keyTitle": "Alle Teile über {source} suchen (eigener Schlüssel)",
+        "untested": "Noch nicht getestet: Die Suche über {source} lief noch nie mit einem echten Schlüssel.",
+        "keyHint": "{source} kennt jedes Teil beim Namen. Es liefert nur Name und Nummer, die Form kommt weiter aus der Bibliothek.",
+        "keyGet": "Schlüssel holen",
+        "keyLabel": "Dein API-Schlüssel",
+        "keyStored": "Der Schlüssel bleibt in diesem Browser und geht nur im Header an den Dienst.",
+        "credit": "Teileformen: {source}-Teilebibliothek, CC BY."
+      },
+      "list": {
+        "title": "Stückliste",
+        "csv": "CSV",
+        "export": "Baustein-Stückliste (CSV)",
+        "empty": "Noch keine Steine.",
+        "total": "{count} Steine insgesamt",
+        "count": "Anzahl",
+        "part": "Teil",
+        "color": "Farbe",
+        "size": "Noppen",
+        "number": "Teilenummer",
+        "credit": "Teil {number}: {author} – {license}",
+        "modelCredit": "{name}: {author} – {license}"
+      },
+      "undo": {
+        "place": "Stein setzen",
+        "move": "Stein verschieben",
+        "remove": "Steine löschen",
+        "color": "Steine anmalen",
+        "duplicate": "Stein kopieren"
+      },
+      "errors": {
+        "unknownPart": "Unbekannter Stein: {part}",
+        "prepare": "Der Stein ließ sich nicht vorbereiten.",
+        "network": "Keine Verbindung zum Dienst. Prüfe, ob du online bist. Die eigenen Steine gehen auch ohne.",
+        "notFound": "Die Bibliothek hat kein Teil mit dieser Nummer.",
+        "tooLarge": "Dieses Teil ist zu groß zum Bauen.",
+        "noGeometry": "Dieses Teil hat in der Bibliothek keine Form.",
+        "auth": "Der Dienst hat den Schlüssel nicht angenommen.",
+        "rate": "Zu viele Anfragen. Kurz warten und nochmal versuchen.",
+        "server": "Der Dienst meldet einen Fehler. Später nochmal versuchen.",
+        "badNumber": "Eine Teilenummer hat nur Buchstaben, Ziffern und Striche."
+      },
+      "models": {
+        "title": "Fertige Modelle",
+        "intro": "Modell anklicken. Es folgt dem Mauszeiger wie ein Stein, ein Klick setzt es. Die Steine eines Modells behalten ihre Farben.",
+        "onlineTitle": "Ganze Bausätze aus der LDraw-Sammlung (online)",
+        "pieces": "{count} Teile",
+        "openFile": "Modelldatei öffnen…",
+        "fileHint": "Viele weitere Bausätze als .mpd- oder .ldr-Dateien:",
+        "collection": "LDraw-Modellsammlung",
+        "loading": "{title} wird geladen ({files} Dateien) …",
+        "missing": "{count} Teile dieses Modells fehlen in der Bibliothek und wurden weggelassen.",
+        "credit": "Jeder Stein eines Bausatzes hat eine Farbe. Modelle: LDraw-Modellsammlung, CC BY.",
+        "unnamed": "Modell",
+        "own": {
+          "house": "Haus",
+          "car": "Auto",
+          "tree": "Baum",
+          "lighthouse": "Leuchtturm",
+          "bridge": "Brücke",
+          "rocket": "Rakete"
+        },
+        "themes": {
+          "city": "Stadt",
+          "castle": "Burg",
+          "pirates": "Piraten",
+          "space": "Weltraum",
+          "vehicles": "Fahrzeuge",
+          "landmarks": "Bauwerke",
+          "adventure": "Abenteuer"
+        }
+      }
+    }
+  }
+}

@@ -150,6 +150,26 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/marketplace/dist`.
 
 Details in [its README](../../plugins/marketplace/README.md).
 
+## The brick designer plugin
+
+The package in [`plugins/bricks/`](../../plugins/bricks) builds with clamp bricks in a mode of its own: pick a brick and a colour, click to place it on the stud grid. It needs no dependencies of its own.
+
+```bash
+cd plugins/bricks
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/bricks/dist`.
+
+![Brick designer: a small house on a baseplate, the panel with colours and catalog](../../plugins/bricks/docs/bricks.png)
+
+- **Catalog**: bricks, plates, tiles, slopes, round parts, arches, frames and baseplates made by the plugin in the measures of the 8 mm grid; they work without a network.
+- **Placing**: a brick snaps to the studs and comes to rest on what is below; turn, move, copy, paint and delete; a parts list with CSV.
+- **Finished models**: six of its own without a network, 38 whole sets from LDraw's collection with every part in its place, or your own `.ldr` or `.mpd` file; placed as one piece, counted brick by brick.
+- **More parts**: any part of the LDraw library by its number, through a current copy (the library itself sends no CORS header), with author and licence in the parts list; searching by name through Rebrickable with your own key, marked in the panel as not tested.
+
+Details in [its README](../../plugins/bricks/README.md).
+
 ## The noise plugin
 
 The package in [`plugins/noise/`](../../plugins/noise) brings procedural generation from seeded noise – simplex noise (fBm, ridged, billow) and cellular (Voronoi) noise – to the app. No dependencies of its own; built like the others:

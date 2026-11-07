@@ -1,0 +1,172 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "bricks": {
+      "plugin": {
+        "name": "Diseñador de bloques",
+        "description": "Construir con bloques encajables: elige un bloque y un color, haz clic para colocarlo en la cuadrícula de tetones, apila, gira, borra y obtén una lista de piezas. Una selección básica funciona sin conexión, otras piezas vienen de una biblioteca libre."
+      },
+      "panel": "Bloques",
+      "mode": "Bloques",
+      "materialName": "Bloque {color}",
+      "commands": {
+        "open": "Diseñador de bloques"
+      },
+      "script": {
+        "brick": "Coloca un bloque del diseñador: id de pieza, posición en tetones, giro en cuartos de vuelta, altura en placas (sin ella el bloque descansa sobre lo que hay debajo) y un color."
+      },
+      "steps": {
+        "color": "Elige un color.",
+        "brick": "Haz clic en un bloque. Ahora sigue al puntero.",
+        "place": "Haz clic en la vista 3D para colocarlo, y otra vez para el siguiente. Esc termina."
+      },
+      "stop": "Dejar de colocar",
+      "color": "Color",
+      "catalog": "Bloques",
+      "colors": {
+        "white": "Blanco",
+        "lightGrey": "Gris claro",
+        "darkGrey": "Gris oscuro",
+        "black": "Negro",
+        "red": "Rojo",
+        "darkRed": "Rojo oscuro",
+        "orange": "Naranja",
+        "yellow": "Amarillo",
+        "lime": "Lima",
+        "green": "Verde",
+        "lightBlue": "Azul claro",
+        "blue": "Azul",
+        "darkBlue": "Azul oscuro",
+        "pink": "Rosa",
+        "purple": "Morado",
+        "tan": "Arena",
+        "brown": "Marrón",
+        "clear": "Transparente"
+      },
+      "categories": {
+        "bricks": "Bloques",
+        "plates": "Placas",
+        "tiles": "Losetas",
+        "slopes": "Pendientes",
+        "round": "Redondos",
+        "special": "Especiales",
+        "baseplates": "Placas base",
+        "loaded": "Cargados"
+      },
+      "kinds": {
+        "brick": "Bloque {size}",
+        "plate": "Placa {size}",
+        "tile": "Loseta {size}",
+        "baseplate": "Placa base {size}",
+        "slope45": "Pendiente 45° {size}",
+        "slope33": "Pendiente 33° {size}",
+        "slopeSmall": "Pendiente pequeña {size}",
+        "slopeInverted": "Pendiente invertida {size}",
+        "roundBrick": "Bloque redondo {size}",
+        "roundPlate": "Placa redonda {size}",
+        "cone": "Cono {size}",
+        "cornerBrick": "Bloque de esquina {size}",
+        "cornerPlate": "Placa de esquina {size}",
+        "arch": "Arco {size}",
+        "window": "Marco de ventana {size}",
+        "door": "Marco de puerta {size}",
+        "panel": "Panel {size}"
+      },
+      "selection": {
+        "many": "{count} bloques seleccionados",
+        "turnTitle": "Un cuarto de vuelta (R)",
+        "duplicate": "Copiar encima",
+        "remove": "Borrar",
+        "hint": "Arrastra un bloque para moverlo. R lo gira, Supr lo borra, un color de arriba lo pinta."
+      },
+      "tool": {
+        "name": "Construir con bloques",
+        "status": "Elige un bloque en el panel o arrastra uno colocado. R: girar, Supr: borrar.",
+        "statusPlacing": "Clic para colocar. R: girar. Re Pág/Av Pág: subir o bajar. Esc: terminar.",
+        "statusMoving": "Mueve el bloque y suelta. R: girar. Re Pág/Av Pág: subir o bajar.",
+        "collides": "Hay otro bloque en medio."
+      },
+      "online": {
+        "title": "Más bloques en línea",
+        "intro": "Busca entre las piezas habituales de la biblioteca libre {source} o escribe un número de pieza. Una pieza se carga una vez y luego funciona también sin conexión.",
+        "search": "Nombre o número de pieza",
+        "nothing": "Ninguna pieza habitual con ese nombre.",
+        "loadNumber": "Cargar la pieza número {number}",
+        "loading": "Cargando la pieza {number} ({files} archivos) …",
+        "cancel": "Cancelar",
+        "keyTitle": "Buscar todas las piezas con {source} (clave propia)",
+        "untested": "Sin probar: la búsqueda de {source} nunca se ha ejecutado con una clave real.",
+        "keyHint": "{source} conoce cada pieza por su nombre. Solo da el nombre y el número, la forma sigue viniendo de la biblioteca.",
+        "keyGet": "Obtener una clave",
+        "keyLabel": "Tu clave de API",
+        "keyStored": "La clave se queda en este navegador y solo va al servicio, en una cabecera.",
+        "credit": "Formas de las piezas: biblioteca de piezas {source}, CC BY."
+      },
+      "list": {
+        "title": "Lista de piezas",
+        "csv": "CSV",
+        "export": "Lista de piezas de bloques (CSV)",
+        "empty": "Todavía no hay bloques.",
+        "total": "{count} bloques en total",
+        "count": "Cantidad",
+        "part": "Pieza",
+        "color": "Color",
+        "size": "Tetones",
+        "number": "Número de pieza",
+        "credit": "Pieza {number}: {author} – {license}",
+        "modelCredit": "{name}: {author} – {license}"
+      },
+      "undo": {
+        "place": "Colocar bloque",
+        "move": "Mover bloque",
+        "remove": "Borrar bloques",
+        "color": "Pintar bloques",
+        "duplicate": "Copiar bloque"
+      },
+      "errors": {
+        "unknownPart": "Bloque desconocido: {part}",
+        "prepare": "No se pudo preparar el bloque.",
+        "network": "Sin conexión con el servicio. Comprueba que estás en línea. Tus propios bloques funcionan sin él.",
+        "notFound": "La biblioteca no tiene ninguna pieza con este número.",
+        "tooLarge": "Esta pieza es demasiado grande para construir.",
+        "noGeometry": "Esta pieza no tiene forma en la biblioteca.",
+        "auth": "El servicio no aceptó la clave.",
+        "rate": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
+        "server": "El servicio respondió con un error. Inténtalo más tarde.",
+        "badNumber": "Un número de pieza solo tiene letras, dígitos y guiones."
+      },
+      "models": {
+        "title": "Modelos terminados",
+        "intro": "Haz clic en un modelo. Sigue al puntero como un bloque y otro clic lo coloca. Los bloques de un modelo conservan sus colores.",
+        "onlineTitle": "Sets completos de la colección LDraw (en línea)",
+        "pieces": "{count} piezas",
+        "openFile": "Abrir archivo de modelo…",
+        "fileHint": "Muchos más sets como archivos .mpd o .ldr:",
+        "collection": "Colección de modelos LDraw",
+        "loading": "Cargando {title} ({files} archivos) …",
+        "missing": "{count} piezas de este modelo no están en la biblioteca y se omitieron.",
+        "credit": "Cada bloque de un set tiene un solo color. Modelos: colección de modelos LDraw, CC BY.",
+        "unnamed": "Modelo",
+        "own": {
+          "house": "Casa",
+          "car": "Coche",
+          "tree": "Árbol",
+          "lighthouse": "Faro",
+          "bridge": "Puente",
+          "rocket": "Cohete"
+        },
+        "themes": {
+          "city": "Ciudad",
+          "castle": "Castillo",
+          "pirates": "Piratas",
+          "space": "Espacio",
+          "vehicles": "Vehículos",
+          "landmarks": "Monumentos",
+          "adventure": "Aventura"
+        }
+      }
+    }
+  }
+}

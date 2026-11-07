@@ -400,6 +400,8 @@ export interface PluginContext {
     look: (instance: Instance, look: DisplayLook | null) => void;
     /** shows a material in another colour or opacity wherever it is used – null gives its own back */
     material: (name: string, look: DisplayMaterialLook | null) => void;
+    /** leaves the lines along the edges of faces out of the view (false), over the model's style, or gives them back (true) */
+    edges: (shown: boolean) => void;
   };
   /**
    * A view of the model rendered on demand – camera, style, hidden tags, size and an optional drawing scale

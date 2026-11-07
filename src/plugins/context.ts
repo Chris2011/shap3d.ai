@@ -555,8 +555,12 @@ export const createPluginContext = (
       const placed = new Set<Instance>();
       const looked = new Set<Instance>();
       const materials = new Set<string>();
+      let edgesHidden = false;
       // the plugin's places and looks go back when it stops
       track(() => {
+        if (edgesHidden && editor.viewer.edgesForDisplay(true)) {
+          editor.invalidate();
+        }
         for (const instance of placed) {
           editor.viewer.placeForDisplay(instance, null);
         }
@@ -575,6 +579,12 @@ export const createPluginContext = (
         }
       });
       return {
+        edges: (shown) => {
+          edgesHidden = !shown;
+          if (editor.viewer.edgesForDisplay(shown)) {
+            editor.invalidate();
+          }
+        },
         place: (instance, matrix) => {
           if (matrix) {
             placed.add(instance);

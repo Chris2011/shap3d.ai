@@ -1,0 +1,172 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "bricks": {
+      "plugin": {
+        "name": "Brick designer",
+        "description": "Build with clamp bricks: pick a brick and a colour, click to place it on the stud grid, stack, turn, delete, and get a parts list. A basic set works offline, more parts load from a free library."
+      },
+      "panel": "Bricks",
+      "mode": "Bricks",
+      "materialName": "Brick {color}",
+      "commands": {
+        "open": "Brick designer"
+      },
+      "script": {
+        "brick": "Places a brick of the designer: part id, position in studs, rotation in quarter turns, height in plates (without it the brick rests on what is below) and a colour."
+      },
+      "steps": {
+        "color": "Choose a colour.",
+        "brick": "Click a brick. It now follows your pointer.",
+        "place": "Click in the 3D view to place it, again for the next one. Esc stops."
+      },
+      "stop": "Stop placing",
+      "color": "Colour",
+      "catalog": "Bricks",
+      "colors": {
+        "white": "White",
+        "lightGrey": "Light grey",
+        "darkGrey": "Dark grey",
+        "black": "Black",
+        "red": "Red",
+        "darkRed": "Dark red",
+        "orange": "Orange",
+        "yellow": "Yellow",
+        "lime": "Lime",
+        "green": "Green",
+        "lightBlue": "Light blue",
+        "blue": "Blue",
+        "darkBlue": "Dark blue",
+        "pink": "Pink",
+        "purple": "Purple",
+        "tan": "Sand",
+        "brown": "Brown",
+        "clear": "Clear"
+      },
+      "categories": {
+        "bricks": "Bricks",
+        "plates": "Plates",
+        "tiles": "Tiles",
+        "slopes": "Slopes",
+        "round": "Round",
+        "special": "Special",
+        "baseplates": "Baseplates",
+        "loaded": "Loaded"
+      },
+      "kinds": {
+        "brick": "Brick {size}",
+        "plate": "Plate {size}",
+        "tile": "Tile {size}",
+        "baseplate": "Baseplate {size}",
+        "slope45": "Slope 45° {size}",
+        "slope33": "Slope 33° {size}",
+        "slopeSmall": "Small slope {size}",
+        "slopeInverted": "Inverted slope {size}",
+        "roundBrick": "Round brick {size}",
+        "roundPlate": "Round plate {size}",
+        "cone": "Cone {size}",
+        "cornerBrick": "Corner brick {size}",
+        "cornerPlate": "Corner plate {size}",
+        "arch": "Arch {size}",
+        "window": "Window frame {size}",
+        "door": "Door frame {size}",
+        "panel": "Panel {size}"
+      },
+      "selection": {
+        "many": "{count} bricks selected",
+        "turnTitle": "A quarter turn (R)",
+        "duplicate": "Copy on top",
+        "remove": "Delete",
+        "hint": "Drag a brick to move it. R turns it, Delete removes it, a colour above paints it."
+      },
+      "tool": {
+        "name": "Build with bricks",
+        "status": "Choose a brick in the panel, or drag a placed brick. R: turn, Delete: remove.",
+        "statusPlacing": "Click to place. R: turn. Page Up/Down: raise or lower. Esc: stop.",
+        "statusMoving": "Move the brick and let go. R: turn. Page Up/Down: raise or lower.",
+        "collides": "Another brick is in the way."
+      },
+      "online": {
+        "title": "More bricks online",
+        "intro": "Search the common parts of the free {source} library, or type a part number. A part is loaded once and then works offline too.",
+        "search": "Name or part number",
+        "nothing": "No part with that name among the common ones.",
+        "loadNumber": "Load part number {number}",
+        "loading": "Loading part {number} ({files} files) …",
+        "cancel": "Cancel",
+        "keyTitle": "Search all parts with {source} (own key)",
+        "untested": "Not tested yet: nobody has run the {source} search with a real key.",
+        "keyHint": "{source} knows every part by name. It only gives the name and number, the shape still comes from the library.",
+        "keyGet": "Get a key",
+        "keyLabel": "Your API key",
+        "keyStored": "The key stays in this browser and only goes to the service, in a header.",
+        "credit": "Part shapes: {source} parts library, CC BY."
+      },
+      "list": {
+        "title": "Parts list",
+        "csv": "CSV",
+        "export": "Brick parts list (CSV)",
+        "empty": "No bricks yet.",
+        "total": "{count} bricks in all",
+        "count": "Count",
+        "part": "Part",
+        "color": "Colour",
+        "size": "Studs",
+        "number": "Part number",
+        "credit": "Part {number}: {author} – {license}",
+        "modelCredit": "{name}: {author} – {license}"
+      },
+      "undo": {
+        "place": "Place brick",
+        "move": "Move brick",
+        "remove": "Delete bricks",
+        "color": "Paint bricks",
+        "duplicate": "Copy brick"
+      },
+      "errors": {
+        "unknownPart": "Unknown brick: {part}",
+        "prepare": "The brick could not be prepared.",
+        "network": "No connection to the service. Check that you are online. Your own bricks work without it.",
+        "notFound": "The library has no part with this number.",
+        "tooLarge": "This part is too large to build with.",
+        "noGeometry": "This part has no shape in the library.",
+        "auth": "The service did not accept the key.",
+        "rate": "Too many requests. Wait a moment and try again.",
+        "server": "The service answered with an error. Try again later.",
+        "badNumber": "A part number has only letters, digits and dashes."
+      },
+      "models": {
+        "title": "Finished models",
+        "intro": "Click a model. It follows your pointer like a brick, and a click places it. Bricks of a model keep their colours.",
+        "onlineTitle": "Whole sets from the LDraw collection (online)",
+        "pieces": "{count} parts",
+        "openFile": "Open model file…",
+        "fileHint": "Many more sets as .mpd or .ldr files:",
+        "collection": "LDraw model repository",
+        "loading": "Loading {title} ({files} files) …",
+        "missing": "{count} parts of this model are not in the library and were left out.",
+        "credit": "Each brick of a set has one colour. Set models: LDraw model repository, CC BY.",
+        "unnamed": "Model",
+        "own": {
+          "house": "House",
+          "car": "Car",
+          "tree": "Tree",
+          "lighthouse": "Lighthouse",
+          "bridge": "Bridge",
+          "rocket": "Rocket"
+        },
+        "themes": {
+          "city": "City",
+          "castle": "Castle",
+          "pirates": "Pirates",
+          "space": "Space",
+          "vehicles": "Vehicles",
+          "landmarks": "Landmarks",
+          "adventure": "Adventure"
+        }
+      }
+    }
+  }
+}

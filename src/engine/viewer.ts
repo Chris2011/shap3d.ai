@@ -299,6 +299,8 @@ export class Viewer {
   /** instances and materials shown in another look for now – the model is not changed */
   private displayLooks = new Map<Instance, DisplayLook>();
   private displayMaterials = new Map<string, DisplayMaterialLook>();
+  /** edges left out for now, over the model's style (which is saved with it, so a view must not change it) */
+  private displayNoEdges = false;
   sun = new THREE.DirectionalLight(0xffffff, 1.5);
   shadowGround: THREE.Mesh;
   grid = new GroundGrid();
@@ -704,7 +706,7 @@ export class Viewer {
       mesh.visible = style.faceStyle !== 'wireframe';
     }
     // ---- edges drawn sharp between faces at an angle, as the model's profiles
-    if (style.profiles && style.faceStyle !== 'wireframe') {
+    if (style.profiles && !this.displayNoEdges && style.faceStyle !== 'wireframe') {
       for (const edge of ents.edges.values()) {
         if ((edge.hidden && !showHidden) || (edge.tag && hiddenTags.has(edge.tag)) || (edge.soft && !showHidden)) {
           continue;
@@ -984,7 +986,7 @@ export class Viewer {
 
     // ---- edges
     const linePositions: number[] = [];
-    const showEdges = style.edges || style.faceStyle === 'wireframe';
+    const showEdges = (style.edges && !this.displayNoEdges) || style.faceStyle === 'wireframe';
     for (const edge of ents.edges.values()) {
       if ((edge.hidden && !showHidden) || (edge.tag && hiddenTags.has(edge.tag)) || (edge.soft && !showHidden)) {
         continue;
@@ -1115,6 +1117,13 @@ export class Viewer {
 
   faceMe: { group: THREE.Group; world: THREE.Matrix4 }[] = [];
   /** Turn face-me components so their front (−Y) looks at the camera, rotating about their own Z axis. */
+  /** leaves the edges of faces out of the view, or brings them back; true when that changes what has to be built */
+  edgesForDisplay(shown: boolean) {
+    const changed = this.displayNoEdges === shown;
+    this.displayNoEdges = !shown;
+    return changed;
+  }
+
   /**
    * Shows an instance at another place for now (its matrix in its parent, null: back to its own) – the model is not
    * changed and the view is not built again; the place stays shown until it is taken back.
@@ -1441,7 +1450,7 @@ export class Viewer {
       this.profileLines = null;
     }
     const style = this.model?.settings.style;
-    if (!style?.profiles || !this.profiles.length) {
+    if (!style?.profiles || this.displayNoEdges || !this.profiles.length) {
       return;
     }
     const eye = cam.position;
