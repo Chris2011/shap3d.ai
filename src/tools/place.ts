@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { PEvt } from '../engine/editor';
 import type { Overlay } from '../engine/overlay';
 import { PointTool } from './base';
-import type { Definition } from '../core/model';
+import type { Definition, Entities } from '../core/model';
 import { t } from '../i18n';
 
 /** Places a component definition at the clicked point (used by the component browser and the 3D-text plugin). */
@@ -114,22 +114,29 @@ export class PlaceTool extends PointTool {
       overlay.line(corners[i], corners[j], '#1d4ed8', 1.2);
     }
     // draw the definition's edges as preview
-    const entities = this.definition.entities;
     let count = 0;
-    for (const edge of entities.edges.values()) {
-      if (count++ > 3000) {
-        break;
+    // an imported model keeps its edges in nested groups
+    const drawEdges = (entities: Entities, toWorld: THREE.Matrix4) => {
+      for (const edge of entities.edges.values()) {
+        if (count > 3000) {
+          return;
+        }
+        if (edge.soft) {
+          continue;
+        }
+        count++;
+        overlay.line(
+          entities.positionOf(edge.start).clone().applyMatrix4(toWorld),
+          entities.positionOf(edge.end).clone().applyMatrix4(toWorld),
+          '#1d4ed8',
+          1.5,
+        );
       }
-      if (edge.soft) {
-        continue;
+      for (const instance of entities.instances.values()) {
+        drawEdges(instance.definition.entities, toWorld.clone().multiply(instance.matrix));
       }
-      overlay.line(
-        entities.positionOf(edge.start).clone().applyMatrix4(matrix),
-        entities.positionOf(edge.end).clone().applyMatrix4(matrix),
-        '#333',
-        1,
-      );
-    }
+    };
+    drawEdges(this.definition.entities, matrix);
     this.drawInference(overlay, false);
   }
 }

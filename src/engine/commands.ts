@@ -16,7 +16,8 @@ import { theme, setTheme, setScene } from '../theme';
 import { openTour } from '../components/tour';
 import { openPalette } from '../components/paletteState';
 import { measureView } from './measureView';
-import type { Entities, EntityRef, Instance } from '../core/model';
+import type { Definition, Entities, EntityRef, Instance } from '../core/model';
+import type { PlaceTool } from '../tools/place';
 import { Entities as EntitiesClass, copyInstanceDetails, isProcedureInput } from '../core/model';
 import type { FaceStyle } from '../core/document';
 import { cutKeepingGroups, isSolid, type SolidOp } from '../core/solids';
@@ -282,13 +283,19 @@ const loadForeign = async (ext: string, file: File): Promise<LoadedScene> => {
   throw new Error(t('import.unsupported', { ext }) + (pluginImporters.has('fbx') ? '' : ` ${t('import.morePlugin')}`));
 };
 
+export interface ImportOptions {
+  onCreated?: (definition: Definition) => void;
+  place?: boolean;
+}
+
 /**
  * opens a file; what the parsers throw on a broken file ("Invalid typed array length") becomes a sentence.
- * `onCreated` runs inside the import's undo step with the new group – not for formats a plugin imports itself or for a model file.
+ * `options.onCreated` runs inside the import's undo step with the new component, and `options.place` lets the user place it with the
+ * mouse instead of putting it on the origin – neither for formats a plugin imports itself or for a model file.
  */
-export const importFile = async (editor: Editor, file: File, onCreated?: (instance: Instance) => void) => {
+export const importFile = async (editor: Editor, file: File, options: ImportOptions = {}) => {
   try {
-    await importFileUnchecked(editor, file, onCreated);
+    await importFileUnchecked(editor, file, options);
   } catch (error) {
     if (
       error instanceof TypeError ||
@@ -303,7 +310,7 @@ export const importFile = async (editor: Editor, file: File, onCreated?: (instan
   }
 };
 
-const importFileUnchecked = async (editor: Editor, file: File, onCreated?: (instance: Instance) => void) => {
+const importFileUnchecked = async (editor: Editor, file: File, { onCreated, place }: ImportOptions) => {
   const ext = file.name.split('.').pop()!.toLowerCase();
   const pluginImporter = pluginImporters.get(ext);
   if (pluginImporter?.import) {
@@ -366,6 +373,7 @@ const importFileUnchecked = async (editor: Editor, file: File, onCreated?: (inst
   const info = await sceneToEntities(obj, editor.model, conv, base).finally(() => {
     editor.ui.status = statusBefore;
   });
+  let toPlace: Definition | undefined;
   editor.commit('undo.import', () => {
     const root = info.build();
     if (!root.faces.size && !root.instances.size) {
@@ -382,9 +390,13 @@ const importFileUnchecked = async (editor: Editor, file: File, onCreated?: (inst
       instance.matrix.premultiply(shift);
     }
     const def = editor.model.newDefinition(editor.model.uniqueDefName(base), true, root);
+    onCreated?.(def);
+    if (place) {
+      toPlace = def;
+      return;
+    }
     const inst = editor.entities.addInstance(def, new THREE.Matrix4(), '');
     editor.select([{ kind: 'instance', id: inst.id }]);
-    onCreated?.(inst);
   });
   const counts = [t('import.triangles', { count: info.triangles })];
   if (info.groups) {
@@ -396,6 +408,10 @@ const importFileUnchecked = async (editor: Editor, file: File, onCreated?: (inst
   editor.toast(
     `${file.name}${unitNote}: ${counts.join(', ')}` + (info.skipped ? ` – ${t('import.skipped', { count: info.skipped })}` : ''),
   );
+  if (toPlace) {
+    (editor.tools.get('place') as PlaceTool).start(toPlace);
+    return;
+  }
   editor.zoomExtents();
 };
 
@@ -469,6 +485,10 @@ const explodeSelectedToInputs = (editor: Editor) => {
 };
 
 export const deleteSelection = (editor: Editor) => {
+  if (editor.selectedAnnotation !== null) {
+    editor.removeAnnotation(editor.selectedAnnotation);
+    return;
+  }
   const refs = editor.selected();
   if (!refs.length) {
     return;

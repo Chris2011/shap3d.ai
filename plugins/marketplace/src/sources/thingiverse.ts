@@ -35,7 +35,8 @@ export const thingiverse: ModelSource = {
   search: async ({ query, category, next, key, signal }) => {
     const page = Number(next ?? 1);
     const params = new URLSearchParams({ type: 'things', per_page: String(PAGE), page: String(page) });
-    const words = encodeURIComponent([query, category].filter(Boolean).join(' '));
+    // its address needs a word, so the list without a search is a broad one
+    const words = encodeURIComponent([query, category].filter(Boolean).join(' ') || 'model');
     const answer = await fetchJson<{ hits?: Thing[] }>(`${API}/search/${words}?${params}`, signal, { headers: bearer(key) });
     const hits = answer.hits ?? [];
     return {

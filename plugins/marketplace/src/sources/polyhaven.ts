@@ -35,8 +35,9 @@ let listing: Promise<Record<string, Asset>> | undefined;
 export const polyHaven: ModelSource = {
   id: 'polyhaven',
   label: 'Poly Haven',
-  search: async ({ query, category, next, signal }) => {
-    listing ??= fetchJson<Record<string, Asset>>(`${API}/assets?t=models`, signal).catch((error) => {
+  search: async ({ query, category, next }) => {
+    // shared by all searches, so not tied to the signal of the one that started it: a newer search must not cancel it
+    listing ??= fetchJson<Record<string, Asset>>(`${API}/assets?t=models`, new AbortController().signal).catch((error) => {
       listing = undefined;
       throw error;
     });

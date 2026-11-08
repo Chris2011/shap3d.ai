@@ -43,6 +43,8 @@ export interface SearchRequest {
   category?: Category;
   next?: string;
   key: string;
+  /** every source's key, by its id – the search over all sources hands them on */
+  keys: Record<string, string>;
   signal: AbortSignal;
 }
 
@@ -61,6 +63,19 @@ export interface ModelSource {
   /** a Download for the worker, or a finished File (made from data). Without it the model only opens at the source */
   download?: (item: ModelItem, key: string, signal: AbortSignal) => Promise<Download | File>;
 }
+
+/** the lists one after the other, a card from each in turn: no source hides behind a long first list */
+export const interleave = <T>(lists: T[][]) => {
+  const merged: T[] = [];
+  for (let row = 0; merged.length < lists.reduce((sum, list) => sum + list.length, 0); row++) {
+    for (const list of lists) {
+      if (row < list.length) {
+        merged.push(list[row]);
+      }
+    }
+  }
+  return merged;
+};
 
 export type SourceErrorCode = 'network' | 'auth' | 'rate' | 'server' | 'noBuildings' | 'noFile';
 

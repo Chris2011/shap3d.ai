@@ -18,11 +18,12 @@
         "placeholder": "Que cherchez-vous ? p. ex. chair (chaise)",
         "placePlaceholder": "Un lieu ou une adresse, p. ex. Place Bellecour Lyon",
         "searching": "Recherche…",
-        "nothing": "Rien trouvé. Essayez un autre mot, si possible en anglais.",
+        "nothing": "Rien trouvé. Voici plutôt une sélection de toutes les sources ; essayez un autre mot, si possible en anglais.",
         "more": "Afficher plus",
-        "privacy": "Rien n’est envoyé avant votre recherche. Une recherche va à {source}.",
+        "privacy": "Cette liste et vos recherches viennent directement des sources, qui voient donc la demande. Les téléchargements ne démarrent qu’après un clic.",
         "poweredBy": "Modèles fournis par {source}.",
-        "untested": "Pas encore testé avec une vraie clé. Si quelque chose échoue, dites-le-nous."
+        "untested": "Pas encore testé avec une vraie clé. Si quelque chose échoue, dites-le-nous.",
+        "allSources": "Toutes les sources"
       },
       "key": {
         "short": "clé",
@@ -64,7 +65,8 @@
         "starting": "Demande en cours, cela peut prendre un moment…",
         "building": "Création des faces…",
         "received": "{size} Mo reçus…",
-        "millimetres": "Le fichier n’a pas d’unité et semblait trop grand en mètres : il a été lu en millimètres."
+        "place": "Le modèle suit le pointeur : allez dans la scène et cliquez pour le placer. Échap l’abandonne.",
+        "placeMillimetres": "Le fichier n’a pas d’unité et semblait trop grand en mètres : il a été lu en millimètres. Cliquez dans le modèle pour le placer. Échap l’abandonne."
       },
       "credits": {
         "tab": "Dans ce modèle",

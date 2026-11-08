@@ -36,9 +36,12 @@
       "file": "demo.js",
       "command": "marketplace.open",
       "step": [
-        "search:modern arm chair",
-        "click:Modern Arm Chair",
+        "search:modern arm chair 01",
+        "wait:4000",
+        "click:Modern Arm Chair 01",
         "click:Ins Modell laden",
+        "tool:place",
+        "view:0.42,0.62",
         "click:‹",
         "search:chair",
         "wait:9000"

@@ -1,4 +1,4 @@
-import type { Definition, Instance } from '../../../src/core/model';
+import type { Definition } from '../../../src/core/model';
 import { extensionOf } from './archive';
 import type { LoadAnswer, LoadRequest } from './loadWorker';
 // oxlint-disable-next-line import/default -- made by the build
@@ -76,7 +76,7 @@ const fileBase = (title: string) =>
     .trim()
     .slice(0, 80) || 'model'; // i18n-ignore – fallback file name
 
-/** from the click on Load to the group in the model, with its credits on it – one undo step */
+/** from the click on Load to a component on the mouse pointer, with its credits on it: the user places it */
 export const loadIntoModel = async (
   source: ModelSource,
   item: ModelItem,
@@ -109,18 +109,23 @@ export const loadIntoModel = async (
     webUrl: item.webUrl,
   };
   let scaled = false;
-  await context.files.importFile(file, (instance: Instance) => {
-    context.data.set(instance.definition, attribution);
-    const size = instance.definition.entities.bounds().getSize(new context.THREE.Vector3());
-    if (maybeMillimetres && Math.max(size.x, size.y, size.z) > LARGEST_IN_METRES) {
-      instance.matrix.scale(new context.THREE.Vector3(0.001, 0.001, 0.001));
-      scaled = true;
-    }
+  await context.files.importFile(file, {
+    place: true,
+    onCreated: (definition) => {
+      context.data.set(definition, attribution);
+      const entities = definition.entities;
+      const size = entities.bounds().getSize(new context.THREE.Vector3());
+      if (maybeMillimetres && Math.max(size.x, size.y, size.z) > LARGEST_IN_METRES) {
+        // the component's own points, as the place tool makes the instance: an STL is one mesh, so there are no groups in it
+        for (const vertex of entities.vertices.values()) {
+          vertex.position.multiplyScalar(0.001);
+        }
+        entities.invalidateHash();
+        scaled = true;
+      }
+    },
   });
-  if (scaled) {
-    context.editor.zoomExtents();
-    context.ui.toast(t('marketplace.load.millimetres'));
-  }
+  context.ui.toast(t(scaled ? 'marketplace.load.placeMillimetres' : 'marketplace.load.place'));
 };
 
 /** the credits of everything loaded into this model; the file is from a stranger too, so only what is text counts */

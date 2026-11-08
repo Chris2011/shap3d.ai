@@ -27,7 +27,11 @@ export const myMiniFactory: ModelSource = {
       throw new SourceError('auth');
     }
     const page = Number(next ?? 1);
-    const params = new URLSearchParams({ q: [query, category].filter(Boolean).join(' '), per_page: String(PAGE), page: String(page) });
+    const params = new URLSearchParams({
+      q: [query, category].filter(Boolean).join(' ') || 'model',
+      per_page: String(PAGE),
+      page: String(page),
+    });
     const answer = await fetchJson<{ items?: Thing[]; total_count?: number }>(`${API}/search?${params}`, signal, {
       headers: { 'X-Api-Key': key },
     });

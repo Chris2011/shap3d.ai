@@ -18,14 +18,14 @@ Search public 3D sources from inside the app, see a preview, the author and the 
 Sources marked as not tested say so in the panel: nobody could try them with a real key yet.
 
 - **Keys**: you enter them in the panel. They stay in this browser (`localStorage`, readable by anything that runs in the app, like AI keys) and only go to that source, in a header, never in an address.
-- **Requests**: nothing is sent until you search or click. A search goes to the source you chose; its pictures load from it.
+- **Requests**: opening the panel lists a default set, so _All sources_ or the source you chose gets a request then, and its pictures load from it. Downloads only start with a click.
 - **Poly Haven** asks to be told about integrations in tools and to be named; **Sketchfab** asks apps to name it and to show author and licence. The panel does this. Nominatim (place search) has a [usage policy](https://operations.osmfoundation.org/policies/nominatim/): one request per search, no search-as-you-type.
 
 ## Loading
 
 1. The bytes are fetched in a worker, with a progress bar and _Cancel_. Limit: 256 MB, counted as they arrive and again while unpacking.
 2. A glTF with its `.bin` and pictures, or a zip with them, becomes one `.glb` in the worker, so the import needs nothing from outside. An address inside a file is not followed: such a file is refused. Paths in a zip stay inside it. Draco, meshopt and Basis compression are refused with a message, since the app's loader has no decoders for them.
-3. The result goes through the app's own import (`context.files.importFile`): faces in a worker, on the ground at the origin, one undo step.  **A textured material becomes one colour**, the mean of its picture where the model uses it: faces have no texture coordinates, so the picture itself does not arrive.
+3. The result goes through the app's own import (`context.files.importFile`, faces in a worker) and lands on the mouse pointer: a click places it, Esc drops it.  **A textured material becomes one colour**, the mean of its picture where the model uses it: faces have no texture coordinates, so the picture itself does not arrive.
 4. **STL has no unit.** One from Commons or Thingiverse with a largest side over 10 is taken for millimetres, and you are told.
 5. **OpenStreetMap**: search a place, and the buildings within 150 m become simple blocks, with `height` or `building:levels` where the map has them. Holes and multi-part buildings (OSM relations) are skipped.
 

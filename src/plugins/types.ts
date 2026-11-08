@@ -303,10 +303,11 @@ export interface PluginContext {
     registerImporter: (importer: PluginImporter) => Disposer;
     registerExporter: (exporter: PluginExporter) => Disposer;
     /**
-     * opens a file like Import… does: faces in a worker, placed on the ground, one undo step. `onCreated` runs inside that step with
-     * the new group (e.g. to keep data on it) – not for a format a plugin imports itself or a model file, which replaces the model
+     * opens a file like Import… does: faces in a worker, on the ground at the origin, one undo step. `onCreated` runs inside that step
+     * with the new component (e.g. to keep data on it); with `place` the user places it with the mouse (Esc drops it) instead of
+     * it landing on the origin – both not for a format a plugin imports itself or a model file, which replaces the model
      */
-    importFile: (file: File, onCreated?: (instance: Instance) => void) => Promise<void>;
+    importFile: (file: File, options?: { onCreated?: (definition: Definition) => void; place?: boolean }) => Promise<void>;
   };
   overlay: { draw: (draw: (overlay: Overlay, editor: Editor) => void) => Disposer };
   events: {

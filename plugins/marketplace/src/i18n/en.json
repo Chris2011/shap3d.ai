@@ -18,11 +18,12 @@
         "placeholder": "What are you looking for? e.g. chair",
         "placePlaceholder": "A place or address, e.g. Marienplatz Munich",
         "searching": "Searching…",
-        "nothing": "Nothing found. Try another word, in English if you can.",
+        "nothing": "Nothing found. Here is a selection from all sources instead; try another word, in English if you can.",
         "more": "Show more",
-        "privacy": "Nothing is sent until you search. A search goes to {source}.",
+        "privacy": "This list and your searches come directly from the sources, so they see the request. Downloads only start with a click.",
         "poweredBy": "Models provided by {source}.",
-        "untested": "Not tested with a real key yet. If something fails, please tell us."
+        "untested": "Not tested with a real key yet. If something fails, please tell us.",
+        "allSources": "All sources"
       },
       "key": {
         "short": "key",
@@ -64,7 +65,8 @@
         "starting": "Asking the source, this can take a moment…",
         "building": "Making faces…",
         "received": "{size} MB received…",
-        "millimetres": "The file has no unit and looked too big for metres, so it was read as millimetres."
+        "place": "The model hangs on the mouse pointer: move into the scene and click to place it. Esc drops it.",
+        "placeMillimetres": "The file has no unit and looked too big for metres, so it was read as millimetres. Click in the model to place it. Esc drops it."
       },
       "credits": {
         "tab": "In this model",

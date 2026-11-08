@@ -141,11 +141,28 @@ const until = async (done: () => boolean, limit = 60000) => {
 const button = (label: string) =>
   ([...document.querySelectorAll('button')] as HTMLElement[]).find((candidate) => candidate.textContent?.trim().endsWith(label));
 
-/** one `&step=` after the scene and commands, for pictures that need the panel used: `search:<words>`, `click:<start of a button's text>` (waits until it is there and enabled), `wait:<ms>` */
-const runStep = async (step: string) => {
+/** one `&step=` after the scene and commands, for pictures that need the panel used: `search:<words>`, `click:<start of a button's text>` (waits until it is there and enabled), `wait:<ms>`, `tool:<id>` (waits for that tool), `view:<x>,<y>` (a left click in the 3D view, 0 … 1 of its size) */
+const runStep = async (step: string, editor: Editor) => {
   const [action, value] = [step.slice(0, step.indexOf(':')), step.slice(step.indexOf(':') + 1)];
   if (action === 'wait') {
     await wait(Number(value));
+  } else if (action === 'tool') {
+    await until(() => editor.ui.tool === value);
+  } else if (action === 'view') {
+    const canvas = document.querySelector('canvas')!;
+    const box = canvas.getBoundingClientRect();
+    const [x, y] = value.split(',').map(Number);
+    const options = {
+      clientX: box.left + box.width * x,
+      clientY: box.top + box.height * y,
+      button: 0,
+      bubbles: true,
+      pointerId: 1,
+      pointerType: 'mouse',
+    };
+    canvas.dispatchEvent(new PointerEvent('pointermove', options));
+    canvas.dispatchEvent(new PointerEvent('pointerdown', { ...options, buttons: 1 }));
+    canvas.dispatchEvent(new PointerEvent('pointerup', { ...options, buttons: 0 }));
   } else if (action === 'search') {
     const input = document.querySelector<HTMLInputElement>('input[type=search]');
     if (input) {
@@ -420,7 +437,7 @@ export const runShot = async (editor: Editor, name: string) => {
     await findCommand(id)?.run(editor);
   }
   for (const step of params.getAll('step')) {
-    await runStep(step);
+    await runStep(step, editor);
   }
   editor.invalidate();
   await wait(800);

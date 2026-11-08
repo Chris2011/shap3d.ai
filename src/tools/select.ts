@@ -266,6 +266,11 @@ export class SelectTool extends Tool {
     this.lastClick = now;
     const selectMode = this.mode(this.down ?? pointer);
     this.down = null;
+    const annotation = editor.pickAnnotation(pointer.x, pointer.y);
+    editor.selectAnnotation(annotation);
+    if (annotation !== null) {
+      return;
+    }
     const { ref, outside } = pickRef(editor, pointer.x, pointer.y);
     if (!ref) {
       if (outside && editor.activePath.length && selectMode === 'set') {
@@ -398,6 +403,11 @@ export class EraserTool extends Tool {
     return picked;
   }
   onDown(pointer: PEvt) {
+    const annotation = this.editor.pickAnnotation(pointer.x, pointer.y);
+    if (annotation !== null) {
+      this.editor.removeAnnotation(annotation);
+      return;
+    }
     this.active = true;
     this.mods = { shift: pointer.shift, ctrl: pointer.ctrl };
     this.marked.clear();

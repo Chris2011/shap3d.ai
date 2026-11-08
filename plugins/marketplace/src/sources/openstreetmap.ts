@@ -11,11 +11,33 @@ const OVERPASS = 'https://overpass-api.de/api/interpreter';
 const RADIUS = 150;
 
 interface Place {
-  place_id: number;
+  place_id: number | string;
   lat: string;
   lon: string;
   display_name: string;
 }
+
+/** what the list shows before a search: the map service has no list of its own, and these cost no request */
+const WELL_KNOWN: Place[] = [
+  ['Marienplatz, München', '48.1374', '11.5755'], // i18n-ignore – place names
+  ['Brandenburger Tor, Berlin', '52.5163', '13.3777'],
+  ['Tour Eiffel, Paris', '48.8584', '2.2945'],
+  ['Piazza San Marco, Venezia', '45.4342', '12.3388'],
+  ['Times Square, New York', '40.7580', '-73.9855'],
+  ['Shibuya, Tokyo', '35.6595', '139.7005'],
+].map(([display_name, lat, lon]) => ({ place_id: display_name, display_name, lat, lon }));
+
+const toItem = (place: Place): ModelItem => ({
+  sourceId: 'osm',
+  id: String(place.place_id),
+  title: place.display_name,
+  author: 'OpenStreetMap contributors', // i18n-ignore – the credit the licence asks for
+  authorUrl: 'https://www.openstreetmap.org/copyright',
+  license: 'ODbL 1.0',
+  licenseUrl: 'https://opendatacommons.org/licenses/odbl/1-0/',
+  webUrl: `https://www.openstreetmap.org/#map=18/${encodeURIComponent(place.lat)}/${encodeURIComponent(place.lon)}`,
+  extra: { lat: Number(place.lat), lon: Number(place.lon) },
+});
 
 export const openStreetMap: ModelSource = {
   id: 'osm',
@@ -23,23 +45,11 @@ export const openStreetMap: ModelSource = {
   places: true,
   search: async ({ query, signal }) => {
     if (!query) {
-      return { items: [] };
+      return { items: WELL_KNOWN.map(toItem) };
     }
     const params = new URLSearchParams({ q: query, format: 'jsonv2', limit: '12' });
     const places = await fetchJson<Place[]>(`${NOMINATIM}?${params}`, signal);
-    return {
-      items: places.map((place): ModelItem => ({
-        sourceId: 'osm',
-        id: String(place.place_id),
-        title: place.display_name,
-        author: 'OpenStreetMap contributors', // i18n-ignore – the credit the licence asks for
-        authorUrl: 'https://www.openstreetmap.org/copyright',
-        license: 'ODbL 1.0',
-        licenseUrl: 'https://opendatacommons.org/licenses/odbl/1-0/',
-        webUrl: `https://www.openstreetmap.org/#map=18/${encodeURIComponent(place.lat)}/${encodeURIComponent(place.lon)}`,
-        extra: { lat: Number(place.lat), lon: Number(place.lon) },
-      })),
-    };
+    return { items: places.map(toItem) };
   },
   download: async (item, _key, signal) => {
     const lat = Number(item.extra?.lat);

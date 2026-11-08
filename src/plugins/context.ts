@@ -383,7 +383,7 @@ export const createPluginContext = (
     code: { registerFormat: (format) => track(registerCodeFormat(format)) },
 
     files: {
-      importFile: (file, onCreated) => importFile(editor, file, onCreated),
+      importFile: (file, options) => importFile(editor, file, options),
       registerImporter: (importer) =>
         track(registerImporter(importer.extensions, { label: importer.label, import: importer.import, loadScene: importer.loadScene })),
       registerExporter: (exporter) => {

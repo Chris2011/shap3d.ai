@@ -18,11 +18,12 @@
         "placeholder": "¿Qué buscas? p. ej. chair (silla)",
         "placePlaceholder": "Un lugar o dirección, p. ej. Plaza Mayor Madrid",
         "searching": "Buscando…",
-        "nothing": "No se encontró nada. Prueba otra palabra, mejor en inglés.",
+        "nothing": "No se encontró nada. Aquí tienes una selección de todas las fuentes; prueba otra palabra, mejor en inglés.",
         "more": "Mostrar más",
-        "privacy": "No se envía nada hasta que buscas. Una búsqueda va a {source}.",
+        "privacy": "Esta lista y tus búsquedas vienen directamente de las fuentes, que ven la petición. Las descargas solo empiezan con un clic.",
         "poweredBy": "Modelos proporcionados por {source}.",
-        "untested": "Aún no probado con una clave real. Si algo falla, avísanos."
+        "untested": "Aún no probado con una clave real. Si algo falla, avísanos.",
+        "allSources": "Todas las fuentes"
       },
       "key": {
         "short": "clave",
@@ -64,7 +65,8 @@
         "starting": "Consultando, puede tardar un momento…",
         "building": "Creando caras…",
         "received": "{size} MB recibidos…",
-        "millimetres": "El archivo no tiene unidad y parecía demasiado grande en metros, así que se leyó en milímetros."
+        "place": "El modelo sigue al puntero: ve a la escena y haz clic para colocarlo. Esc lo descarta.",
+        "placeMillimetres": "El archivo no tiene unidad y parecía demasiado grande en metros, así que se leyó en milímetros. Haz clic en el modelo para colocarlo. Esc lo descarta."
       },
       "credits": {
         "tab": "En este modelo",

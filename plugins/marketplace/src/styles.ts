@@ -8,7 +8,7 @@ const CSS = `
 .s3d-mk-hint { margin: 0; font-size: 0.75rem; color: var(--s3d-text-2); }
 .s3d-mk-warn { margin: 0; padding: 0.375rem 0.5rem; border: 1px solid var(--s3d-line); border-radius: 4px; font-size: 0.75rem; }
 .s3d-mk-row { display: flex; gap: 0.375rem; align-items: center; }
-.s3d-mk-input { flex: 1; min-width: 0; padding: 0.25rem 0.375rem; border: 1px solid var(--s3d-line); border-radius: 4px; background: transparent; color: inherit; font: inherit; }
+.s3d-mk-input { flex: 1; min-width: 0; }
 .s3d-mk-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
 .s3d-mk-chip { padding: 0.125rem 0.5rem; border: 1px solid var(--s3d-line); border-radius: 999px; background: transparent; color: inherit; font-size: 0.75rem; cursor: pointer; }
 .s3d-mk-chip:hover { background: var(--s3d-hover); }
@@ -23,6 +23,10 @@ const CSS = `
 .s3d-mk-facts { display: grid; grid-template-columns: auto 1fr; gap: 0.125rem 0.5rem; margin: 0; }
 .s3d-mk-facts dt { color: var(--s3d-text-2); }
 .s3d-mk-facts dd { margin: 0; overflow-wrap: anywhere; }
+.s3d-mk-notice { margin: 0; padding: 0.5rem 0.625rem; border-radius: 4px; background: var(--s3d-navy-bg); color: #fff; font-weight: 700; }
+.s3d-mk-spinner { width: 2rem; height: 2rem; margin: 2rem auto; border: 3px solid var(--s3d-line); border-top-color: var(--s3d-navy-bg); border-radius: 50%; animation: s3d-mk-spin 0.8s linear infinite; }
+@keyframes s3d-mk-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .s3d-mk-spinner { animation-duration: 3s; } }
 .s3d-mk-bar { height: 6px; border-radius: 3px; background: var(--s3d-hover); overflow: hidden; }
 .s3d-mk-bar span { display: block; height: 100%; background: var(--s3d-navy-bg); }
 .s3d-mk-credit { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.25rem 0; border-top: 1px solid var(--s3d-line); }

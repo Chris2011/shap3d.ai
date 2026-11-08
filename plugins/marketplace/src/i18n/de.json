@@ -18,11 +18,12 @@
         "placeholder": "Was suchst du? z. B. chair (Stuhl)",
         "placePlaceholder": "Ort oder Adresse, z. B. Marienplatz München",
         "searching": "Suche läuft…",
-        "nothing": "Nichts gefunden. Versuch ein anderes Wort, am besten auf Englisch.",
+        "nothing": "Nichts gefunden. Hier stattdessen eine Auswahl aus allen Quellen; versuch ein anderes Wort, am besten auf Englisch.",
         "more": "Mehr zeigen",
-        "privacy": "Es wird nichts gesendet, bevor du suchst. Eine Suche geht an {source}.",
+        "privacy": "Diese Liste und deine Suchen kommen direkt von den Quellen, die sehen also die Anfrage. Downloads starten erst per Klick.",
         "poweredBy": "Modelle bereitgestellt von {source}.",
-        "untested": "Noch nicht mit einem echten Schlüssel getestet. Falls etwas nicht klappt, sag uns bitte Bescheid."
+        "untested": "Noch nicht mit einem echten Schlüssel getestet. Falls etwas nicht klappt, sag uns bitte Bescheid.",
+        "allSources": "Alle Quellen"
       },
       "key": {
         "short": "Schlüssel",
@@ -64,7 +65,8 @@
         "starting": "Anfrage läuft, das kann etwas dauern…",
         "building": "Flächen entstehen…",
         "received": "{size} MB empfangen…",
-        "millimetres": "Die Datei hat keine Einheit und war für Meter zu groß, sie wurde als Millimeter gelesen."
+        "place": "Das Modell hängt am Mauszeiger: in die Szene fahren und klicken, um es zu platzieren. Esc verwirft es.",
+        "placeMillimetres": "Die Datei hat keine Einheit und war für Meter zu groß, sie wurde als Millimeter gelesen. Ins Modell klicken, um sie zu platzieren. Esc verwirft sie."
       },
       "credits": {
         "tab": "In diesem Modell",

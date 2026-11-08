@@ -96,7 +96,11 @@ interface HistoryEntry {
   path: number[];
 }
 
+const ANNOTATION_FONT = '12px "Open Sans", "Segoe UI", sans-serif';
+
 export class Editor {
+  /** the text or dimension selected with the Select tool, null = none */
+  selectedAnnotation: number | null = null;
   model = new Model();
   viewer!: Viewer;
   infer!: InferenceEngine;
@@ -288,7 +292,59 @@ export class Editor {
       this.selectionChanged();
     }
   }
+  /** the id of the text or dimension under a screen point: its text box or one of its lines (drawn last, so looked at first) */
+  pickAnnotation(x: number, y: number) {
+    const pointer = new THREE.Vector3(x, y);
+    const nearLine = (start: THREE.Vector3, end: THREE.Vector3) => {
+      const [from, to] = [this.viewer.project(start), this.viewer.project(end)];
+      if (!from.visible || !to.visible) {
+        return false;
+      }
+      const line = new THREE.Line3(new THREE.Vector3(from.x, from.y), new THREE.Vector3(to.x, to.y));
+      return line.closestPointToPoint(pointer, true, new THREE.Vector3()).distanceTo(pointer) <= 5;
+    };
+    const context = this.viewer.overlay.context;
+    context.font = ANNOTATION_FONT;
+    for (const label of [...this.model.labels].reverse()) {
+      const anchor = label.point.clone().add(label.offset);
+      const box = this.viewer.project(anchor);
+      const width = context.measureText(this.labelText(label)).width + 8;
+      if ((box.visible && x >= box.x && x <= box.x + width && Math.abs(y - box.y) <= 9) || nearLine(label.point, anchor)) {
+        return label.id;
+      }
+    }
+    for (const dimension of [...this.model.dimensions].reverse()) {
+      const [start, end] = [dimension.start.clone().add(dimension.offset), dimension.end.clone().add(dimension.offset)];
+      const box = this.viewer.project(start.clone().add(end).multiplyScalar(0.5));
+      const width = context.measureText(this.fmt(dimension.start.distanceTo(dimension.end))).width + 8;
+      if (
+        (box.visible && Math.abs(x - box.x) <= width / 2 && Math.abs(y - box.y) <= 9) ||
+        nearLine(start, end) ||
+        nearLine(dimension.start, start) ||
+        nearLine(dimension.end, end)
+      ) {
+        return dimension.id;
+      }
+    }
+    return null;
+  }
+  /** a text or dimension is not geometry, so it is selected on its own: clicking anything else ends it */
+  selectAnnotation(id: number | null) {
+    if (id !== null) {
+      this.clearSelection();
+    }
+    this.selectedAnnotation = id;
+    this.redraw();
+  }
+  removeAnnotation(id: number) {
+    this.commit('commands.delete', () => {
+      this.model.labels = this.model.labels.filter((label) => label.id !== id);
+      this.model.dimensions = this.model.dimensions.filter((dimension) => dimension.id !== id);
+    });
+    this.selectedAnnotation = null;
+  }
   selectionChanged() {
+    this.selectedAnnotation = null;
     this.selDirty = true;
     this.ui.selRev++;
   }
@@ -867,20 +923,21 @@ export class Editor {
     }
     // dimensions & labels
     for (const dimension of this.model.dimensions) {
-      this.drawDimension(overlay, dimension.start, dimension.end, dimension.offset);
+      this.drawDimension(overlay, dimension.start, dimension.end, dimension.offset, dimension.id === this.selectedAnnotation);
     }
     for (const label of this.model.labels) {
       const tip = label.point,
         anchor = label.point.clone().add(label.offset);
-      overlay.line(tip, anchor, '#000', 1);
+      const color = label.id === this.selectedAnnotation ? '#1d4ed8' : '#000';
+      overlay.line(tip, anchor, color, label.id === this.selectedAnnotation ? 2 : 1);
       const tipScreen = overlay.screen(tip);
       if (tipScreen) {
-        overlay.context.fillStyle = '#000';
+        overlay.context.fillStyle = color;
         overlay.context.beginPath();
         overlay.context.arc(tipScreen.x, tipScreen.y, 2, 0, 7);
         overlay.context.fill();
       }
-      overlay.text(anchor, this.labelText(label), { background: '#ffffffd9', align: 'left', offsetX: 4 });
+      overlay.text(anchor, this.labelText(label), { color, background: '#ffffffd9', align: 'left', offsetX: 4, font: ANNOTATION_FONT });
     }
     // section planes
     if (this.model.settings.sectionPlanes) {
@@ -891,19 +948,21 @@ export class Editor {
     this.tool.draw(overlay);
   }
 
-  drawDimension(overlay: Overlay, start: THREE.Vector3, end: THREE.Vector3, off: THREE.Vector3) {
+  drawDimension(overlay: Overlay, start: THREE.Vector3, end: THREE.Vector3, off: THREE.Vector3, selected = false) {
     const offsetStart = start.clone().add(off),
       offsetEnd = end.clone().add(off);
-    overlay.line(start, offsetStart, '#000', 1);
-    overlay.line(end, offsetEnd, '#000', 1);
-    overlay.line(offsetStart, offsetEnd, '#000', 1);
+    const color = selected ? '#1d4ed8' : '#000';
+    const width = selected ? 2 : 1;
+    overlay.line(start, offsetStart, color, width);
+    overlay.line(end, offsetEnd, color, width);
+    overlay.line(offsetStart, offsetEnd, color, width);
     const screenStart = overlay.screen(offsetStart),
       screenEnd = overlay.screen(offsetEnd);
     if (screenStart && screenEnd) {
       const context = overlay.context;
       const direction = screenEnd.clone().sub(screenStart).normalize().multiplyScalar(9);
       const normal = new THREE.Vector2(-direction.y, direction.x).multiplyScalar(0.35);
-      context.fillStyle = '#000';
+      context.fillStyle = color;
       for (const [tip, sign] of [
         [screenStart, 1],
         [screenEnd, -1],
@@ -916,7 +975,11 @@ export class Editor {
         context.fill();
       }
     }
-    overlay.text(offsetStart.clone().add(offsetEnd).multiplyScalar(0.5), this.fmt(start.distanceTo(end)), { background: '#ffffffe6' });
+    overlay.text(offsetStart.clone().add(offsetEnd).multiplyScalar(0.5), this.fmt(start.distanceTo(end)), {
+      color,
+      background: '#ffffffe6',
+      font: ANNOTATION_FONT,
+    });
   }
 
   drawSection(overlay: Overlay, planePoint: THREE.Vector3, planeNormal: THREE.Vector3, active: boolean) {
