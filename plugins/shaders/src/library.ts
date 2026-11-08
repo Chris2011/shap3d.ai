@@ -8,7 +8,7 @@ import type { PluginShader } from '../../../src/plugins/types';
  */
 
 /** value noise and fractal noise in 3D – prefixed, so nothing clashes with three.js' own GLSL */
-const NOISE = /* glsl */ `
+export const NOISE = /* glsl */ `
 float shHash(vec3 p) {
   p = fract(p * 0.3183099 + 0.1);
   p *= 17.0;
@@ -43,10 +43,23 @@ vec2 shPlanar(vec3 p, vec3 n) {
 }
 `;
 
-const shader = (id: string, params: PluginShader['params'], body: string, size?: number): PluginShader => ({
+/**
+ * Every shader may add relief and roughness: `float s3dHeight(vec3 p, vec3 n)` (in tiles – the light falls on it like
+ * on a bump map) and `float s3dRoughness(vec3 p, vec3 n)` (0 shiny … 1 matt). Both get a parameter of their own.
+ */
+const shader = (
+  id: string,
+  params: PluginShader['params'],
+  body: string,
+  { roughness, relief = true, size }: { roughness: number; relief?: boolean; size?: number },
+): PluginShader => ({
   id,
   label: `shaders.shader.${id}`,
-  params: params?.map((param) => ({ ...param, label: `shaders.param.${param.name}` })),
+  params: [
+    ...(params ?? []),
+    ...(relief ? [{ name: 'relief', label: '', type: 'number' as const, default: 1, min: 0, max: 3 }] : []),
+    { name: 'roughness', label: '', type: 'number' as const, default: roughness, min: 0, max: 1 },
+  ].map((param) => ({ ...param, label: `shaders.param.${param.name}` })),
   size,
   glsl: NOISE + body,
 });
@@ -62,18 +75,31 @@ export const SHADERS: PluginShader[] = [
       { name: 'axis', label: '', type: 'number', default: 0, min: 0, max: 2, step: 1 },
     ],
     /* glsl */ `
-vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
-  // q.z runs along the grain: x, y or z of the object
-  vec3 q = u_axis < 0.5 ? p.yzx : (u_axis < 1.5 ? p.zxy : p);
+// q.z runs along the grain: x, y or z of the object
+vec3 shWoodAxis(vec3 p) {
+  return u_axis < 0.5 ? p.yzx : (u_axis < 1.5 ? p.zxy : p);
+}
+float shWoodLate(vec3 q) {
   float d = length(q.xy + vec2(0.37, 0.61));
   d += u_distortion * 0.12 * shFbm(q * vec3(3.0, 3.0, 0.35));
   float ring = fract(d * u_rings);
-  float late = smoothstep(0.55, 0.95, ring) * (1.0 - smoothstep(0.95, 1.0, ring));
+  return smoothstep(0.55, 0.95, ring) * (1.0 - smoothstep(0.95, 1.0, ring));
+}
+vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+  vec3 q = shWoodAxis(p);
   float fibre = shNoise(q * vec3(90.0, 90.0, 1.5));
-  vec3 color = mix(base, u_ringColor, late);
+  vec3 color = mix(base, u_ringColor, shWoodLate(q));
   color *= 1.0 - u_grain * 0.35 * fibre;
   return color * (0.92 + 0.16 * shNoise(q * vec3(4.0, 4.0, 0.3)));
+}
+float s3dHeight(vec3 p, vec3 n) {
+  vec3 q = shWoodAxis(p);
+  return -u_relief * (0.0015 * shWoodLate(q) + 0.0008 * u_grain * shNoise(q * vec3(90.0, 90.0, 1.5)));
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return u_roughness + 0.15 * shWoodLate(shWoodAxis(p));
 }`,
+    { roughness: 0.55 },
   ),
   shader(
     'marble',
@@ -84,13 +110,23 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
       { name: 'turbulence', label: '', type: 'number', default: 1.4, min: 0, max: 3 },
     ],
     /* glsl */ `
-vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+float shMarbleVein(vec3 p) {
   float t = (p.x + 0.6 * p.y + 0.3 * p.z) * u_veins + u_turbulence * 4.0 * shFbm(p * 2.2);
   float vein = pow(1.0 - abs(sin(t)), u_sharpness);
   float fine = pow(1.0 - abs(sin(t * 2.7 + 3.0 * shFbm(p * 5.0))), u_sharpness * 2.0) * 0.5;
+  return clamp(vein + fine, 0.0, 1.0);
+}
+vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
   vec3 color = base * (0.94 + 0.06 * shFbm(p * 6.0));
-  return mix(color, u_veinColor, clamp(vein + fine, 0.0, 1.0));
+  return mix(color, u_veinColor, shMarbleVein(p));
+}
+float s3dHeight(vec3 p, vec3 n) {
+  return -u_relief * 0.0005 * shMarbleVein(p);
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return u_roughness + 0.25 * shMarbleVein(p);
 }`,
+    { roughness: 0.12 },
   ),
   shader(
     'granite',
@@ -108,7 +144,14 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
   float light = shNoise(q * 1.3 + 17.0);
   color = mix(color, u_darkColor, 0.85 * smoothstep(0.82 - 0.25 * u_amount, 0.9 - 0.25 * u_amount, dark));
   return mix(color, u_lightColor, 0.7 * smoothstep(0.86, 0.93, light));
+}
+float s3dHeight(vec3 p, vec3 n) {
+  return u_relief * 0.0012 * shNoise(p * 30.0 / u_grainSize);
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return u_roughness + 0.2 * shNoise(p * 39.0 / u_grainSize + 17.0);
 }`,
+    { roughness: 0.3 },
   ),
   shader(
     'terrazzo',
@@ -120,7 +163,8 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
       { name: 'chips', label: '', type: 'number', default: 10, min: 4, max: 40, step: 1 },
     ],
     /* glsl */ `
-vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+// x: how much of a chip is here, y: which of the three colours (0 … 1)
+vec2 shTerrazzo(vec3 p) {
   vec3 q = p * u_chips;
   vec3 cell = floor(q);
   vec3 f = fract(q);
@@ -140,12 +184,21 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
     }
   }
   float radius = 0.22 + 0.25 * fract(id * 7.0);
-  float chip = step(id, u_density) * (1.0 - smoothstep(radius - 0.04, radius, nearest));
-  float pick = id / max(u_density, 0.001);
-  vec3 chipColor = pick < 0.34 ? u_chip1 : (pick < 0.67 ? u_chip2 : u_chip3);
+  return vec2(step(id, u_density) * (1.0 - smoothstep(radius - 0.04, radius, nearest)), id / max(u_density, 0.001));
+}
+vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+  vec2 chip = shTerrazzo(p);
+  vec3 chipColor = chip.y < 0.34 ? u_chip1 : (chip.y < 0.67 ? u_chip2 : u_chip3);
   vec3 color = base * (0.95 + 0.1 * shNoise(p * 40.0));
-  return mix(color, chipColor, chip);
+  return mix(color, chipColor, chip.x);
+}
+float s3dHeight(vec3 p, vec3 n) {
+  return u_relief * 0.0006 * shTerrazzo(p).x;
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return u_roughness - 0.1 * shTerrazzo(p).x;
 }`,
+    { roughness: 0.3 },
   ),
   shader(
     'rust',
@@ -155,14 +208,22 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
       { name: 'scale', label: '', type: 'number', default: 3, min: 0.5, max: 10 },
     ],
     /* glsl */ `
-vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
-  float m = shFbm(p * u_scale);
+float shRust(vec3 p) {
   float threshold = mix(0.72, 0.28, u_amount);
-  float rust = smoothstep(threshold - 0.04, threshold + 0.06, m);
+  return smoothstep(threshold - 0.04, threshold + 0.06, shFbm(p * u_scale));
+}
+vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
   vec3 metal = base * (0.9 + 0.2 * shNoise(p * vec3(200.0, 6.0, 6.0)));
   vec3 crust = u_rustColor * (0.6 + 0.8 * shNoise(p * 35.0));
-  return mix(metal, crust, rust);
+  return mix(metal, crust, shRust(p));
+}
+float s3dHeight(vec3 p, vec3 n) {
+  return u_relief * 0.004 * shRust(p) * shFbm(p * u_scale * 4.0);
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return mix(u_roughness, 0.95, shRust(p));
 }`,
+    { roughness: 0.35 },
   ),
   shader(
     'bricks',
@@ -174,19 +235,29 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
       { name: 'variation', label: '', type: 'number', default: 0.35, min: 0, max: 1 },
     ],
     /* glsl */ `
-vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+// x: 1 in the mortar, y: the brick's own tint (-0.5 … 0.5)
+vec2 shBrick(vec3 p, vec3 n) {
   vec2 uv = shPlanar(p, n);
   float row = floor(uv.y / u_brickHeight);
   float x = uv.x / u_brickWidth + 0.5 * mod(row, 2.0);
-  float column = floor(x);
   vec2 local = vec2(fract(x) * u_brickWidth, fract(uv.y / u_brickHeight) * u_brickHeight);
   float halfJoint = u_joint * 0.5;
   float mortar = 1.0 - step(halfJoint, local.x) * step(local.x, u_brickWidth - halfJoint) * step(halfJoint, local.y) * step(local.y, u_brickHeight - halfJoint);
-  float tint = shHash(vec3(column, row, 3.0)) - 0.5;
-  vec3 brick = base * (1.0 + u_variation * tint) * (0.9 + 0.2 * shNoise(p * 80.0));
+  return vec2(mortar, shHash(vec3(floor(x), row, 3.0)) - 0.5);
+}
+vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+  vec2 brick = shBrick(p, n);
+  vec3 face = base * (1.0 + u_variation * brick.y) * (0.9 + 0.2 * shNoise(p * 80.0));
   vec3 joint = u_mortarColor * (0.9 + 0.2 * shNoise(p * 120.0));
-  return mix(brick, joint, mortar);
+  return mix(face, joint, brick.x);
+}
+float s3dHeight(vec3 p, vec3 n) {
+  return u_relief * (0.0015 * shNoise(p * 80.0) - 0.008 * shBrick(p, n).x);
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return u_roughness + 0.1 * shBrick(p, n).x;
 }`,
+    { roughness: 0.85 },
   ),
   shader(
     'checker',
@@ -199,7 +270,11 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
   // a hair inside the face, so faces lying exactly on a square's border don't flicker
   vec3 q = floor((p - n * 0.0005) * u_squares);
   return mod(q.x + q.y + q.z, 2.0) < 0.5 ? base : u_color2;
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return u_roughness;
 }`,
+    { roughness: 0.5, relief: false },
   ),
   shader(
     'concrete',
@@ -209,17 +284,29 @@ vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
       { name: 'panels', label: '', type: 'number', default: 0.5, min: 0, max: 1 },
     ],
     /* glsl */ `
-vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
-  vec3 color = base * (1.0 - u_stains * 0.5 * (shFbm(p * 1.2) - 0.45));
-  color *= 1.0 - u_pores * 0.5 * step(0.9, shNoise(p * 160.0));
-  // formwork panels 2.5 × 1.25 m with their joints and tie holes
+// formwork panels 2.5 × 1.25 m with their joints and tie holes: 1 there
+float shFormwork(vec3 p, vec3 n) {
   vec2 panel = shPlanar(p, n) / vec2(2.5, 1.25);
   vec2 edge = min(fract(panel), 1.0 - fract(panel)) * vec2(2.5, 1.25);
   float joint = 1.0 - step(0.008, min(edge.x, edge.y));
   vec2 hole = abs(fract(panel * vec2(4.0, 2.0)) - 0.5) * vec2(0.625, 0.625);
-  float tie = 1.0 - step(0.018, length(hole));
-  return color * (1.0 - u_panels * 0.35 * max(joint, tie));
+  return max(joint, 1.0 - step(0.018, length(hole)));
+}
+float shPore(vec3 p) {
+  return step(0.9, shNoise(p * 160.0));
+}
+vec3 s3dSurface(vec3 p, vec3 n, vec3 base) {
+  vec3 color = base * (1.0 - u_stains * 0.5 * (shFbm(p * 1.2) - 0.45));
+  color *= 1.0 - u_pores * 0.5 * shPore(p);
+  return color * (1.0 - u_panels * 0.35 * shFormwork(p, n));
+}
+float s3dHeight(vec3 p, vec3 n) {
+  return -u_relief * (0.004 * u_panels * shFormwork(p, n) + 0.0015 * u_pores * shPore(p) - 0.0005 * shFbm(p * 8.0));
+}
+float s3dRoughness(vec3 p, vec3 n) {
+  return u_roughness;
 }`,
+    { roughness: 0.9 },
   ),
 ];
 

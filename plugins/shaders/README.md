@@ -22,10 +22,13 @@ The plugin is a package of its own with its own `package.json` and is **not** pa
 - **Scripts**: `s3d.shaderMaterial('oak')` adds a ready-made material and returns its name; every shader also works with the app's own `s3d.material(name, colour, { shader: 'shaders.wood', params: { rings: 20 }, size: 0.5 })`.
 - Texts in English, German, French, Spanish and Arabic.
 
+- **Relief and gloss**: every shader also has relief (mortar joints, formwork, wood grain, rust crust …) and roughness (polished marble, matt concrete), each a slider in the Materials panel. Relief shows in every face style; with roughness the material is drawn lit and physically based.
+- **Mix your own material** (top of the panel): a base pattern and up to three layers on top, each with strength and size, and a live preview. _Create and paint_ puts it into the model. Every layer's colours and details are sliders in the Materials panel afterwards. The material's shader id names its layers (`shaders.mix-bricks-rust`), so a model shows it again wherever the plugin is installed.
+
 ## Good to know
 
 - The shaders are drawn in the 3D view, in scene previews and in views for LayOut.
-- **Export**: glTF and GLB know no shaders, so the app bakes each shader material into a picture (up to 2048 px, every face with its own patch, the pattern exactly as in the 3D view). OBJ and STL carry no pictures – there the material keeps its colour.
+- **Export**: relief and roughness stay in the app: glTF and GLB get the colour only. glTF and GLB know no shaders, so the app bakes each shader material into a picture (up to 2048 px, every face with its own patch, the pattern exactly as in the 3D view). OBJ and STL carry no pictures – there the material keeps its colour.
 - **Without the plugin** a material with a shader shows its colour. The shader and its parameters stay in the model and come back when the plugin is on again.
 - The pattern belongs to the object (its group or component), not to the world: copies of a component look the same, moving or rotating an object takes the pattern along.
 

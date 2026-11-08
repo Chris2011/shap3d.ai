@@ -59,7 +59,9 @@
         "squares": "Squares per tile",
         "stains": "Stains",
         "pores": "Pores",
-        "panels": "Formwork joints"
+        "panels": "Formwork joints",
+        "relief": "Relief",
+        "roughness": "Roughness (0 shiny, 1 matt)"
       },
       "preset": {
         "oak": "Oak",
@@ -80,6 +82,22 @@
         "unknown": "Unknown shader material “{id}”. Available: {allowed}",
         "description": "Puts a ready-made shader material into the model (if it is not there yet) and returns its name.",
         "returns": "Material name"
+      },
+      "mix": {
+        "title": "Mix your own material",
+        "hint": "A base pattern and up to three layers on top: each one is drawn over what lies below, with colour, relief and gloss. The details (colours, rings, joints …) are in the Materials panel afterwards.",
+        "base": "Base",
+        "layer": "Layer {number}",
+        "pattern": "Pattern",
+        "strength": "Strength",
+        "size": "Size",
+        "add": "+ Add a layer",
+        "remove": "Remove layer",
+        "color": "Colour",
+        "name": "Name",
+        "create": "Create and paint",
+        "created": "“{name}” is in the model and on the paint bucket.",
+        "preview": "Preview"
       }
     }
   }

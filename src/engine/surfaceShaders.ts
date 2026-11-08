@@ -12,6 +12,8 @@ import type { MaterialDef } from '../core/document';
  * - `n` the face normal in the same coordinates,
  * - `base` the material colour (linear) – returns the colour of the point (linear).
  * Every parameter is a uniform `u_<name>` (float, or vec3 for colours – linear as well).
+ * It may also define `float s3dHeight(vec3 p, vec3 n)` – relief in tiles, which tilts the light like a bump map – and
+ * `float s3dRoughness(vec3 p, vec3 n)` – 0 shiny … 1 matt, which makes the material physically based (lit).
  */
 export interface SurfaceShaderParam {
   name: string;
@@ -55,7 +57,38 @@ export const registerSurfaceShader = (shader: SurfaceShader) => {
   };
 };
 
-export const surfaceShader = (id: string | undefined) => (id ? SURFACE_SHADERS.find((shader) => shader.id === id) : undefined);
+/** shaders made when a material first names them: by id prefix – e.g. a plugin's shaders mixed from layers */
+const resolvers = new Map<string, (id: string) => SurfaceShader | undefined>();
+const resolved = new Map<string, SurfaceShader | null>();
+const forget = (prefix: string) => {
+  for (const id of [...resolved.keys()].filter((key) => key.startsWith(prefix))) {
+    resolved.delete(id);
+  }
+};
+
+export const registerShaderResolver = (prefix: string, resolve: (id: string) => SurfaceShader | undefined) => {
+  resolvers.set(prefix, resolve);
+  forget(prefix);
+  return () => {
+    resolvers.delete(prefix);
+    forget(prefix);
+  };
+};
+
+export const surfaceShader = (id: string | undefined): SurfaceShader | undefined => {
+  if (!id) {
+    return undefined;
+  }
+  const registered = SURFACE_SHADERS.find((shader) => shader.id === id);
+  const prefix = registered ? undefined : [...resolvers.keys()].find((candidate) => id.startsWith(candidate));
+  if (!prefix) {
+    return registered;
+  }
+  if (!resolved.has(id)) {
+    resolved.set(id, resolvers.get(prefix)!(id) ?? null);
+  }
+  return resolved.get(id) ?? undefined;
+};
 
 /** the material's shader – only when its plugin is on */
 export const materialShader = (material: Pick<MaterialDef, 'shader'> | undefined) => surfaceShader(material?.shader);
@@ -67,20 +100,42 @@ export const shaderParam = (material: Pick<MaterialDef, 'shaderParams'>, param: 
 export const shaderSize = (material: Pick<MaterialDef, 'textureSize'>, shader: SurfaceShader) => material.textureSize ?? shader.size ?? 1;
 
 const VALID_NAME = /^[A-Za-z][A-Za-z0-9_]*$/;
+const HAS_HEIGHT = /\bfloat\s+s3dHeight\s*\(/;
+const HAS_ROUGHNESS = /\bfloat\s+s3dRoughness\s*\(/;
+
+/** does the shader bring its own roughness – then its material is drawn lit and physically based */
+export const shaderHasRoughness = (shader: SurfaceShader) => HAS_ROUGHNESS.test(shader.glsl);
+
+/**
+ * the normal tilted by a height field (bump mapping from screen-space derivatives, as three.js' perturbNormalArb):
+ * position, normal and height in one space – metres in the view, tiles in a swatch
+ */
+const BUMP = `vec3 s3dBumped(vec3 position, vec3 normal, float height) {
+  vec3 dx = dFdx(position);
+  vec3 dy = dFdy(position);
+  vec3 r1 = cross(dy, normal);
+  vec3 r2 = cross(normal, dx);
+  float det = dot(dx, r1);
+  vec3 gradient = sign(det) * (dFdx(height) * r1 + dFdy(height) * r2);
+  return normalize(abs(det) * normal - gradient);
+}`;
 
 /** uniform declarations and the shader's own GLSL – goes before main() of a fragment shader */
 const fragmentHeader = (shader: SurfaceShader) =>
   [
     'varying vec3 vS3dPos;',
     'varying vec3 vS3dNormal;',
+    'varying vec3 vS3dWorld;',
+    'uniform float s3dSize;',
     ...(shader.params ?? [])
       .filter((param) => VALID_NAME.test(param.name))
       .map((param) => `uniform ${param.type === 'color' ? 'vec3' : 'float'} u_${param.name};`),
     shader.glsl,
+    BUMP,
   ].join('\n');
 
-const VERTEX_HEADER = 'uniform float s3dSize;\nvarying vec3 vS3dPos;\nvarying vec3 vS3dNormal;';
-const VERTEX_MAIN = 'vS3dPos = position / s3dSize; vS3dNormal = normal;';
+const VERTEX_HEADER = 'uniform float s3dSize;\nvarying vec3 vS3dPos;\nvarying vec3 vS3dNormal;\nvarying vec3 vS3dWorld;';
+const VERTEX_MAIN = 'vS3dPos = position / s3dSize; vS3dNormal = normal; vS3dWorld = (modelMatrix * vec4(position, 1.0)).xyz;';
 const SURFACE_CALL = 's3dSurface(vS3dPos, normalize(vS3dNormal), ';
 
 const uniformsOf = (shader: SurfaceShader, material: ShadedMaterial) => {
@@ -102,6 +157,10 @@ export interface SurfaceSetup {
   fragmentHeader: string;
   /** the call that turns `base` into the surface colour, e.g. surfaceCall('vColor.rgb') */
   surfaceCall: (base: string) => string;
+  /** the normal tilted by the shader's relief (position and normal in one space, in metres) – undefined without relief */
+  reliefCall?: (position: string, normal: string) => string;
+  /** the shader's roughness at the point – undefined without */
+  roughnessCall?: string;
 }
 
 export const surfaceSetup = (shader: SurfaceShader, material: ShadedMaterial): SurfaceSetup => ({
@@ -111,6 +170,10 @@ export const surfaceSetup = (shader: SurfaceShader, material: ShadedMaterial): S
   vertexMain: VERTEX_MAIN,
   fragmentHeader: fragmentHeader(shader),
   surfaceCall: (base) => `${SURFACE_CALL}${base})`,
+  reliefCall: HAS_HEIGHT.test(shader.glsl)
+    ? (position, normal) => `s3dBumped(${position}, ${normal}, s3dHeight(vS3dPos, normalize(vS3dNormal)) * s3dSize)`
+    : undefined,
+  roughnessCall: HAS_ROUGHNESS.test(shader.glsl) ? 'clamp(s3dRoughness(vS3dPos, normalize(vS3dNormal)), 0.04, 1.0)' : undefined,
 });
 
 /**
@@ -126,6 +189,19 @@ export const applySurface = (material: THREE.Material, setup: SurfaceSetup) => {
     program.fragmentShader = program.fragmentShader
       .replace('#include <common>', `#include <common>\n${setup.fragmentHeader}`)
       .replace('#include <color_fragment>', `#include <color_fragment>\ndiffuseColor.rgb = ${setup.surfaceCall('diffuseColor.rgb')};`);
+    // lit materials work in view space; a basic (unlit) material has neither chunk, and nothing changes
+    if (setup.reliefCall) {
+      program.fragmentShader = program.fragmentShader.replace(
+        '#include <normal_fragment_maps>',
+        `#include <normal_fragment_maps>\nnormal = ${setup.reliefCall('-vViewPosition', 'normal')};`,
+      );
+    }
+    if (setup.roughnessCall) {
+      program.fragmentShader = program.fragmentShader.replace(
+        '#include <roughnessmap_fragment>',
+        `#include <roughnessmap_fragment>\nroughnessFactor = ${setup.roughnessCall};`,
+      );
+    }
   };
   material.customProgramCacheKey = () => `s3d-surface:${setup.key}`;
 };
@@ -149,10 +225,22 @@ const renderSwatch = (shader: SurfaceShader, material: ShadedMaterial) => {
     uniforms: { ...setup.uniforms, base: { value: base } },
     vertexShader: `varying vec3 vS3dPos; varying vec3 vS3dNormal;
 void main(){ vS3dPos = vec3(position.x * 0.75 + 0.75, 0.37, position.y * 0.75 + 0.75); vS3dNormal = vec3(0.0, -1.0, 0.0); gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    // relief shows as light from the upper left – in tiles, like the pattern
     fragmentShader: `uniform vec3 base;
 ${setup.fragmentHeader}
 vec3 toSRGB(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
-void main(){ gl_FragColor = vec4(toSRGB(clamp(${setup.surfaceCall('base')}, 0.0, 1.0)), 1.0); }`,
+void main(){
+  vec3 color = ${setup.surfaceCall('base')};
+  ${
+    setup.reliefCall
+      ? `vec3 facing = vec3(0.0, -1.0, 0.0);
+  vec3 tilted = s3dBumped(vS3dPos, facing, s3dHeight(vS3dPos, facing));
+  vec3 light = normalize(vec3(-0.5, -1.0, 0.6));
+  color *= 1.0 + 0.8 * (dot(tilted, light) - dot(facing, light));`
+      : ''
+  }
+  gl_FragColor = vec4(toSRGB(clamp(color, 0.0, 1.0)), 1.0);
+}`,
   });
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), swatchMaterial);
   const scene = new THREE.Scene();

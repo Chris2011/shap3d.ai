@@ -87,6 +87,9 @@
           <option v-for="entry in SURFACE_SHADERS" :key="entry.id" :value="SHADER_PREFIX + entry.id">
             {{ t('materials.shaderOption', { name: localize(entry.label) }) }}
           </option>
+          <option v-if="shader && !SURFACE_SHADERS.includes(shader)" :value="SHADER_PREFIX + shader.id">
+            {{ t('materials.shaderOption', { name: localize(shader.label) }) }}
+          </option>
           <option v-if="cur.shader && !shader" :value="SHADER_PREFIX + cur.shader">
             {{ t('materials.shaderMissing', { shader: cur.shader }) }}
           </option>

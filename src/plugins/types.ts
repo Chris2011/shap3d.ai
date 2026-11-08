@@ -181,8 +181,10 @@ export interface PluginShaderParam {
 /**
  * A surface shader for materials. `glsl` defines `vec3 s3dSurface(vec3 p, vec3 n, vec3 base)`: `p` is the point
  * in the object's own coordinates divided by the material's size (1 = one tile), `n` the face normal, `base` the
- * material colour – it returns the colour there. Colours are linear. Light, shadows, clipping and colour space stay
- * with the app; while the plugin is off, materials with the shader show their colour.
+ * material colour – it returns the colour there. Colours are linear. It may also define `float s3dHeight(vec3 p, vec3 n)`
+ * (relief in tiles: the light falls on it like on a bump map) and `float s3dRoughness(vec3 p, vec3 n)` (0 shiny … 1 matt:
+ * the material is then drawn lit and physically based). Light, shadows, clipping and colour space stay with the app;
+ * while the plugin is off, materials with the shader show their colour.
  */
 export interface PluginShader {
   /** short id – the full id is "<plugin>.<id>" (what materials store) */
@@ -289,6 +291,11 @@ export interface PluginContext {
     ensure: (name: string, material: PluginMaterial) => string;
     /** a shader that materials can use – listed with the textures in the Materials panel; returns its full id */
     registerShader: (shader: PluginShader) => string;
+    /**
+     * shaders made on demand: a material that names "<plugin>.<prefix>…" gets its shader from `resolve` (with the short id)
+     * the first time it is drawn – for shaders made from data, e.g. mixed from layers; undefined = no such shader
+     */
+    resolveShaders: (prefix: string, resolve: (id: string) => PluginShader | undefined) => Disposer;
     /** a small picture of a material as the Materials panel shows it (CSS background value) */
     preview: (material: PluginMaterial) => string;
   };

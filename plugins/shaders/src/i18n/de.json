@@ -59,7 +59,9 @@
         "squares": "Felder je Kachel",
         "stains": "Flecken",
         "pores": "Poren",
-        "panels": "Schalungsfugen"
+        "panels": "Schalungsfugen",
+        "relief": "Relief",
+        "roughness": "Rauheit (0 glänzend, 1 matt)"
       },
       "preset": {
         "oak": "Eiche",
@@ -80,6 +82,22 @@
         "unknown": "Unbekanntes Shader-Material „{id}“. Verfügbar: {allowed}",
         "description": "Legt ein fertiges Shader-Material im Modell an (falls es noch fehlt) und gibt seinen Namen zurück.",
         "returns": "Materialname"
+      },
+      "mix": {
+        "title": "Eigenes Material mischen",
+        "hint": "Ein Grundmuster und bis zu drei Ebenen darüber: Jede wird über das darunter gelegt, mit Farbe, Relief und Glanz. Die Feinheiten (Farben, Ringe, Fugen …) stehen danach im Materialien-Panel.",
+        "base": "Grund",
+        "layer": "Ebene {number}",
+        "pattern": "Muster",
+        "strength": "Stärke",
+        "size": "Größe",
+        "add": "+ Ebene hinzufügen",
+        "remove": "Ebene entfernen",
+        "color": "Farbe",
+        "name": "Name",
+        "create": "Anlegen und malen",
+        "created": "„{name}“ ist im Modell und im Farbeimer.",
+        "preview": "Vorschau"
       }
     }
   }

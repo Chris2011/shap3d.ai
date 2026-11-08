@@ -6,14 +6,28 @@
 // - a panel with ready-made materials (oak, walnut, Carrara …) – a click picks it for the paint bucket
 // Without the plugin, materials with a shader show their colour – models stay usable.
 // Scripts: s3d.shaderMaterial('oak') or s3d.material(name, colour, { shader: 'shaders.wood', params }).
-import type { S3dPlugin } from '../../../src/plugins/types';
+import type { PluginContext, S3dPlugin } from '../../../src/plugins/types';
 import S3dShaderLibrary from './S3dShaderLibrary.vue';
 import { PRESETS, SHADERS } from './library';
 import { ensurePreset, findPreset } from './presets';
+import { composeLayers, layersOf, MIX_PREFIX } from './layers';
 import { MESSAGES, t, useRuntime } from './runtime';
 import { injectStyles } from './styles';
 
 const PANEL = 'library';
+
+const resolveMixes = (context: PluginContext) =>
+  context.materials.resolveShaders(MIX_PREFIX, (id) => {
+    const layers = layersOf(id);
+    return (
+      layers &&
+      composeLayers(
+        layers,
+        (layer, label) => `${layer === 1 ? t('shaders.mix.base') : t('shaders.mix.layer', { number: layer })} · ${t(label)}`,
+        (ids) => ids.map((shader) => t(`shaders.shader.${shader}`)).join(' + '),
+      )
+    );
+  });
 
 const plugin: S3dPlugin = {
   id: 'shaders',
@@ -30,6 +44,12 @@ const plugin: S3dPlugin = {
     for (const shader of SHADERS) {
       context.materials.registerShader(shader);
     }
+    // mixed materials: their shader comes from their id, made again (with the labels' new language) when the language changes
+    let mixes = resolveMixes(context);
+    context.i18n.onChange(() => {
+      mixes();
+      mixes = resolveMixes(context);
+    });
 
     context.icons.register(
       'shaders',

@@ -29,7 +29,7 @@ import {
   workspaceState,
 } from './uiExtensions';
 import { renderViewImage, renderViewLines } from '../engine/viewRender';
-import { registerSurfaceShader } from '../engine/surfaceShaders';
+import { registerShaderResolver, registerSurfaceShader } from '../engine/surfaceShaders';
 import { swatchStyle } from '../utils/materialSwatch';
 import { registerCodeFormat } from '../scripting/codeExport';
 import { registerCompletionValues, registerLanguageCompletions } from '../scripting/completion';
@@ -369,6 +369,17 @@ export const createPluginContext = (
           editor.invalidate();
         });
         return id;
+      },
+      resolveShaders: (prefix, resolve) => {
+        const unregister = registerShaderResolver(qualified(prefix), (id) => {
+          const shader = resolve(id.slice(plugin.id.length + 1));
+          return shader && { ...shader, id };
+        });
+        editor.invalidate();
+        return track(() => {
+          unregister();
+          editor.invalidate();
+        });
       },
       preview: (material) =>
         swatchStyle({

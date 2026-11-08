@@ -21,7 +21,7 @@ import {
 } from '../core/textures';
 import type { MaterialDef } from '../core/document';
 import { loadEnvironment, type LoadedEnvironment } from './environment';
-import { applySurface, materialShader, shaderSize, surfaceSetup, type SurfaceSetup } from './surfaceShaders';
+import { applySurface, materialShader, shaderHasRoughness, shaderSize, surfaceSetup, type SurfaceSetup } from './surfaceShaders';
 import { planeBasis } from '../core/geometry';
 import { theme, onThemeChange } from '../theme';
 import { meshView } from './meshView';
@@ -156,6 +156,7 @@ vec3 toSRGB(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.0
 void main(){
   #include <clipping_planes_fragment>
   vec3 n = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0);
+  ${surface?.reliefCall ? `n = ${surface.reliefCall('vS3dWorld', 'n')};` : ''}
   float f = clamp(dark + light * max(dot(n, lightDir), 0.0), 0.0, 1.0);
   #ifdef USE_SU_MAP
   vec3 base = texture2D(map, vSuUv).rgb;
@@ -881,6 +882,10 @@ export class Viewer {
         if (!shaderBucket) {
           shaderBucket = bucket();
           shaderBucket.surface = surfaceSetup(shader, fitted(mdef));
+          // its own roughness needs a physically based material; the material's pictures need texture coordinates, which shaders have none of
+          if (shaderHasRoughness(shader)) {
+            shaderBucket.pbr = { ...mdef, maps: undefined };
+          }
           textured.set(key, shaderBucket);
         }
         target = shaderBucket;

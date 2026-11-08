@@ -12,7 +12,8 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt src",
     "format:check": "oxfmt --check src",
-    "i18n": "node ../../scripts/i18n.mjs check --package ."
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "test": "node --test test/*.test.ts"
   },
   "lint-staged": {
     "src/**/*.{js,mjs,ts,vue}": [

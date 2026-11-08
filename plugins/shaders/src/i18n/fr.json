@@ -59,7 +59,9 @@
         "squares": "Cases par carreau",
         "stains": "Taches",
         "pores": "Pores",
-        "panels": "Joints de coffrage"
+        "panels": "Joints de coffrage",
+        "relief": "Relief",
+        "roughness": "Rugosité (0 brillant, 1 mat)"
       },
       "preset": {
         "oak": "Chêne",
@@ -80,6 +82,22 @@
         "unknown": "Matériau shader inconnu « {id} ». Disponibles : {allowed}",
         "description": "Ajoute un matériau shader prêt à l’emploi au modèle (s’il n’y est pas encore) et renvoie son nom.",
         "returns": "Nom du matériau"
+      },
+      "mix": {
+        "title": "Mélanger son propre matériau",
+        "hint": "Un motif de base et jusqu’à trois couches par-dessus : chacune recouvre ce qui est dessous, avec couleur, relief et brillance. Les détails (couleurs, cernes, joints …) se règlent ensuite dans le panneau Matériaux.",
+        "base": "Base",
+        "layer": "Couche {number}",
+        "pattern": "Motif",
+        "strength": "Intensité",
+        "size": "Taille",
+        "add": "+ Ajouter une couche",
+        "remove": "Retirer la couche",
+        "color": "Couleur",
+        "name": "Nom",
+        "create": "Créer et peindre",
+        "created": "« {name} » est dans le modèle et dans le pot de peinture.",
+        "preview": "Aperçu"
       }
     }
   }

@@ -130,6 +130,7 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/shaders/dist`.
 - The patterns are **solid** – computed from the point in the object's own coordinates – so they run round every edge without seams and move with the object.
 - The shaders appear with the textures in the **Materials panel** (_Texture › Shaders (plugins)_); their parameters (colours, ring count, vein sharpness, brick size …) are sliders and colour pickers there.
 - A panel with **ready-made materials** (oak, walnut, Carrara, Nero Marquina, terrazzo, rusty steel, copper patina, clinker, exposed concrete …), and `s3d.shaderMaterial('oak')` or `s3d.material(name, colour, { shader: 'shaders.wood', params })` in scripts.
+- **Relief and gloss** from every pattern (mortar joints, formwork, polished marble …), and **own materials mixed from layers**: a base pattern and up to three more on top, each with strength and size, with a live preview.
 
 It uses `context.materials.registerShader` – the way to add shaders of your own is in [its README](../../plugins/shaders/README.md). Without the plugin, materials with a shader show their colour; export formats keep the colour too.
 

@@ -59,7 +59,9 @@
         "squares": "Casillas por baldosa",
         "stains": "Manchas",
         "pores": "Poros",
-        "panels": "Juntas de encofrado"
+        "panels": "Juntas de encofrado",
+        "relief": "Relieve",
+        "roughness": "Rugosidad (0 brillante, 1 mate)"
       },
       "preset": {
         "oak": "Roble",
@@ -80,6 +82,22 @@
         "unknown": "Material shader desconocido «{id}». Disponibles: {allowed}",
         "description": "Añade al modelo un material shader listo para usar (si aún no está) y devuelve su nombre.",
         "returns": "Nombre del material"
+      },
+      "mix": {
+        "title": "Mezclar un material propio",
+        "hint": "Un patrón base y hasta tres capas encima: cada una se pinta sobre lo de abajo, con color, relieve y brillo. Los detalles (colores, anillos, juntas …) se ajustan luego en el panel Materiales.",
+        "base": "Base",
+        "layer": "Capa {number}",
+        "pattern": "Patrón",
+        "strength": "Intensidad",
+        "size": "Tamaño",
+        "add": "+ Añadir una capa",
+        "remove": "Quitar capa",
+        "color": "Color",
+        "name": "Nombre",
+        "create": "Crear y pintar",
+        "created": "«{name}» está en el modelo y en el bote de pintura.",
+        "preview": "Vista previa"
       }
     }
   }

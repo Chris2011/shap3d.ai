@@ -14,6 +14,14 @@ const CSS = `
 .s3d-sh-preview { display: block; aspect-ratio: 1; border-radius: 3px; background-size: cover; }
 .s3d-sh-name { font-size: 0.6875rem; line-height: 1.2; text-align: center; }
 .s3d-sh-hint { margin: 0; font-size: 0.75rem; color: var(--s3d-text-2); }
+.s3d-sh-mixer { display: flex; gap: 0.5rem; align-items: flex-start; }
+.s3d-sh-mix-preview { flex: none; width: 5.5rem; aspect-ratio: 1; border-radius: 4px; border: 1px solid var(--s3d-line); background-size: cover; }
+.s3d-sh-layers { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.375rem; }
+.s3d-sh-layer { display: flex; flex-direction: column; gap: 0.25rem; padding-bottom: 0.375rem; border-bottom: 1px solid var(--s3d-line); }
+.s3d-sh-row { display: flex; gap: 0.375rem; align-items: center; }
+.s3d-sh-label { flex: none; width: 4.5rem; font-size: 0.75rem; color: var(--s3d-text-2); }
+.s3d-sh-grow { flex: 1; min-width: 0; }
+.s3d-sh-color { flex: none; width: 2.25rem; height: 1.75rem; padding: 1px; border: 1px solid var(--s3d-line); border-radius: 3px; background: transparent; }
 .s3d-sh-code { display: block; padding: 0.25rem 0.375rem; border-radius: 3px; background: var(--s3d-hover); font-size: 0.6875rem; overflow-wrap: anywhere; }
 `;
 

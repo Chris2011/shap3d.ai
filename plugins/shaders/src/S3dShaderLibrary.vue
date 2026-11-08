@@ -1,6 +1,7 @@
 <template>
   <div class="s3d-sh">
     <p class="s3d-sh-hint">{{ t('shaders.panel.hint') }}</p>
+    <S3dLayerMixer />
     <section v-for="group in groups" :key="group.shader" class="s3d-sh-section">
       <div class="s3d-sh-heading">{{ t(`shaders.shader.${group.shader}`) }}</div>
       <div class="s3d-sh-items">
@@ -26,6 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import S3dLayerMixer from './S3dLayerMixer.vue';
 import { PRESETS, SHADERS, type Preset } from './library';
 import { paintWith, presetName, presetPreview } from './presets';
 import { pluginContext, t } from './runtime';
