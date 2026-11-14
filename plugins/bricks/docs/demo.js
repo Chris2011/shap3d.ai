@@ -1,61 +1,19 @@
-// Demo for the brick designer screenshot (npm run screenshots): a small house on a baseplate, built with s3d.brick.
+// Demo for the brick designer screenshot (npm run screenshots) – the same as the example "Brick house" in the script editor.
 s3d.editor.model.name = 'Haus';
-const lay = (part, x, y, color, rotation = 0) => s3d.brick(part, { at: [x, y], color, rotation });
+s3d.brick('baseplate-16x16', { at: [0, 0], color: 'green' });
+s3d.brick('tile-2x4', { at: [-1, -6], color: 'tan' });
+s3d.brick('tile-2x4', { at: [1, -6], color: 'tan' });
 
-lay('baseplate-16x16', 0, 0, 'green');
-
-// a path to the door
-lay('tile-2x4', -1, -6, 'tan');
-lay('tile-2x4', 1, -6, 'tan');
-
-// the walls, six bricks high: a door in front, a window on each side, joints that change from row to row
-lay('door-4x1x6', 0, -3.5, 'blue');
-for (const x of [-5.5, 5.5]) {
-  lay('brick-1x6', x, 0, 'white');
-  lay('window-2x1x2', x, 0, 'lightBlue', 90);
-}
-for (let row = 0; row < 6; row++) {
-  for (const x of [-4, 4]) {
-    lay('brick-1x4', x, -3.5, 'white', 90);
-  }
-  if (row % 2) {
-    for (const x of [-3, 3]) {
-      lay('brick-1x6', x, 3.5, 'white', 90);
-    }
-  } else {
-    for (const x of [-4, 0, 4]) {
-      lay('brick-1x4', x, 3.5, 'white', 90);
-    }
-  }
-  for (const x of [-5.5, 5.5]) {
-    if (row === 0) {
-      continue;
-    }
-    if (row < 3) {
-      for (const y of [-2, 2]) {
-        lay('brick-1x2', x, y, 'white');
-      }
-    } else {
-      lay('brick-1x6', x, 0, 'white');
-    }
-  }
+// four walls, six bricks high: front and back along x, the sides between them along y
+s3d.brickWall({ from: [-6, -4], length: 12, rows: 6, color: 'white', openings: [{ part: 'door-4x1x6', at: 4, color: 'blue' }] });
+s3d.brickWall({ from: [-6, 3], length: 12, rows: 6, color: 'white', openings: [{ part: 'window-2x1x2', at: 5, from: 2, color: 'lightBlue' }] });
+for (const x of [-6, 5]) {
+  s3d.brickWall({ from: [x, -3], length: 6, rows: 6, along: 'y', color: 'white', openings: [{ part: 'window-2x1x2', at: 2, from: 1, color: 'lightBlue' }] });
 }
 
-// the roof: three rows of slopes on each side
-for (const [y, rotation] of [
-  [-3, 0],
-  [3, 180],
-  [-2, 0],
-  [2, 180],
-  [-1, 0],
-  [1, 180],
-]) {
+// the roof: three rows of slopes on each side, each resting on the one before
+for (const [y, rotation] of [[-3, 0], [3, 180], [-2, 0], [2, 180], [-1, 0], [1, 180]]) {
   for (const x of [-4, 0, 4]) {
-    lay('slope45-4x2', x, y, 'darkRed', rotation);
+    s3d.brick('slope45-4x2', { at: [x, y], rotation, color: 'darkRed' });
   }
 }
-
-// a tree
-lay('roundBrick-1x1', -6.5, -6.5, 'brown');
-lay('roundBrick-2x2', -7, -7, 'green');
-lay('cone-1x1', -7.5, -7.5, 'lime');

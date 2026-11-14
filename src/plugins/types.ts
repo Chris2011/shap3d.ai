@@ -265,6 +265,8 @@ export interface PluginContext {
      * `values` is asked each time the list opens, so it may change (e.g. fonts the user adds).
      */
     completeValues: (option: string, values: () => (string | ScriptCompletion)[]) => Disposer;
+    /** code completion for a string argument of an s3d function (`index` counts from 0): `s3d.brick('…')` */
+    completeArgument: (method: string, index: number, values: () => (string | ScriptCompletion)[]) => Disposer;
     /**
      * code completion for a script language (your own from registerLanguage, or another plugin's): `provider`
      * returns candidates for the cursor, the editor filters and ranks them by the word before the cursor

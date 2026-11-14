@@ -15,7 +15,8 @@
         "open": "Klemmbaustein-Designer"
       },
       "script": {
-        "brick": "Setzt einen Stein des Designers: Teile-ID, Position in Noppen, Drehung in Vierteldrehungen, Höhe in Platten (ohne sie liegt der Stein auf dem, was darunter ist) und eine Farbe."
+        "brick": "Setzt einen Stein, ein fertiges Modell (\"model:own-house\", \"model:6080\") oder ein Bibliotheksteil (\"ldraw:3001\"): Position in Noppen, Drehung in Vierteldrehungen, Höhe in Platten (ohne sie liegt es auf dem, was darunter ist) und eine Farbe.",
+        "wall": "Mauert eine Wand mit versetzten Fugen: Startecke und Länge in Noppen, Reihen, Richtung (x oder y), Farbe und eingesetzte Tür- oder Fensterrahmen."
       },
       "steps": {
         "color": "Farbe wählen.",
@@ -165,6 +166,20 @@
           "vehicles": "Fahrzeuge",
           "landmarks": "Bauwerke",
           "adventure": "Abenteuer"
+        }
+      },
+      "examples": {
+        "house": {
+          "name": "Steinhaus",
+          "description": "Wände mit Tür und Fenstern, ein Dach aus Schrägen, auf einer Grundplatte."
+        },
+        "models": {
+          "name": "Fertige Modelle",
+          "description": "Die eigenen Modelle des Plugins nebeneinander."
+        },
+        "online": {
+          "name": "Teile und Bausätze online",
+          "description": "Ein Bausatz und Teile aus der LDraw-Bibliothek, vor dem Lauf geladen."
         }
       }
     }

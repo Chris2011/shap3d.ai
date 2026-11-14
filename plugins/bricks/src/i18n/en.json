@@ -15,7 +15,8 @@
         "open": "Brick designer"
       },
       "script": {
-        "brick": "Places a brick of the designer: part id, position in studs, rotation in quarter turns, height in plates (without it the brick rests on what is below) and a colour."
+        "brick": "Places a brick, a finished model (\"model:own-house\", \"model:6080\") or a library part (\"ldraw:3001\"): position in studs, rotation in quarter turns, height in plates (without it, it rests on what is below) and a colour.",
+        "wall": "Lays a wall of bricks with shifted joints: start corner and length in studs, rows, direction (x or y), colour, and door or window frames set into it."
       },
       "steps": {
         "color": "Choose a colour.",
@@ -165,6 +166,20 @@
           "vehicles": "Vehicles",
           "landmarks": "Landmarks",
           "adventure": "Adventure"
+        }
+      },
+      "examples": {
+        "house": {
+          "name": "Brick house",
+          "description": "Walls with door and windows, a roof of slopes, on a baseplate."
+        },
+        "models": {
+          "name": "Finished models",
+          "description": "The plugin's own models side by side."
+        },
+        "online": {
+          "name": "Parts and sets online",
+          "description": "A set and parts from the LDraw library, loaded before the run."
         }
       }
     }

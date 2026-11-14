@@ -4,12 +4,14 @@
 //   needs the user's own key
 // - placing with snapping to the studs, stacking on what is below, turning, moving, deleting
 // - a parts list (CSV), with the credits the library's licence asks for
+// - scripts: s3d.brick and s3d.brickWall with completion for parts and colours, and examples in the script editor
 // Bricks are components of the model, their colour is the instance's material – the app's tools work on them.
 import type { S3dPlugin } from '../../../src/plugins/types';
-import { addBrick, frameBricks, type PlaceOptions } from './bricks';
+import { frameBricks } from './bricks';
 import { brickCsv } from './list';
 import { MESSAGES, t, useRuntime } from './runtime';
 import S3dBricks from './S3dBricks.vue';
+import { useScripting } from './script';
 import { useBrickState } from './state';
 import { injectStyles } from './styles';
 import { createBuildTool, TOOL_ID } from './tool';
@@ -68,12 +70,7 @@ const plugin: S3dPlugin = {
       run: () => context.modes.open(MODE),
     });
 
-    context.script.extend('brick', (_api, part: string, options: PlaceOptions = {}) => addBrick(part, options).id, {
-      category: 'Plugins',
-      signature: 's3d.brick(part, { at: [x, y], rotation, level, color })',
-      description: 'bricks.script.brick',
-      example: "s3d.brick('brick-2x4', { at: [0, 0], rotation: 90, color: 'red' });",
-    });
+    useScripting(context);
 
     context.files.registerExporter({
       id: 'list',

@@ -15,7 +15,8 @@
         "open": "Diseñador de bloques"
       },
       "script": {
-        "brick": "Coloca un bloque del diseñador: id de pieza, posición en tetones, giro en cuartos de vuelta, altura en placas (sin ella el bloque descansa sobre lo que hay debajo) y un color."
+        "brick": "Coloca un bloque, un modelo terminado (\"model:own-house\", \"model:6080\") o una pieza de la biblioteca (\"ldraw:3001\"): posición en tetones, giro en cuartos de vuelta, altura en placas (sin ella descansa sobre lo que hay debajo) y un color.",
+        "wall": "Levanta un muro con juntas desplazadas: esquina inicial y longitud en tetones, filas, dirección (x o y), color y marcos de puerta o ventana encajados."
       },
       "steps": {
         "color": "Elige un color.",
@@ -165,6 +166,20 @@
           "vehicles": "Vehículos",
           "landmarks": "Monumentos",
           "adventure": "Aventura"
+        }
+      },
+      "examples": {
+        "house": {
+          "name": "Casa de bloques",
+          "description": "Paredes con puerta y ventanas, un tejado de pendientes, sobre una placa base."
+        },
+        "models": {
+          "name": "Modelos terminados",
+          "description": "Los modelos propios del plugin uno junto a otro."
+        },
+        "online": {
+          "name": "Piezas y sets en línea",
+          "description": "Un set y piezas de la biblioteca LDraw, cargados antes de ejecutar."
         }
       }
     }

@@ -65,9 +65,12 @@ A model follows the pointer and is placed by a click like a brick. It moves, tur
 
 ```js
 s3d.brick('brick-2x4', { at: [0, 0], rotation: 90, color: 'red' });
+s3d.brickWall({ from: [-6, -4], length: 12, rows: 6, color: 'white', openings: [{ part: 'door-4x1x6', at: 4, color: 'blue' }] });
 ```
 
-`at` counts in studs from the origin and snaps to the grid. Without `level` (in plates above the ground) the brick rests on what is below. A part from the library is `'ldraw:3001'` once it is loaded in the panel.
+- `s3d.brick(part, { at, rotation, level, color })` places a brick, a finished model or a library part and returns its id. `at` counts in studs from the origin and snaps to the grid; without `level` (in plates above the ground) it rests on what is below. Parts: the catalog's ids (`'brick-2x4'`, `'slope45-4x2'` …), the own models (`'model:own-house'` …), the sets of the collection (`'model:6080'` …) and any library part (`'ldraw:3001'`). Parts and sets from the library are loaded before the script runs.
+- `s3d.brickWall({ from, length, rows, along, color, openings })` lays a wall of 1 × 4 bricks with shifted joints (1 × 2 and 1 × 1 at the ends), `along` `'x'` or `'y'`, from the corner `from` in studs. Each opening is a door or window frame from the catalog, `at` studs from the wall's start and `from` rows up; the wall leaves its place free and sets it. It returns the ids of all its bricks.
+- The script editor completes the part (`s3d.brick('…')`) and the colour (`color: '…'`), and lists the examples _Brick house_, _Finished models_ and _Parts and sets online_ under the plugin's name.
 
 ## Checks
 

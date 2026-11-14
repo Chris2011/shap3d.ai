@@ -12,5 +12,5 @@
 - Searching all parts by name through Rebrickable with the user's own key, marked in the panel as not tested.
 - Finished models: six of the plugin's own (house, car, tree, lighthouse, bridge, rocket) that work without a network, 38 whole sets from LDraw's model collection with every part in its place and colour, and opening your own `.ldr` or `.mpd` file. A model is placed, moved, turned and deleted as one piece and counted brick by brick in the parts list.
 - A parts list with counts per part and colour, CSV download and export.
-- The script function `s3d.brick(part, { at, rotation, level, color })`.
+- Scripts: `s3d.brick(part, { at, rotation, level, color })` for bricks, finished models and library parts (loaded before the run), `s3d.brickWall({ from, length, rows, along, color, openings })` for walls with shifted joints and door or window frames, completion for parts and colours, and three examples in the script editor (a brick house, the finished models, parts and sets online).
 - Texts in English, German, French, Spanish and Arabic.

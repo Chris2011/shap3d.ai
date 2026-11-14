@@ -15,7 +15,8 @@
         "open": "Concepteur de briques"
       },
       "script": {
-        "brick": "Pose une brique du concepteur : identifiant de pièce, position en tenons, rotation en quarts de tour, hauteur en plaques (sans elle, la brique repose sur ce qui est dessous) et une couleur."
+        "brick": "Pose une brique, un modèle fini (\"model:own-house\", \"model:6080\") ou une pièce de la bibliothèque (\"ldraw:3001\") : position en tenons, rotation en quarts de tour, hauteur en plaques (sans elle, elle repose sur ce qui est dessous) et une couleur.",
+        "wall": "Monte un mur aux joints décalés : coin de départ et longueur en tenons, rangées, direction (x ou y), couleur, et cadres de porte ou de fenêtre intégrés."
       },
       "steps": {
         "color": "Choisissez une couleur.",
@@ -165,6 +166,20 @@
           "vehicles": "Véhicules",
           "landmarks": "Monuments",
           "adventure": "Aventure"
+        }
+      },
+      "examples": {
+        "house": {
+          "name": "Maison en briques",
+          "description": "Des murs avec porte et fenêtres, un toit de pentes, sur une plaque de base."
+        },
+        "models": {
+          "name": "Modèles finis",
+          "description": "Les modèles du plugin côte à côte."
+        },
+        "online": {
+          "name": "Pièces et ensembles en ligne",
+          "description": "Un ensemble et des pièces de la bibliothèque LDraw, chargés avant l'exécution."
         }
       }
     }

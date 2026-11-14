@@ -32,7 +32,7 @@ import { renderViewImage, renderViewLines } from '../engine/viewRender';
 import { registerShaderResolver, registerSurfaceShader } from '../engine/surfaceShaders';
 import { swatchStyle } from '../utils/materialSwatch';
 import { registerCodeFormat } from '../scripting/codeExport';
-import { registerCompletionValues, registerLanguageCompletions } from '../scripting/completion';
+import { argumentKey, registerCompletionValues, registerLanguageCompletions } from '../scripting/completion';
 import type { Disposer, PluginContext, PluginMesh, PluginMeshOptions, PluginPanel } from './types';
 import { dataFormat, onDataChange, readData, readFormat, registerDataFormat, writeData, writeFormat } from './pluginData';
 import { t, localize, copyLocalized, addMessages, addLanguage, setLanguage, language, languages } from '../i18n';
@@ -302,6 +302,7 @@ export const createPluginContext = (
       },
       beforeRun: (prepare) => track(registerBeforeRun(prepare)),
       completeValues: (option, values) => track(registerCompletionValues(option, values)),
+      completeArgument: (method, index, values) => track(registerCompletionValues(argumentKey(method, index), values)),
       registerCompletions: (scriptLanguage, provider) => track(registerLanguageCompletions(scriptLanguage, provider)),
     },
 

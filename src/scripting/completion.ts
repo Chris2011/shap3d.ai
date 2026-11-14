@@ -31,6 +31,9 @@ interface ValueSource {
 const VALUE_SOURCES: ValueSource[] = [];
 
 /** Suggestions for an option value (`{ font: '…' }` in JavaScript, `"font": "…"` in JSON) – e.g. the fonts of the 3D-text plugin. */
+/** where values for a string argument of a plugin's s3d function are kept, next to those for options */
+export const argumentKey = (method: string, index: number) => `${method}(${index})`;
+
 export const registerCompletionValues = (option: string, values: () => (string | ScriptCompletion)[]) => {
   const source = { option, values };
   VALUE_SOURCES.push(source);
@@ -877,7 +880,8 @@ const argumentValues = (code: string, frame: Frame, context: JsContext, editor?:
     if ((method === 'polygon' && index === 3) || (method === 'arc' && index === 5)) {
       return AXES();
     }
-    return [];
+    // a plugin's own function: s3d.brick('|')
+    return registryValues(argumentKey(method, index));
   }
   // unknown receivers (loop variables …) still get materials for .material('…')
   if ((method === 'material' || method === 'backMaterial') && index === 0 && receiver !== 'component') {
