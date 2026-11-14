@@ -1,7 +1,7 @@
 ---
 title: Vue reactivity
-sources: [https://vuejs.org/guide/extras/reactivity-in-depth.html, https://vuejs.org/api/reactivity-advanced.html, src/composables/useModel.ts, src/engine/editor.ts]
-updated: 2026-11-06
+sources: [https://vuejs.org/guide/extras/reactivity-in-depth.html, https://vuejs.org/api/reactivity-advanced.html, src/composables/useModel.ts, src/engine/editor.ts, src/components/panels/materials/S3dMaterialBasics.vue]
+updated: 2026-11-08
 ---
 
 # Vue reactivity
@@ -19,7 +19,15 @@ const modelName = useModel(() => editor.model.name); // follows every change
 const name = computed(() => editor.model.name); // wrong: never updates
 ```
 
-Change the model inside `editor.commit(label, () => …)`: that makes the undo step and tells the UI. A change outside it needs `editor.invalidate()` and `editor.ui.saved = false`.
+A `computed` only triggers when its value changes. `useModel(() => editor.model.settings)` returns the same object after every change, so a template that shows `settings.latitude` does not update. Read the value itself, or a fresh copy:
+
+```ts
+const shown = useModel(() => ({ ...props.material })); // new object per change: the template follows
+```
+
+`src/components/panels/materials/S3dMaterialBasics.vue`, `src/components/panels/S3dShadows.vue` and `src/composables/useStyleSettings.ts` do this. The same goes for plain data of a plugin session: `src/plugins/builtin/terrain/panel/S3dTerrainSurfaces.vue` copies the layers on every `terrainUi.revision`.
+
+Change the model inside `editor.commit(label, () => …)`: that makes the undo step and tells the UI. A live change without undo goes through `useLiveEdit()` from `src/composables/useLiveEdit.ts` (redraw and unsaved mark).
 
 Never put an `Entities`, `Face`, three.js object, texture or `Worker` into `ref` or `reactive`. Use `shallowRef` or `markRaw`.
 

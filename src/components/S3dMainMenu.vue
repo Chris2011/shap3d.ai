@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-55" @pointerdown="$emit('close')"></div>
-  <div class="s3d-menu top-11 left-0 z-60 rounded-none" @pointerdown.stop>
+  <div class="s3d-menu top-11 left-0 z-60 rounded-none" role="menu" @pointerdown.stop>
     <div class="-mt-1 mb-1 flex flex-col items-start gap-1.5 bg-brand-night px-3.5 pt-3 pb-2.5">
       <S3dLogo :size="30" :word-size="18" /><span class="ps-9.75 text-[0.65625rem] tracking-[0.1rem] text-[#7d8794] uppercase">{{
         t('brand.tagline')
@@ -10,36 +10,41 @@
       >
     </div>
     <template v-for="(item, i) in items" :key="i">
-      <div v-if="item.sep" class="s3d-menu-sep"></div>
-      <div
+      <S3dMenuSeparator v-if="item.sep" />
+      <S3dMenuItem
         v-else
-        class="s3d-menu-item relative"
-        :class="{ disabled: item.cmd && !enabled(item.cmd) }"
+        :icon="item.icon"
+        icon-space
+        :shortcut="item.cmd ? shortcut(item.cmd) : undefined"
+        :disabled="!!item.cmd && !enabled(item.cmd)"
+        :submenu="!!item.sub"
         @mouseenter="sub = item.sub ? i : -1"
         @click="click(item)"
       >
-        <S3dIcon v-if="item.icon" :name="item.icon" :size="18" />
-        <span v-else class="w-4.5"></span>
         {{ t(`menu.${item.label}`) }}
-        <span v-if="item.cmd && shortcut(item.cmd)" class="sc">{{ shortcut(item.cmd) }}</span>
-        <S3dIcon v-if="item.sub" name="chevron" :size="14" class="ms-auto" />
-        <div v-if="item.sub && sub === i" class="s3d-menu -top-1 left-full ms-0.5 max-h-[80vh] overflow-auto">
-          <template v-for="command in subItems(item.sub)" :key="command.id">
-            <div v-if="command.separator" class="s3d-menu-sep"></div>
-            <div class="s3d-menu-item" :class="{ disabled: command.enabled && !command.enabled(editor) }" @click.stop="runIt(command.id)">
-              <span class="inline-block w-3.5 font-bold text-blue">{{ command.checked && command.checked(editor) ? '✓' : '' }}</span
-              >{{ command.label }}<span v-if="command.shortcut" class="sc">{{ command.shortcut }}</span>
-            </div>
-          </template>
-        </div>
-      </div>
+        <template v-if="item.sub && sub === i" #submenu>
+          <div class="s3d-menu -top-1 left-full ms-0.5 max-h-[80vh] overflow-auto" role="menu">
+            <template v-for="command in subItems(item.sub)" :key="command.id">
+              <S3dMenuSeparator v-if="command.separator" />
+              <S3dMenuItem
+                :checked="!!command.checked?.(editor)"
+                :shortcut="command.shortcut"
+                :disabled="!!command.enabled && !command.enabled(editor)"
+                @click.stop="runIt(command.id)"
+                >{{ command.label }}</S3dMenuItem
+              >
+            </template>
+          </div>
+        </template>
+      </S3dMenuItem>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import S3dIcon from './S3dIcon.vue';
+import S3dMenuItem from './ui/S3dMenuItem.vue';
+import S3dMenuSeparator from './ui/S3dMenuSeparator.vue';
 import S3dLogo from './S3dLogo.vue';
 import { BRAND } from '../brand';
 import { useEditor } from './keys';

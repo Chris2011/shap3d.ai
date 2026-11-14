@@ -537,6 +537,7 @@
     },
     "menu": {
       "new": "Neu",
+      "newTab": "Neuer Tab",
       "open": "Öffnen…",
       "saveAs": "Speichern unter (Download)",
       "saveLocal": "Im Browser speichern",

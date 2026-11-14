@@ -275,7 +275,7 @@
     @apply h-7 w-full rounded-[3px] border border-edge bg-surface px-2 outline-none focus:border-blue focus:ring-2 focus:ring-[rgba(47,143,214,.2)];
   }
   select.s3d-input {
-    @apply pr-1;
+    @apply pe-1;
   }
 
   .s3d-label {
@@ -311,7 +311,7 @@
     @apply pointer-events-none opacity-40;
   }
   .s3d-menu-item .sc {
-    @apply ml-auto pl-6 text-xs text-ink-2;
+    @apply ms-auto ps-6 text-xs text-ink-2;
   }
   .s3d-menu-sep {
     @apply my-1 h-px bg-line;

@@ -1,67 +1,71 @@
 <template>
-  <label class="s3d-check font-semibold"
-    ><input type="checkbox" :checked="settings.shadows" @change="set('shadows', !settings.shadows)" /> {{ t('shadows.show') }}</label
-  >
-  <div class="s3d-section-title">{{ t('shadows.time') }}</div>
-  <div class="s3d-row">
-    <input
-      type="range"
+  <S3dCheckbox class="font-semibold" :model-value="settings.shadows" @update:model-value="set('shadows', $event)">{{
+    t('shadows.show')
+  }}</S3dCheckbox>
+  <S3dSectionTitle>{{ t('shadows.time') }}</S3dSectionTitle>
+  <S3dFieldRow>
+    <S3dRangeSlider
+      class="flex-1"
       min="5"
       max="21"
       step="0.25"
-      :value="settings.shadowHour"
-      @input="set('shadowHour', +val($event))"
+      :aria-label="t('shadows.time')"
+      :model-value="settings.shadowHour"
+      @update:model-value="set('shadowHour', $event)"
+    /><span class="w-18.5 text-end tabular-nums">{{ formatClock(settings.shadowHour) }}</span>
+  </S3dFieldRow>
+  <S3dSectionTitle>{{ t('shadows.date') }}</S3dSectionTitle>
+  <S3dFieldRow>
+    <S3dRangeSlider
       class="flex-1"
-    /><span class="w-18.5 text-end tabular-nums">{{ time }}</span>
-  </div>
-  <div class="s3d-section-title">{{ t('shadows.date') }}</div>
-  <div class="s3d-row">
-    <input
-      type="range"
       min="1"
       max="12"
       step="1"
-      :value="settings.shadowMonth"
-      @input="set('shadowMonth', +val($event))"
+      :aria-label="t('shadows.date')"
+      :model-value="settings.shadowMonth"
+      @update:model-value="set('shadowMonth', $event)"
+    /><span class="w-18.5 text-end tabular-nums">{{ monthName(settings.shadowMonth, language) }}</span>
+  </S3dFieldRow>
+  <S3dSectionTitle>{{ t('shadows.latitude') }}</S3dSectionTitle>
+  <S3dFieldRow>
+    <S3dRangeSlider
       class="flex-1"
-    /><span class="w-18.5 text-end tabular-nums">{{ monthName(settings.shadowMonth) }}</span>
-  </div>
-  <div class="s3d-section-title">{{ t('shadows.latitude') }}</div>
-  <div class="s3d-row">
-    <input type="range" min="-66" max="66" step="1" :value="settings.latitude" @input="set('latitude', +val($event))" class="flex-1" /><span
-      class="w-18.5 text-end tabular-nums"
-      >{{ settings.latitude }}°</span
-    >
-  </div>
-  <div class="s3d-section-title">{{ t('shadows.north') }}</div>
-  <div class="s3d-row">
-    <input type="range" min="0" max="359" step="1" :value="settings.north" @input="set('north', +val($event))" class="flex-1" /><span
-      class="w-18.5 text-end tabular-nums"
-      >{{ settings.north }}°</span
-    >
-  </div>
+      min="-66"
+      max="66"
+      step="1"
+      :aria-label="t('shadows.latitude')"
+      :model-value="settings.latitude"
+      @update:model-value="set('latitude', $event)"
+    /><span class="w-18.5 text-end tabular-nums">{{ settings.latitude }}°</span>
+  </S3dFieldRow>
+  <S3dSectionTitle>{{ t('shadows.north') }}</S3dSectionTitle>
+  <S3dFieldRow>
+    <S3dRangeSlider
+      class="flex-1"
+      min="0"
+      max="359"
+      step="1"
+      :aria-label="t('shadows.north')"
+      :model-value="settings.north"
+      @update:model-value="set('north', $event)"
+    /><span class="w-18.5 text-end tabular-nums">{{ settings.north }}°</span>
+  </S3dFieldRow>
   <p class="s3d-label my-3">{{ t('shadows.hint') }}</p>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import S3dCheckbox from '../ui/S3dCheckbox.vue';
+import S3dFieldRow from '../ui/S3dFieldRow.vue';
+import S3dRangeSlider from '../ui/S3dRangeSlider.vue';
+import S3dSectionTitle from '../ui/S3dSectionTitle.vue';
 import { useEditor } from '../keys';
-import type { ModelSettings } from '../../core/document';
 import { useModel } from '../../composables/useModel';
+import { useModelSettings } from '../../composables/useModelSettings';
+import { formatClock, monthName } from '../../utils/dateText';
 import { t, language } from '../../i18n';
+
 const editor = useEditor();
-const settings = useModel(() => editor.model.settings);
-const val = (event: Event) => (event.target as HTMLInputElement).value;
-const set = <K extends keyof ModelSettings>(key: K, value: ModelSettings[K]) => {
-  editor.model.settings[key] = value;
-  editor.ui.saved = false;
-  editor.invalidate();
-};
-/** month 1–12 as a word in the current language */
-const monthName = (month: number) => new Date(2000, month - 1, 1).toLocaleString(language.value, { month: 'long' });
-const time = computed(() => {
-  const hours = Math.floor(settings.value.shadowHour),
-    minutes = Math.round((settings.value.shadowHour - hours) * 60);
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-});
+// a copy per model change: the same settings object would not re-render the value labels
+const settings = useModel(() => ({ ...editor.model.settings }));
+const set = useModelSettings();
 </script>

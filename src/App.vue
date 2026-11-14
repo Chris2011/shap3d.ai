@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { computed, provide, ref, shallowRef, onMounted, watch } from 'vue';
-import { useEventListener } from '@vueuse/core';
+import { useEventListener, useTimeoutFn } from '@vueuse/core';
 import S3dViewport from './components/S3dViewport.vue';
 import S3dTopBar from './components/S3dTopBar.vue';
 import S3dSceneTabs from './components/S3dSceneTabs.vue';
@@ -210,6 +210,8 @@ const installFromLink = async () => {
   }
 };
 
+/** first start: the welcome tour once the splash is gone */
+const { start: startTourTimer } = useTimeoutFn(() => openTour(), 2500, { immediate: false });
 onMounted(() => {
   installKeyboard(editor, (firstKey) => statusBar.value?.focusVcb(firstKey));
   // plugins need the viewer, which the viewport creates while mounting
@@ -218,7 +220,7 @@ onMounted(() => {
     .catch((error) => console.error('Plugins konnten nicht geladen werden', error));
   // first start: show the welcome tour once the splash is gone
   if (!tourSeen() && !new URLSearchParams(location.search).has('shot')) {
-    setTimeout(() => openTour(), 2500);
+    startTourTimer();
   }
 });
 </script>

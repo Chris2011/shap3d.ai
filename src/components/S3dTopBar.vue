@@ -3,23 +3,7 @@
     <button :class="[TOOLBAR_BUTTON, { 'bg-hover': menuOpen }]" :title="t('topbar.menu')" @click.stop="menuOpen = !menuOpen">
       <S3dIcon name="menu" :size="22" />
     </button>
-    <input
-      v-if="editing"
-      ref="nameInput"
-      class="mx-1 h-7 w-50 border border-navy bg-surface px-2 font-bold text-navy outline-none"
-      v-model="name"
-      @keydown.enter="commitName"
-      @blur="commitName"
-      @keydown.esc="editing = false"
-    />
-    <div
-      v-else
-      class="max-w-65 cursor-text truncate pe-2 ps-1.5 text-sm/11 font-bold tracking-[0.05312rem] text-navy"
-      :title="t('topbar.rename')"
-      @click="startEdit"
-    >
-      {{ modelName }}
-    </div>
+    <S3dModelName />
     <button
       v-for="(button, i) in buttonsAt('name')"
       :key="i"
@@ -71,100 +55,35 @@
     </button>
   </div>
 
-  <!-- model | modes and workspaces of plugins (e.g. the layout plugin's sheets) – centred, the active one coloured -->
-  <div
-    v-if="WORKSPACES.length || MODES.length"
-    class="s3d-panel absolute top-0 left-1/2 z-30 flex h-11 -translate-x-1/2 items-center px-1.5"
-    role="radiogroup"
-  >
-    <div class="flex gap-0.5 rounded bg-hover p-0.5">
-      <button
-        v-for="option in workspaceOptions"
-        :key="option.value"
-        type="button"
-        role="radio"
-        :aria-checked="option.value === activeWorkspace"
-        class="flex h-8 items-center gap-1 rounded-[3px] border-0 px-2.5 text-xs whitespace-nowrap"
-        :class="option.value === activeWorkspace ? 'bg-blue font-bold text-white shadow-sm' : 'bg-transparent text-ink hover:bg-surface'"
-        @click="switchWorkspace(option.value)"
-      >
-        <S3dIcon v-if="option.icon" :name="option.icon" :size="14" />{{ option.label }}
-      </button>
-    </div>
-  </div>
-
-  <div ref="exportBox" class="s3d-panel absolute top-0 right-0 z-30 flex h-11 items-center gap-2 px-2">
-    <button
-      class="h-7 rounded-[2px] border-0 bg-navy-bg px-2.5 text-[0.8125rem] font-bold tracking-[0.01875rem] text-white hover:bg-[#0b3457]"
-      @click="toggleExport()"
-    >
-      {{ t('topbar.export') }}
-    </button>
-    <div v-if="exportOpen" class="s3d-menu top-11 right-0" @click="closeExport()">
-      <div class="s3d-menu-item" @click="run('save')"><S3dIcon name="save" :size="18" /> {{ t('topbar.exportModel') }}</div>
-      <div class="s3d-menu-item" @click="run('export-glb')"><S3dIcon name="cube" :size="18" /> GLB</div>
-      <div class="s3d-menu-item" @click="run('export-gltf')"><S3dIcon name="cube" :size="18" /> glTF</div>
-      <div class="s3d-menu-item" @click="run('export-stl')"><S3dIcon name="cube" :size="18" /> {{ t('topbar.exportStl') }}</div>
-      <div class="s3d-menu-item" @click="run('export-obj')"><S3dIcon name="cube" :size="18" /> OBJ</div>
-      <div class="s3d-menu-item" @click="run('export-png')"><S3dIcon name="camera" :size="18" /> {{ t('topbar.exportPng') }}</div>
-    </div>
-  </div>
+  <S3dWorkspaceSwitch />
+  <S3dExportMenu />
 
   <S3dMainMenu v-if="menuOpen" @close="menuOpen = false" />
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, nextTick, useTemplateRef } from 'vue';
-import { usePopover } from '../composables/usePopover';
+import { ref } from 'vue';
 import S3dIcon from './S3dIcon.vue';
 import S3dMainMenu from './S3dMainMenu.vue';
+import S3dThemeButton from './S3dThemeButton.vue';
+import S3dExportMenu from './topbar/S3dExportMenu.vue';
+import S3dModelName from './topbar/S3dModelName.vue';
+import S3dWorkspaceSwitch from './topbar/S3dWorkspaceSwitch.vue';
 import { useEditor } from './keys';
 import { runCommand } from '../engine/commands';
-import { MODES, TOP_BAR_BUTTONS, WORKSPACES, modeState, switchView, workspaceState } from '../plugins/uiExtensions';
-import S3dThemeButton from './S3dThemeButton.vue';
-import { useModel } from '../composables/useModel';
+import { TOP_BAR_BUTTONS } from '../plugins/uiExtensions';
 import { t, localize } from '../i18n';
 
+/** Top bar: menu, model name, undo/redo/clear, theme, plugin buttons and save – plus the workspace switch and Export. */
 const editor = useEditor();
 /** a tool in the middle of an action – undo and redo cancel it then; the status line changes with every step of one */
 const toolBusy = () => (void editor.ui.status, !!editor.tool?.busy());
-const workspaceOptions = computed(() => [
-  { value: '', label: t('workspace.model'), icon: 'cube' },
-  ...MODES.map((mode) => ({ value: mode.id, label: localize(mode.label), icon: mode.icon })),
-  ...WORKSPACES.map((workspace) => ({ value: workspace.id, label: localize(workspace.label), icon: workspace.icon })),
-]);
-const activeWorkspace = computed(() => workspaceState.active ?? modeState.active ?? '');
-const switchWorkspace = (id: string) => switchView(editor, id || null);
 const TB_BASE = 'flex h-9 items-center justify-center border-0 p-0 hover:enabled:bg-hover disabled:cursor-default disabled:opacity-35';
 const TOOLBAR_BUTTON = `${TB_BASE} w-9 text-navy`;
 const TB_SM = `${TB_BASE} w-6 text-[#6b6f7b] dark:text-ink-2`;
 const menuOpen = ref(false);
-const editing = ref(false);
-const name = ref('');
-const nameInput = shallowRef<HTMLInputElement | null>(null);
-const modelName = useModel(() => editor.model.name);
-const startEdit = () => {
-  name.value = editor.model.name;
-  editing.value = true;
-  nextTick(() => {
-    nameInput.value?.focus();
-    nameInput.value?.select();
-  });
-};
-const commitName = () => {
-  if (!editing.value) {
-    return;
-  }
-  editing.value = false;
-  if (name.value.trim()) {
-    editor.model.name = name.value.trim();
-    editor.ui.saved = false;
-    editor.ui.revision++;
-  }
-};
 const run = (id: string) => {
   runCommand(editor, id);
 };
 const buttonsAt = (position: 'name' | 'theme') => TOP_BAR_BUTTONS.filter((button) => (button.position ?? 'name') === position);
-const { open: exportOpen, toggle: toggleExport, close: closeExport } = usePopover(useTemplateRef('exportBox'));
 </script>

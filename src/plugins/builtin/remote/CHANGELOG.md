@@ -5,6 +5,7 @@
 ### Changed
 
 - No tile in the right-hand bar: the panel opens from the _Plugins_ menu or the command palette.
+- The connection listens for focus and visibility with `useEventListener` (VueUse) instead of own listeners.
 
 ### Security
 

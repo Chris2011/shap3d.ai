@@ -1,31 +1,33 @@
 <template>
-  <div class="s3d-section-title">{{ t('display.show') }}</div>
-  <label
+  <S3dSectionTitle>{{ t('display.show') }}</S3dSectionTitle>
+  <S3dCheckbox
     v-for="option in OPTS"
     :key="option.id"
-    class="s3d-check"
     :class="{ 'ms-5': option.parent, 'cursor-default opacity-50': option.parent && !check(option.parent) }"
-    ><input type="checkbox" :checked="check(option.id)" :disabled="!!option.parent && !check(option.parent)" @change="toggle(option.id)" />
-    {{ t(option.label) }}</label
+    :model-value="check(option.id)"
+    :disabled="!!option.parent && !check(option.parent)"
+    @update:model-value="toggle(option.id)"
+    >{{ t(option.label) }}</S3dCheckbox
   >
-  <div class="s3d-section-title">{{ t('commands.toggleSectionPlanes') }}</div>
+  <S3dSectionTitle>{{ t('commands.toggleSectionPlanes') }}</S3dSectionTitle>
   <div v-for="section in sections" :key="section.id" class="flex items-center gap-1 [&_.s3d-btn]:px-1.75">
-    <label class="s3d-check flex-1"
-      ><input type="radio" name="activesec" :checked="section.active" @change="activate(section.id)" /> {{ section.name }}</label
-    >
-    <button class="s3d-btn small" :title="t('display.flip')" @click="flip(section.id)">⇄</button>
-    <button class="s3d-btn small" :title="t('display.shift')" @click="shift(section.id, -0.1)">−</button>
-    <button class="s3d-btn small" :title="t('display.shift')" @click="shift(section.id, 0.1)">+</button>
-    <button class="s3d-btn small" :title="t('commands.delete')" @click="del(section.id)">✕</button>
+    <S3dRadio class="flex-1" name="activesec" :checked="section.active" @select="activate(section.id)">{{ section.name }}</S3dRadio>
+    <S3dButton small :title="t('display.flip')" @click="flip(section.id)">⇄</S3dButton>
+    <S3dButton small :title="t('display.shift')" @click="shift(section.id, -0.1)">−</S3dButton>
+    <S3dButton small :title="t('display.shift')" @click="shift(section.id, 0.1)">+</S3dButton>
+    <S3dButton small :title="t('commands.delete')" @click="del(section.id)">✕</S3dButton>
   </div>
-  <label v-if="sections.length" class="s3d-check"
-    ><input type="radio" name="activesec" :checked="!sections.some((section) => section.active)" @change="activate(-1)" />
-    {{ t('display.noActive') }}</label
-  >
+  <S3dRadio v-if="sections.length" name="activesec" :checked="!sections.some((section) => section.active)" @select="activate(-1)">{{
+    t('display.noActive')
+  }}</S3dRadio>
   <div v-if="!sections.length" class="s3d-label">{{ t('display.empty') }}</div>
 </template>
 
 <script setup lang="ts">
+import S3dButton from '../ui/S3dButton.vue';
+import S3dCheckbox from '../ui/S3dCheckbox.vue';
+import S3dRadio from '../ui/S3dRadio.vue';
+import S3dSectionTitle from '../ui/S3dSectionTitle.vue';
 import { useEditor } from '../keys';
 import { runCommand, findCommand } from '../../engine/commands';
 import { useModel } from '../../composables/useModel';

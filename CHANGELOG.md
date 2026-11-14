@@ -54,8 +54,21 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **Materials as a cube**: the swatches in the Materials panel can be shown flat or as a small cube.
 - **Plugin API**: `render.pass(draw)` draws over each frame of the 3D view; exporters can ask first (`options`: choices and checkboxes, handed to `export`). _(Import formats 1.2.0: USDZ export, view as SVG)_
 
+### Changed
+
+- **Component library** in `src/components/ui/`: button, icon button, section title, form row, checkbox, radio, text field, select, slider, colour well and menu item, used by the panels instead of hand-written `s3d-…` classes. Fields that change the model commit on Enter or leaving the field, as before.
+- **Big panels split by job**: the welcome tour (one component per illustration), Materials, Script editor, Plugin manager and Entity Info are now small parts with small composables (`src/composables/`) and pure functions (`src/utils/`, `src/engine/selectionInfo.ts`, `src/engine/selectionEdits.ts`, `src/engine/softenEdges.ts`, `src/core/materialRefs.ts`). They look and work as before. The script editor and plugin manager share their panel state with their parts through provide/inject.
+- **Accessibility and right to left**: form fields and icon buttons of these panels have accessible names, section titles are headings, and the close button of the welcome tour sits on the correct side in Arabic.
+- The values in the Materials panel (opacity, roughness, rotation …) now follow the slider while dragging instead of on the next change.
+- **More of the UI split by job**: Styles (presets, faces, environment, ambient occlusion – presets as pure data in `src/core/stylePresets.ts`), the command palette (rows and search as pure functions in `src/engine/paletteRows.ts`), the top bar (model name, workspace switch, Export menu) and the menus, which now use `S3dMenuItem` and `S3dMenuSeparator` with menu roles. Status-bar and toolbar icon buttons use `S3dIconButton`. A floating window is `useFloatingWindow`. They look and work as before.
+- Right to left: the shortcut column of menus and the arrow of drop-downs sit on the correct side.
+- **Scripting API split by job**: `src/scripting/api.ts` (1 400 lines) only re-exports; points, face and group handles, running JavaScript (main thread and worker), JSON scenes, error texts and the round shapes that remember how they were made are modules of their own, and the `s3d` class is built in layers (base, groups, sketch, solids, round solids, view) in `src/scripting/scriptApi/`. Scripts, plugins and the import path stay the same.
+- **VueUse instead of hand-written timers and listeners**: debounced saving and searching (`watchDebounced`, `useDebounceFn`), window size (`useWindowSize`), the AI settings in `useStorage`, the welcome-tour delay (`useTimeoutFn`) and the remote connection's listeners (`useEventListener`).
+
 ### Fixed
 
+- **The Shadows panel** shows the time, month, latitude and north while dragging the sliders, not only after the next change.
+- **The main menu** showed `menu.newTab` instead of "New tab".
 - **Curves look and act as one surface**: faces joined by soft edges up to 30° are shaded smoothly instead of as flat strips (cylinders, spheres, gear flanks, imports), and a click or the paint bucket takes the whole surface. The shape stays the same; exports are unchanged.
 - **Hidden soft edges could be clicked**: selecting and erasing took edges that are not drawn. They now only react while hidden geometry is shown.
 - **Stray lines on flat faces of meshes**: merging coplanar triangles left inner edges without a face behind, drawn as loose lines (a fan of them on OpenSCAD gears, also in imports). Merging now removes them, so such a mesh counts as a solid again.

@@ -54,7 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { ref, shallowRef, computed, watch, nextTick } from 'vue';
+import { useWindowSize } from '@vueuse/core';
 import type { CompletionItem } from '../../scripting/completion';
 import type { CompletionKind } from '../../scripting/languages';
 import type { CompletionAnchor } from '../../composables/useCodeCompletion';
@@ -87,25 +88,19 @@ const current = computed(() => props.items[props.selected]);
 const prefixLength = (label: string) => (props.word && label.toLowerCase().startsWith(props.word.toLowerCase()) ? props.word.length : 0);
 
 const height = ref(0);
-const viewport = shallowRef({ width: window.innerWidth, height: window.innerHeight });
-const onResize = () => {
-  viewport.value = { width: window.innerWidth, height: window.innerHeight };
-};
-onMounted(() => window.addEventListener('resize', onResize));
-onBeforeUnmount(() => window.removeEventListener('resize', onResize));
+const { width: viewWidth, height: viewHeight } = useWindowSize();
 
 /** below the line if it fits (or fits better), otherwise above – always inside the window */
 const placement = computed(() => {
-  const { width: viewWidth, height: viewHeight } = viewport.value;
-  const width = Math.min(WIDTH, viewWidth - 2 * MARGIN);
-  const left = Math.max(MARGIN, Math.min(props.anchor.x - 22, viewWidth - width - MARGIN));
-  const spaceBelow = viewHeight - props.anchor.bottom - MARGIN,
+  const width = Math.min(WIDTH, viewWidth.value - 2 * MARGIN);
+  const left = Math.max(MARGIN, Math.min(props.anchor.x - 22, viewWidth.value - width - MARGIN));
+  const spaceBelow = viewHeight.value - props.anchor.bottom - MARGIN,
     spaceAbove = props.anchor.top - MARGIN;
   const above = height.value > spaceBelow && spaceAbove > spaceBelow;
   const maxHeight = Math.max(80, above ? spaceAbove - 2 : spaceBelow - 2);
   const style: Record<string, string> = { left: `${left}px`, width: `${width}px`, maxHeight: `${maxHeight}px` };
   if (above) {
-    style.bottom = `${viewHeight - props.anchor.top + 2}px`;
+    style.bottom = `${viewHeight.value - props.anchor.top + 2}px`;
   } else {
     style.top = `${props.anchor.bottom + 2}px`;
   }

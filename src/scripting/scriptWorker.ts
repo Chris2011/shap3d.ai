@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import { scriptErrorText, ScriptApi, type ScriptLog } from './api';
+import { ScriptApi } from './scriptApi/scriptApi';
+import { scriptErrorText } from './scriptErrors';
+import type { ScriptLog } from './scriptTypes';
 import { Model } from '../core/document';
 import type { Editor } from '../engine/editor';
 import { t } from '../i18n';
@@ -141,6 +143,7 @@ const lockDown = () => {
 
 /** Answer to the owner of the worker – `Worker.postMessage` without the Window overload's targetOrigin */
 const postToOwner = (response: ScriptWorkerResponse) => {
+  // oxlint-disable-next-line unicorn/require-post-message-target-origin -- a worker's postMessage has no targetOrigin
   (self as unknown as { postMessage: (data: ScriptWorkerResponse) => void }).postMessage(response);
 };
 

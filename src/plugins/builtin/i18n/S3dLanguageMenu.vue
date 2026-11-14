@@ -8,33 +8,32 @@
       @pointerdown.stop
     >
       <div class="px-3 pt-1.5 pb-1 s3d-caption text-muted">{{ t('i18n.switcher.title') }}</div>
-      <div
+      <S3dMenuItem
         v-for="entry in languages"
         :key="entry.code"
-        class="s3d-menu-item"
         role="menuitemradio"
+        :checked="isChosen(entry.code)"
         :aria-checked="isChosen(entry.code)"
         @click="choose(entry.code)"
       >
-        <span class="inline-block w-3.5 font-bold text-blue">{{ isChosen(entry.code) ? '✓' : '' }}</span>
         <span class="flex-1" :dir="entry.dir">{{ entry.name }}</span>
         <span class="text-[0.6875rem] text-muted uppercase">{{ entry.code }}</span>
         <span v-if="entry.code !== SOURCE_LANGUAGE" class="w-9 text-end text-[0.6875rem] text-muted tabular-nums">{{
           percent(entry.code)
         }}</span>
-      </div>
-      <div class="s3d-menu-item" role="menuitemradio" :aria-checked="chosenLanguage === ''" @click="choose('')">
-        <span class="inline-block w-3.5 font-bold text-blue">{{ chosenLanguage === '' ? '✓' : '' }}</span
-        >{{ t('i18n.switcher.automatic') }}
-      </div>
-      <div class="s3d-menu-sep"></div>
-      <div class="s3d-menu-item" @click="openEditor()"><S3dIcon name="language" :size="18" /> {{ t('i18n.switcher.edit') }}</div>
+      </S3dMenuItem>
+      <S3dMenuItem role="menuitemradio" :checked="chosenLanguage === ''" :aria-checked="chosenLanguage === ''" @click="choose('')">{{
+        t('i18n.switcher.automatic')
+      }}</S3dMenuItem>
+      <S3dMenuSeparator />
+      <S3dMenuItem icon="language" @click="openEditor()">{{ t('i18n.switcher.edit') }}</S3dMenuItem>
     </div>
   </template>
 </template>
 
 <script setup lang="ts">
-import S3dIcon from '../../../components/S3dIcon.vue';
+import S3dMenuItem from '../../../components/ui/S3dMenuItem.vue';
+import S3dMenuSeparator from '../../../components/ui/S3dMenuSeparator.vue';
 import { showPanel } from '../../../components/panelState';
 import { t, languages, chosenLanguage, setLanguage, formatNumber, SOURCE_LANGUAGE } from '../../../i18n';
 import { languageMenu, closeLanguageMenu, EDITOR_PANEL } from './state';

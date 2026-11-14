@@ -1,4 +1,5 @@
 import { reactive } from 'vue';
+import { useEventListener } from '@vueuse/core';
 import type { PluginContext } from '../../types';
 import { handleRemoteAction, RemoteFailure } from './handlers';
 
@@ -136,8 +137,8 @@ export const startRemoteConnection = (context: PluginContext) => {
   hot.on('s3d:remote-status', onStatus);
   hot.on('vite:ws:connect', onConnect); // also after the dev server restarted
   hot.on('vite:ws:disconnect', onDisconnect);
-  window.addEventListener('focus', helloWhenVisible);
-  document.addEventListener('visibilitychange', helloWhenVisible);
+  const stopFocus = useEventListener(window, 'focus', helloWhenVisible);
+  const stopVisibility = useEventListener(document, 'visibilitychange', helloWhenVisible);
   remoteState.connected = true; // the app was just served by the dev server; a lost connection reports itself
   hello();
 
@@ -146,8 +147,8 @@ export const startRemoteConnection = (context: PluginContext) => {
     hot.off('s3d:remote-status', onStatus);
     hot.off('vite:ws:connect', onConnect);
     hot.off('vite:ws:disconnect', onDisconnect);
-    window.removeEventListener('focus', helloWhenVisible);
-    document.removeEventListener('visibilitychange', helloWhenVisible);
+    stopFocus();
+    stopVisibility();
     hot.send('s3d:remote-bye', { id: tabId });
     claimThisTab = () => {};
     Object.assign(remoteState, { connected: false, active: false, tabs: 0 });

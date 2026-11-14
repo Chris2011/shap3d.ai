@@ -1,7 +1,7 @@
 ---
 title: Principles
-sources: [CONTRIBUTING.md, src/plugins/types.ts, packages/procgen/README.md]
-updated: 2026-11-06
+sources: [CONTRIBUTING.md, src/plugins/types.ts, packages/procgen/README.md, src/scripting/api.ts]
+updated: 2026-11-12
 ---
 
 # Principles
@@ -49,6 +49,13 @@ Split by job, never by line count. A helper that only makes a function shorter h
 ## Composition over inheritance
 
 Combine small functions and composables. Inherit only where a real "is a" contract exists, as with tools.
+
+## Splitting a large module
+
+- Split by job, and keep the import path: the old file becomes a barrel that only re-exports. `src/scripting/api.ts` re-exports points, handles, the `s3d` class, running JavaScript and JSON, and error texts – the plugin packages import it unchanged.
+- A class that scripts and plugins use as one object (`s3d`) may be built in layers, one file each, every layer one job: `src/scripting/scriptApi/` (base → groups → sketch → solids → round solids → `ScriptApi`). Members a later layer needs are `protected`, callbacks take `this`, and code that walks the members (error hints in `src/scripting/scriptErrors.ts`) walks the whole prototype chain.
+- Side effects on a class (wrapping its methods) live in a function the class file calls, not in a module that has to be imported for its effect: `recordParametricShapes` in `src/scripting/parametric.ts`.
+- A worker imports the modules it needs, not the barrel: `src/scripting/scriptWorker.ts`.
 
 ## Fail at the boundary
 

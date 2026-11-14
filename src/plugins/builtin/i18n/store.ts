@@ -1,4 +1,5 @@
 import { computed, reactive, toRaw } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 import {
   addLanguage,
   addMessages,
@@ -43,11 +44,10 @@ const TEMPLATE_SOURCES = ['app', 'i18n'];
 let storage: Storage | null = null;
 const languageDisposers = new Map<string, Disposer>();
 const layerDisposers = new Map<string, Disposer>();
-let saveTimer = 0;
-
+/** a change waits to be written */
+let pending = false;
 const writeNow = () => {
-  clearTimeout(saveTimer);
-  saveTimer = 0;
+  pending = false;
   storage?.set(
     'languages',
     Object.values(toRaw(customLanguages)).map((entry) => ({ ...entry.info, messages: entry.messages })),
@@ -55,9 +55,10 @@ const writeNow = () => {
   storage?.set('overrides', toRaw(overrides));
 };
 /** saves a moment later (typing in the editor writes many times a second) */
+const writeLater = useDebounceFn(() => pending && writeNow(), 300);
 const save = () => {
-  clearTimeout(saveTimer);
-  saveTimer = window.setTimeout(writeNow, 300);
+  pending = true;
+  void writeLater();
 };
 
 /** (Re-)registers the editor's texts of a language as their own layer – they win over the language pack. */
@@ -96,7 +97,7 @@ export const startLanguages = (store: Storage): Disposer => {
     }
   }
   return () => {
-    if (saveTimer) {
+    if (pending) {
       writeNow();
     } // don't lose the last change when the plugin is switched off
     for (const dispose of [...layerDisposers.values(), ...languageDisposers.values()]) {

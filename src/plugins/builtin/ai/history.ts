@@ -1,4 +1,5 @@
-import { reactive, watch } from 'vue';
+import { reactive } from 'vue';
+import { watchDebounced } from '@vueuse/core';
 import type { AiTurn } from './agent';
 import { t, language } from '../../../i18n';
 
@@ -42,39 +43,36 @@ const load = (): { sessions: AiSession[]; currentId: string } => {
 
 export const aiHistory = reactive(load());
 
-let saveTimer = 0;
-watch(
+// saved a moment after the last change – streaming answers change it many times a second
+watchDebounced(
   aiHistory,
   () => {
-    clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(() => {
-      try {
-        aiHistory.sessions.sort((left, right) => right.updated - left.updated);
-        if (aiHistory.sessions.length > MAX_SESSIONS) {
-          aiHistory.sessions.splice(MAX_SESSIONS);
-        }
-        // pictures are large: when the storage is full, older chats are kept without theirs, then all are –
-        // the text of the conversations is never lost for them
-        const without = (keep: (session: AiSession) => boolean) => ({
-          ...aiHistory,
-          sessions: aiHistory.sessions.map((session) =>
-            keep(session) ? session : { ...session, turns: session.turns.map(({ images: _images, ...turn }) => turn) },
-          ),
-        });
-        for (const version of [aiHistory, without((session) => session.id === aiHistory.currentId), without(() => false)]) {
-          try {
-            localStorage.setItem(KEY, JSON.stringify(version));
-            break;
-          } catch {
-            /* quota exceeded – try with fewer pictures, else keep in memory */
-          }
-        }
-      } catch {
-        /* storage unavailable – keep in memory */
+    try {
+      aiHistory.sessions.sort((left, right) => right.updated - left.updated);
+      if (aiHistory.sessions.length > MAX_SESSIONS) {
+        aiHistory.sessions.splice(MAX_SESSIONS);
       }
-    }, 400);
+      // pictures are large: when the storage is full, older chats are kept without theirs, then all are –
+      // the text of the conversations is never lost for them
+      const without = (keep: (session: AiSession) => boolean) => ({
+        ...aiHistory,
+        sessions: aiHistory.sessions.map((session) =>
+          keep(session) ? session : { ...session, turns: session.turns.map(({ images: _images, ...turn }) => turn) },
+        ),
+      });
+      for (const version of [aiHistory, without((session) => session.id === aiHistory.currentId), without(() => false)]) {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(version));
+          break;
+        } catch {
+          /* quota exceeded – try with fewer pictures, else keep in memory */
+        }
+      }
+    } catch {
+      /* storage unavailable – keep in memory */
+    }
   },
-  { deep: true },
+  { deep: true, debounce: 400 },
 );
 
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);

@@ -1183,6 +1183,8 @@
     "menu": {
       "new": "",
       "new#en": "New",
+      "newTab": "",
+      "newTab#en": "New tab",
       "open": "",
       "open#en": "Open…",
       "saveAs": "",

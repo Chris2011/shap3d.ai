@@ -1,27 +1,26 @@
 <template>
   <div class="absolute inset-x-0 bottom-0 z-30 flex h-status items-center gap-1 bg-panel px-1.5 text-xs">
-    <button class="s3d-iconbtn size-6.5" :title="t('statusbar.help')" @click="editor.ui.dialog = { kind: 'help' }">
-      <S3dIcon name="help" :size="18" />
-    </button>
-    <button
-      class="s3d-iconbtn size-6.5"
-      :class="{ active: snapping }"
-      :title="t(snapping ? 'statusbar.snappingOn' : 'statusbar.snappingOff')"
+    <S3dIconButton class="size-6.5" icon="help" :icon-size="18" :label="t('statusbar.help')" @click="editor.ui.dialog = { kind: 'help' }" />
+    <S3dIconButton
+      class="size-6.5"
+      icon="magnet"
+      :icon-size="18"
+      :active="snapping"
+      :label="t(snapping ? 'statusbar.snappingOn' : 'statusbar.snappingOff')"
       :aria-pressed="snapping"
       @click="runCommand(editor, 'toggleSnapping')"
-    >
-      <S3dIcon name="magnet" :size="18" />
-    </button>
+    />
     <span class="mx-0.5 h-4 w-px bg-edge"></span>
     <div ref="devBox" class="relative">
-      <button
-        class="s3d-iconbtn size-6.5"
-        :class="{ active: devOpen }"
-        :title="t('statusbar.inputDeviceTitle', { device: nav.device === 'mouse' ? t('statusbar.mouse') : t('statusbar.trackpad') })"
+      <S3dIconButton
+        class="size-6.5"
+        :icon="nav.device === 'mouse' ? 'mouse' : 'trackpad'"
+        :icon-size="18"
+        :active="devOpen"
+        :aria-expanded="devOpen"
+        :label="t('statusbar.inputDeviceTitle', { device: nav.device === 'mouse' ? t('statusbar.mouse') : t('statusbar.trackpad') })"
         @click="toggleDev()"
-      >
-        <S3dIcon :name="nav.device === 'mouse' ? 'mouse' : 'trackpad'" :size="18" />
-      </button>
+      />
       <div v-if="devOpen" class="s3d-panel absolute bottom-8.5 left-0 z-50 w-75 px-3 py-2.5 text-xs" @click.stop @pointerdown.stop>
         <div :class="HEADING" class="mt-0!">{{ t('statusbar.inputDevice') }}</div>
         <S3dSegmentedControl v-model="nav.device" :options="DEVICES" />
@@ -73,7 +72,7 @@
 <script setup lang="ts">
 import S3dSegmentedControl from './ui/S3dSegmentedControl.vue';
 import { ref, shallowRef, computed, watch, nextTick } from 'vue';
-import S3dIcon from './S3dIcon.vue';
+import S3dIconButton from './ui/S3dIconButton.vue';
 import { nav, wheelAction, ACTION_LABEL, type NavAction } from '../engine/navigation';
 import { useTemplateRef } from 'vue';
 import { usePopover } from '../composables/usePopover';

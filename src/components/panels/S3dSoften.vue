@@ -1,120 +1,37 @@
 <template>
   <p class="s3d-label my-3">{{ t('soften.hint') }}</p>
-  <div class="s3d-row">
-    <span class="s3d-label">{{ t('vcb.angle') }}</span
-    ><input type="range" min="0" max="180" step="1" v-model.number="angle" class="flex-1" /><span class="w-10.5 text-end"
+  <S3dFieldRow :label="t('vcb.angle')">
+    <S3dRangeSlider v-model="angle" class="flex-1" min="0" max="180" step="1" :aria-label="t('vcb.angle')" /><span class="w-10.5 text-end"
       >{{ angle }}°</span
     >
-  </div>
-  <label class="s3d-check"><input type="checkbox" v-model="coplanar" /> {{ t('soften.coplanar') }}</label>
+  </S3dFieldRow>
+  <S3dCheckbox v-model="coplanar">{{ t('soften.coplanar') }}</S3dCheckbox>
   <div class="mt-2 flex gap-1.5">
-    <button
-      class="s3d-btn small"
-      :disabled="!editor.selection.size"
-      :title="editor.selection.size ? '' : t('soften.selectFirst')"
-      @click="apply"
-    >
-      {{ t('soften.apply') }}</button
-    ><button
-      class="s3d-btn small"
-      :disabled="!editor.selection.size"
-      :title="editor.selection.size ? '' : t('soften.selectFirst')"
-      @click="clear"
-    >
+    <S3dButton small :disabled="!hasSelection" :title="hasSelection ? '' : t('soften.selectFirst')" @click="apply">
+      {{ t('soften.apply') }}</S3dButton
+    ><S3dButton small :disabled="!hasSelection" :title="hasSelection ? '' : t('soften.selectFirst')" @click="clear">
       {{ t('soften.reset') }}
-    </button>
+    </S3dButton>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import S3dButton from '../ui/S3dButton.vue';
+import S3dCheckbox from '../ui/S3dCheckbox.vue';
+import S3dFieldRow from '../ui/S3dFieldRow.vue';
+import S3dRangeSlider from '../ui/S3dRangeSlider.vue';
 import { useEditor } from '../keys';
+import { softenSelectionByAngle, unsoftenSelection } from '../../engine/softenEdges';
 import { t } from '../../i18n';
 
 const editor = useEditor();
 const angle = ref(20);
 const coplanar = ref(true);
-
-/** Edge ids of the selection – edges inside selected groups/components get a negative id. */
-const selectedEdgeIds = (): number[] => {
+const hasSelection = computed(() => {
   void editor.ui.selRev;
-  const entities = editor.entities;
-  const selection = editor.selected();
-  const ids = new Set<number>();
-  for (const item of selection) {
-    if (item.kind === 'edge') {
-      ids.add(item.id);
-    }
-    if (item.kind === 'face') {
-      const face = entities.faces.get(item.id);
-      if (face) {
-        entities.faceEdges(face).forEach((edge) => ids.add(edge.id));
-      }
-    }
-  }
-  if (selection.some((item) => item.kind === 'instance')) {
-    for (const item of selection) {
-      const instance = entities.instances.get(item.id);
-      if (instance) {
-        instance.definition.entities.edges.forEach((edge) => ids.add(-edge.id));
-      }
-    }
-  }
-  return [...ids];
-};
-
-const apply = () => {
-  const minCosine = Math.cos((angle.value * Math.PI) / 180);
-  editor.commit('undo.soften', () => {
-    const entities = editor.entities;
-    const soften = (container: typeof entities, ids: number[]) => {
-      for (const id of ids) {
-        const edge = container.edges.get(id);
-        if (!edge) {
-          continue;
-        }
-        const faces = container.facesOfEdge(id);
-        if (faces.length !== 2) {
-          continue;
-        }
-        const cosine = container.faceNormal(faces[0]).dot(container.faceNormal(faces[1]));
-        edge.soft = (cosine >= minCosine && (coplanar.value || cosine < 1 - 1e-6)) || undefined;
-      }
-    };
-    soften(
-      entities,
-      selectedEdgeIds().filter((id) => id > 0),
-    );
-    for (const item of editor.selected()) {
-      if (item.kind !== 'instance') {
-        continue;
-      }
-      const instance = entities.instances.get(item.id);
-      if (instance) {
-        soften(instance.definition.entities, [...instance.definition.entities.edges.keys()]);
-      }
-    }
-  });
-};
-
-const clear = () => {
-  editor.commit('undo.unsoften', () => {
-    const entities = editor.entities;
-    for (const id of selectedEdgeIds()) {
-      const edge = id > 0 ? entities.edges.get(id) : undefined;
-      if (edge) {
-        edge.soft = undefined;
-      }
-    }
-    for (const item of editor.selected()) {
-      if (item.kind !== 'instance') {
-        continue;
-      }
-      const instance = entities.instances.get(item.id);
-      if (instance) {
-        instance.definition.entities.edges.forEach((edge) => (edge.soft = undefined));
-      }
-    }
-  });
-};
+  return editor.selection.size > 0;
+});
+const apply = () => softenSelectionByAngle(editor, angle.value, coplanar.value);
+const clear = () => unsoftenSelection(editor);
 </script>

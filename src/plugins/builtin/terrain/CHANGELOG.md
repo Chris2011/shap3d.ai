@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The terrain window is split into parts (new terrain, brush, surfaces, extras) with the session limits in `useTerrainSession` – it looks and works as before. The values of the surface and water sliders now follow while dragging.
+
 ### Security
 
 - Texts from language files no longer run as markup in the panel: only simple emphasis stays.

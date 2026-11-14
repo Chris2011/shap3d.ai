@@ -1,24 +1,27 @@
 <template>
   <div class="fixed inset-0 z-59" @pointerdown="$emit('close')" @contextmenu.prevent="$emit('close')"></div>
-  <div class="s3d-menu" :style="style" @pointerdown.stop>
+  <div class="s3d-menu" :style="style" role="menu" @pointerdown.stop>
     <template v-for="(item, i) in items" :key="i">
-      <div v-if="item.sep" class="s3d-menu-sep"></div>
-      <div v-else class="s3d-menu-item relative" @mouseenter="open = item.children ? i : -1" @click="run(item)">
-        {{ item.label }}<span v-if="item.sc" class="sc">{{ item.sc }}</span>
-        <S3dIcon v-if="item.children" name="chevron" :size="14" class="ms-auto" />
-        <div v-if="item.children && open === i" class="s3d-menu -top-1 ms-0.5" :class="subLeft ? 'right-full me-0.5' : 'left-full'">
-          <div v-for="(child, j) in item.children" :key="j" class="s3d-menu-item" @click.stop="run(child)">
-            {{ child.label }}<span v-if="child.sc" class="sc">{{ child.sc }}</span>
+      <S3dMenuSeparator v-if="item.sep" />
+      <S3dMenuItem v-else :shortcut="item.sc" :submenu="!!item.children" @mouseenter="open = item.children ? i : -1" @click="run(item)">
+        {{ item.label }}
+        <template v-if="item.children && open === i" #submenu>
+          <div class="s3d-menu -top-1 ms-0.5" :class="subLeft ? 'right-full me-0.5' : 'left-full'" role="menu">
+            <S3dMenuItem v-for="(child, j) in item.children" :key="j" :shortcut="child.sc" @click.stop="run(child)">{{
+              child.label
+            }}</S3dMenuItem>
           </div>
-        </div>
-      </div>
+        </template>
+      </S3dMenuItem>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import S3dIcon from './S3dIcon.vue';
+import { useWindowSize } from '@vueuse/core';
+import S3dMenuItem from './ui/S3dMenuItem.vue';
+import S3dMenuSeparator from './ui/S3dMenuSeparator.vue';
 import { useEditor } from './keys';
 import { runCommand } from '../engine/commands';
 import { showPanel } from './panelState';
@@ -125,13 +128,14 @@ const items = computed<It[]>(() => {
   }
   return out;
 });
+const { width: viewWidth, height: viewHeight } = useWindowSize();
 const style = computed(() => ({
-  left: Math.min(props.x, window.innerWidth - 240) + 'px',
-  top: Math.min(props.y, window.innerHeight - 30 * items.value.length - 20) + 'px',
+  left: Math.min(props.x, viewWidth.value - 240) + 'px',
+  top: Math.min(props.y, viewHeight.value - 30 * items.value.length - 20) + 'px',
   position: 'fixed' as const,
 }));
 /** submenus open to the left when the menu sits near the right edge */
-const subLeft = computed(() => props.x > window.innerWidth - 480);
+const subLeft = computed(() => props.x > viewWidth.value - 480);
 const run = (item: It) => {
   if (item.children) {
     return;

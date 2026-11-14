@@ -1,7 +1,7 @@
 ---
 title: Project conventions
 sources: [CONTRIBUTING.md, docs/wiki/development.md, .oxlintrc.json, tsconfig.json]
-updated: 2026-11-06
+updated: 2026-11-08
 ---
 
 # Project conventions
@@ -11,7 +11,8 @@ The full rules are in [CONTRIBUTING.md](../../CONTRIBUTING.md). These are the on
 ## Where a change belongs
 
 - **Kernel and engine** (`src/core/`, `src/engine/`): modelling and the view. `src/core/` does not import Vue. Only `src/core/textures.ts` touches the DOM.
-- **UI** (`src/components/`): the `S3d…` components. Shared building blocks are in `src/components/ui/`.
+- **UI** (`src/components/`): the `S3d…` components. Shared building blocks are in `src/components/ui/`. The parts of a big panel go into a folder named after it, e.g. `src/components/panels/materials/`.
+- **Logic without Vue**: a pure function goes to `src/utils/` (UI helpers, e.g. `src/utils/codeText.ts`), `src/engine/` (works on the editor, e.g. `src/engine/selectionEdits.ts`) or `src/core/` (works on the model, e.g. `src/core/materialRefs.ts`). Only stateful logic is a composable in `src/composables/`.
 - **Plugin packages** (`plugins/<name>/`): only use the plugin API in `src/plugins/types.ts`, never app modules. If the API cannot do something, extend the API.
 - **Libraries** (`packages/<name>/`): pure functions with tests, no editor and no Vue.
 - **LayOut** (`plugins/layout/`): only through the plugin API. Do not change `src/` for it.

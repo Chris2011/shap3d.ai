@@ -1,4 +1,5 @@
 import { reactive, watch } from 'vue';
+import { useStorage } from '@vueuse/core';
 import { t, formatNumber } from '../../../i18n';
 import { RECOMMENDED_QUANT } from './hfsearch';
 
@@ -77,29 +78,21 @@ export interface AiConfig {
 }
 
 const KEY = 's3d:ai';
-const load = (): AiConfig => {
-  try {
-    const stored = JSON.parse(localStorage.getItem(KEY) ?? 'null');
-    if (stored && PROVIDERS.some((provider) => provider.id === stored.provider)) {
-      return { autoRun: true, fast: false, ...stored };
-    }
-  } catch {
-    /* storage unavailable */
-  }
-  return { provider: 'ollama', baseUrl: PROVIDERS[0].baseUrl, apiKey: '', model: '', configured: false, autoRun: true, fast: false };
+const DEFAULT_CONFIG: AiConfig = {
+  provider: 'ollama',
+  baseUrl: PROVIDERS[0].baseUrl,
+  apiKey: '',
+  model: '',
+  configured: false,
+  autoRun: true,
+  fast: false,
 };
-export const aiConfig = reactive<AiConfig>(load());
-watch(
-  aiConfig,
-  (config) => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(config));
-    } catch {
-      /* ignore */
-    }
-  },
-  { deep: true },
-);
+/** kept in this browser; settings of an unknown provider (removed or renamed) start over */
+const stored = useStorage<AiConfig>(KEY, { ...DEFAULT_CONFIG }, undefined, { mergeDefaults: true, listenToStorageChanges: false });
+if (!PROVIDERS.some((provider) => provider.id === stored.value.provider)) {
+  stored.value = { ...DEFAULT_CONFIG };
+}
+export const aiConfig: AiConfig = stored.value;
 
 export const providerInfo = (id: ProviderId) => PROVIDERS.find((provider) => provider.id === id)!;
 

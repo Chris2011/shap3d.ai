@@ -14,6 +14,10 @@
 - **Knows every plugin's script calls**: the quick prompt for small models now lists the `s3d.` calls of the active plugins too (before only the full prompt did), and the full prompt adds the plugins' own examples – so the assistant can build terrains, roads, level objects … with whatever plugins are switched on.
 - Falls back to the classic synchronous run when a script needs something only the main thread has (a plugin's `s3d.` extension) or no worker is available – and when the script builds inside an open group.
 
+### Changed
+
+- The chat panel is split into small parts (header, history, messages, user and AI turns, input) with the picture handling in `usePictureAttachments` and the history grouping as a pure function – it looks and works as before. The set-up wizard (one part per step, its state in `wizard/useAiSetup.ts`) and the model search (search bar, result row, files; `search/useHfSearch.ts`) are split the same way. Settings are kept with `useStorage`, the history and the search wait with `watchDebounced` (VueUse) instead of own timers. Icon buttons now have an accessible name, and the delete and remove buttons sit on the correct side in right-to-left languages.
+
 ## [1.3.0] – 2026-10-22 · Shap3D.ai 0.7.0
 
 ### Added

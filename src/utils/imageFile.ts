@@ -8,7 +8,8 @@ export interface ModelImage {
   aspect: number;
 }
 
-const readDataUrl = (file: Blob) =>
+/** The file as a data URL. */
+export const readDataUrl = (file: Blob) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
