@@ -17,6 +17,21 @@ A **pre-commit hook** does this for you: `npm install` sets it up ([husky](https
 
 Plugin packages (`plugins/<name>/`) are not part of the app, so the app's scripts and its lint-staged configuration leave them alone. Each package has the same scripts in its own `package.json` (`npm run lint`, `lint:fix`, `format`, `format:check` in its folder) and its own `lint-staged` configuration, which the hook uses for staged files in that package – lint-staged always takes the configuration closest to a file. The rules come from the `.oxlintrc.json` and `.oxfmtrc.json` in the repository root, which oxlint and oxfmt find from the package folder.
 
+## Storybook
+
+[Storybook](https://storybook.js.org/) shows every Vue component on its own – the app's (`src/components`), the built-in plugins' (`src/plugins/builtin`) and the plugin packages' (`plugins/<name>/src`) – with their variants and props as controls.
+
+```bash
+npm run storybook         # http://localhost:6016
+npm run build-storybook   # static build in dist/storybook
+```
+
+- **Stories** lie next to their component: `S3dButton.vue` → `S3dButton.stories.ts`. A new component gets a story too.
+- **One real editor** for all stories ([`.storybook/editor.ts`](../../.storybook/editor.ts)): its viewer draws into a hidden canvas, the built-in plugins run, and a small demo model (house, a component with copies, a procedural group, two scenes) gives panels something to show. Stories that open global state – a dialog, the tour, a second model tab – close it again when they are left.
+- **Plugin packages** get the app only through `activate(context)`; their stories start the package once with the loader `startPluginPackage(plugin)`. The package tsconfigs leave the stories out (they import the app); [`.storybook/tsconfig.json`](../../.storybook/tsconfig.json) type-checks them: `npx vue-tsc --noEmit -p .storybook`.
+- The toolbar switches **light/dark** and **German/English**.
+- Storybook has its own Vite config ([`.storybook/vite.config.ts`](../../.storybook/vite.config.ts)) – the app's adds dev-server middlewares and a Content Security Policy Storybook doesn't want.
+
 ## Releases
 
 Releases run by themselves – no tag by hand. The [release workflow](../../.github/workflows/release.yml) runs on every push to `main` and releases the version in `package.json` as soon as there is no release (tag `v<version>`) for it yet:
@@ -61,11 +76,13 @@ src/
                REST, Swagger UI and MCP, its dev-server half in remote/server)
   i18n/        the i18n core – t(), message and language registry, number/unit formatting, English source texts (en.json)
   components/  Vue UI – toolbars, panels, dialogs, command palette, welcome tour
-               (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components)
+               (every component is prefixed with S3d, e.g. S3dTopBar.vue, so it never collides with library components;
+               its Storybook story lies next to it, S3dTopBar.stories.ts)
   components/ui/  small reusable building blocks – S3dModalDialog, S3dToggleSwitch, S3dSegmentedControl, S3dProgressBar, S3dCloseButton
   composables/ reusable stateful logic – useModel/useSelection, usePopover, useScripts (built on VueUse)
   utils/       pure helper functions – e.g. material swatches
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
+.storybook/    Storybook – config, the shared editor with its demo model, the plugin-package loader
 docs/          logo, README screenshots and this wiki (docs/wiki/)
 plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/, roomplanner/, shaders/, noise/, level/, marketplace/, bricks/ (not part of the app build)
 packages/      libraries that plugins bundle at build time – procgen/ (procedural generation, with Vitest tests; not part of the app build)

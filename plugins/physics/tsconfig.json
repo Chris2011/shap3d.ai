@@ -5,5 +5,7 @@
     // Rapier's declarations use Symbol.dispose (ESNext) – they are its own business
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // stories run in the app's Storybook (.storybook/) – they import the app, which a package must not
+  "exclude": ["src/**/*.stories.ts"]
 }

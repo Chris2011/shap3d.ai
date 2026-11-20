@@ -4,5 +4,7 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // stories run in the app's Storybook (.storybook/) – they import the app, which a package must not
+  "exclude": ["src/**/*.stories.ts"]
 }

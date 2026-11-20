@@ -1,0 +1,11 @@
+{
+  // type-checks the Storybook setup and the stories of the plugin packages (the app's stories are in the main tsconfig)
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["vite/client", "three", "web-bluetooth", "node"],
+    "paths": { "@shap3d/procgen": ["../packages/procgen/src/index.ts"] }
+  },
+  "include": [".", "../src/**/*.d.ts", "../plugins/*/src/**/*.stories.ts"]
+}

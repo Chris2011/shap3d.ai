@@ -28,7 +28,7 @@ oxlint and oxfmt enforce the formatting (`npm run lint:fix`, `npm run format`; t
 - **Readable names** – `selection`, `instance`, `definition`, not `sel`, `inst`, `def` in new code.
 - **Function expressions** – `const build = () => { … }` rather than `function build() { … }`.
 - **Composables** for reusable stateful logic in Vue (`src/composables/use….ts`).
-- **Vue components** are prefixed with `S3d` (`S3dTopBar.vue`) so they never collide with library components.
+- **Vue components** are prefixed with `S3d` (`S3dTopBar.vue`) so they never collide with library components. Each one has a Storybook story next to it (`S3dTopBar.stories.ts`, `npm run storybook` – see [Storybook](docs/wiki/development.md#storybook)).
 - Comments say _why_, in plain sentences, as densely as the surrounding code does.
 - Units are **metres**, **Z is up**.
 

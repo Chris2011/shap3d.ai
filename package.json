@@ -19,7 +19,9 @@
     "lint:fix": "oxlint --fix src scripts",
     "format": "oxfmt src scripts",
     "format:check": "oxfmt --check src scripts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "storybook dev -p 6016 --no-open",
+    "build-storybook": "storybook build -o dist/storybook"
   },
   "lint-staged": {
     "{src,scripts}/**/*.{js,mjs,ts,vue}": [
@@ -49,6 +51,8 @@
     "vue": "^3.5.44"
   },
   "devDependencies": {
+    "@storybook/addon-docs": "^10.6.8",
+    "@storybook/vue3-vite": "^10.6.8",
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^22.20.5",
@@ -58,6 +62,7 @@
     "lint-staged": "^16.4.0",
     "oxfmt": "0.72.0",
     "oxlint": "1.87.0",
+    "storybook": "^10.6.8",
     "swagger-ui-dist": "^5.34.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
