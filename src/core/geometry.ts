@@ -262,3 +262,10 @@ export const bbox = (points: V3[]): THREE.Box3 => {
   }
   return box;
 };
+
+/** `transform` (a rotation, a scale …) about `point` instead of about the origin */
+export const aboutPoint = (point: V3, transform: THREE.Matrix4): THREE.Matrix4 =>
+  new THREE.Matrix4()
+    .makeTranslation(point.x, point.y, point.z)
+    .multiply(transform)
+    .multiply(new THREE.Matrix4().makeTranslation(-point.x, -point.y, -point.z));

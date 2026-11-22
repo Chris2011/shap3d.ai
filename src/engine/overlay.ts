@@ -129,6 +129,7 @@ export class Overlay {
       intersection: '#000',
       axis: '#000',
       origin: '#e0a000',
+      cross: '#e00000',
     };
     const color = col[kind] ?? '#000';
     context.fillStyle = color;
@@ -156,8 +157,8 @@ export class Overlay {
       context.closePath();
       context.fill();
       context.stroke();
-    } else if (kind === 'intersection') {
-      context.strokeStyle = '#000';
+    } else if (kind === 'intersection' || kind === 'cross') {
+      context.strokeStyle = color;
       context.lineWidth = 2;
       context.beginPath();
       context.moveTo(screenPos.x - 5, screenPos.y - 5);
