@@ -107,6 +107,25 @@ const items = computed<It[]>(() => {
       { label: t('contextMenu.flipGreen'), cmd: 'flipY' },
       { label: t('contextMenu.flipBlue'), cmd: 'flipZ' },
     );
+    const objects = selection.filter((entityRef) => entityRef.kind === 'instance').length;
+    if (objects >= 2) {
+      const axes = [
+        ['X', t('contextMenu.red')],
+        ['Y', t('contextMenu.green')],
+        ['Z', t('contextMenu.blue')],
+      ];
+      out.push({
+        label: t('contextMenu.align'),
+        children: axes.flatMap(([name, axis]) => [
+          { label: t('contextMenu.axisStart', { axis }), cmd: `align${name}Min` },
+          { label: t('contextMenu.axisCenter', { axis }), cmd: `align${name}Center` },
+          { label: t('contextMenu.axisEnd', { axis }), cmd: `align${name}Max` },
+        ]),
+      });
+      if (objects >= 3) {
+        out.push({ label: t('contextMenu.distribute'), children: axes.map(([name, axis]) => ({ label: axis, cmd: `distribute${name}` })) });
+      }
+    }
     out.push(
       { sep: true },
       { label: t('commands.zoomSelection'), cmd: 'zoomSelection' },
