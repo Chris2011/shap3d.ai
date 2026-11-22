@@ -845,7 +845,8 @@
         "blueprint": "Blueprint",
         "sketch": "Sketch",
         "night": "Night",
-        "white": "White"
+        "white": "White",
+        "monochrome": "Monochrome"
       },
       "environment": "Environment (HDR, EXR)",
       "environmentLoad": "Load…",

@@ -40,6 +40,21 @@ export const STYLE_PRESETS: readonly StylePreset[] = [
   },
   { id: 'night', style: { ...DEFAULT_STYLE, skyColor: '#1f2a44', groundColor: '#2c2f33', edgeColor: '#111111' } },
   { id: 'white', style: { ...DEFAULT_STYLE, sky: false, ground: false, skyColor: '#ffffff', groundColor: '#ffffff' } },
+  // like a white study model: no material colours, light grey back faces and soft grey edges – with shadows and AO a presentation look
+  {
+    id: 'monochrome',
+    style: {
+      ...DEFAULT_STYLE,
+      faceStyle: 'monochrome',
+      frontColor: '#ffffff',
+      backColor: '#e6e6e6',
+      edgeColor: '#4d4d4d',
+      sky: false,
+      ground: false,
+      skyColor: '#ffffff',
+      groundColor: '#ffffff',
+    },
+  },
 ];
 
 /** presets leave the ambient occlusion as it is */

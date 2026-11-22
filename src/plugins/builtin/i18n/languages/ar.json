@@ -845,7 +845,8 @@
         "blueprint": "مخطط أزرق",
         "sketch": "رسم تخطيطي",
         "night": "ليل",
-        "white": "أبيض"
+        "white": "أبيض",
+        "monochrome": "أحادي اللون"
       },
       "environment": "البيئة (HDR, EXR)",
       "environmentLoad": "تحميل…",

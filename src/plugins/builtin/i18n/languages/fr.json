@@ -845,7 +845,8 @@
         "blueprint": "Plan bleu",
         "sketch": "Croquis",
         "night": "Nuit",
-        "white": "Blanc"
+        "white": "Blanc",
+        "monochrome": "Monochrome"
       },
       "environment": "Environnement (HDR, EXR)",
       "environmentLoad": "Charger…",

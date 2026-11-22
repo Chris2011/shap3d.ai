@@ -845,7 +845,8 @@
         "blueprint": "Plano",
         "sketch": "Boceto",
         "night": "Noche",
-        "white": "Blanco"
+        "white": "Blanco",
+        "monochrome": "Monocromo"
       },
       "environment": "Entorno (HDR, EXR)",
       "environmentLoad": "Cargar…",

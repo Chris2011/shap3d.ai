@@ -845,7 +845,8 @@
         "blueprint": "Blaupause",
         "sketch": "Skizze",
         "night": "Nacht",
-        "white": "Weiß"
+        "white": "Weiß",
+        "monochrome": "Monochrom"
       },
       "environment": "Umgebung (HDR, EXR)",
       "environmentLoad": "Laden…",

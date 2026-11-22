@@ -1761,7 +1761,9 @@
         "night": "",
         "night#en": "Night",
         "white": "",
-        "white#en": "White"
+        "white#en": "White",
+        "monochrome": "",
+        "monochrome#en": "Monochrome"
       },
       "environment": "",
       "environment#en": "Environment (HDR, EXR)",
