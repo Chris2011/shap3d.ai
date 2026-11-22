@@ -119,6 +119,7 @@
       "view-back": "Back",
       "view-left": "Left",
       "view-bottom": "Bottom",
+      "view-ceiling": "Reflected ceiling plan",
       "toggleSnapping": "Snapping",
       "explodeToInputs": "Take apart into its parts",
       "newTab": "New tab",

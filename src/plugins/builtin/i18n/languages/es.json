@@ -119,6 +119,7 @@
       "view-back": "Posterior",
       "view-left": "Izquierda",
       "view-bottom": "Inferior",
+      "view-ceiling": "Plano de techo reflejado",
       "toggleSnapping": "Ajuste",
       "explodeToInputs": "Separar en sus partes",
       "newTab": "Nueva pestaña",

@@ -30,11 +30,18 @@ export const CAMERA_COMMANDS: CommandDefinition[] = [
     },
     checked: (editor) => !!editor.viewer?.rig.isOrtho,
   },
-  ...(['iso', 'top', 'front', 'right', 'back', 'left', 'bottom'] as const).map((view) => ({
+  ...(['iso', 'top', 'front', 'right', 'back', 'left', 'bottom', 'ceiling'] as const).map((view) => ({
     id: 'view-' + view,
     group: 'camera',
     separator: view === 'iso',
-    run: (editor: Editor) => editor.viewer.rig.standardView(view, editor.model.bounds()),
+    run: (editor: Editor) => {
+      // a reflected ceiling plan is a parallel projection, like a drawing
+      if (view === 'ceiling') {
+        editor.viewer.rig.isOrtho = true;
+        editor.ui.projection = 'ortho';
+      }
+      editor.viewer.rig.standardView(view, editor.model.bounds());
+    },
     checked: (editor: Editor) => isStandardView(editor, view),
   })),
 ];

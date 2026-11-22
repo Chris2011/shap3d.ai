@@ -405,6 +405,8 @@
       "view-left#en": "Left",
       "view-bottom": "",
       "view-bottom#en": "Bottom",
+      "view-ceiling": "",
+      "view-ceiling#en": "Reflected ceiling plan",
       "toggleSnapping": "",
       "toggleSnapping#en": "Snapping",
       "explodeToInputs": "",

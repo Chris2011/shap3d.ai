@@ -60,7 +60,11 @@ export class Overlay {
     }
     const toScreen = (viewPoint: THREE.Vector3) => {
       const projected = viewPoint.clone().applyMatrix4(cam.projectionMatrix);
-      return new THREE.Vector2(((projected.x + 1) / 2) * this.viewer.width, ((1 - projected.y) / 2) * this.viewer.height);
+      const renderedX = ((projected.x + 1) / 2) * this.viewer.width;
+      return new THREE.Vector2(
+        this.viewer.rig.reflected ? this.viewer.width - renderedX : renderedX,
+        ((1 - projected.y) / 2) * this.viewer.height,
+      );
     };
     return [toScreen(viewStart), toScreen(viewEnd)];
   }

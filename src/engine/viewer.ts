@@ -377,6 +377,8 @@ export class Viewer {
     this.scene.add(this.shadowGround, this.grid.mesh);
     this.rig.onChange = () => {
       this.needsRender = true;
+      // the reflected ceiling plan mirrors the 3D picture only; the overlay with its texts stays readable
+      this.canvas.style.transform = this.rig.reflected ? 'scaleX(-1)' : '';
     };
     onThemeChange(() => {
       this.needsRender = true;
@@ -1850,7 +1852,9 @@ export class Viewer {
 
   // ------------------------------------------------------------ picking helpers
   ndc(x: number, y: number) {
-    return new THREE.Vector2((x / this.width) * 2 - 1, -(y / this.height) * 2 + 1);
+    // a reflected view shows the picture mirrored: the cursor at x looks at the rendered pixel at width - x
+    const renderedX = this.rig.reflected ? this.width - x : x;
+    return new THREE.Vector2((renderedX / this.width) * 2 - 1, -(y / this.height) * 2 + 1);
   }
   ray(x: number, y: number): THREE.Ray {
     return this.rig.ray(this.ndc(x, y));
@@ -1858,8 +1862,9 @@ export class Viewer {
 
   project(point: THREE.Vector3): { x: number; y: number; z: number; visible: boolean } {
     const projected = point.clone().project(this.rig.camera);
+    const renderedX = ((projected.x + 1) / 2) * this.width;
     return {
-      x: ((projected.x + 1) / 2) * this.width,
+      x: this.rig.reflected ? this.width - renderedX : renderedX,
       y: ((1 - projected.y) / 2) * this.height,
       z: projected.z,
       visible: projected.z > -1 && projected.z < 1,

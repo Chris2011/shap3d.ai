@@ -23,15 +23,19 @@ const STANDARD_VIEW_DIRECTIONS = {
   iso: [-1, -1, 0.8],
   top: [0, 0, 1],
   bottom: [0, 0, -1],
+  ceiling: [0, 0, -1],
   front: [0, -1, 0],
   back: [0, 1, 0],
   left: [-1, 0, 0],
   right: [1, 0, 0],
 } as const;
-/** The camera still looks along the standard view (any zoom or pan, no orbit since). */
+/** The camera still looks along the standard view (any zoom or pan, no orbit since); the ceiling plan is the mirrored view from below. */
 export const isStandardView = (editor: Editor, view: keyof typeof STANDARD_VIEW_DIRECTIONS): boolean => {
   const rig = editor.viewer?.rig;
   if (!rig) {
+    return false;
+  }
+  if (rig.reflected !== (view === 'ceiling')) {
     return false;
   }
   const direction = rig.position.clone().sub(rig.target).normalize();

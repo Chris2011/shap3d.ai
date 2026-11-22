@@ -7,6 +7,11 @@ export class CameraRig {
   ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, -10000, 10000);
   target = new THREE.Vector3(0, 0, 0);
   isOrtho = false;
+  /**
+   * reflected ceiling plan: the picture is shown mirrored left to right (the viewer flips its canvas).
+   * shortcut: pictures rendered apart from the view (scene thumbnails, PNG export, LayOut viewports) are not mirrored – flip them in viewRender.ts when one is needed.
+   */
+  reflected = false;
   aspect = 1;
   private tween: { from: CameraState; to: CameraState; startedAt: number; duration: number } | null = null;
   onChange = () => {};
@@ -64,7 +69,8 @@ export class CameraRig {
 
   orbit(deltaX: number, deltaY: number, pivot?: THREE.Vector3) {
     const center = pivot ?? this.target;
-    const yaw = -deltaX * 0.006,
+    // in a mirrored picture the cursor moves the other way
+    const yaw = (this.reflected ? deltaX : -deltaX) * 0.006,
       pitch = -deltaY * 0.006;
     const cam = this.persp;
     const off = cam.position.clone().sub(center);
@@ -102,7 +108,7 @@ export class CameraRig {
     }
     const right = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 0);
     const up = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 1);
-    const move = right.multiplyScalar(-dxPx * worldPerPx).add(up.multiplyScalar(dyPx * worldPerPx));
+    const move = right.multiplyScalar((this.reflected ? dxPx : -dxPx) * worldPerPx).add(up.multiplyScalar(dyPx * worldPerPx));
     cam.position.add(move);
     this.target.add(move);
     this.changed();
@@ -144,14 +150,17 @@ export class CameraRig {
       target: sphere.center.toArray(),
       fov: this.persp.fov,
       ortho: this.isOrtho,
+      reflected: this.reflected,
     };
     this.applyState(to, animate);
   }
 
-  standardView(name: 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right' | 'iso', box: THREE.Box3, animate = true) {
+  /** `ceiling`: the reflected ceiling plan – from below, mirrored, so it lines up with the plan from above */
+  standardView(name: 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right' | 'iso' | 'ceiling', box: THREE.Box3, animate = true) {
     const dirs: Record<string, number[]> = {
       top: [0, -0.0001, 1],
       bottom: [0, 0.0001, -1],
+      ceiling: [0, 0.0001, -1],
       front: [0, -1, 0],
       back: [0, 1, 0],
       left: [-1, 0, 0],
@@ -167,6 +176,7 @@ export class CameraRig {
         target: center.toArray(),
         fov: this.persp.fov,
         ortho: this.isOrtho,
+        reflected: name === 'ceiling',
       },
       animate,
       () => this.zoomExtents(box, animate),
@@ -174,12 +184,19 @@ export class CameraRig {
   }
 
   getState(): CameraState {
-    return { position: this.persp.position.toArray(), target: this.target.toArray(), fov: this.persp.fov, ortho: this.isOrtho };
+    return {
+      position: this.persp.position.toArray(),
+      target: this.target.toArray(),
+      fov: this.persp.fov,
+      ortho: this.isOrtho,
+      reflected: this.reflected,
+    };
   }
 
   private after: (() => void) | null = null;
   applyState(state: CameraState, animate = true, after?: () => void) {
     this.isOrtho = state.ortho;
+    this.reflected = !!state.reflected;
     if (!animate) {
       this.tween = null;
       this.after = null;

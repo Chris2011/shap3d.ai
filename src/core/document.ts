@@ -92,6 +92,8 @@ export interface CameraState {
   target: number[];
   fov: number;
   ortho: boolean;
+  /** reflected ceiling plan: the view from below, mirrored so it lines up with the plan from above */
+  reflected?: boolean;
 }
 export interface Scene {
   id: number;
