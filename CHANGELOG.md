@@ -54,6 +54,8 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **The place of the sun**: latitude and north direction in the Shadows panel, saved with the model.
 - **Materials as a cube**: the swatches in the Materials panel can be shown flat or as a small cube.
 - **Plugin API**: `render.pass(draw)` draws over each frame of the 3D view; exporters can ask first (`options`: choices and checkboxes, handed to `export`). _(Import formats 1.2.0: USDZ export, view as SVG)_
+- **Offset on several faces**: select several faces and click one of them with _Offset_ – all of them get the same border inside (or outside), in one undo step. A double-click repeats the last distance on all of them. Clicking a face outside the selection offsets only that one, as before.
+- **Gaps while moving**: Move shows the free space to the nearest group or component on each side along red and green as dimensions. Tab picks one of them (marked blue), and a typed length is then that gap – e.g. Tab, `500`, Enter leaves 500 mm to the neighbour. Without Tab, a typed length is the distance moved, as before.
 - **Align and distribute**: with two or more groups or components selected, the context menu lines them up along the red, green or blue direction – at the start, centre or end of the selection; with three or more, _Distribute_ gives them equal gaps, the outer two stay. Also in the command palette, one undo step; locked ones stay where they are.
 - **Storybook for developers**: `npm run storybook` shows every Vue component – app, built-in plugins and plugin packages – with its variants, in light and dark, German and English, on a real editor with a demo model. Stories lie next to their components.
 

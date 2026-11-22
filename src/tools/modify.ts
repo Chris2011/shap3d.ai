@@ -6,7 +6,16 @@ import { isProcedureInput, type EntityRef, type Entities, type Instance } from '
 import { PointTool, onPlane, planeAxes } from './base';
 import { AXES, AXIS_COLOR, closestOnLineToRay, snapping } from '../engine/inference';
 import { parseArray, parseLengthList, formatAngle } from '../core/units';
-import { offsetPolygon, polygonNormal, planeBasis, to2D, pointInPolygon2D, distPointSegment2D, closestOnSegment } from '../core/geometry';
+import {
+  offsetPolygon,
+  polygonNormal,
+  planeBasis,
+  to2D,
+  pointInPolygon2D,
+  distPointSegment2D,
+  closestOnSegment,
+  LEN_EPS,
+} from '../core/geometry';
 import { createFollowMeProcedure } from '../core/procedures';
 import { t, formatDecimal, normalizeNumberInput } from '../i18n';
 import { gridLevels } from '../engine/gridView';
@@ -588,6 +597,8 @@ export class OffsetTool extends PointTool {
   vcbLabel = 'vcb.distance';
   cursor = 'crosshair';
   faceId: number | null = null;
+  /** the other selected faces when one of several is clicked – they get the same border (inset) */
+  otherFaceIds: number[] = [];
   distance = 0;
   pressed = false;
   status() {
@@ -598,7 +609,17 @@ export class OffsetTool extends PointTool {
   }
   cancel() {
     this.faceId = null;
+    this.otherFaceIds = [];
     this.editor.setHover(null);
+  }
+  /** the clicked face; with several faces selected and one of them clicked, all of them */
+  takeFaces(clickedId: number) {
+    const selected = this.editor
+      .selected()
+      .filter((entityRef) => entityRef.kind === 'face')
+      .map((entityRef) => entityRef.id);
+    this.faceId = selected.length === 1 ? selected[0] : clickedId;
+    this.otherFaceIds = selected.length > 1 && selected.includes(clickedId) ? selected.filter((id) => id !== clickedId) : [];
   }
   face(pointer: { x: number; y: number }) {
     const editor = this.editor;
@@ -608,9 +629,9 @@ export class OffsetTool extends PointTool {
       (context) => context.path.length === editor.activePath.length && editor.inContext(context.path),
     );
   }
-  worldLoop(): V3[] {
+  worldLoop(faceId = this.faceId!): V3[] {
     const editor = this.editor;
-    const face = editor.entities.faces.get(this.faceId!)!;
+    const face = editor.entities.faces.get(faceId)!;
     return face.outer.map((vertex) => editor.toWorld(editor.entities.positionOf(vertex)));
   }
   onMove(pointer: PEvt) {
@@ -641,12 +662,11 @@ export class OffsetTool extends PointTool {
   onDown(pointer: PEvt) {
     this.downAt = { x: pointer.x, y: pointer.y };
     if (this.faceId == null) {
-      const sel = this.editor.selected().filter((entityRef) => entityRef.kind === 'face');
       const faceHit = this.face(pointer);
       if (!faceHit) {
         return;
       }
-      this.faceId = sel.length === 1 ? sel[0].id : faceHit.faceId;
+      this.takeFaces(faceHit.faceId);
       this.distance = 0;
       this.pressed = true;
       return;
@@ -662,7 +682,7 @@ export class OffsetTool extends PointTool {
   onDblClick(pointer: PEvt) {
     const faceHit = this.face(pointer);
     if (faceHit && this.editor.lastOffset) {
-      this.faceId = faceHit.faceId;
+      this.takeFaces(faceHit.faceId);
       this.finish(this.editor.lastOffset);
     }
   }
@@ -671,12 +691,15 @@ export class OffsetTool extends PointTool {
       return;
     }
     const editor = this.editor;
-    const faceId = this.faceId;
+    const faceIds = [this.faceId, ...this.otherFaceIds];
     editor.commit('tools.offset', () => {
-      const face = editor.entities.faces.get(faceId)!;
-      const pts = editor.entities.facePoints(face);
-      const off = offsetPolygon(pts, editor.entities.faceNormal(face), distance);
-      editor.entities.addLoop(off);
+      const entities = editor.entities;
+      // all borders first, then the loops – adding one splits only its own face
+      const loops = faceIds.flatMap((id) => {
+        const face = entities.faces.get(id);
+        return face ? [offsetPolygon(entities.facePoints(face), entities.faceNormal(face), distance)] : [];
+      });
+      loops.forEach((loop) => entities.addLoop(loop));
     });
     editor.lastOffset = distance;
     this.cancel();
@@ -693,13 +716,74 @@ export class OffsetTool extends PointTool {
     if (this.faceId == null) {
       return;
     }
-    const pts = this.worldLoop();
-    const normal = polygonNormal(pts);
-    overlay.polyline(offsetPolygon(pts, normal, this.distance), '#000', 1.3, true);
+    for (const id of [this.faceId, ...this.otherFaceIds]) {
+      const pts = this.worldLoop(id);
+      overlay.polyline(offsetPolygon(pts, polygonNormal(pts), this.distance), '#000', 1.3, true);
+    }
   }
 }
 
 // ===================================================================== Move
+/** the free space between what is moved and the nearest group or component on one side (world points) */
+interface Gap {
+  /** which side: 'x+', 'x-', 'y+', 'y-' */
+  side: string;
+  from: V3;
+  to: V3;
+  length: number;
+}
+
+/**
+ * The gaps from the moved selection to its nearest neighbour on each side along red and green: groups and components
+ * of the open context whose box lies beside it (overlapping across and in height).
+ * shortcut: boxes in the context's axes and lengths unscaled – off inside a scaled group; fine until someone moves there.
+ */
+const neighbourGaps = (editor: Editor): Gap[] => {
+  const refs = editor.selected();
+  const moving = editor.entities.refBounds(refs);
+  if (moving.isEmpty()) {
+    return [];
+  }
+  const movedIds = new Set(refs.filter((entityRef) => entityRef.kind === 'instance').map((entityRef) => entityRef.id));
+  const others = [...editor.entities.instances.values()]
+    .filter((instance) => !movedIds.has(instance.id) && !instance.hidden)
+    .map((instance) => editor.entities.refBounds([{ kind: 'instance', id: instance.id }]));
+  const gaps: Gap[] = [];
+  for (const axis of ['x', 'y'] as const) {
+    const across = axis === 'x' ? 'y' : 'x';
+    for (const sign of [1, -1]) {
+      let nearest: THREE.Box3 | null = null;
+      let length = Infinity;
+      for (const box of others) {
+        if (
+          box.max[across] < moving.min[across] ||
+          box.min[across] > moving.max[across] ||
+          box.max.z < moving.min.z ||
+          box.min.z > moving.max.z
+        ) {
+          continue;
+        }
+        const gap = sign > 0 ? box.min[axis] - moving.max[axis] : moving.min[axis] - box.max[axis];
+        if (gap > LEN_EPS && gap < length) {
+          length = gap;
+          nearest = box;
+        }
+      }
+      if (nearest) {
+        // the dimension runs in the middle of the part where both boxes face each other
+        const from = new THREE.Vector3();
+        from[across] = (Math.max(nearest.min[across], moving.min[across]) + Math.min(nearest.max[across], moving.max[across])) / 2;
+        from.z = (Math.max(nearest.min.z, moving.min.z) + Math.min(nearest.max.z, moving.max.z)) / 2;
+        from[axis] = sign > 0 ? moving.max[axis] : moving.min[axis];
+        const to = from.clone();
+        to[axis] += sign * length;
+        gaps.push({ side: axis + (sign > 0 ? '+' : '-'), from: editor.toWorld(from), to: editor.toWorld(to), length });
+      }
+    }
+  }
+  return gaps;
+};
+
 export class MoveTool extends PointTool {
   id = 'move';
   name = 'tools.move';
@@ -721,8 +805,15 @@ export class MoveTool extends PointTool {
   /** moving from an outline edge: the moved groups are see-through, with the look they had before */
   fromProfile = false;
   seeThrough: { instance: Instance; look: ReturnType<Editor['viewer']['shownLook']> }[] = [];
+  /** while moving: the free space to the neighbours; Tab picks one, and a typed length is then that space */
+  gaps: Gap[] = [];
+  gapSide: string | null = null;
+  get hotGap() {
+    return this.gaps.find((gap) => gap.side === this.gapSide) ?? null;
+  }
   status() {
-    return this.start ? t(this.copy ? 'tools.status.moveTargetCopy' : 'tools.status.moveTarget') : t('tools.status.moveStart');
+    const base = this.start ? t(this.copy ? 'tools.status.moveTargetCopy' : 'tools.status.moveTarget') : t('tools.status.moveStart');
+    return this.start && this.gaps.length ? `${base} ${t(this.hotGap ? 'tools.status.moveGapType' : 'tools.status.moveGapTab')}` : base;
   }
   busy() {
     return !!this.start;
@@ -735,6 +826,8 @@ export class MoveTool extends PointTool {
     this.start = null;
     this.live = null;
     this.fromProfile = false;
+    this.gaps = [];
+    this.gapSide = null;
     this.resetLocks();
     this.clearGrips();
     this.editor.setHover(null);
@@ -802,6 +895,11 @@ export class MoveTool extends PointTool {
       localEnd = editor.toLocal(this.start!.clone().add(delta));
     const matrix = new THREE.Matrix4().makeTranslation(localEnd.x - localStart.x, localEnd.y - localStart.y, localEnd.z - localStart.z);
     this.live!.apply(matrix);
+    const hadGaps = this.gaps.length > 0;
+    this.gaps = neighbourGaps(editor);
+    if (hadGaps !== this.gaps.length > 0) {
+      editor.refreshStatus();
+    }
     editor.invalidate();
     editor.setVcb(editor.fmt(delta.length()));
   }
@@ -880,10 +978,22 @@ export class MoveTool extends PointTool {
     this.start = null;
     this.live = null;
     this.fromProfile = false;
+    this.gaps = [];
+    this.gapSide = null;
     this.resetLocks();
     editor.invalidate();
   }
   onKey(keyEvent: KeyboardEvent, down: boolean) {
+    // Tab steps through the gaps to the neighbours (and back to none); a typed length then sets that gap
+    if (keyEvent.key === 'Tab' && this.start && this.gaps.length) {
+      if (down) {
+        const index = this.gaps.findIndex((gap) => gap.side === this.gapSide);
+        const next = ((index + (keyEvent.shiftKey ? this.gaps.length + 1 : 2)) % (this.gaps.length + 1)) - 1;
+        this.gapSide = next < 0 ? null : this.gaps[next].side;
+        this.editor.setVcb(this.hotGap ? this.editor.fmt(this.hotGap.length) : this.editor.fmt(this.delta.length()));
+      }
+      return true;
+    }
     if (keyEvent.key === 'Control' && down && !keyEvent.repeat) {
       this.copy = !this.copy;
       if (this.start) {
@@ -938,6 +1048,18 @@ export class MoveTool extends PointTool {
     if (!this.start) {
       return false;
     }
+    const gap = this.hotGap;
+    if (gap) {
+      // the typed length is the space to the neighbour picked with Tab
+      const length = this.lengthOf(text);
+      if (length == null || length < 0) {
+        return false;
+      }
+      const towards = gap.to.clone().sub(gap.from).normalize();
+      this.apply(this.delta.clone().addScaledVector(towards, gap.length - length));
+      this.finish();
+      return true;
+    }
     const lengths = parseLengthList(text, editor.model.settings.units);
     if (lengths.length === 3 && lengths.every((x) => x != null)) {
       this.apply(new THREE.Vector3(lengths[0]!, lengths[1]!, lengths[2]!));
@@ -957,6 +1079,11 @@ export class MoveTool extends PointTool {
     if (this.start && this.inference) {
       const col = this.inference.axis ? AXIS_COLOR[this.inference.axis] : '#000';
       overlay.line(this.start, this.start.clone().add(this.delta), col, 1.2, [4, 3]);
+    }
+    if (this.start) {
+      for (const gap of this.gaps) {
+        this.editor.drawDimension(overlay, gap.from, gap.to, new THREE.Vector3(), gap.side === this.gapSide);
+      }
     }
     if (!this.start && this.frame) {
       drawBoxFrame(this.editor, overlay, this.frame, this.rotateGrips, this.hotRotate);

@@ -334,6 +334,8 @@
         "moveTarget": "Haz clic para fijar el punto de destino o escribe una distancia. | Ctrl = copia sí/no. Flechas = bloquear la dirección de inferencia.",
         "moveTargetCopy": "Haz clic para fijar el punto de destino o escribe una distancia. (copia) | Ctrl = copia sí/no. Flechas = bloquear la dirección de inferencia.",
         "moveStart": "Haz clic para fijar el punto inicial. Las cruces rojas en la caja de un grupo lo rotan. | Ctrl = copia sí/no.",
+        "moveGapTab": "Tab = distancia a un vecino.",
+        "moveGapType": "Escribe la distancia al vecino marcado (Tab = siguiente).",
         "rotateCenter": "Elige el centro de rotación. Las flechas alinean el transportador.",
         "rotateStart": "Elige el punto inicial del ángulo de rotación.",
         "rotateAngle": "Elige o escribe el ángulo de rotación. Ctrl = copia.",

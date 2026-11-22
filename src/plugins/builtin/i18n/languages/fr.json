@@ -334,6 +334,8 @@
         "moveTarget": "Cliquez pour définir le point d’arrivée ou saisissez une distance. | Ctrl = copie activée/désactivée. Flèches = verrouiller la direction d’inférence.",
         "moveTargetCopy": "Cliquez pour définir le point d’arrivée ou saisissez une distance. (copie) | Ctrl = copie activée/désactivée. Flèches = verrouiller la direction d’inférence.",
         "moveStart": "Cliquez pour définir le point de départ. Les croix rouges sur la boîte d'un groupe le font pivoter. | Ctrl = copie activée/désactivée.",
+        "moveGapTab": "Tab = distance à un voisin.",
+        "moveGapType": "Saisissez la distance au voisin marqué (Tab = suivant).",
         "rotateCenter": "Choisissez le centre de rotation. Les flèches alignent le rapporteur.",
         "rotateStart": "Choisissez le point de départ de l’angle de rotation.",
         "rotateAngle": "Choisissez ou saisissez l’angle de rotation. Ctrl = copie.",

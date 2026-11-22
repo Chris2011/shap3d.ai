@@ -334,6 +334,8 @@
         "moveTarget": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. | Strg = Kopie ein/aus. Pfeiltasten = Richtung festhalten.",
         "moveTargetCopy": "Klicken, um den Zielpunkt festzulegen, oder Abstand eingeben. (Kopie) | Strg = Kopie ein/aus. Pfeiltasten = Richtung festhalten.",
         "moveStart": "Klicken, um den Startpunkt festzulegen. Rote Kreuze am Rahmen einer Gruppe drehen sie. | Strg = Kopie ein/aus.",
+        "moveGapTab": "Tab = Abstand zu einem Nachbarn.",
+        "moveGapType": "Abstand zum markierten Nachbarn eingeben (Tab = nächster).",
         "rotateCenter": "Wähle den Drehpunkt aus. Pfeiltasten richten den Winkelmesser aus.",
         "rotateStart": "Wähle den Startpunkt des Drehwinkels aus.",
         "rotateAngle": "Wähle den Drehwinkel aus oder gib ihn ein. Strg = Kopie.",

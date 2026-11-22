@@ -334,6 +334,8 @@
         "moveTarget": "Click to set the target point, or type a distance. | Ctrl = copy on/off. Arrow keys = keep to a direction.",
         "moveTargetCopy": "Click to set the target point, or type a distance. (copy) | Ctrl = copy on/off. Arrow keys = keep to a direction.",
         "moveStart": "Click to set the start point. Red crosses on a group's box rotate it. | Ctrl = copy on/off.",
+        "moveGapTab": "Tab = distance to a neighbour.",
+        "moveGapType": "Type the distance to the marked neighbour (Tab = next).",
         "rotateCenter": "Pick the centre of rotation. Arrow keys align the protractor.",
         "rotateStart": "Pick the start point of the rotation angle.",
         "rotateAngle": "Pick or type the rotation angle. Ctrl = copy.",
