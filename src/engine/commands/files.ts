@@ -6,6 +6,7 @@ import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter.js';
 import type { Editor } from '../editor';
 import { imageTexturesReady } from '../../core/textures';
 import { t } from '../../i18n';
+import { rememberProject } from '../projects';
 import { modelToThree } from './modelToThree';
 
 export const download = (name: string, data: Blob | string, type = 'application/octet-stream') => {
@@ -73,6 +74,10 @@ export const saveModel = async (editor: Editor) => {
 };
 
 export const exportAs = async (editor: Editor, kind: ExportKind) => {
+  if (kind === 'json') {
+    // first, so the saved file carries its entry of the project overview
+    await rememberProject(editor);
+  }
   const file = await exportFile(editor, kind);
   download(file.name, file.data, file.mimeType);
   if (kind === 'json') {

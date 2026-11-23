@@ -32,6 +32,7 @@
     <S3dContextMenu v-if="contextMenu" :x="contextMenu.x" :y="contextMenu.y" @close="contextMenu = null" />
     <S3dCommandPalette v-if="palette.open" />
     <component :is="pluginWindow" v-for="(pluginWindow, index) in PLUGIN_WINDOWS" :key="index" />
+    <S3dProjects />
     <S3dDialogs />
     <S3dWelcomeTour />
     <transition
@@ -70,6 +71,7 @@ import S3dContextMenu from './components/S3dContextMenu.vue';
 import S3dCommandPalette from './components/S3dCommandPalette.vue';
 import { palette, openPalette, closePalette } from './components/paletteState';
 import S3dDialogs from './components/S3dDialogs.vue';
+import S3dProjects from './components/S3dProjects.vue';
 import { PLUGIN_WINDOWS, WORKSPACES, workspaceState } from './plugins/uiExtensions';
 import S3dIcon from './components/S3dIcon.vue';
 import S3dWelcomeTour from './components/S3dWelcomeTour.vue';

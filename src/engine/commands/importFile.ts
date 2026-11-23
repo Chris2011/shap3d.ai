@@ -8,6 +8,7 @@ import type { Editor } from '../editor';
 import type { Definition } from '../../core/model';
 import type { PlaceTool } from '../../tools/place';
 import { pluginImporters, type LoadedScene } from '../../plugins/fileFormats';
+import { rememberProject } from '../projects';
 import { t } from '../../i18n';
 
 /** Import mesh files as a component made of faces (coplanar triangles merged). */
@@ -100,6 +101,7 @@ const importFileUnchecked = async (editor: Editor, file: File, { onCreated, plac
     if (typeof json.format === 'string' && json.format.startsWith('shap3d/')) {
       editor.loadJSON(json);
       editor.model.name = file.name.replace(/\.(shap3d|formwerk|suv)\.json$|\.json$/i, '');
+      void rememberProject(editor);
       return;
     }
     throw new Error(t('import.unknownJson'));

@@ -22,6 +22,7 @@
     "commands": {
       "new": "Neu",
       "open": "Öffnen…",
+      "projects": "Projekte…",
       "save": "Speichern (Download)",
       "saveLocal": "Im Browser speichern",
       "loadLocal": "Aus Browser laden",
@@ -558,6 +559,7 @@
       "new": "Neu",
       "newTab": "Neuer Tab",
       "open": "Öffnen…",
+      "projects": "Projekte…",
       "saveAs": "Speichern unter (Download)",
       "saveLocal": "Im Browser speichern",
       "loadLocal": "Aus Browser laden",
@@ -1796,6 +1798,17 @@
         "tooMany": "Das wären mehr als 2000 Kopien – das letzte Ergebnis bleibt.",
         "failed": "Das Ergebnis ließ sich nicht berechnen – das letzte Ergebnis bleibt."
       }
+    },
+    "projects": {
+      "title": "Projekte",
+      "search": "Projekte suchen",
+      "empty": "Noch keine Projekte. Modelle, die du speicherst oder öffnest, erscheinen hier.",
+      "noMatch": "Kein Projekt passt zur Suche.",
+      "open": "Öffnen",
+      "duplicate": "Duplizieren",
+      "remove": "Aus der Übersicht entfernen",
+      "copyName": "{name} (Kopie)",
+      "confirmRemove": "„{name}“ aus der Übersicht entfernen? Anderswo gespeicherte Dateien bleiben."
     }
   }
 }

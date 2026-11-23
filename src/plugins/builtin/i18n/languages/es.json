@@ -22,6 +22,7 @@
     "commands": {
       "new": "Nuevo",
       "open": "Abrir…",
+      "projects": "Proyectos…",
       "save": "Guardar (descarga)",
       "saveLocal": "Guardar en el navegador",
       "loadLocal": "Cargar desde el navegador",
@@ -558,6 +559,7 @@
       "new": "Nuevo",
       "newTab": "Nueva pestaña",
       "open": "Abrir…",
+      "projects": "Proyectos…",
       "saveAs": "Guardar como (descarga)",
       "saveLocal": "Guardar en el navegador",
       "loadLocal": "Cargar desde el navegador",
@@ -1796,6 +1798,17 @@
         "tooMany": "Serían más de 2000 copias: se mantiene el último resultado.",
         "failed": "No se pudo construir el procedimiento: se mantiene el último resultado."
       }
+    },
+    "projects": {
+      "title": "Proyectos",
+      "search": "Buscar proyectos",
+      "empty": "Aún no hay proyectos. Los modelos que guardes o abras aparecen aquí.",
+      "noMatch": "Ningún proyecto coincide con la búsqueda.",
+      "open": "Abrir",
+      "duplicate": "Duplicar",
+      "remove": "Quitar de la vista general",
+      "copyName": "{name} (copia)",
+      "confirmRemove": "¿Quitar «{name}» de la vista general? Los archivos guardados en otro lugar se conservan."
     }
   }
 }

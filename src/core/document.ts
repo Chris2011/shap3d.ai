@@ -153,6 +153,8 @@ export interface ModelSettings {
   /** tabs for the scenes above the viewport */
   sceneTabs: boolean;
   style: StyleSettings;
+  /** the entry of this model in the project overview (browser storage); copies of the file share it */
+  projectId?: string;
 }
 
 export const DEFAULT_STYLE: StyleSettings = {
@@ -437,7 +439,13 @@ export class Model implements DefinitionRegistry {
     };
     const toVector = (values: number[]) => new THREE.Vector3(values[0], values[1], values[2]);
     this.name = json.name ?? t('names.untitled');
-    this.settings = { ...this.settings, ...json.settings, style: { ...DEFAULT_STYLE, ...json.settings?.style } };
+    this.settings = {
+      ...this.settings,
+      ...json.settings,
+      style: { ...DEFAULT_STYLE, ...json.settings?.style },
+      // a model without an entry must not keep the one of the model loaded before
+      projectId: json.settings?.projectId,
+    };
     this.pluginData = json.pluginData ? JSON.parse(JSON.stringify(json.pluginData)) : undefined;
     this.environment = json.environment && { name: String(json.environment.name), data: String(json.environment.data) };
     if (json.materials) {

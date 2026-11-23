@@ -54,6 +54,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **The place of the sun**: latitude and north direction in the Shadows panel, saved with the model.
 - **Materials as a cube**: the swatches in the Materials panel can be shown flat or as a small cube.
 - **Plugin API**: `render.pass(draw)` draws over each frame of the 3D view; exporters can ask first (`options`: choices and checkboxes, handed to `export`). _(Import formats 1.2.0: USDZ export, view as SVG)_
+- **Project overview**: _File › Projects…_ lists the models you saved, saved in the browser or opened (up to 40, kept in the browser), with a preview, search, open, duplicate and remove. A model saved as a file remembers its entry.
 - **Style preset "Monochrome"**: a white study-model look in the Styles panel – the _Mono_ face style, light grey back faces, grey edges, no sky or ground. Add shadows and ambient occlusion for a presentation.
 - **Reflected ceiling plan**: _Camera › Reflected ceiling plan_ shows the model from below in parallel projection, mirrored so it lines up with the plan from above. Picking, snapping and panning follow the mirrored picture; texts stay readable; scenes remember it. Scene thumbnails, PNG export and LayOut viewports are not mirrored yet.
 - **Offset on several faces**: select several faces and click one of them with _Offset_ – all of them get the same border inside (or outside), in one undo step. A double-click repeats the last distance on all of them. Clicking a face outside the selection offsets only that one, as before.
@@ -74,6 +75,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ### Fixed
 
+- **Scene previews** showed a model changed just before without the change: the picture was taken before the view was rebuilt.
 - **The Shadows panel** shows the time, month, latitude and north while dragging the sliders, not only after the next change.
 - **The main menu** showed `menu.newTab` instead of "New tab".
 - **Curves look and act as one surface**: faces joined by soft edges up to 30° are shaded smoothly instead of as flat strips (cylinders, spheres, gear flanks, imports), and a click or the paint bucket takes the whole surface. The shape stays the same; exports are unchanged.

@@ -7,16 +7,15 @@ import { t } from '../i18n';
 /** the scene last chosen – shared by the Szenen panel and the scene tabs */
 export const sceneState = reactive({ active: null as number | null });
 
-const THUMBNAIL_WIDTH = 192;
-
-/** A small JPEG of the current view for the scene tab preview. */
-const thumbnail = (editor: Editor): string | undefined => {
+/** A small JPEG of the current view – for the scene tab preview and the project overview. */
+export const viewThumbnail = (editor: Editor, width = 192): string | undefined => {
   try {
     const source = editor.viewer.canvas;
+    editor.frame(); // a model changed just now is not in the view yet
     editor.viewer.render(); // the drawing buffer is only valid right after a render
     const canvas = document.createElement('canvas');
-    canvas.width = THUMBNAIL_WIDTH;
-    canvas.height = Math.round((THUMBNAIL_WIDTH * source.height) / Math.max(1, source.width));
+    canvas.width = width;
+    canvas.height = Math.round((width * source.height) / Math.max(1, source.width));
     canvas.getContext('2d')?.drawImage(source, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/jpeg', 0.7);
   } catch {
@@ -29,7 +28,7 @@ export const captureScene = (editor: Editor): Omit<Scene, 'id' | 'name'> => ({
   camera: editor.viewer.rig.getState(),
   style: { ...editor.model.settings.style },
   hiddenTags: editor.model.tags.filter((tag) => !tag.visible).map((tag) => tag.name),
-  thumbnail: thumbnail(editor),
+  thumbnail: viewThumbnail(editor),
 });
 
 /** Adds a scene from the current view (one undo step) and makes it the active one. */

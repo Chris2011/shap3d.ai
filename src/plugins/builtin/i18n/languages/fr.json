@@ -22,6 +22,7 @@
     "commands": {
       "new": "Nouveau",
       "open": "Ouvrir…",
+      "projects": "Projets…",
       "save": "Enregistrer (téléchargement)",
       "saveLocal": "Enregistrer dans le navigateur",
       "loadLocal": "Charger depuis le navigateur",
@@ -558,6 +559,7 @@
       "new": "Nouveau",
       "newTab": "Nouvel onglet",
       "open": "Ouvrir…",
+      "projects": "Projets…",
       "saveAs": "Enregistrer sous (téléchargement)",
       "saveLocal": "Enregistrer dans le navigateur",
       "loadLocal": "Charger depuis le navigateur",
@@ -1796,6 +1798,17 @@
         "tooMany": "Cela ferait plus de 2000 copies – le dernier résultat reste.",
         "failed": "La procédure n’a pas pu être construite – le dernier résultat reste."
       }
+    },
+    "projects": {
+      "title": "Projets",
+      "search": "Rechercher des projets",
+      "empty": "Aucun projet pour l’instant. Les modèles enregistrés ou ouverts apparaissent ici.",
+      "noMatch": "Aucun projet ne correspond à la recherche.",
+      "open": "Ouvrir",
+      "duplicate": "Dupliquer",
+      "remove": "Retirer de la vue d’ensemble",
+      "copyName": "{name} (copie)",
+      "confirmRemove": "Retirer « {name} » de la vue d’ensemble ? Les fichiers enregistrés ailleurs restent."
     }
   }
 }

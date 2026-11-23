@@ -6,6 +6,8 @@ import type { CommandDefinition } from './types';
 import { pickFile, purgeReminder, saveModel, exportAs } from './files';
 import { importFile, IMPORT_EXTS } from './importFile';
 import { pluginImporters } from '../../plugins/fileFormats';
+import { rememberProject } from '../projects';
+import { openProjects } from '../../components/projectsState';
 
 /** The commands of the File menu – in menu order */
 export const FILE_COMMANDS: CommandDefinition[] = [
@@ -31,6 +33,7 @@ export const FILE_COMMANDS: CommandDefinition[] = [
       }
     },
   },
+  { id: 'projects', group: 'file', run: () => openProjects() },
   { id: 'save', shortcut: 'Ctrl+S', group: 'file', run: (editor) => saveModel(editor) },
   {
     id: 'toggleAutosave',
@@ -59,6 +62,7 @@ export const FILE_COMMANDS: CommandDefinition[] = [
       try {
         localStorage.setItem('s3d:saved', JSON.stringify(editor.model.toJSON()));
         editor.ui.saved = true;
+        void rememberProject(editor);
         editor.toast(t('toast.savedInBrowser'));
       } catch {
         editor.toast(t('toast.saveFailed'));

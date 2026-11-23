@@ -696,7 +696,8 @@ export class Editor {
     this.viewer.needsRender = true;
   }
 
-  private frame() {
+  /** brings pending model changes into the view – every frame, and before a picture is taken of it */
+  frame() {
     if (this.dirty) {
       this.dirty = false;
       this.selDirty = false;
