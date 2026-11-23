@@ -76,7 +76,7 @@ export const isProcedureInput = (instance: Instance) => !!instance.procedureRole
 
 /** how a procedural group was made; its result is built again from its inputs (see core/procedures.ts) */
 export interface ProcedureData {
-  kind: 'solid' | 'followme' | 'copyalong';
+  kind: 'solid' | 'followme' | 'copyalong' | 'edges';
   params: Record<string, string | number | boolean>;
   /** of the inputs when the result was last built */
   hash?: number;
@@ -1109,6 +1109,19 @@ export class Entities {
         continue;
       }
       const faces = this.facesOfEdge(edges[0].id);
+      // a face that passes the vertex twice (a pinched outline, e.g. where boolean cuts meet at a corner) or uses it
+      // without these edges would keep a corner that no longer exists
+      if (
+        this.facesOfVertex(vertexId).length !== faces.length ||
+        faces.some(
+          (face) =>
+            this.loops(face)
+              .flat()
+              .filter((vertex) => vertex === vertexId).length !== 1,
+        )
+      ) {
+        continue;
+      }
       const props = { soft: edges[0].soft, hidden: edges[0].hidden, tag: edges[0].tag };
       for (const face of faces) {
         for (const edge of this.faceEdges(face)) {

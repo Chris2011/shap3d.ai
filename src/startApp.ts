@@ -1,8 +1,11 @@
 /** The editor itself (three.js, tools, panels …) – loaded as its own bundle after the splash screen is up. */
 import { createApp } from 'vue';
 import App from './App.vue';
+import { loadManifold } from './core/manifold';
 
 export const startApp = () => {
+  // exact booleans for closed bodies; loads in the background, three-bvh-csg works until then
+  void loadManifold();
   const app = createApp(App);
   let mountError: unknown = null; // production builds only log hook errors – catch them to show the error screen
   app.config.errorHandler = (error) => {

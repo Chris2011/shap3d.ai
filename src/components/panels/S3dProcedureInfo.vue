@@ -10,6 +10,20 @@
       </select>
     </div>
 
+    <template v-if="procedure.kind === 'edges'">
+      <div class="s3d-row">
+        <span class="s3d-label">{{ t('procedures.edgeTreatment') }}</span>
+        <select class="s3d-input" :value="procedure.params.treatment" @change="setParams({ treatment: inputValue($event) })">
+          <option value="round">{{ t('procedures.round') }}</option>
+          <option value="chamfer">{{ t('procedures.chamfer') }}</option>
+        </select>
+      </div>
+      <div class="s3d-row">
+        <span class="s3d-label">{{ t(procedure.params.treatment === 'round' ? 'procedures.radius' : 'procedures.chamferWidth') }}</span>
+        <input class="s3d-input" :value="editor.fmt(Number(procedure.params.size))" @change="setLength('size', $event)" @keydown.stop />
+      </div>
+    </template>
+
     <template v-if="procedure.kind === 'copyalong'">
       <div class="s3d-row">
         <span class="s3d-label">{{ t('procedures.distribute') }}</span>
@@ -24,7 +38,12 @@
       </div>
       <div v-else class="s3d-row">
         <span class="s3d-label">{{ t('procedures.spacing') }}</span>
-        <input class="s3d-input" :value="editor.fmt(Number(procedure.params.spacing))" @change="setSpacing($event)" @keydown.stop />
+        <input
+          class="s3d-input"
+          :value="editor.fmt(Number(procedure.params.spacing))"
+          @change="setLength('spacing', $event)"
+          @keydown.stop
+        />
       </div>
       <label class="s3d-check">
         <input
@@ -97,12 +116,13 @@ const setCount = (event: Event) => {
     (event.target as HTMLInputElement).value = String(procedure.value?.params.count ?? 1);
   }
 };
-const setSpacing = (event: Event) => {
-  const spacing = parseLength(inputValue(event), editor.model.settings.units);
-  if (spacing != null && spacing > 0) {
-    setParams({ spacing });
+/** a length typed for a parameter (spacing, radius …) – back to the old value when it is no positive length */
+const setLength = (key: string, event: Event) => {
+  const length = parseLength(inputValue(event), editor.model.settings.units);
+  if (length != null && length > 0) {
+    setParams({ [key]: length });
   } else {
-    (event.target as HTMLInputElement).value = editor.fmt(Number(procedure.value?.params.spacing ?? 1));
+    (event.target as HTMLInputElement).value = editor.fmt(Number(procedure.value?.params[key] ?? 1));
   }
 };
 </script>

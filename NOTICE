@@ -19,7 +19,7 @@ Third-party content bundled with this product (under its own license):
 
 Third-party libraries used at runtime (installed via npm, not copied into
 this repository): three.js, three-bvh-csg, three-mesh-bvh, Vue, Tailwind CSS, fzstd –
-all MIT licensed.
+all MIT licensed – and manifold-3d (Apache-2.0).
 
 Not bundled: the SketchUp SDK (downloaded by each user from Trimble under
 Trimble's terms) and any AI models (each under its own license).

@@ -7,6 +7,7 @@ import { makeGroup, explode, explodeSelectedToInputs, setLocked } from './groups
 import { deleteSelection, copySelection, paste, hideSelection, unhideAll, clearAll } from './edit';
 import { reverseFaces, orientFaces, softenSelection, intersectSelection } from './faces';
 import { flipSelection, alignSelection, distributeSelection } from './arrange';
+import { treatSelectedEdges } from './edges';
 import { runSolid } from './solids';
 
 /** The commands of the Edit menu and the solid tools – in menu order */
@@ -124,6 +125,8 @@ export const EDIT_COMMANDS: CommandDefinition[] = [
   { id: 'soften', group: 'edit', run: (editor) => softenSelection(editor, true) },
   { id: 'unsoften', group: 'edit', run: (editor) => softenSelection(editor, false) },
   { id: 'intersect', group: 'edit', run: intersectSelection },
+  { id: 'roundEdges', group: 'edit', run: (editor) => treatSelectedEdges(editor, 'round') },
+  { id: 'chamferEdges', group: 'edit', run: (editor) => treatSelectedEdges(editor, 'chamfer') },
   { id: 'flipX', group: 'edit', run: (editor) => flipSelection(editor, 'x') },
   { id: 'flipY', group: 'edit', run: (editor) => flipSelection(editor, 'y') },
   { id: 'flipZ', group: 'edit', run: (editor) => flipSelection(editor, 'z') },

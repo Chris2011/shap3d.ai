@@ -101,6 +101,10 @@ const items = computed<It[]>(() => {
     if (has('edge') || has('face')) {
       out.push({ label: t('commands.soften'), cmd: 'soften' }, { label: t('commands.unsoften'), cmd: 'unsoften' });
     }
+    // rounding works on the edges of the open group
+    if (has('edge') && editor.activePath.length) {
+      out.push({ label: t('commands.roundEdges'), cmd: 'roundEdges' }, { label: t('commands.chamferEdges'), cmd: 'chamferEdges' });
+    }
     out.push(
       { sep: true },
       { label: t('contextMenu.flipRed'), cmd: 'flipX' },

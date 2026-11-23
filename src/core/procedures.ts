@@ -9,6 +9,7 @@ import {
   type ProcedureRole,
 } from './model';
 import { cutKeepingGroups, isSolid, solidOp, type SolidOp } from './solids';
+import { treatEdges, type EdgeSpec, type EdgeTreatment } from './roundEdges';
 
 /**
  * Procedures: non-destructive modelling. A procedural group keeps what it was made from – its inputs, as child groups
@@ -154,6 +155,30 @@ const buildSolid = (definition: Definition, fresh: { entities: Entities }, defs:
     }
     result = accumulated.definition.entities;
   }
+  if (!result.faces.size && !result.instances.size) {
+    return 'procedures.errors.empty';
+  }
+  fresh.entities = result;
+  return null;
+};
+
+/** rounded or chamfered edges: the body with its edges cut away – size and kind can change, the edges stay */
+const buildEdges = (definition: Definition, fresh: { entities: Entities }, defs: ProcedureModel): string | null => {
+  const [target] = inputsOf(definition, 'target');
+  if (!target) {
+    return 'procedures.errors.missingInput';
+  }
+  if (!isSolid(target.definition.entities)) {
+    return 'procedures.errors.notSolid';
+  }
+  const { treatment, size, edges } = definition.procedure!.params;
+  const result = treatEdges(
+    target.definition.entities,
+    JSON.parse(String(edges)) as EdgeSpec[],
+    treatment as EdgeTreatment,
+    Number(size),
+    defs,
+  );
   if (!result.faces.size && !result.instances.size) {
     return 'procedures.errors.empty';
   }
@@ -311,7 +336,9 @@ export const rebuildProcedure = (definition: Definition, defs: ProcedureModel): 
         ? buildSolid(definition, fresh, defs)
         : procedure.kind === 'followme'
           ? buildFollowMe(definition, fresh, defs)
-          : buildCopyAlong(definition, fresh);
+          : procedure.kind === 'edges'
+            ? buildEdges(definition, fresh, defs)
+            : buildCopyAlong(definition, fresh);
   } catch (failure) {
     console.error(failure);
     error = 'procedures.errors.failed';
@@ -393,6 +420,33 @@ export const createSolidProcedure = (
   const toProcedure = target.matrix.clone().invert();
   takeInput(ents, definition, target, 'target', toProcedure);
   tools.forEach((tool) => takeInput(ents, definition, tool, 'tool', toProcedure));
+  const error = rebuildProcedure(definition, model);
+  if (error) {
+    throw new Error(error);
+  }
+  return procedure;
+};
+
+/**
+ * Rounded or chamfered edges as a procedure: the group goes inside as its input and the procedure takes its place, name,
+ * tag and data. `specs` are in the group's coordinates. Throws the message's key when there is no result.
+ */
+export const createEdgeProcedure = (
+  model: ProcedureModel,
+  ents: Entities,
+  target: Instance,
+  treatment: EdgeTreatment,
+  size: number,
+  specs: EdgeSpec[],
+) => {
+  const definition = model.newDefinition(target.definition.name, false);
+  definition.procedure = { kind: 'edges', params: { treatment, size, edges: JSON.stringify(specs) } };
+  if (target.definition.pluginData) {
+    definition.pluginData = JSON.parse(JSON.stringify(target.definition.pluginData));
+  }
+  const procedure = copyInstanceDetails(target, ents.addInstance(definition, target.matrix.clone(), target.name));
+  target.pluginData = undefined;
+  takeInput(ents, definition, target, 'target', target.matrix.clone().invert());
   const error = rebuildProcedure(definition, model);
   if (error) {
     throw new Error(error);

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
+import { manifoldBoolean, type BooleanInput } from './manifold';
 import {
   copyInstanceDetails,
   type Definition,
@@ -162,9 +163,17 @@ export const cutKeepingGroups = (
   const reach = tool.definition.entities.bounds(new THREE.Box3(), toolInTarget);
   let result = new Entities();
   if (target.faces.size) {
-    const part = toBrush(target, new THREE.Matrix4(), undefined, false);
-    const cutter = toBrush(tool.definition.entities, toolInTarget, tool.material);
-    result = fromMesh(evaluator.evaluate(part, cutter, mode === 'subtract' ? SUBTRACTION : INTERSECTION) as unknown as THREE.Mesh);
+    result =
+      manifoldBoolean(mode, { entities: target, nested: false }, [
+        { entities: tool.definition.entities, matrix: toolInTarget, inherit: tool.material },
+      ]) ??
+      fromMesh(
+        evaluator.evaluate(
+          toBrush(target, new THREE.Matrix4(), undefined, false),
+          toBrush(tool.definition.entities, toolInTarget, tool.material),
+          mode === 'subtract' ? SUBTRACTION : INTERSECTION,
+        ) as unknown as THREE.Mesh,
+      );
   }
   for (const child of target.instances.values()) {
     if (isProcedureInput(child)) {
@@ -195,6 +204,37 @@ export const cutKeepingGroups = (
 };
 
 /**
+ * The target's own faces minus several tools (all in the target's coordinates), turned back into faces only once at
+ * the end – cuts that meet at a corner would otherwise be merged into faces in between, which can leave a face without
+ * one of its corners. Groups inside the target stay as they are.
+ */
+export const subtractAll = (target: Entities, tools: Entities[], options: CutOptions): Entities => {
+  const evaluator = new Evaluator();
+  evaluator.attributes = ['position', 'uv', 'normal'];
+  evaluator.useGroups = true;
+  const exact = manifoldBoolean(
+    'subtract',
+    { entities: target, nested: false },
+    tools.map((tool) => ({ entities: tool })),
+  );
+  let part = exact ? null : toBrush(target, new THREE.Matrix4(), undefined, false);
+  for (const tool of exact ? [] : tools) {
+    part = evaluator.evaluate(part!, toBrush(tool, new THREE.Matrix4()), SUBTRACTION) as Brush;
+  }
+  const result = exact ?? fromMesh(part as unknown as THREE.Mesh);
+  for (const child of target.instances.values()) {
+    if (!isProcedureInput(child)) {
+      const definition = child.definition.isComponent ? child.definition : options.defs.cloneDefinition(child.definition);
+      const copy = copyInstanceDetails(child, result.addInstance(definition, child.matrix.clone(), child.name));
+      if (options.role) {
+        copy.procedureRole = options.role;
+      }
+    }
+  }
+  return result;
+};
+
+/**
  * Boolean operation on instances (in the coordinates of their parent).
  * Returns the resulting Entities (in parent coordinates) – one or more pieces.
  */
@@ -202,20 +242,26 @@ export const solidOp = (operation: SolidOp, instance: Instance, other: Instance)
   const evaluator = new Evaluator();
   evaluator.attributes = ['position', 'uv', 'normal'];
   evaluator.useGroups = true;
-  const brushA = toBrush(instance.definition.entities, instance.matrix, instance.material),
-    brushB = toBrush(other.definition.entities, other.matrix, other.material);
-  const run = (x: Brush, y: Brush, mode: number) => fromMesh(evaluator.evaluate(x, y, mode) as unknown as THREE.Mesh);
+  const inputA: BooleanInput = { entities: instance.definition.entities, matrix: instance.matrix, inherit: instance.material },
+    inputB: BooleanInput = { entities: other.definition.entities, matrix: other.matrix, inherit: other.material };
+  const brushes = new Map<BooleanInput, Brush>();
+  const brushOf = (input: BooleanInput) =>
+    brushes.get(input) ?? brushes.set(input, toBrush(input.entities, input.matrix!, input.inherit)).get(input)!;
+  const OPERATIONS = { [ADDITION]: 'union', [SUBTRACTION]: 'subtract', [INTERSECTION]: 'intersect' } as const;
+  // exact with manifold-3d for closed bodies, else three-bvh-csg
+  const run = (x: BooleanInput, y: BooleanInput, mode: typeof ADDITION | typeof SUBTRACTION | typeof INTERSECTION) =>
+    manifoldBoolean(OPERATIONS[mode], x, [y]) ?? fromMesh(evaluator.evaluate(brushOf(x), brushOf(y), mode) as unknown as THREE.Mesh);
   switch (operation) {
     case 'union':
     case 'outershell':
-      return [run(brushA, brushB, ADDITION)];
+      return [run(inputA, inputB, ADDITION)];
     case 'intersect':
-      return [run(brushA, brushB, INTERSECTION)];
+      return [run(inputA, inputB, INTERSECTION)];
     case 'subtract':
-      return [run(brushB, brushA, SUBTRACTION)];
+      return [run(inputB, inputA, SUBTRACTION)];
     case 'trim':
-      return [run(brushB, brushA, SUBTRACTION)];
+      return [run(inputB, inputA, SUBTRACTION)];
     case 'split':
-      return [run(brushA, brushB, SUBTRACTION), run(brushB, brushA, SUBTRACTION), run(brushA, brushB, INTERSECTION)];
+      return [run(inputA, inputB, SUBTRACTION), run(inputB, inputA, SUBTRACTION), run(inputA, inputB, INTERSECTION)];
   }
 };

@@ -4,7 +4,7 @@
 
 - [fzstd](https://github.com/101arrowz/fzstd) (MIT) – zstd decompression for compressed Blender files
 - [web-ifc](https://github.com/ThatOpen/engine_web-ifc) (MPL-2.0) by That Open Company – reads IFC files in the IFC plugin package (not part of the app)
-- [three.js](https://threejs.org) (MIT), [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh) (MIT), [Vue](https://vuejs.org) (MIT), [Vite](https://vitejs.dev) (MIT), [Tailwind CSS](https://tailwindcss.com) (MIT)
+- [three.js](https://threejs.org) (MIT), [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh) (MIT), [manifold-3d](https://github.com/elalish/manifold) (Apache-2.0), [Vue](https://vuejs.org) (MIT), [Vite](https://vitejs.dev) (MIT), [Tailwind CSS](https://tailwindcss.com) (MIT)
 - Reference people built from the [Humaaans](https://www.humaaans.com) illustrations by Pablo Stanley (CC0) – see `src/assets/people/LICENSE.md`
 - Helvetiker and Optimer typefaces from the three.js examples, © MAGENTA Ltd. – see `src/plugins/builtin/text3d/fonts/LICENSE`
 - Fonts of the 3D-text plugin from [Fontsource](https://fontsource.org) (SIL Open Font License 1.1, licenses in `node_modules/@fontsource/*/LICENSE`): Roboto, Playfair Display, Bebas Neue, Fredoka, Black Ops One, Pacifico, Lobster, Caveat, Orbitron, Press Start 2P, JetBrains Mono; read with [opentype.js](https://github.com/opentypejs/opentype.js) (MIT)
