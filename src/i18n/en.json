@@ -221,7 +221,9 @@
       "unroundCorner": "Corner back",
       "snapPoint": "Change snap point",
       "attribute": "Change attribute",
-      "environment": "Change environment"
+      "environment": "Change environment",
+      "sectionDepth": "Section view depth",
+      "sectionTags": "Section tags"
     },
     "toast": {
       "nothingSelected": "Nothing selected",
@@ -252,7 +254,8 @@
       "roundCornerTwoEdges": "Only a corner of exactly two edges can be rounded.",
       "roundCornerTooShort": "The edges of this corner are too short for that rounding.",
       "unroundNoCorner": "This arc does not lie between two straight edges that meet in a corner.",
-      "snapPointNeedsGroup": "Snap points belong to a group or component. Click on one."
+      "snapPointNeedsGroup": "Snap points belong to a group or component. Click on one.",
+      "invalidLength": "Invalid length: {value}"
     },
     "confirm": {
       "discardChanges": "Discard unsaved changes?",
@@ -812,7 +815,10 @@
       "empty": "No section planes. Tool “Section plane” in the expanded tool set.",
       "rulers": "Rulers on the axes (m · cm · mm depending on zoom)",
       "grid": "Ground grid (mm · cm · m depending on zoom)",
-      "labels": "Labels along the axes and grid legend (5 m · Grid 1 m · 10 m)"
+      "labels": "Labels along the axes and grid legend (5 m · Grid 1 m · 10 m)",
+      "sectionDepth": "View depth",
+      "sectionDepthAll": "all",
+      "sectionTags": "Cut only these tags (none = everything)"
     },
     "modelInfo": {
       "units": "Units",

@@ -83,6 +83,10 @@ export interface SectionPlane {
   normal: THREE.Vector3;
   active: boolean;
   name: string;
+  /** only groups and components with one of these tags are cut; missing or empty = everything */
+  tags?: string[];
+  /** how far behind the cut the model is shown (m); missing = all of it */
+  depth?: number;
 }
 /** Version tag of the saved model files (.shap3d.json, autosave). */
 export const MODEL_FORMAT = 'shap3d/2';
@@ -417,6 +421,8 @@ export class Model implements DefinitionRegistry {
         normal: toArray(section.normal),
         active: section.active,
         name: section.name,
+        tags: section.tags?.length ? [...section.tags] : undefined,
+        depth: section.depth || undefined,
       })),
       scenes: JSON.parse(
         JSON.stringify(
@@ -560,6 +566,8 @@ export class Model implements DefinitionRegistry {
       normal: toVector(section.normal),
       active: !!section.active,
       name: section.name ?? t('names.section'),
+      tags: Array.isArray(section.tags) && section.tags.length ? section.tags.map(String) : undefined,
+      depth: Number(section.depth) > 0 ? Number(section.depth) : undefined,
     }));
     this.scenes = (json.scenes ?? []).map((scene: any): Scene => ({
       ...scene,

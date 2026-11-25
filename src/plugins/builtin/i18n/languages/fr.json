@@ -221,7 +221,9 @@
       "unroundCorner": "Rétablir le coin",
       "snapPoint": "Modifier le point d’ancrage",
       "attribute": "Modifier l’attribut",
-      "environment": "Modifier l’environnement"
+      "environment": "Modifier l’environnement",
+      "sectionDepth": "Profondeur de coupe",
+      "sectionTags": "Balises de coupe"
     },
     "toast": {
       "nothingSelected": "Rien n’est sélectionné",
@@ -252,7 +254,8 @@
       "roundCornerTwoEdges": "Seul un coin formé d’exactement deux arêtes peut être arrondi.",
       "roundCornerTooShort": "Les arêtes de ce coin sont trop courtes pour cet arrondi.",
       "unroundNoCorner": "Cet arc ne se trouve pas entre deux arêtes droites qui se rejoignent en un coin.",
-      "snapPointNeedsGroup": "Les points d’ancrage appartiennent à un groupe ou un composant. Cliquez sur l’un d’eux."
+      "snapPointNeedsGroup": "Les points d’ancrage appartiennent à un groupe ou un composant. Cliquez sur l’un d’eux.",
+      "invalidLength": "Longueur invalide : {value}"
     },
     "confirm": {
       "discardChanges": "Abandonner les modifications non enregistrées ?",
@@ -812,7 +815,10 @@
       "empty": "Aucun plan de coupe. Outil « Plan de coupe » dans la boîte à outils étendue.",
       "rulers": "Règles sur les axes (m · cm · mm selon le zoom)",
       "grid": "Grille au sol (mm · cm · m selon le zoom)",
-      "labels": "Étiquettes le long des axes et légende de la grille (5 m · Grille 1 m · 10 m)"
+      "labels": "Étiquettes le long des axes et légende de la grille (5 m · Grille 1 m · 10 m)",
+      "sectionDepth": "Profondeur de vue",
+      "sectionDepthAll": "tout",
+      "sectionTags": "Couper seulement ces balises (aucune = tout)"
     },
     "modelInfo": {
       "units": "Unités",

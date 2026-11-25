@@ -21,6 +21,7 @@
     t('display.noActive')
   }}</S3dRadio>
   <div v-if="!sections.length" class="s3d-label">{{ t('display.empty') }}</div>
+  <S3dSectionOptions v-if="activeSection" :section="activeSection" />
 </template>
 
 <script setup lang="ts">
@@ -28,6 +29,7 @@ import S3dButton from '../ui/S3dButton.vue';
 import S3dCheckbox from '../ui/S3dCheckbox.vue';
 import S3dRadio from '../ui/S3dRadio.vue';
 import S3dSectionTitle from '../ui/S3dSectionTitle.vue';
+import S3dSectionOptions from './S3dSectionOptions.vue';
 import { useEditor } from '../keys';
 import { runCommand, findCommand } from '../../engine/commands';
 import { useModel } from '../../composables/useModel';
@@ -58,6 +60,7 @@ const toggle = (id: string) => {
   editor.ui.saved = false;
 };
 const sections = useModel(() => editor.model.sections);
+const activeSection = useModel(() => editor.model.sections.find((section) => section.active));
 const activate = (id: number) => {
   editor.commit('undo.activeSection', () => editor.model.sections.forEach((section) => (section.active = section.id === id)));
 };

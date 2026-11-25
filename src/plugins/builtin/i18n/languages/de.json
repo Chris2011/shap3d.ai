@@ -221,7 +221,9 @@
       "unroundCorner": "Ecke zurück",
       "snapPoint": "Andockpunkt ändern",
       "attribute": "Attribut ändern",
-      "environment": "Umgebung ändern"
+      "environment": "Umgebung ändern",
+      "sectionDepth": "Schnitttiefe",
+      "sectionTags": "Schnitt-Tags"
     },
     "toast": {
       "nothingSelected": "Nichts ausgewählt",
@@ -252,7 +254,8 @@
       "roundCornerTwoEdges": "Nur eine Ecke aus genau zwei Kanten lässt sich abrunden.",
       "roundCornerTooShort": "Die Kanten dieser Ecke sind für diese Rundung zu kurz.",
       "unroundNoCorner": "Dieser Bogen liegt nicht zwischen zwei geraden Kanten, die sich in einer Ecke treffen.",
-      "snapPointNeedsGroup": "Andockpunkte gehören zu einer Gruppe oder Komponente. Klicke auf eine."
+      "snapPointNeedsGroup": "Andockpunkte gehören zu einer Gruppe oder Komponente. Klicke auf eine.",
+      "invalidLength": "Ungültige Länge: {value}"
     },
     "confirm": {
       "discardChanges": "Ungespeicherte Änderungen verwerfen?",
@@ -812,7 +815,10 @@
       "empty": "Keine Schnittebenen. Werkzeug „Schnittebene“ im erweiterten Werkzeugsatz.",
       "rulers": "Maßstab an den Achsen (m · cm · mm je nach Zoom)",
       "grid": "Raster am Boden (mm · cm · m je nach Zoom)",
-      "labels": "Beschriftung an den Achsen und Rasterangabe (5 m · Raster 1 m · 10 m)"
+      "labels": "Beschriftung an den Achsen und Rasterangabe (5 m · Raster 1 m · 10 m)",
+      "sectionDepth": "Schnitttiefe",
+      "sectionDepthAll": "alles",
+      "sectionTags": "Nur diese Tags schneiden (keiner = alles)"
     },
     "modelInfo": {
       "units": "Einheiten",

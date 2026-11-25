@@ -600,7 +600,11 @@
       "attribute": "",
       "attribute#en": "Change attribute",
       "environment": "",
-      "environment#en": "Change environment"
+      "environment#en": "Change environment",
+      "sectionDepth": "",
+      "sectionDepth#en": "Section view depth",
+      "sectionTags": "",
+      "sectionTags#en": "Section tags"
     },
     "toast": {
       "nothingSelected": "",
@@ -660,7 +664,9 @@
       "unroundNoCorner": "",
       "unroundNoCorner#en": "This arc does not lie between two straight edges that meet in a corner.",
       "snapPointNeedsGroup": "",
-      "snapPointNeedsGroup#en": "Snap points belong to a group or component. Click on one."
+      "snapPointNeedsGroup#en": "Snap points belong to a group or component. Click on one.",
+      "invalidLength": "",
+      "invalidLength#en": "Invalid length: {value}"
     },
     "confirm": {
       "discardChanges": "",
@@ -1700,7 +1706,13 @@
       "grid": "",
       "grid#en": "Ground grid (mm · cm · m depending on zoom)",
       "labels": "",
-      "labels#en": "Labels along the axes and grid legend (5 m · Grid 1 m · 10 m)"
+      "labels#en": "Labels along the axes and grid legend (5 m · Grid 1 m · 10 m)",
+      "sectionDepth": "",
+      "sectionDepth#en": "View depth",
+      "sectionDepthAll": "",
+      "sectionDepthAll#en": "all",
+      "sectionTags": "",
+      "sectionTags#en": "Cut only these tags (none = everything)"
     },
     "modelInfo": {
       "units": "",

@@ -29,6 +29,7 @@ import { measureView } from './measureView';
 import { GroundGrid } from './gridView';
 import { AmbientOcclusion } from './ambientOcclusion';
 import { drawingAxesMatrix } from './drawingAxes';
+import { sectionScope, cutsPath } from './sectionScope';
 
 /**
  * Night scene: the model's sky/ground colours are pushed towards a night sky, faces get moonlight and
@@ -314,6 +315,10 @@ export class Viewer {
   model!: Model;
   pickMeshes: THREE.Mesh[] = [];
   clipPlanes: THREE.Plane[] = [];
+  /** the section cuts among the clip planes – the planes of a view depth get no fill */
+  private cutPlanes: THREE.Plane[] = [];
+  /** groups a section limited to tags does not cut */
+  private uncut = new Set<PickContext>();
   needsRender = true;
   width = 1;
   height = 1;
@@ -494,14 +499,11 @@ export class Viewer {
     this.faceMe = [];
 
     // section planes
+    const scope = sectionScope(model.sections, model.settings.sectionCuts);
     this.clipPlanes.length = 0;
-    if (model.settings.sectionCuts) {
-      for (const section of model.sections) {
-        if (section.active) {
-          this.clipPlanes.push(new THREE.Plane().setFromNormalAndCoplanarPoint(section.normal.clone().normalize(), section.point));
-        }
-      }
-    }
+    this.clipPlanes.push(...scope.planes);
+    this.cutPlanes = scope.cuts;
+    this.uncut.clear();
 
     const hiddenTags = model.hiddenTags();
     const activeKey = state.activePath.map((instance) => instance.id).join('/');
@@ -548,6 +550,13 @@ export class Viewer {
       }
     };
     walk(model.root, [], new THREE.Matrix4(), undefined);
+    if (this.clipPlanes.length) {
+      for (const built of this.builtGroups) {
+        if (!cutsPath(scope, built.path)) {
+          this.showUncut(built);
+        }
+      }
+    }
 
     this.applyLighting();
     this.scene.fog = this.pluginLighting.fog();
@@ -1269,6 +1278,32 @@ export class Viewer {
     }
   }
 
+  /** a group the section does not cut: its faces and lines get their own materials without planes */
+  private showUncut(built: Viewer['builtGroups'][number]) {
+    this.uncut.add(built.context);
+    for (const child of built.group.children) {
+      const object = child as THREE.Mesh;
+      if (object.userData.tri) {
+        this.ownFaceMesh(object);
+        (object.material as THREE.Material).clippingPlanes = [];
+        object.userData.uncut = true;
+      } else if (object.material && !Array.isArray(object.material) && object.material.clippingPlanes === this.clipPlanes) {
+        const material = object.material.clone();
+        material.clippingPlanes = [];
+        material.userData.owned = true;
+        if (material instanceof LineMaterial) {
+          this.lineMats.push(material);
+        }
+        object.material = material;
+      }
+    }
+  }
+
+  /** whether a section plane cuts this point away – groups the section does not cut keep all of theirs */
+  private cutAway(point: THREE.Vector3, context?: PickContext) {
+    return !(context && this.uncut.has(context)) && this.clipPlanes.some((plane) => plane.distanceToPoint(point) < -1e-6);
+  }
+
   /** a mesh about to look different from the other instances: its own colours and material – its shape stays shared */
   private ownFaceMesh(mesh: THREE.Mesh) {
     if (!mesh.userData.shared) {
@@ -1774,7 +1809,9 @@ export class Viewer {
     const layer = 6;
     const meshes = this.pickMeshes.filter((mesh) => {
       const material = mesh.material as THREE.Material;
-      return material.side === THREE.FrontSide && !material.transparent && mesh.visible && mesh.parent?.visible !== false;
+      return (
+        material.side === THREE.FrontSide && !material.transparent && !mesh.userData.uncut && mesh.visible && mesh.parent?.visible !== false
+      );
     });
     const savedLayers = cam.layers.mask;
     const savedOverride = this.scene.overrideMaterial;
@@ -1800,7 +1837,7 @@ export class Viewer {
     const box = this.model.bounds();
     const size = box.isEmpty() ? 100 : box.getBoundingSphere(new THREE.Sphere()).radius * 4;
     const capGeometry = new THREE.PlaneGeometry(size, size);
-    for (const plane of this.clipPlanes) {
+    for (const plane of this.cutPlanes) {
       this.renderer.clearStencil();
       const others = this.clipPlanes.filter((other) => other !== plane);
       const backs = count(THREE.BackSide, THREE.IncrementWrapStencilOp, this.clipPlanes);
@@ -1894,10 +1931,10 @@ export class Viewer {
     }
     const hits = raycaster.intersectObjects(vis, false);
     for (const hit of hits) {
-      if (this.clipPlanes.some((plane) => plane.distanceToPoint(hit.point) < -1e-6)) {
+      const mesh = hit.object as THREE.Mesh;
+      if (this.cutAway(hit.point, mesh.userData.ctx)) {
         continue;
       }
-      const mesh = hit.object as THREE.Mesh;
       const faceId = mesh.userData.tri[Math.floor(hit.faceIndex!)];
       if (faceId == null) {
         continue;
@@ -1993,7 +2030,7 @@ export class Viewer {
         if (hitPoint.distanceTo(origin) >= limit) {
           continue;
         }
-        if (this.clipPlanes.some((plane) => plane.distanceToPoint(hitPoint) < -1e-6)) {
+        if (this.cutAway(hitPoint, mesh.userData.ctx)) {
           continue;
         }
         return true;
@@ -2042,7 +2079,7 @@ export class Viewer {
       let edgeParam = den > 1e-12 ? (crossDot * rayOffset - rayDot * edgeOffset) / den : param;
       edgeParam = Math.max(0, Math.min(1, edgeParam));
       const closest = edgeRec.start.clone().addScaledVector(dir, edgeParam);
-      if (this.clipPlanes.some((plane) => plane.distanceToPoint(closest) < -1e-6)) {
+      if (this.cutAway(closest, edgeRec.context)) {
         continue;
       }
       if (this.isHidden(closest)) {
@@ -2067,7 +2104,7 @@ export class Viewer {
       if (distance > tolPx || (best && distance >= best.dist)) {
         continue;
       }
-      if (this.clipPlanes.some((plane) => plane.distanceToPoint(vertex.position) < -1e-6)) {
+      if (this.cutAway(vertex.position, vertex.context)) {
         continue;
       }
       // tested along the line of sight to the vertex itself, not under the cursor – near silhouettes the cursor ray hits other faces
