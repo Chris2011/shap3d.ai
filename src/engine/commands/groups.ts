@@ -1,14 +1,50 @@
 // Groups and components from the selection, and taking them apart again.
 import * as THREE from 'three';
-import { dropInputs, explodeToInputs } from '../../core/procedures';
+import { createSolidProcedure, dropInputs, explodeToInputs } from '../../core/procedures';
+import { isSolid } from '../../core/solids';
 import type { Editor } from '../editor';
 import type { EntityRef } from '../../core/model';
 import { t } from '../../i18n';
+
+/**
+ * A group of closed bodies and holes (groups marked as a hole) takes the holes away from the bodies – as a procedure, so
+ * the holes can still be moved. Returns false when the selection is no such mix.
+ */
+const groupWithHoles = (editor: Editor, name?: string) => {
+  const refs = editor.selected();
+  const instances = refs.map((entityRef) => (entityRef.kind === 'instance' ? editor.entities.instances.get(entityRef.id) : undefined));
+  if (instances.some((instance) => !instance)) {
+    return false;
+  }
+  const parts = instances as NonNullable<(typeof instances)[number]>[];
+  const holes = parts.filter((part) => part.hole),
+    bodies = parts.filter((part) => !part.hole);
+  if (!holes.length || !bodies.length) {
+    return false;
+  }
+  if (parts.some((part) => !isSolid(part.definition.entities))) {
+    editor.toast(t('toast.holesNeedSolids'));
+    return false;
+  }
+  try {
+    editor.commit('commands.makeGroup', () => {
+      const groupName = name || editor.model.uniqueDefName(t('names.group'));
+      const procedure = createSolidProcedure(editor.model, editor.entities, 'subtract', bodies[0], holes, bodies.slice(1), groupName);
+      editor.select([{ kind: 'instance', id: procedure.id }]);
+    });
+  } catch {
+    // commit has put everything back and said so
+  }
+  return true;
+};
 
 export const makeGroup = (editor: Editor, component: boolean, name?: string) => {
   const refs = editor.selected();
   if (!refs.length) {
     editor.toast(t('toast.nothingSelected'));
+    return;
+  }
+  if (!component && groupWithHoles(editor, name)) {
     return;
   }
   editor.commit(component ? 'undo.makeComponent' : 'commands.makeGroup', () => {

@@ -17,7 +17,7 @@ const forEachSelected = (editor: Editor, label: string, apply: (entityRef: Entit
 const elementOf = (
   entityRef: EntityRef,
   entities: Entities,
-): { tag?: string; hidden?: boolean; soft?: boolean; locked?: boolean } | undefined =>
+): { tag?: string; hidden?: boolean; soft?: boolean; locked?: boolean; hole?: boolean } | undefined =>
   entityRef.kind === 'face'
     ? entities.faces.get(entityRef.id)
     : entityRef.kind === 'edge'
@@ -53,12 +53,12 @@ export const tagSelection = (editor: Editor, tag: string) => {
 };
 
 /** Sets hidden (everything), soft (edges) or locked (groups/components) on the selection. */
-export const setSelectionFlag = (editor: Editor, flag: 'hidden' | 'soft' | 'locked', on: boolean) =>
+export const setSelectionFlag = (editor: Editor, flag: 'hidden' | 'soft' | 'locked' | 'hole', on: boolean) =>
   forEachSelected(
     editor,
-    flag === 'hidden' ? 'commands.hide' : flag === 'soft' ? 'commands.soften' : 'commands.lock',
+    flag === 'hidden' ? 'commands.hide' : flag === 'soft' ? 'commands.soften' : flag === 'hole' ? 'commands.toggleHole' : 'commands.lock',
     (entityRef, entities) => {
-      if ((flag === 'soft' && entityRef.kind !== 'edge') || (flag === 'locked' && entityRef.kind !== 'instance')) {
+      if ((flag === 'soft' && entityRef.kind !== 'edge') || ((flag === 'locked' || flag === 'hole') && entityRef.kind !== 'instance')) {
         return;
       }
       const element = elementOf(entityRef, entities);

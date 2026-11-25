@@ -224,6 +224,9 @@ export interface DisplayLook {
   hidden?: boolean;
 }
 
+/** how an instance marked as a hole is shown */
+const HOLE_LOOK: DisplayLook = { color: '#8c98a4', opacity: 0.45 };
+
 /** a material shown for now in another colour (CSS) or opacity (0 … 1) wherever it is used */
 export interface DisplayMaterialLook {
   color?: string;
@@ -1197,7 +1200,10 @@ export class Viewer {
     }
     const white = new THREE.Color(1, 1, 1);
     for (const built of this.builtGroups) {
-      const looks = built.path.map((instance) => this.displayLooks.get(instance)).filter((look) => !!look);
+      // a hole shows see-through grey unless a plugin shows it otherwise
+      const looks = built.path
+        .map((instance) => this.displayLooks.get(instance) ?? (instance.hole ? HOLE_LOOK : undefined))
+        .filter((look) => !!look);
       if (!looks.length && !materialColors.size && !built.group.userData.looked) {
         continue;
       }

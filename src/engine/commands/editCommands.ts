@@ -8,6 +8,15 @@ import { deleteSelection, copySelection, paste, hideSelection, unhideAll, clearA
 import { reverseFaces, orientFaces, softenSelection, intersectSelection } from './faces';
 import { flipSelection, alignSelection, distributeSelection } from './arrange';
 import { treatSelectedEdges } from './edges';
+import { setSelectionFlag } from '../selectionEdits';
+
+/** the selected groups and components of the open context */
+const selectedInstances = (editor: Editor) =>
+  editor
+    .selected()
+    .filter((entityRef) => entityRef.kind === 'instance')
+    .map((entityRef) => editor.entities.instances.get(entityRef.id))
+    .filter((instance) => instance !== undefined);
 import { runSolid } from './solids';
 
 /** The commands of the Edit menu and the solid tools – in menu order */
@@ -117,6 +126,16 @@ export const EDIT_COMMANDS: CommandDefinition[] = [
           }
         }
       }),
+  },
+  {
+    id: 'toggleHole',
+    group: 'edit',
+    // on for all selected groups, or off again when they all are holes
+    run: (editor) => setSelectionFlag(editor, 'hole', !selectedInstances(editor).every((instance) => instance.hole)),
+    checked: (editor) => {
+      const instances = selectedInstances(editor);
+      return instances.length > 0 && instances.every((instance) => instance.hole);
+    },
   },
   { id: 'lock', group: 'edit', run: (editor) => setLocked(editor, true) },
   { id: 'unlock', group: 'edit', run: (editor) => setLocked(editor, false) },

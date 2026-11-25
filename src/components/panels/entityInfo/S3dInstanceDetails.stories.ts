@@ -14,6 +14,7 @@ const meta = {
       isComponent: true,
       count: 3,
       locked: false,
+      hole: false,
       pos: [9, 1, 0],
       size: '0,45 m × 0,45 m × 0,9 m',
       volume: '0,18 m³',

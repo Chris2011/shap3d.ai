@@ -36,6 +36,8 @@ export interface InstanceInfo extends PaintedInfo {
   count: number;
   tag?: string;
   locked: boolean;
+  /** marked as a hole */
+  hole: boolean;
   /** position in metres */
   pos: [number, number, number];
   size: string;
@@ -119,6 +121,7 @@ export const describeSelection = (editor: Editor): SelectionInfo => {
       tag: instance.tag,
       hidden: !!instance.hidden,
       locked: !!instance.locked,
+      hole: !!instance.hole,
       pos: [pos.x, pos.y, pos.z],
       size: `${editor.fmt(size.x)} × ${editor.fmt(size.y)} × ${editor.fmt(size.z)}`,
     };

@@ -59,6 +59,8 @@ export interface Instance {
   tag?: string;
   hidden?: boolean;
   locked?: boolean;
+  /** a hole: shown see-through, and a group made of it and closed bodies takes it away from them (see makeGroup) */
+  hole?: boolean;
   /**
    * data plugins keep on this one instance, by plugin id (e.g. the properties of a game object) – plain JSON, saved
    * with the model, kept while the plugin is off and copied with the instance
@@ -88,6 +90,9 @@ export interface ProcedureData {
 export const copyInstanceDetails = (source: Instance, copy: Instance) => {
   copy.material = source.material;
   copy.tag = source.tag;
+  if (source.hole) {
+    copy.hole = true;
+  }
   if (source.procedureRole) {
     copy.procedureRole = source.procedureRole;
     copy.hidden = source.hidden;

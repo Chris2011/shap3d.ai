@@ -132,13 +132,18 @@ const scratch = (entities: Entities): Instance => ({
 
 const buildSolid = (definition: Definition, fresh: { entities: Entities }, defs: ProcedureModel): string | null => {
   const operation = definition.procedure!.params.operation as ProcedureSolidOp;
-  const [target] = inputsOf(definition, 'target');
+  const targets = inputsOf(definition, 'target');
+  let [target] = targets;
   const tools = inputsOf(definition, 'tool');
   if (!target || !tools.length) {
     return 'procedures.errors.missingInput';
   }
-  if ([target, ...tools].some((input) => !isSolid(input.definition.entities))) {
+  if ([...targets, ...tools].some((input) => !isSolid(input.definition.entities))) {
     return 'procedures.errors.notSolid';
+  }
+  // several bodies (a group of bodies and holes): one body first, so every hole goes through all of them
+  for (const other of targets.slice(1)) {
+    target = scratch(solidOp('union', target, other)[0]);
   }
   let result: Entities;
   if (operation === 'subtract' || operation === 'intersect') {
@@ -408,8 +413,10 @@ export const createSolidProcedure = (
   operation: ProcedureSolidOp,
   target: Instance,
   tools: Instance[],
+  moreTargets: Instance[] = [],
+  name = target.definition.name,
 ) => {
-  const definition = model.newDefinition(target.definition.name, false);
+  const definition = model.newDefinition(name, false);
   definition.procedure = { kind: 'solid', params: { operation } };
   if (target.definition.pluginData) {
     definition.pluginData = JSON.parse(JSON.stringify(target.definition.pluginData));
@@ -419,6 +426,7 @@ export const createSolidProcedure = (
   target.pluginData = undefined;
   const toProcedure = target.matrix.clone().invert();
   takeInput(ents, definition, target, 'target', toProcedure);
+  moreTargets.forEach((other) => takeInput(ents, definition, other, 'target', toProcedure));
   tools.forEach((tool) => takeInput(ents, definition, tool, 'tool', toProcedure));
   const error = rebuildProcedure(definition, model);
   if (error) {

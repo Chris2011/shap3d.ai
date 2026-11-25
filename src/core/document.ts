@@ -355,6 +355,7 @@ export class Model implements DefinitionRegistry {
         tag: instance.tag,
         hidden: instance.hidden || undefined,
         locked: instance.locked || undefined,
+        hole: instance.hole || undefined,
         pluginData: instance.pluginData ? JSON.parse(JSON.stringify(instance.pluginData)) : undefined,
         procedureRole: instance.procedureRole,
       })),
@@ -510,6 +511,7 @@ export class Model implements DefinitionRegistry {
           tag: instance.tag,
           hidden: !!instance.hidden,
           locked: !!instance.locked,
+          hole: instance.hole || undefined,
           procedureRole: instance.procedureRole,
         };
         if (instance.pluginData) {

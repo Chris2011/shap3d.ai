@@ -23,6 +23,9 @@
   <S3dCheckbox :model-value="info.locked" @update:model-value="setSelectionFlag(editor, 'locked', $event)">{{
     t('toast.locked')
   }}</S3dCheckbox>
+  <S3dCheckbox :model-value="info.hole" @update:model-value="setSelectionFlag(editor, 'hole', $event)">{{
+    t('entityInfo.hole')
+  }}</S3dCheckbox>
   <S3dAttributeList :attributes="info.attributes" />
   <S3dProcedureInfo />
 </template>
