@@ -49,6 +49,10 @@ export const AXES: Record<'x' | 'y' | 'z', THREE.Vector3> = {
   y: new THREE.Vector3(0, 1, 0),
   z: new THREE.Vector3(0, 0, 1),
 };
+/** where the drawing axes cross (see drawingAxes.ts) – the ground plane for free drawing goes through it */
+export const AXES_ORIGIN = new THREE.Vector3();
+/** the plane free drawing lands on: across blue, through `from` (its height) or the axes' origin */
+const groundPlane = (from: THREE.Vector3 | null) => new THREE.Plane().setFromNormalAndCoplanarPoint(AXES.z, from ?? AXES_ORIGIN);
 export const AXIS_COLOR = { x: '#e00000', y: '#00a000', z: '#0000e0' } as const;
 export const AXIS_LABEL = {
   get x() {
@@ -492,14 +496,14 @@ export class InferenceEngine {
       ));
     }
     // ---- ground / free
-    const ground = new THREE.Plane(new THREE.Vector3(0, 0, 1), from ? -from.z : 0);
+    const ground = groundPlane(from);
     const groundPoint = ray.intersectPlane(ground, new THREE.Vector3());
     if (groundPoint && groundPoint.distanceTo(ray.origin) < 5000) {
       return (this.last = this.alignInPlane(
         x,
         y,
         { point: groundPoint, kind: 'ground', label: '' },
-        { point: groundPoint, normal: new THREE.Vector3(0, 0, 1) },
+        { point: groundPoint, normal: AXES.z.clone() },
       ));
     }
     const freePoint = ray.at(from ? from.distanceTo(ray.origin) : 10, new THREE.Vector3());
@@ -523,7 +527,7 @@ export class InferenceEngine {
     if (faceHit) {
       return { point: faceHit.point, kind: 'face', label: '', face: faceHit };
     }
-    const groundPoint = ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), from ? -from.z : 0), new THREE.Vector3());
+    const groundPoint = ray.intersectPlane(groundPlane(from), new THREE.Vector3());
     if (groundPoint && groundPoint.distanceTo(ray.origin) < 5000) {
       return { point: groundPoint, kind: 'ground', label: '' };
     }

@@ -219,7 +219,7 @@ export class ProtractorTool extends PointTool {
     const inference = this.pick(pointer, this.center);
     this.current = inference.point.clone();
     if (!this.center) {
-      this.hoverN = inference.face && inference.kind === 'face' ? inference.face.normal.clone() : new THREE.Vector3(0, 0, 1);
+      this.hoverN = inference.face && inference.kind === 'face' ? inference.face.normal.clone() : AXES.z.clone();
       return;
     }
     if (this.ref) {

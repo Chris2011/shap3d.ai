@@ -131,7 +131,7 @@ export const planeFromInference = (inference: Inference): PlaneRef & { fromFace:
   if (inference.face && inference.kind === 'face') {
     return { point: inference.point.clone(), normal: inference.face.normal.clone().normalize(), fromFace: true };
   }
-  return { point: inference.point.clone(), normal: new THREE.Vector3(0, 0, 1), fromFace: false };
+  return { point: inference.point.clone(), normal: AXES.z.clone(), fromFace: false };
 };
 
 /** In-plane axes aligned with the model axes where possible. */

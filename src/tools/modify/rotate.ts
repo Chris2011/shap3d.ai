@@ -115,8 +115,7 @@ export class RotateTool extends PointTool {
     if (!this.center) {
       const hoverInference = this.pick(pointer, null);
       this.hoverP = hoverInference.point.clone();
-      this.hoverN =
-        hoverInference.face && hoverInference.kind === 'face' ? hoverInference.face.normal.clone().normalize() : new THREE.Vector3(0, 0, 1);
+      this.hoverN = hoverInference.face && hoverInference.kind === 'face' ? hoverInference.face.normal.clone().normalize() : AXES.z.clone();
       if (!editor.selected().length) {
         editor.setHover(hoverPick(editor, pointer));
       }

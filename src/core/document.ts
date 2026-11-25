@@ -130,6 +130,13 @@ export interface StyleSettings {
   aoColor: string;
 }
 
+/** drawing axes: their origin and the red and green directions (blue is across both), in model coordinates */
+export interface DrawingAxes {
+  origin: number[];
+  x: number[];
+  y: number[];
+}
+
 export interface ModelSettings {
   units: Units;
   precision: number;
@@ -153,6 +160,8 @@ export interface ModelSettings {
   /** tabs for the scenes above the viewport */
   sceneTabs: boolean;
   style: StyleSettings;
+  /** red, green and blue turned onto a face (see engine/drawingAxes.ts); missing = the model axes */
+  drawingAxes?: DrawingAxes;
   /** the entry of this model in the project overview (browser storage); copies of the file share it */
   projectId?: string;
 }
@@ -446,6 +455,7 @@ export class Model implements DefinitionRegistry {
       style: { ...DEFAULT_STYLE, ...json.settings?.style },
       // a model without an entry must not keep the one of the model loaded before
       projectId: json.settings?.projectId,
+      drawingAxes: json.settings?.drawingAxes,
     };
     this.pluginData = json.pluginData ? JSON.parse(JSON.stringify(json.pluginData)) : undefined;
     this.environment = json.environment && { name: String(json.environment.name), data: String(json.environment.data) };

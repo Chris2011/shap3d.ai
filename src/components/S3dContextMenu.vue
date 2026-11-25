@@ -97,6 +97,7 @@ const items = computed<It[]>(() => {
         { label: t('commands.reverseFaces'), cmd: 'reverseFaces' },
         { label: t('commands.orientFaces'), cmd: 'orientFaces' },
         { label: t('contextMenu.intersect'), cmd: 'intersect' },
+        { label: t('commands.alignAxes'), cmd: 'alignAxes' },
       );
     }
     if (has('edge') || has('face')) {
@@ -144,6 +145,9 @@ const items = computed<It[]>(() => {
       { label: t('commands.selectAll'), cmd: 'selectAll', sc: shortcutLabel('Ctrl+A') },
       { label: t('commands.unhideAll'), cmd: 'unhideAll' },
     );
+    if (editor.model.settings.drawingAxes) {
+      out.push({ label: t('commands.resetAxes'), cmd: 'resetAxes' });
+    }
     out.push({ sep: true }, { label: t('commands.zoomExtents'), cmd: 'zoomExtents', sc: shortcutLabel('Shift+Z') });
     out.push({ sep: true }, codeEntry(editor.activePath.length ? t('contextMenu.groupAsCode') : t('contextMenu.modelAsCode')));
   }

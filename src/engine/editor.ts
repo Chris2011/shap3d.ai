@@ -9,6 +9,7 @@ import { InferenceEngine } from './inference';
 import type { Overlay } from './overlay';
 import { formatLength, formatArea } from '../core/units';
 import { nav, wheelAction } from './navigation';
+import { applyDrawingAxes } from './drawingAxes';
 import { t, localize, normalizeNumberInput } from '../i18n';
 
 /** Tools of SketchUp Web's main toolbar (others appear as recently used tools). */
@@ -702,6 +703,7 @@ export class Editor {
       this.dirty = false;
       this.selDirty = false;
       this.pruneSelection();
+      applyDrawingAxes(this.model.settings);
       this.viewer.rebuild(this.viewState());
     } else if (this.selDirty) {
       this.selDirty = false;

@@ -5,7 +5,7 @@ import type { Entities } from '../core/model';
 import type { Overlay } from '../engine/overlay';
 import { PointTool, planeFromInference, planeAxes, onPlane } from './base';
 import { parseLengthList } from '../core/units';
-import { AXIS_COLOR, MAGENTA, snapping } from '../engine/inference';
+import { AXES, AXIS_COLOR, MAGENTA, snapping } from '../engine/inference';
 import { type PlaneRef, lineLineClosest } from '../core/geometry';
 import { t, formatDecimal } from '../i18n';
 
@@ -845,7 +845,7 @@ export class Arc2Tool extends PointTool {
       }
       const chordDir = this.end.clone().sub(this.start).normalize();
       if (Math.abs(chordDir.dot(this.normal)) > 1e-3) {
-        this.normal = chordDir.clone().cross(new THREE.Vector3(0, 0, 1));
+        this.normal = chordDir.clone().cross(AXES.z);
         if (this.normal.lengthSq() < 1e-6) {
           this.normal.set(1, 0, 0);
         }

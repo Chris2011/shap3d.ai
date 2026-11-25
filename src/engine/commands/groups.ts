@@ -12,11 +12,13 @@ import { t } from '../../i18n';
  */
 const groupWithHoles = (editor: Editor, name?: string) => {
   const refs = editor.selected();
-  const instances = refs.map((entityRef) => (entityRef.kind === 'instance' ? editor.entities.instances.get(entityRef.id) : undefined));
-  if (instances.some((instance) => !instance)) {
+  const parts = refs
+    .map((entityRef) => (entityRef.kind === 'instance' ? editor.entities.instances.get(entityRef.id) : undefined))
+    .filter((instance) => instance !== undefined);
+  // loose faces or edges in the selection: a plain group as before
+  if (parts.length !== refs.length) {
     return false;
   }
-  const parts = instances as NonNullable<(typeof instances)[number]>[];
   const holes = parts.filter((part) => part.hole),
     bodies = parts.filter((part) => !part.hole);
   if (!holes.length || !bodies.length) {

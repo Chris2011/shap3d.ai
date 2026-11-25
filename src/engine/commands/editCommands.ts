@@ -9,6 +9,8 @@ import { reverseFaces, orientFaces, softenSelection, intersectSelection } from '
 import { flipSelection, alignSelection, distributeSelection } from './arrange';
 import { treatSelectedEdges } from './edges';
 import { setSelectionFlag } from '../selectionEdits';
+import { runSolid } from './solids';
+import { alignAxesToFace, resetAxes, canAlignAxes } from './axes';
 
 /** the selected groups and components of the open context */
 const selectedInstances = (editor: Editor) =>
@@ -17,7 +19,6 @@ const selectedInstances = (editor: Editor) =>
     .filter((entityRef) => entityRef.kind === 'instance')
     .map((entityRef) => editor.entities.instances.get(entityRef.id))
     .filter((instance) => instance !== undefined);
-import { runSolid } from './solids';
 
 /** The commands of the Edit menu and the solid tools – in menu order */
 export const EDIT_COMMANDS: CommandDefinition[] = [
@@ -144,6 +145,8 @@ export const EDIT_COMMANDS: CommandDefinition[] = [
   { id: 'soften', group: 'edit', run: (editor) => softenSelection(editor, true) },
   { id: 'unsoften', group: 'edit', run: (editor) => softenSelection(editor, false) },
   { id: 'intersect', group: 'edit', run: intersectSelection },
+  { id: 'alignAxes', group: 'edit', run: alignAxesToFace, enabled: canAlignAxes },
+  { id: 'resetAxes', group: 'edit', run: resetAxes, enabled: (editor) => !!editor.model.settings.drawingAxes },
   { id: 'roundEdges', group: 'edit', run: (editor) => treatSelectedEdges(editor, 'round') },
   { id: 'chamferEdges', group: 'edit', run: (editor) => treatSelectedEdges(editor, 'chamfer') },
   { id: 'flipX', group: 'edit', run: (editor) => flipSelection(editor, 'x') },

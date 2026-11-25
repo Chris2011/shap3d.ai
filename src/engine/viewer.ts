@@ -28,6 +28,7 @@ import { meshView } from './meshView';
 import { measureView } from './measureView';
 import { GroundGrid } from './gridView';
 import { AmbientOcclusion } from './ambientOcclusion';
+import { drawingAxesMatrix } from './drawingAxes';
 
 /**
  * Night scene: the model's sky/ground colours are pushed towards a night sky, faces get moonlight and
@@ -551,6 +552,10 @@ export class Viewer {
     this.applyLighting();
     this.scene.fog = this.pluginLighting.fog();
     this.axes.visible = model.settings.axes;
+    // the axis lines lie along the drawing axes
+    this.axes.matrixAutoUpdate = false;
+    this.axes.matrix.copy(drawingAxesMatrix());
+    this.axes.matrixWorldNeedsUpdate = true;
 
     this.applyDisplayPlaces();
     this.applyDisplayLooks();
