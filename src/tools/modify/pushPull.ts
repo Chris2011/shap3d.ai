@@ -5,6 +5,7 @@ import type { Overlay } from '../../engine/overlay';
 import { PointTool } from '../base';
 import { t } from '../../i18n';
 import { pickContextFace } from './picking';
+import { drawPulledFace } from './gumballDraw';
 
 type V3 = THREE.Vector3;
 
@@ -171,20 +172,10 @@ export class PushPullTool extends PointTool {
   draw(overlay: Overlay) {
     const editor = this.editor;
     if (this.faceId != null && this.start) {
-      const face = editor.entities.faces.get(this.faceId);
-      if (!face) {
+      if (!editor.entities.faces.has(this.faceId)) {
         return;
       }
-      const off = this.normal.clone().multiplyScalar(this.distance);
-      for (const loop of editor.entities.loops(face)) {
-        const base = loop.map((vertex) => editor.toWorld(editor.entities.positionOf(vertex)));
-        const top = base.map((point) => point.clone().add(off));
-        overlay.fillPolygon(top, 'rgba(90,120,255,0.18)');
-        overlay.polyline(top, '#000', 1.2, true);
-        for (let i = 0; i < base.length; i++) {
-          overlay.line(base[i], top[i], '#000', 1);
-        }
-      }
+      drawPulledFace(editor, overlay, this.faceId, this.normal.clone().multiplyScalar(this.distance));
       const inference = this.inference;
       if (inference?.target && inference.alignFrom) {
         overlay.line(inference.alignFrom, inference.point, '#000', 1, [2, 3]);
