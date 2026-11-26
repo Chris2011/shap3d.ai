@@ -20,6 +20,7 @@
   </S3dFieldRow>
   <S3dFieldRow :label="t('materials.size')">{{ info.size }}</S3dFieldRow>
   <S3dFieldRow v-if="info.volume" :label="t('entityInfo.volume')">{{ info.volume }}</S3dFieldRow>
+  <S3dFieldRow v-if="info.area" :label="t('entityInfo.surfaceArea')">{{ info.area }}</S3dFieldRow>
   <S3dCheckbox :model-value="info.locked" @update:model-value="setSelectionFlag(editor, 'locked', $event)">{{
     t('toast.locked')
   }}</S3dCheckbox>

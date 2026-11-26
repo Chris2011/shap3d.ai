@@ -1081,7 +1081,8 @@
       "attributes": "السمات",
       "attributeAdd": "إضافة سمة…",
       "attributeRemove": "إزالة السمة",
-      "attributeName": "اسم السمة"
+      "attributeName": "اسم السمة",
+      "surfaceArea": "المساحة السطحية"
     },
     "shapes": {
       "cylinder": "أسطوانة",

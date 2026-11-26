@@ -2174,7 +2174,9 @@
       "attributeRemove": "",
       "attributeRemove#en": "Remove attribute",
       "attributeName": "",
-      "attributeName#en": "Name of the attribute"
+      "attributeName#en": "Name of the attribute",
+      "surfaceArea": "",
+      "surfaceArea#en": "Surface"
     },
     "shapes": {
       "cylinder": "",

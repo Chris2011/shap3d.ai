@@ -1081,7 +1081,8 @@
       "attributes": "Attributes",
       "attributeAdd": "Add attribute…",
       "attributeRemove": "Remove attribute",
-      "attributeName": "Name of the attribute"
+      "attributeName": "Name of the attribute",
+      "surfaceArea": "Surface"
     },
     "shapes": {
       "cylinder": "Cylinder",
