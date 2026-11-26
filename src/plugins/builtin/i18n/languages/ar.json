@@ -132,7 +132,8 @@
       "toggleAutosave": "الحفظ التلقائي (في المتصفح)",
       "toggleGumball": "مقبض التحويل عند التحديد",
       "mirrorProcedure": "انعكاس (يبقى قابلاً للتعديل)",
-      "patternProcedure": "نمط (يبقى قابلاً للتعديل)"
+      "patternProcedure": "نمط (يبقى قابلاً للتعديل)",
+      "toggleDrawLabels": "المقاسات أثناء الرسم"
     },
     "names": {
       "model": "نموذج",
@@ -524,7 +525,8 @@
       "scale": "المقياس",
       "fov": "مجال الرؤية",
       "eyeHeight": "ارتفاع العين",
-      "copyAlong": "النسخ أو التباعد"
+      "copyAlong": "النسخ أو التباعد",
+      "sideLength": "الضلع"
     },
     "app": {
       "dropToImport": "أفلت الملف لاستيراده",

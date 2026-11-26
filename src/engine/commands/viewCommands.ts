@@ -7,6 +7,7 @@ import { showPanel } from '../../components/panelState';
 import type { CommandDefinition } from './types';
 import { setFaceStyle } from './view';
 import { gumballOn } from '../../tools/modify/gumball';
+import { drawLabelsOn } from '../../tools/drawLabels';
 
 /** The commands of the View menu – in menu order */
 export const VIEW_COMMANDS: CommandDefinition[] = [
@@ -36,6 +37,15 @@ export const VIEW_COMMANDS: CommandDefinition[] = [
       editor.invalidate();
     },
     checked: () => gumballOn.value,
+  },
+  {
+    id: 'toggleDrawLabels',
+    group: 'view',
+    run: (editor) => {
+      drawLabelsOn.value = !drawLabelsOn.value;
+      editor.redraw();
+    },
+    checked: () => drawLabelsOn.value,
   },
   {
     id: 'toggleRulers',

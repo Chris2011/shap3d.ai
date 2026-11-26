@@ -46,6 +46,7 @@ const OPTS: { id: string; label: string; parent?: string }[] = [
   { id: 'togglePeopleSize', label: 'commands.togglePeopleSize' },
   { id: 'toggleGuides', label: 'commands.toggleGuides' },
   { id: 'toggleGumball', label: 'commands.toggleGumball' },
+  { id: 'toggleDrawLabels', label: 'commands.toggleDrawLabels' },
   { id: 'toggleSectionPlanes', label: 'commands.toggleSectionPlanes' },
   { id: 'toggleSectionCuts', label: 'commands.toggleSectionCuts' },
   { id: 'toggleHidden', label: 'commands.toggleHidden' },

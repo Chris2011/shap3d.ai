@@ -8,6 +8,7 @@ import { parseLengthList } from '../core/units';
 import { AXES, AXIS_COLOR, MAGENTA, snapping } from '../engine/inference';
 import { type PlaneRef, lineLineClosest } from '../core/geometry';
 import { t, formatDecimal } from '../i18n';
+import { edgeLabel, pointLabel, valueLabel } from './drawLabels';
 
 type V3 = THREE.Vector3;
 
@@ -123,6 +124,7 @@ export class LineTool extends PointTool {
             ? MAGENTA
             : '#000';
       overlay.line(this.start, this.inference.point, col, col === '#000' ? 1 : 1.6);
+      edgeLabel(this.editor, overlay, this.start, this.inference.point);
     }
     this.drawInference(overlay);
   }
@@ -370,6 +372,8 @@ export class RectangleTool extends PointTool {
     if (this.corner) {
       const pts = this.corners(this.corner, this.basisU, this.basisV, this.width, this.height);
       overlay.polyline(pts, this.aligned ? MAGENTA : '#0000ff', 1.4, true);
+      edgeLabel(this.editor, overlay, pts[0], pts[1]);
+      edgeLabel(this.editor, overlay, pts[1], pts[2]);
       if (this.special) {
         overlay.line(pts[0], pts[2], '#888', 1, [4, 3]);
         overlay.tooltip(this.editor.mouse.x, this.editor.mouse.y, this.special);
@@ -462,11 +466,14 @@ export class RotatedRectangleTool extends PointTool {
   draw(overlay: Overlay) {
     if (this.pts.length === 1 && this.current) {
       overlay.line(this.pts[0], this.current, '#000', 1.2);
+      edgeLabel(this.editor, overlay, this.pts[0], this.current);
     }
     if (this.pts.length === 2 && this.current) {
       const corners = this.rect();
       overlay.fillPolygon(corners, 'rgba(100,140,255,0.12)');
       overlay.polyline(corners, '#000', 1.2, true);
+      edgeLabel(this.editor, overlay, corners[0], corners[1]);
+      edgeLabel(this.editor, overlay, corners[1], corners[2]);
     }
     this.drawInference(overlay);
   }
@@ -608,7 +615,15 @@ export class CircleTool extends PointTool {
       const pts = this.points(this.center, this.plane.normal, this.startDir, this.radius);
       overlay.fillPolygon(pts, 'rgba(100,140,255,0.12)');
       overlay.polyline(pts, '#000', 1.2, true);
-      overlay.line(this.center, this.center.clone().addScaledVector(this.startDir, this.radius), '#555', 1, [3, 3]);
+      const rim = this.center.clone().addScaledVector(this.startDir, this.radius);
+      overlay.line(this.center, rim, '#555', 1, [3, 3]);
+      edgeLabel(this.editor, overlay, this.center, rim, 'R ');
+      // across from the radius: a circle's diameter, a polygon's side
+      pointLabel(
+        overlay,
+        this.center.clone().addScaledVector(this.startDir, -this.radius),
+        this.polygon ? `${t('vcb.sideLength')} ${this.editor.fmt(pts[0].distanceTo(pts[1]))}` : `Ø ${this.editor.fmt(2 * this.radius)}`,
+      );
     }
     if (this.center) {
       overlay.marker(this.center, 'center');
@@ -1051,6 +1066,9 @@ export class Arc2Tool extends PointTool {
     return false;
   }
   draw(overlay: Overlay) {
+    if (this.busy()) {
+      valueLabel(this.editor, overlay);
+    }
     if (this.start && !this.end && this.current) {
       overlay.line(this.start, this.current, '#000', 1);
     }
@@ -1209,6 +1227,9 @@ export class ArcCenterTool extends PointTool {
     return false;
   }
   draw(overlay: Overlay) {
+    if (this.busy()) {
+      valueLabel(this.editor, overlay);
+    }
     if (this.center && !this.startPoint && this.current) {
       const point = onPlane(this.current, this.center, this.normal);
       overlay.line(this.center, point, '#555', 1, [3, 3]);
@@ -1300,6 +1321,9 @@ export class Arc3Tool extends PointTool {
     });
   }
   draw(overlay: Overlay) {
+    if (this.busy()) {
+      valueLabel(this.editor, overlay);
+    }
     if (this.pts.length === 1 && this.current) {
       overlay.line(this.pts[0], this.current, '#000', 1);
     }

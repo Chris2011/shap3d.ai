@@ -132,7 +132,8 @@
       "toggleAutosave": "Guardado automático (en el navegador)",
       "toggleGumball": "Gumball en la selección",
       "mirrorProcedure": "Simetría (sigue editable)",
-      "patternProcedure": "Patrón (sigue editable)"
+      "patternProcedure": "Patrón (sigue editable)",
+      "toggleDrawLabels": "Medidas al dibujar"
     },
     "names": {
       "model": "Modelo",
@@ -524,7 +525,8 @@
       "scale": "Escala",
       "fov": "Campo de visión",
       "eyeHeight": "Altura de los ojos",
-      "copyAlong": "Copias o separación"
+      "copyAlong": "Copias o separación",
+      "sideLength": "Lado"
     },
     "app": {
       "dropToImport": "Suelta el archivo para importarlo",

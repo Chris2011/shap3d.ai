@@ -132,7 +132,8 @@
       "toggleAutosave": "Autosave (in the browser)",
       "toggleGumball": "Gumball at the selection",
       "mirrorProcedure": "Mirror (stays editable)",
-      "patternProcedure": "Pattern (stays editable)"
+      "patternProcedure": "Pattern (stays editable)",
+      "toggleDrawLabels": "Sizes while drawing"
     },
     "names": {
       "model": "Model",
@@ -524,7 +525,8 @@
       "scale": "Scale",
       "fov": "Field of view",
       "eyeHeight": "Eye height",
-      "copyAlong": "Copies or spacing"
+      "copyAlong": "Copies or spacing",
+      "sideLength": "Side"
     },
     "app": {
       "dropToImport": "Drop the file to import it",

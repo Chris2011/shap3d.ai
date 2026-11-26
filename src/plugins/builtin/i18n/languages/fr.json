@@ -132,7 +132,8 @@
       "toggleAutosave": "Enregistrement automatique (dans le navigateur)",
       "toggleGumball": "Gumball sur la sélection",
       "mirrorProcedure": "Symétrie (reste modifiable)",
-      "patternProcedure": "Réseau (reste modifiable)"
+      "patternProcedure": "Réseau (reste modifiable)",
+      "toggleDrawLabels": "Dimensions pendant le dessin"
     },
     "names": {
       "model": "Modèle",
@@ -524,7 +525,8 @@
       "scale": "Échelle",
       "fov": "Champ de vision",
       "eyeHeight": "Hauteur des yeux",
-      "copyAlong": "Copies ou espacement"
+      "copyAlong": "Copies ou espacement",
+      "sideLength": "Côté"
     },
     "app": {
       "dropToImport": "Déposez le fichier pour l’importer",

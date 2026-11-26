@@ -432,7 +432,9 @@
       "mirrorProcedure": "",
       "mirrorProcedure#en": "Mirror (stays editable)",
       "patternProcedure": "",
-      "patternProcedure#en": "Pattern (stays editable)"
+      "patternProcedure#en": "Pattern (stays editable)",
+      "toggleDrawLabels": "",
+      "toggleDrawLabels#en": "Sizes while drawing"
     },
     "names": {
       "model": "",
@@ -1168,7 +1170,9 @@
       "eyeHeight": "",
       "eyeHeight#en": "Eye height",
       "copyAlong": "",
-      "copyAlong#en": "Copies or spacing"
+      "copyAlong#en": "Copies or spacing",
+      "sideLength": "",
+      "sideLength#en": "Side"
     },
     "app": {
       "dropToImport": "",

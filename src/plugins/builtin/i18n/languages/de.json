@@ -132,7 +132,8 @@
       "toggleAutosave": "Automatisch speichern (im Browser)",
       "toggleGumball": "Gumball an der Auswahl",
       "mirrorProcedure": "Spiegeln (bleibt bearbeitbar)",
-      "patternProcedure": "Muster (bleibt bearbeitbar)"
+      "patternProcedure": "Muster (bleibt bearbeitbar)",
+      "toggleDrawLabels": "Maße beim Zeichnen"
     },
     "names": {
       "model": "Modell",
@@ -524,7 +525,8 @@
       "scale": "Skalierung",
       "fov": "Sichtfeld",
       "eyeHeight": "Augenhöhe",
-      "copyAlong": "Kopien oder Abstand"
+      "copyAlong": "Kopien oder Abstand",
+      "sideLength": "Seite"
     },
     "app": {
       "dropToImport": "Datei loslassen zum Importieren",
