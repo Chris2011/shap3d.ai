@@ -130,7 +130,8 @@
       "explodeToInputs": "In seine Teile zerlegen",
       "newTab": "Neuer Tab",
       "toggleAutosave": "Automatisch speichern (im Browser)",
-      "toggleGumball": "Gumball an der Auswahl"
+      "toggleGumball": "Gumball an der Auswahl",
+      "mirrorProcedure": "Spiegeln (bleibt bearbeitbar)"
     },
     "names": {
       "model": "Modell",
@@ -256,7 +257,8 @@
       "roundCornerTooShort": "Die Kanten dieser Ecke sind für diese Rundung zu kurz.",
       "unroundNoCorner": "Dieser Bogen liegt nicht zwischen zwei geraden Kanten, die sich in einer Ecke treffen.",
       "snapPointNeedsGroup": "Andockpunkte gehören zu einer Gruppe oder Komponente. Klicke auf eine.",
-      "invalidLength": "Ungültige Länge: {value}"
+      "invalidLength": "Ungültige Länge: {value}",
+      "selectGroups": "Erst Gruppen oder Komponenten wählen."
     },
     "confirm": {
       "discardChanges": "Ungespeicherte Änderungen verwerfen?",
@@ -1794,7 +1796,8 @@
         "solid": "Bleibt bearbeitbar: Volumenkörper",
         "followme": "Bleibt bearbeitbar: Folge mir",
         "copyalong": "Bleibt bearbeitbar: Entlang kopieren",
-        "edges": "Bleibt bearbeitbar: Kanten abgerundet"
+        "edges": "Bleibt bearbeitbar: Kanten abgerundet",
+        "mirror": "Bleibt bearbeitbar: Spiegeln"
       },
       "operation": "Operation",
       "distribute": "Verteilen",
@@ -1818,7 +1821,8 @@
         "copyAlong": "Entlang kopieren",
         "followMe": "Folge mir",
         "path": "Pfad",
-        "profile": "Profil"
+        "profile": "Profil",
+        "mirror": "Spiegelung"
       },
       "errors": {
         "missingInput": "Ein Teil, aus dem es besteht, fehlt – das letzte Ergebnis bleibt.",
@@ -1828,7 +1832,9 @@
         "followMe": "Das Profil konnte diesem Pfad nicht folgen – das letzte Ergebnis bleibt.",
         "tooMany": "Das wären mehr als 2000 Kopien – das letzte Ergebnis bleibt.",
         "failed": "Das Ergebnis ließ sich nicht berechnen – das letzte Ergebnis bleibt."
-      }
+      },
+      "mirrorAxis": "Spiegeln quer zu",
+      "mirrorPlane": "Ebene bei"
     },
     "projects": {
       "title": "Projekte",

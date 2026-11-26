@@ -130,7 +130,8 @@
       "explodeToInputs": "Take apart into its parts",
       "newTab": "New tab",
       "toggleAutosave": "Autosave (in the browser)",
-      "toggleGumball": "Gumball at the selection"
+      "toggleGumball": "Gumball at the selection",
+      "mirrorProcedure": "Mirror (stays editable)"
     },
     "names": {
       "model": "Model",
@@ -256,7 +257,8 @@
       "roundCornerTooShort": "The edges of this corner are too short for that rounding.",
       "unroundNoCorner": "This arc does not lie between two straight edges that meet in a corner.",
       "snapPointNeedsGroup": "Snap points belong to a group or component. Click on one.",
-      "invalidLength": "Invalid length: {value}"
+      "invalidLength": "Invalid length: {value}",
+      "selectGroups": "Select groups or components first."
     },
     "confirm": {
       "discardChanges": "Discard unsaved changes?",
@@ -1776,7 +1778,8 @@
         "solid": "Stays editable: solid tool",
         "followme": "Stays editable: Follow Me",
         "copyalong": "Stays editable: Copy Along",
-        "edges": "Stays editable: rounded edges"
+        "edges": "Stays editable: rounded edges",
+        "mirror": "Stays editable: mirror"
       },
       "operation": "Operation",
       "distribute": "Distribute",
@@ -1800,7 +1803,8 @@
         "copyAlong": "Copy Along",
         "followMe": "Follow Me",
         "path": "Path",
-        "profile": "Profile"
+        "profile": "Profile",
+        "mirror": "Mirror"
       },
       "errors": {
         "missingInput": "One of the parts it is made from is missing – the last result stays.",
@@ -1810,7 +1814,9 @@
         "followMe": "The profile could not follow this path – the last result stays.",
         "tooMany": "That would be more than 2000 copies – the last result stays.",
         "failed": "The result could not be built – the last result stays."
-      }
+      },
+      "mirrorAxis": "Mirror across",
+      "mirrorPlane": "Plane at"
     },
     "projects": {
       "title": "Projects",

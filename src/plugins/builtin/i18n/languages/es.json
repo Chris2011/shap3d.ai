@@ -130,7 +130,8 @@
       "explodeToInputs": "Separar en sus partes",
       "newTab": "Nueva pestaña",
       "toggleAutosave": "Guardado automático (en el navegador)",
-      "toggleGumball": "Gumball en la selección"
+      "toggleGumball": "Gumball en la selección",
+      "mirrorProcedure": "Simetría (sigue editable)"
     },
     "names": {
       "model": "Modelo",
@@ -256,7 +257,8 @@
       "roundCornerTooShort": "Las aristas de esta esquina son demasiado cortas para ese redondeo.",
       "unroundNoCorner": "Este arco no está entre dos aristas rectas que se unen en una esquina.",
       "snapPointNeedsGroup": "Los puntos de anclaje pertenecen a un grupo o componente. Haz clic en uno.",
-      "invalidLength": "Longitud no válida: {value}"
+      "invalidLength": "Longitud no válida: {value}",
+      "selectGroups": "Selecciona primero grupos o componentes."
     },
     "confirm": {
       "discardChanges": "¿Descartar los cambios no guardados?",
@@ -1794,7 +1796,8 @@
         "solid": "Procedimiento: herramienta de sólidos",
         "followme": "Procedimiento: Sígueme",
         "copyalong": "Procedimiento: Copiar a lo largo",
-        "edges": "Sigue editable: aristas redondeadas"
+        "edges": "Sigue editable: aristas redondeadas",
+        "mirror": "Sigue editable: simetría"
       },
       "operation": "Operación",
       "distribute": "Repartir",
@@ -1818,7 +1821,8 @@
         "copyAlong": "Copiar a lo largo",
         "followMe": "Sígueme",
         "path": "Recorrido",
-        "profile": "Perfil"
+        "profile": "Perfil",
+        "mirror": "Simetría"
       },
       "errors": {
         "missingInput": "Falta una entrada del procedimiento: se mantiene el último resultado.",
@@ -1828,7 +1832,9 @@
         "followMe": "El perfil no pudo seguir este recorrido: se mantiene el último resultado.",
         "tooMany": "Serían más de 2000 copias: se mantiene el último resultado.",
         "failed": "No se pudo construir el procedimiento: se mantiene el último resultado."
-      }
+      },
+      "mirrorAxis": "Simetría según",
+      "mirrorPlane": "Plano en"
     },
     "projects": {
       "title": "Proyectos",

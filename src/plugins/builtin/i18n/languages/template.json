@@ -428,7 +428,9 @@
       "toggleAutosave": "",
       "toggleAutosave#en": "Autosave (in the browser)",
       "toggleGumball": "",
-      "toggleGumball#en": "Gumball at the selection"
+      "toggleGumball#en": "Gumball at the selection",
+      "mirrorProcedure": "",
+      "mirrorProcedure#en": "Mirror (stays editable)"
     },
     "names": {
       "model": "",
@@ -668,7 +670,9 @@
       "snapPointNeedsGroup": "",
       "snapPointNeedsGroup#en": "Snap points belong to a group or component. Click on one.",
       "invalidLength": "",
-      "invalidLength#en": "Invalid length: {value}"
+      "invalidLength#en": "Invalid length: {value}",
+      "selectGroups": "",
+      "selectGroups#en": "Select groups or components first."
     },
     "confirm": {
       "discardChanges": "",
@@ -3379,7 +3383,9 @@
         "copyalong": "",
         "copyalong#en": "Stays editable: Copy Along",
         "edges": "",
-        "edges#en": "Stays editable: rounded edges"
+        "edges#en": "Stays editable: rounded edges",
+        "mirror": "",
+        "mirror#en": "Stays editable: mirror"
       },
       "operation": "",
       "operation#en": "Operation",
@@ -3425,7 +3431,9 @@
         "path": "",
         "path#en": "Path",
         "profile": "",
-        "profile#en": "Profile"
+        "profile#en": "Profile",
+        "mirror": "",
+        "mirror#en": "Mirror"
       },
       "errors": {
         "missingInput": "",
@@ -3442,7 +3450,11 @@
         "tooMany#en": "That would be more than 2000 copies – the last result stays.",
         "failed": "",
         "failed#en": "The result could not be built – the last result stays."
-      }
+      },
+      "mirrorAxis": "",
+      "mirrorAxis#en": "Mirror across",
+      "mirrorPlane": "",
+      "mirrorPlane#en": "Plane at"
     },
     "projects": {
       "title": "",

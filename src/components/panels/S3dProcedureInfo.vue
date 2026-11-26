@@ -55,6 +55,21 @@
       </label>
     </template>
 
+    <template v-if="procedure.kind === 'mirror'">
+      <div class="s3d-row">
+        <span class="s3d-label">{{ t('procedures.mirrorAxis') }}</span>
+        <select class="s3d-input" :value="procedure.params.axis" @change="setMirrorAxis(inputValue($event) as MirrorAxis)">
+          <option value="x">{{ t('contextMenu.red') }}</option>
+          <option value="y">{{ t('contextMenu.green') }}</option>
+          <option value="z">{{ t('contextMenu.blue') }}</option>
+        </select>
+      </div>
+      <div class="s3d-row">
+        <span class="s3d-label">{{ t('procedures.mirrorPlane') }}</span>
+        <input class="s3d-input" :value="editor.fmt(Number(procedure.params.at))" @change="setPlane($event)" @keydown.stop />
+      </div>
+    </template>
+
     <div class="s3d-row">
       <span class="s3d-label">{{ t('procedures.inputs') }}</span>
       <span class="min-w-0 truncate" :title="inputNames">{{ inputNames }}</span>
@@ -74,6 +89,7 @@ import { useEditor } from '../keys';
 import { isProcedureInput } from '../../core/model';
 import { PROCEDURE_SOLID_OPS, rebuildProcedure } from '../../core/procedures';
 import { parseLength } from '../../core/units';
+import { mirrorPlaneAt, type MirrorAxis } from '../../core/mirrorProcedure';
 import { runCommand } from '../../engine/commands';
 import { useSelection } from '../../composables/useModel';
 import { t } from '../../i18n';
@@ -114,6 +130,20 @@ const setCount = (event: Event) => {
     setParams({ count });
   } else {
     (event.target as HTMLInputElement).value = String(procedure.value?.params.count ?? 1);
+  }
+};
+/** another axis: the plane goes back to the far side of the sources along it */
+const setMirrorAxis = (axis: MirrorAxis) => {
+  const sources = [...(instance.value?.definition.entities.instances.values() ?? [])].filter((input) => input.procedureRole === 'source');
+  setParams({ axis, at: mirrorPlaneAt(sources, axis) });
+};
+/** where the mirror plane lies along its axis – any length, also 0 or negative */
+const setPlane = (event: Event) => {
+  const at = parseLength(inputValue(event), editor.model.settings.units);
+  if (at != null) {
+    setParams({ at });
+  } else {
+    (event.target as HTMLInputElement).value = editor.fmt(Number(procedure.value?.params.at ?? 0));
   }
 };
 /** a length typed for a parameter (spacing, radius …) – back to the old value when it is no positive length */

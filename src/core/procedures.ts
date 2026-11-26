@@ -10,6 +10,7 @@ import {
 } from './model';
 import { cutKeepingGroups, isSolid, solidOp, type SolidOp } from './solids';
 import { treatEdges, type EdgeSpec, type EdgeTreatment } from './roundEdges';
+import { buildMirror, mirrorPlaneAt } from './mirrorProcedure';
 
 /**
  * Procedures: non-destructive modelling. A procedural group keeps what it was made from – its inputs, as child groups
@@ -343,7 +344,9 @@ export const rebuildProcedure = (definition: Definition, defs: ProcedureModel): 
           ? buildFollowMe(definition, fresh, defs)
           : procedure.kind === 'edges'
             ? buildEdges(definition, fresh, defs)
-            : buildCopyAlong(definition, fresh);
+            : procedure.kind === 'mirror'
+              ? buildMirror(definition, fresh)
+              : buildCopyAlong(definition, fresh);
   } catch (failure) {
     console.error(failure);
     error = 'procedures.errors.failed';
@@ -508,6 +511,18 @@ export const createCopyAlongProcedure = (
   } else {
     takeInput(ents, definition, path, 'path');
   }
+  const error = rebuildProcedure(definition, model);
+  if (error) {
+    throw new Error(error);
+  }
+  return ents.addInstance(definition, new THREE.Matrix4(), '');
+};
+
+/** Mirror: the groups go inside as sources, the plane across the red axis touches their far side */
+export const createMirrorProcedure = (model: ProcedureModel, ents: Entities, sources: Instance[], name: string) => {
+  const definition = model.newDefinition(name, false);
+  definition.procedure = { kind: 'mirror', params: { axis: 'x', at: mirrorPlaneAt(sources, 'x') } };
+  sources.forEach((source) => takeInput(ents, definition, source, 'source'));
   const error = rebuildProcedure(definition, model);
   if (error) {
     throw new Error(error);

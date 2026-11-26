@@ -130,7 +130,8 @@
       "explodeToInputs": "Défaire en ses parties",
       "newTab": "Nouvel onglet",
       "toggleAutosave": "Enregistrement automatique (dans le navigateur)",
-      "toggleGumball": "Gumball sur la sélection"
+      "toggleGumball": "Gumball sur la sélection",
+      "mirrorProcedure": "Symétrie (reste modifiable)"
     },
     "names": {
       "model": "Modèle",
@@ -256,7 +257,8 @@
       "roundCornerTooShort": "Les arêtes de ce coin sont trop courtes pour cet arrondi.",
       "unroundNoCorner": "Cet arc ne se trouve pas entre deux arêtes droites qui se rejoignent en un coin.",
       "snapPointNeedsGroup": "Les points d’ancrage appartiennent à un groupe ou un composant. Cliquez sur l’un d’eux.",
-      "invalidLength": "Longueur invalide : {value}"
+      "invalidLength": "Longueur invalide : {value}",
+      "selectGroups": "Sélectionnez d’abord des groupes ou des composants."
     },
     "confirm": {
       "discardChanges": "Abandonner les modifications non enregistrées ?",
@@ -1794,7 +1796,8 @@
         "solid": "Procédure : outil solide",
         "followme": "Procédure : Suivez-moi",
         "copyalong": "Procédure : Copier le long",
-        "edges": "Reste modifiable : arêtes arrondies"
+        "edges": "Reste modifiable : arêtes arrondies",
+        "mirror": "Reste modifiable : symétrie"
       },
       "operation": "Opération",
       "distribute": "Répartir",
@@ -1818,7 +1821,8 @@
         "copyAlong": "Copier le long",
         "followMe": "Suivez-moi",
         "path": "Chemin",
-        "profile": "Profil"
+        "profile": "Profil",
+        "mirror": "Symétrie"
       },
       "errors": {
         "missingInput": "Une entrée de la procédure manque – le dernier résultat reste.",
@@ -1828,7 +1832,9 @@
         "followMe": "Le profil n’a pas pu suivre ce chemin – le dernier résultat reste.",
         "tooMany": "Cela ferait plus de 2000 copies – le dernier résultat reste.",
         "failed": "La procédure n’a pas pu être construite – le dernier résultat reste."
-      }
+      },
+      "mirrorAxis": "Symétrie selon",
+      "mirrorPlane": "Plan à"
     },
     "projects": {
       "title": "Projets",
