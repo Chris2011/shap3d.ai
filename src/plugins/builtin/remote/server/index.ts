@@ -14,11 +14,11 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createReadStream, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, normalize, sep } from 'node:path';
-import { ACTIONS, inputProperties, pathParameters, usesQuery, type JsonSchema, type RemoteAction } from './actions';
-import { buildOpenApi } from './openapi';
-import { createBridge, RemoteError } from './bridge';
-import { createMcp } from './mcp';
-import { refusal } from '../../../../../tools/requestGuard';
+import { ACTIONS, inputProperties, pathParameters, usesQuery, type JsonSchema, type RemoteAction } from './actions.ts';
+import { buildOpenApi } from './openapi.ts';
+import { createBridge, RemoteError } from './bridge.ts';
+import { createMcp } from './mcp.ts';
+import { refusal } from '../../../../../tools/requestGuard.ts';
 
 const MAX_BODY_BYTES = 200 * 1024 * 1024;
 const SWAGGER_DIR = dirname(createRequire(import.meta.url).resolve('swagger-ui-dist/package.json'));

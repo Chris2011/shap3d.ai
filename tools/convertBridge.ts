@@ -14,7 +14,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { refusal } from './requestGuard';
+import { refusal } from './requestGuard.ts';
 
 const MAX_BYTES = 300 * 1024 * 1024;
 const TIMEOUT_MS = 180_000;

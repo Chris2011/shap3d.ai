@@ -87,6 +87,9 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 
 ### Fixed
 
+- **The first click after drawing works**: a click right after a change – a rectangle, then <kbd>P</kbd> and a click on the new face – sometimes missed it and only the second click took. The view now takes in pending changes before every click, for every tool.
+- Entity Info follows a procedure's changed parameters at once (e.g. Copy Along switching between count and spacing showed the old fields).
+- `npm run dev` no longer warns about Vite's native config loader: the dev-server imports carry their file extensions.
 - **Scene previews** showed a model changed just before without the change: the picture was taken before the view was rebuilt.
 - **Booleans could crash on corners**: healing collinear edges removed a corner a face still passed twice, so later steps failed (seen where two cuts meet at a corner).
 - **The Shadows panel** shows the time, month, latitude and north while dragging the sliders, not only after the next change.

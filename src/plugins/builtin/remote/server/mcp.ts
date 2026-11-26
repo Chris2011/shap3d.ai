@@ -5,8 +5,8 @@
  */
 import { lstat, mkdir, realpath, writeFile } from 'node:fs/promises';
 import { dirname, extname, isAbsolute, relative, resolve } from 'node:path';
-import { ACTIONS, type RemoteAction } from './actions';
-import { RemoteError, type Bridge } from './bridge';
+import { ACTIONS, type RemoteAction } from './actions.ts';
+import { RemoteError, type Bridge } from './bridge.ts';
 
 // the version of this MCP interface (like the API version in openapi.ts) – raised when tools change incompatibly, not with every plugin version
 const SERVER_INFO = { name: 'shap3d-ai', title: 'Shap3D.ai', version: '1.0.0' };

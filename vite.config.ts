@@ -3,10 +3,10 @@ import { defineConfig, type Plugin } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import { Readable } from 'node:stream';
-import { convertBridge } from './tools/convertBridge';
-import { remoteApi } from './src/plugins/builtin/remote/server';
-import { refusal } from './tools/requestGuard';
-import { CONTENT_SECURITY_POLICY } from './tools/contentSecurityPolicy';
+import { convertBridge } from './tools/convertBridge.ts';
+import { remoteApi } from './src/plugins/builtin/remote/server/index.ts';
+import { refusal } from './tools/requestGuard.ts';
+import { CONTENT_SECURITY_POLICY } from './tools/contentSecurityPolicy.ts';
 
 /**
  * Dev-only proxy for AI providers that don't send CORS headers (e.g. LM Studio without CORS,

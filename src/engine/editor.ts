@@ -777,6 +777,9 @@ export class Editor {
   // ------------------------------------------------------------ input
   private lastDown = { t: 0, x: 0, y: 0 };
   pointerDown(pointer: PEvt) {
+    // a click right after a change (a rectangle, then P) must already see the new geometry – the view rebuilds only
+    // on the next animation frame, which may come after this event (slow frames, a busy or hidden window)
+    this.frame();
     if (pointer.button === 1 || (pointer.button === 0 && this.ui.tool === 'orbit' && false)) {
       const faceHit = this.viewer.pickFace(pointer.x, pointer.y);
       this.nav = { mode: pointer.shift ? 'pan' : 'orbit', x: pointer.x, y: pointer.y, pivot: faceHit ? faceHit.point : null };
@@ -821,6 +824,7 @@ export class Editor {
     this.redraw();
   }
   dblClick(pointer: PEvt) {
+    this.frame();
     if (pointer.button === 0) {
       this.tool.onDblClick(pointer);
       this.refreshStatus();

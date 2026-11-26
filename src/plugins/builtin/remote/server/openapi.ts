@@ -1,5 +1,5 @@
 /** Builds the OpenAPI 3.1 document of the REST API from the action list. */
-import { ACTIONS, inputProperties, pathParameters, usesQuery, type JsonSchema, type RemoteAction } from './actions';
+import { ACTIONS, inputProperties, pathParameters, usesQuery, type JsonSchema, type RemoteAction } from './actions.ts';
 
 const errorResponse = (description: string) => ({
   description,
