@@ -90,6 +90,7 @@ const items = computed<It[]>(() => {
       out.push({ label: t('commands.lock'), cmd: 'lock' }, { label: t('commands.unlock'), cmd: 'unlock' });
       out.push({ label: t('commands.toggleHole'), cmd: 'toggleHole' });
       out.push({ label: t('commands.mirrorProcedure'), cmd: 'mirrorProcedure' });
+      out.push({ label: t('commands.patternProcedure'), cmd: 'patternProcedure' });
     }
     out.push({ label: t('commands.makeGroup'), cmd: 'makeGroup' }, { label: t('commands.makeComponent'), cmd: 'makeComponent', sc: 'G' });
     if (has('face')) {

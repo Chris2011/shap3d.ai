@@ -55,20 +55,8 @@
       </label>
     </template>
 
-    <template v-if="procedure.kind === 'mirror'">
-      <div class="s3d-row">
-        <span class="s3d-label">{{ t('procedures.mirrorAxis') }}</span>
-        <select class="s3d-input" :value="procedure.params.axis" @change="setMirrorAxis(inputValue($event) as MirrorAxis)">
-          <option value="x">{{ t('contextMenu.red') }}</option>
-          <option value="y">{{ t('contextMenu.green') }}</option>
-          <option value="z">{{ t('contextMenu.blue') }}</option>
-        </select>
-      </div>
-      <div class="s3d-row">
-        <span class="s3d-label">{{ t('procedures.mirrorPlane') }}</span>
-        <input class="s3d-input" :value="editor.fmt(Number(procedure.params.at))" @change="setPlane($event)" @keydown.stop />
-      </div>
-    </template>
+    <S3dMirrorParams v-if="procedure.kind === 'mirror'" />
+    <S3dPatternParams v-if="procedure.kind === 'pattern'" />
 
     <div class="s3d-row">
       <span class="s3d-label">{{ t('procedures.inputs') }}</span>
@@ -85,74 +73,19 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useEditor } from '../keys';
+import S3dMirrorParams from './procedures/S3dMirrorParams.vue';
+import S3dPatternParams from './procedures/S3dPatternParams.vue';
 import { isProcedureInput } from '../../core/model';
-import { PROCEDURE_SOLID_OPS, rebuildProcedure } from '../../core/procedures';
-import { parseLength } from '../../core/units';
-import { mirrorPlaneAt, type MirrorAxis } from '../../core/mirrorProcedure';
+import { PROCEDURE_SOLID_OPS } from '../../core/procedures';
 import { runCommand } from '../../engine/commands';
-import { useSelection } from '../../composables/useModel';
+import { inputValue, useProcedureParams } from '../../composables/useProcedureParams';
 import { t } from '../../i18n';
 
-const editor = useEditor();
-
-const instance = useSelection(() => {
-  const selection = editor.selected();
-  const only = selection.length === 1 && selection[0].kind === 'instance' ? editor.entities.instances.get(selection[0].id) : undefined;
-  return only?.definition.procedure ? only : null;
-});
-const procedure = computed(() => instance.value?.definition.procedure);
+const { editor, instance, procedure, setParams, setCount, setLength } = useProcedureParams();
 const inputNames = computed(() =>
   [...(instance.value?.definition.entities.instances.values() ?? [])]
     .filter(isProcedureInput)
     .map((input) => input.name || input.definition.name)
     .join(', '),
 );
-
-const inputValue = (event: Event) => (event.target as HTMLInputElement | HTMLSelectElement).value;
-
-const setParams = (change: Record<string, string | number | boolean>) => {
-  const definition = instance.value?.definition;
-  if (!definition?.procedure) {
-    return;
-  }
-  editor.commit('procedures.undoParams', () => {
-    Object.assign(definition.procedure!.params, change);
-    const error = rebuildProcedure(definition, editor.model);
-    if (error) {
-      editor.toast(t(error));
-    }
-  });
-};
-const setCount = (event: Event) => {
-  const count = Math.round(Number(inputValue(event)));
-  if (Number.isFinite(count) && count >= 1) {
-    setParams({ count });
-  } else {
-    (event.target as HTMLInputElement).value = String(procedure.value?.params.count ?? 1);
-  }
-};
-/** another axis: the plane goes back to the far side of the sources along it */
-const setMirrorAxis = (axis: MirrorAxis) => {
-  const sources = [...(instance.value?.definition.entities.instances.values() ?? [])].filter((input) => input.procedureRole === 'source');
-  setParams({ axis, at: mirrorPlaneAt(sources, axis) });
-};
-/** where the mirror plane lies along its axis – any length, also 0 or negative */
-const setPlane = (event: Event) => {
-  const at = parseLength(inputValue(event), editor.model.settings.units);
-  if (at != null) {
-    setParams({ at });
-  } else {
-    (event.target as HTMLInputElement).value = editor.fmt(Number(procedure.value?.params.at ?? 0));
-  }
-};
-/** a length typed for a parameter (spacing, radius …) – back to the old value when it is no positive length */
-const setLength = (key: string, event: Event) => {
-  const length = parseLength(inputValue(event), editor.model.settings.units);
-  if (length != null && length > 0) {
-    setParams({ [key]: length });
-  } else {
-    (event.target as HTMLInputElement).value = editor.fmt(Number(procedure.value?.params[key] ?? 1));
-  }
-};
 </script>

@@ -11,6 +11,7 @@ import {
 import { cutKeepingGroups, isSolid, solidOp, type SolidOp } from './solids';
 import { treatEdges, type EdgeSpec, type EdgeTreatment } from './roundEdges';
 import { buildMirror, mirrorPlaneAt } from './mirrorProcedure';
+import { buildPattern, patternDefaults } from './patternProcedure';
 
 /**
  * Procedures: non-destructive modelling. A procedural group keeps what it was made from – its inputs, as child groups
@@ -346,7 +347,9 @@ export const rebuildProcedure = (definition: Definition, defs: ProcedureModel): 
             ? buildEdges(definition, fresh, defs)
             : procedure.kind === 'mirror'
               ? buildMirror(definition, fresh)
-              : buildCopyAlong(definition, fresh);
+              : procedure.kind === 'pattern'
+                ? buildPattern(definition, fresh)
+                : buildCopyAlong(definition, fresh);
   } catch (failure) {
     console.error(failure);
     error = 'procedures.errors.failed';
@@ -518,10 +521,20 @@ export const createCopyAlongProcedure = (
   return ents.addInstance(definition, new THREE.Matrix4(), '');
 };
 
-/** Mirror: the groups go inside as sources, the plane across the red axis touches their far side */
-export const createMirrorProcedure = (model: ProcedureModel, ents: Entities, sources: Instance[], name: string) => {
+/**
+ * Mirror or pattern: the groups go inside as sources. A mirror's plane across the red axis touches their far side; a
+ * pattern starts as a row of three along red, touching.
+ */
+export const createSourcesProcedure = (
+  model: ProcedureModel,
+  ents: Entities,
+  sources: Instance[],
+  name: string,
+  kind: 'mirror' | 'pattern' = 'mirror',
+) => {
   const definition = model.newDefinition(name, false);
-  definition.procedure = { kind: 'mirror', params: { axis: 'x', at: mirrorPlaneAt(sources, 'x') } };
+  definition.procedure =
+    kind === 'pattern' ? { kind, params: patternDefaults(sources) } : { kind, params: { axis: 'x', at: mirrorPlaneAt(sources, 'x') } };
   sources.forEach((source) => takeInput(ents, definition, source, 'source'));
   const error = rebuildProcedure(definition, model);
   if (error) {

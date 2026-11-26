@@ -1,6 +1,6 @@
 // Groups and components from the selection, and taking them apart again.
 import * as THREE from 'three';
-import { createMirrorProcedure, createSolidProcedure, dropInputs, explodeToInputs } from '../../core/procedures';
+import { createSourcesProcedure, createSolidProcedure, dropInputs, explodeToInputs } from '../../core/procedures';
 import { isSolid } from '../../core/solids';
 import type { Editor } from '../editor';
 import type { EntityRef } from '../../core/model';
@@ -111,8 +111,8 @@ export const explodeSelectedToInputs = (editor: Editor) => {
   });
 };
 
-/** the selected groups and their mirror image as one procedure: the image follows when they change */
-export const mirrorSelection = (editor: Editor) => {
+/** the selected groups and their mirror image or copies as one procedure: the result follows when they change */
+export const sourcesProcedure = (editor: Editor, kind: 'mirror' | 'pattern') => {
   const sources = editor
     .selected()
     .map((entityRef) => (entityRef.kind === 'instance' ? editor.entities.instances.get(entityRef.id) : undefined))
@@ -122,9 +122,9 @@ export const mirrorSelection = (editor: Editor) => {
     return;
   }
   try {
-    editor.commit('commands.mirrorProcedure', () => {
-      const name = editor.model.uniqueDefName(t('procedures.names.mirror'));
-      const procedure = createMirrorProcedure(editor.model, editor.entities, sources, name);
+    editor.commit(`commands.${kind}Procedure`, () => {
+      const name = editor.model.uniqueDefName(t(`procedures.names.${kind}`));
+      const procedure = createSourcesProcedure(editor.model, editor.entities, sources, name, kind);
       editor.select([{ kind: 'instance', id: procedure.id }]);
     });
   } catch {

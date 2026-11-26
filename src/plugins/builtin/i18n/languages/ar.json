@@ -131,7 +131,8 @@
       "newTab": "علامة تبويب جديدة",
       "toggleAutosave": "الحفظ التلقائي (في المتصفح)",
       "toggleGumball": "مقبض التحويل عند التحديد",
-      "mirrorProcedure": "انعكاس (يبقى قابلاً للتعديل)"
+      "mirrorProcedure": "انعكاس (يبقى قابلاً للتعديل)",
+      "patternProcedure": "نمط (يبقى قابلاً للتعديل)"
     },
     "names": {
       "model": "نموذج",
@@ -1797,7 +1798,8 @@
         "followme": "إجراء: اتبعني",
         "copyalong": "إجراء: نسخ على امتداد مسار",
         "edges": "يبقى قابلًا للتعديل: حواف مدورة",
-        "mirror": "يبقى قابلاً للتعديل: انعكاس"
+        "mirror": "يبقى قابلاً للتعديل: انعكاس",
+        "pattern": "يبقى قابلاً للتعديل: نمط"
       },
       "operation": "العملية",
       "distribute": "التوزيع",
@@ -1822,7 +1824,8 @@
         "followMe": "اتبعني",
         "path": "مسار",
         "profile": "مقطع",
-        "mirror": "انعكاس"
+        "mirror": "انعكاس",
+        "pattern": "نمط"
       },
       "errors": {
         "missingInput": "أحد مدخلات الإجراء مفقود – تبقى النتيجة الأخيرة.",
@@ -1834,7 +1837,14 @@
         "failed": "تعذر بناء الإجراء – تبقى النتيجة الأخيرة."
       },
       "mirrorAxis": "انعكاس عبر",
-      "mirrorPlane": "المستوى عند"
+      "mirrorPlane": "المستوى عند",
+      "patternMode": "النمط",
+      "patternLinear": "صف",
+      "patternCircular": "دائرة",
+      "patternAlong": "على طول",
+      "patternAbout": "حول",
+      "patternAngle": "الزاوية",
+      "patternCenter": "المركز"
     },
     "projects": {
       "title": "المشاريع",

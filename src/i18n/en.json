@@ -131,7 +131,8 @@
       "newTab": "New tab",
       "toggleAutosave": "Autosave (in the browser)",
       "toggleGumball": "Gumball at the selection",
-      "mirrorProcedure": "Mirror (stays editable)"
+      "mirrorProcedure": "Mirror (stays editable)",
+      "patternProcedure": "Pattern (stays editable)"
     },
     "names": {
       "model": "Model",
@@ -1779,7 +1780,8 @@
         "followme": "Stays editable: Follow Me",
         "copyalong": "Stays editable: Copy Along",
         "edges": "Stays editable: rounded edges",
-        "mirror": "Stays editable: mirror"
+        "mirror": "Stays editable: mirror",
+        "pattern": "Stays editable: pattern"
       },
       "operation": "Operation",
       "distribute": "Distribute",
@@ -1804,7 +1806,8 @@
         "followMe": "Follow Me",
         "path": "Path",
         "profile": "Profile",
-        "mirror": "Mirror"
+        "mirror": "Mirror",
+        "pattern": "Pattern"
       },
       "errors": {
         "missingInput": "One of the parts it is made from is missing – the last result stays.",
@@ -1816,7 +1819,14 @@
         "failed": "The result could not be built – the last result stays."
       },
       "mirrorAxis": "Mirror across",
-      "mirrorPlane": "Plane at"
+      "mirrorPlane": "Plane at",
+      "patternMode": "Pattern",
+      "patternLinear": "Row",
+      "patternCircular": "Circle",
+      "patternAlong": "Along",
+      "patternAbout": "About",
+      "patternAngle": "Angle",
+      "patternCenter": "Centre"
     },
     "projects": {
       "title": "Projects",

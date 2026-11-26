@@ -78,7 +78,7 @@ export const isProcedureInput = (instance: Instance) => !!instance.procedureRole
 
 /** how a procedural group was made; its result is built again from its inputs (see core/procedures.ts) */
 export interface ProcedureData {
-  kind: 'solid' | 'followme' | 'copyalong' | 'edges' | 'mirror';
+  kind: 'solid' | 'followme' | 'copyalong' | 'edges' | 'mirror' | 'pattern';
   params: Record<string, string | number | boolean>;
   /** of the inputs when the result was last built */
   hash?: number;

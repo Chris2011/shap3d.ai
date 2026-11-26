@@ -131,7 +131,8 @@
       "newTab": "Nouvel onglet",
       "toggleAutosave": "Enregistrement automatique (dans le navigateur)",
       "toggleGumball": "Gumball sur la sélection",
-      "mirrorProcedure": "Symétrie (reste modifiable)"
+      "mirrorProcedure": "Symétrie (reste modifiable)",
+      "patternProcedure": "Réseau (reste modifiable)"
     },
     "names": {
       "model": "Modèle",
@@ -1797,7 +1798,8 @@
         "followme": "Procédure : Suivez-moi",
         "copyalong": "Procédure : Copier le long",
         "edges": "Reste modifiable : arêtes arrondies",
-        "mirror": "Reste modifiable : symétrie"
+        "mirror": "Reste modifiable : symétrie",
+        "pattern": "Reste modifiable : réseau"
       },
       "operation": "Opération",
       "distribute": "Répartir",
@@ -1822,7 +1824,8 @@
         "followMe": "Suivez-moi",
         "path": "Chemin",
         "profile": "Profil",
-        "mirror": "Symétrie"
+        "mirror": "Symétrie",
+        "pattern": "Réseau"
       },
       "errors": {
         "missingInput": "Une entrée de la procédure manque – le dernier résultat reste.",
@@ -1834,7 +1837,14 @@
         "failed": "La procédure n’a pas pu être construite – le dernier résultat reste."
       },
       "mirrorAxis": "Symétrie selon",
-      "mirrorPlane": "Plan à"
+      "mirrorPlane": "Plan à",
+      "patternMode": "Réseau",
+      "patternLinear": "Rangée",
+      "patternCircular": "Cercle",
+      "patternAlong": "Le long de",
+      "patternAbout": "Autour de",
+      "patternAngle": "Angle",
+      "patternCenter": "Centre"
     },
     "projects": {
       "title": "Projets",

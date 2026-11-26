@@ -131,7 +131,8 @@
       "newTab": "Nueva pestaña",
       "toggleAutosave": "Guardado automático (en el navegador)",
       "toggleGumball": "Gumball en la selección",
-      "mirrorProcedure": "Simetría (sigue editable)"
+      "mirrorProcedure": "Simetría (sigue editable)",
+      "patternProcedure": "Patrón (sigue editable)"
     },
     "names": {
       "model": "Modelo",
@@ -1797,7 +1798,8 @@
         "followme": "Procedimiento: Sígueme",
         "copyalong": "Procedimiento: Copiar a lo largo",
         "edges": "Sigue editable: aristas redondeadas",
-        "mirror": "Sigue editable: simetría"
+        "mirror": "Sigue editable: simetría",
+        "pattern": "Sigue editable: patrón"
       },
       "operation": "Operación",
       "distribute": "Repartir",
@@ -1822,7 +1824,8 @@
         "followMe": "Sígueme",
         "path": "Recorrido",
         "profile": "Perfil",
-        "mirror": "Simetría"
+        "mirror": "Simetría",
+        "pattern": "Patrón"
       },
       "errors": {
         "missingInput": "Falta una entrada del procedimiento: se mantiene el último resultado.",
@@ -1834,7 +1837,14 @@
         "failed": "No se pudo construir el procedimiento: se mantiene el último resultado."
       },
       "mirrorAxis": "Simetría según",
-      "mirrorPlane": "Plano en"
+      "mirrorPlane": "Plano en",
+      "patternMode": "Patrón",
+      "patternLinear": "Fila",
+      "patternCircular": "Círculo",
+      "patternAlong": "A lo largo de",
+      "patternAbout": "Alrededor de",
+      "patternAngle": "Ángulo",
+      "patternCenter": "Centro"
     },
     "projects": {
       "title": "Proyectos",

@@ -430,7 +430,9 @@
       "toggleGumball": "",
       "toggleGumball#en": "Gumball at the selection",
       "mirrorProcedure": "",
-      "mirrorProcedure#en": "Mirror (stays editable)"
+      "mirrorProcedure#en": "Mirror (stays editable)",
+      "patternProcedure": "",
+      "patternProcedure#en": "Pattern (stays editable)"
     },
     "names": {
       "model": "",
@@ -3385,7 +3387,9 @@
         "edges": "",
         "edges#en": "Stays editable: rounded edges",
         "mirror": "",
-        "mirror#en": "Stays editable: mirror"
+        "mirror#en": "Stays editable: mirror",
+        "pattern": "",
+        "pattern#en": "Stays editable: pattern"
       },
       "operation": "",
       "operation#en": "Operation",
@@ -3433,7 +3437,9 @@
         "profile": "",
         "profile#en": "Profile",
         "mirror": "",
-        "mirror#en": "Mirror"
+        "mirror#en": "Mirror",
+        "pattern": "",
+        "pattern#en": "Pattern"
       },
       "errors": {
         "missingInput": "",
@@ -3454,7 +3460,21 @@
       "mirrorAxis": "",
       "mirrorAxis#en": "Mirror across",
       "mirrorPlane": "",
-      "mirrorPlane#en": "Plane at"
+      "mirrorPlane#en": "Plane at",
+      "patternMode": "",
+      "patternMode#en": "Pattern",
+      "patternLinear": "",
+      "patternLinear#en": "Row",
+      "patternCircular": "",
+      "patternCircular#en": "Circle",
+      "patternAlong": "",
+      "patternAlong#en": "Along",
+      "patternAbout": "",
+      "patternAbout#en": "About",
+      "patternAngle": "",
+      "patternAngle#en": "Angle",
+      "patternCenter": "",
+      "patternCenter#en": "Centre"
     },
     "projects": {
       "title": "",

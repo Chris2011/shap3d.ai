@@ -3,7 +3,7 @@ import { snapping } from '../inference';
 import type { Editor } from '../editor';
 import { t } from '../../i18n';
 import type { CommandDefinition } from './types';
-import { makeGroup, explode, explodeSelectedToInputs, setLocked, mirrorSelection } from './groups';
+import { makeGroup, explode, explodeSelectedToInputs, setLocked, sourcesProcedure } from './groups';
 import { deleteSelection, copySelection, paste, hideSelection, unhideAll, clearAll } from './edit';
 import { reverseFaces, orientFaces, softenSelection, intersectSelection } from './faces';
 import { flipSelection, alignSelection, distributeSelection } from './arrange';
@@ -149,7 +149,12 @@ export const EDIT_COMMANDS: CommandDefinition[] = [
   { id: 'resetAxes', group: 'edit', run: resetAxes, enabled: (editor) => !!editor.model.settings.drawingAxes },
   { id: 'roundEdges', group: 'edit', run: (editor) => treatSelectedEdges(editor, 'round') },
   { id: 'chamferEdges', group: 'edit', run: (editor) => treatSelectedEdges(editor, 'chamfer') },
-  { id: 'mirrorProcedure', group: 'edit', run: mirrorSelection, enabled: (editor) => selectedInstances(editor).length > 0 },
+  ...(['mirror', 'pattern'] as const).map((kind) => ({
+    id: `${kind}Procedure`,
+    group: 'edit',
+    run: (editor: Editor) => sourcesProcedure(editor, kind),
+    enabled: (editor: Editor) => selectedInstances(editor).length > 0,
+  })),
   { id: 'flipX', group: 'edit', run: (editor) => flipSelection(editor, 'x') },
   { id: 'flipY', group: 'edit', run: (editor) => flipSelection(editor, 'y') },
   { id: 'flipZ', group: 'edit', run: (editor) => flipSelection(editor, 'z') },
