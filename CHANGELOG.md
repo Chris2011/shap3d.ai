@@ -9,6 +9,7 @@ The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC
 
 | Version                     | Date       | In one sentence                                                                          |
 | --------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
+| [0.11.0](#0110--2026-11-26) | 2026-11-26 | Exact solids with manifold-3d, holes, drawing axes, gumball, sections by tag and textures on import |
 | [0.10.0](#0100--2026-11-01) | 2026-11-01 | A bigger plugin API – workspaces, modes, lights, display, data – and scripts in a worker |
 | [0.9.0](#090--2026-10-25)   | 2026-10-25 | Scene tabs, outliner by tags, guide points – and IFC as a plugin package                 |
 | [0.8.0](#080--2026-10-22)   | 2026-10-22 | Native desktop app with Tauri – executable and installers                                |
@@ -31,7 +32,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 | [OpenSCAD](plugins/openscad/CHANGELOG.md) (package)                    | **1.2.0** | **1.4.0** | **1.4.1** |
 | [IFC](plugins/ifc/CHANGELOG.md) (package)                              | –         | –         | –         | –         | **1.0.0** | 1.0.0     |
 
-## [Unreleased]
+## [0.11.0] – 2026-11-26
 
 ### Added
 
@@ -55,6 +56,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - **Materials as a cube**: the swatches in the Materials panel can be shown flat or as a small cube.
 - **Plugin API**: `render.pass(draw)` draws over each frame of the 3D view; exporters can ask first (`options`: choices and checkboxes, handed to `export`). _(Import formats 1.2.0: USDZ export, view as SVG)_
 - **Drawing axes on a face**: _Align axes to face_ (context menu of one face) turns red, green and blue onto that face – drawing in empty space, the arrow-key locks, rectangles and protractors then follow its plane, like SketchUp's axes or Rhino's construction plane. _Reset axes_ brings back the model axes. Saved with the model, one undo step each; the grid and rulers stay on the model axes.
+- **Textures on import**: textured materials in glTF, FBX, DAE, OBJ and the other mesh formats keep their picture, saved with the model, at the size the file's texture coordinates give. Faces show pictures flat like SketchUp, so where each face shows which part of the picture is not taken over – texture atlases and scanned models look scrambled. Pictures that cannot be read keep the mean colour as before.
 - **Exact volume and surface**: Entity Info measures a solid group or component with manifold-3d – parts that overlap count once, and its outer surface is shown too. While the library loads, the sum of the faces is shown as before.
 - **Gumball**: _View › Gumball_ (also in the Display panel, off by default) puts handles on the selection in the Select tool, like Rhino's: arrows move along an axis, squares scale along it, arcs rotate (with Rotate's protractor and typed angles, then back to Select), and an orange dot pulls a single selected face. One undo step each, Esc cancels.
 - **Sections by tag, with a view depth**: in the Display panel the active section plane can cut only groups and components on chosen tags (none ticked cuts everything, as before) and show only a slice behind the cut. Groups it does not cut stay whole and can be picked. Saved with the model, one undo step each, like Rhino's selective clipping.

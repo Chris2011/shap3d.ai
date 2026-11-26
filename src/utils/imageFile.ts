@@ -1,5 +1,5 @@
 /** longest side of an image kept in a model (px) – larger pictures are scaled down, the file stays small */
-const IMAGE_LIMIT = 2048;
+export const IMAGE_LIMIT = 2048;
 
 export interface ModelImage {
   /** data URL (PNG or JPEG) */

@@ -4,10 +4,11 @@ import { Entities, type Definition } from '../core/model';
 import { t } from '../i18n';
 import { runMeshJob } from '../scripting/meshJobs';
 import { unpackInto } from '../scripting/preparedMesh';
+import { importedImage, type ImportedImage } from './importTexture';
 
 /**
  * Turns a loaded three.js scene (Collada, glTF, OBJ, STL) into our entities: one group per named node,
- * materials with colour and opacity, front/back faces merged. The input must already be Z-up in metres
+ * materials with colour, opacity and picture, front/back faces merged. The input must already be Z-up in metres
  * (pass `conv` to rotate/scale it).
  */
 export interface ImportResult {
@@ -92,13 +93,14 @@ export const sceneToEntities = async (obj: THREE.Object3D, model: Model, conv: T
   // materials: three.js material → model material name
   const matName = new Map<string, string | undefined>();
   /** materials the model does not have yet – added in its undo step */
-  const newMaterials: { name: string; color: string; opacity: number }[] = [];
+  const newMaterials: ({ name: string; color: string; opacity: number } & Partial<ImportedImage>)[] = [];
   const known = () => [...model.materials, ...newMaterials];
   const materialFor = (
     mat: THREE.Material | undefined,
     geometry: THREE.BufferGeometry,
     start: number,
     count: number,
+    matrix: THREE.Matrix4,
   ): string | undefined => {
     if (!mat) {
       return undefined;
@@ -114,7 +116,7 @@ export const sceneToEntities = async (obj: THREE.Object3D, model: Model, conv: T
       matName.set(mat.uuid, undefined);
       return undefined;
     }
-    // faces have no texture coordinates: a textured material becomes the mean colour of the picture where this mesh uses it
+    // the mean colour of the picture where this mesh uses it: the swatch, and the colour when the picture cannot be kept
     const seen = map ? meanTextureColor(map, geometry, start, count) : null;
     // without a readable picture a neutral tone stands in for white
     const color = seen
@@ -123,6 +125,7 @@ export const sceneToEntities = async (obj: THREE.Object3D, model: Model, conv: T
         ? '#c8c4bc'
         : hex;
     const opacity = mat.transparent ? THREE.MathUtils.clamp(mat.opacity, 0.05, 1) : 1;
+    const picture = map ? importedImage(map, geometry, start, count, matrix, mat.transparent) : null;
     let name = (mat.name || `${baseName} Material`).trim();
     const same = known().find((material) => material.name === name);
     if (same && (same.color.toLowerCase() !== color || Math.abs(same.opacity - opacity) > 0.01)) {
@@ -133,7 +136,7 @@ export const sceneToEntities = async (obj: THREE.Object3D, model: Model, conv: T
       name = `${name} ${i}`;
     }
     if (!known().some((material) => material.name === name)) {
-      newMaterials.push({ name, color, opacity });
+      newMaterials.push({ name, color, opacity, ...picture });
     }
     matName.set(mat.uuid, name);
     return name;
@@ -160,7 +163,7 @@ export const sceneToEntities = async (obj: THREE.Object3D, model: Model, conv: T
       const matrix = conv.clone().multiply(mesh.matrixWorld);
       const flip = matrix.determinant() < 0;
       for (const group of groups) {
-        const name = materialFor(mats[group.materialIndex ?? 0], geometry, group.start, group.count);
+        const name = materialFor(mats[group.materialIndex ?? 0], geometry, group.start, group.count, matrix);
         let material = name ? materialNames.indexOf(name) : -1;
         if (name && material < 0) {
           material = materialNames.push(name) - 1;
