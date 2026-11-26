@@ -752,7 +752,9 @@
       "mapNormal": "خريطة الاتجاهات",
       "mapAo": "الانسداد المحيطي",
       "loadMap": "تحميل صورة…",
-      "removeMap": "إزالة الصورة"
+      "removeMap": "إزالة الصورة",
+      "density": "الكثافة",
+      "densityUnknown": "غير معروفة"
     },
     "tags": {
       "add": "إضافة وسم",
@@ -1082,7 +1084,9 @@
       "attributeAdd": "إضافة سمة…",
       "attributeRemove": "إزالة السمة",
       "attributeName": "اسم السمة",
-      "surfaceArea": "المساحة السطحية"
+      "surfaceArea": "المساحة السطحية",
+      "mass": "الكتلة",
+      "centroid": "مركز الكتلة"
     },
     "shapes": {
       "cylinder": "أسطوانة",

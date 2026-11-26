@@ -752,7 +752,9 @@
       "mapNormal": "Normal-Map",
       "mapAo": "Umgebungsverdeckung",
       "loadMap": "Bild laden…",
-      "removeMap": "Bild entfernen"
+      "removeMap": "Bild entfernen",
+      "density": "Dichte",
+      "densityUnknown": "unbekannt"
     },
     "tags": {
       "add": "Tag hinzufügen",
@@ -1082,7 +1084,9 @@
       "attributeAdd": "Attribut hinzufügen…",
       "attributeRemove": "Attribut entfernen",
       "attributeName": "Name des Attributs",
-      "surfaceArea": "Oberfläche"
+      "surfaceArea": "Oberfläche",
+      "mass": "Masse",
+      "centroid": "Schwerpunkt"
     },
     "shapes": {
       "cylinder": "Zylinder",

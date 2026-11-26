@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import type { Editor } from './editor';
 import { formatVolume } from '../core/units';
 import { isSolid, volume } from '../core/solids';
-import { manifoldMeasure } from '../core/manifold';
-import { t } from '../i18n';
+import { measureSolid } from '../core/solidMeasure';
+import { t, formatNumber } from '../i18n';
 
 interface PaintedInfo {
   title: string;
@@ -46,6 +46,10 @@ export interface InstanceInfo extends PaintedInfo {
   volume: string;
   /** the solid's outer surface; '' unless measured exactly (Manifold) */
   area: string;
+  /** '' unless measured and every part's material has a density */
+  mass: string;
+  /** centre of mass as x; y; z – '' unless measured */
+  centroid: string;
 }
 export interface MultiInfo extends PaintedInfo {
   kind: 'multi';
@@ -107,13 +111,21 @@ export const describeSelection = (editor: Editor): SelectionInfo => {
     walk(editor.model.root);
     const solid = isSolid(instance.definition.entities);
     // exact with Manifold (overlapping parts count once); the sum of the faces while it is not loaded
-    const measured = solid ? manifoldMeasure(instance.definition.entities, instance.matrix) : null;
+    const density = (name: string | undefined) => editor.model.material(name)?.density;
+    const measured = solid ? measureSolid(instance.definition.entities, instance.matrix, instance.material, density) : null;
     const cubicMeters = measured?.volume ?? (solid ? Math.abs(volume(instance.definition.entities, instance.matrix)) : 0);
     const isComponent = instance.definition.isComponent;
     return {
       kind: 'instance',
       volume: solid ? formatVolume(cubicMeters, editor.model.settings.units) : '',
       area: measured ? editor.fmtArea(measured.area) : '',
+      mass: measured?.mass !== undefined ? `${formatNumber(measured.mass, { maximumFractionDigits: 2 })} kg` : '',
+      centroid: measured
+        ? measured.centroid
+            .toArray()
+            .map((value) => editor.fmt(value))
+            .join('; ')
+        : '',
       title: t(
         solid ? (isComponent ? 'entityInfo.solidComponent' : 'entityInfo.solidGroup') : isComponent ? 'names.component' : 'names.group',
       ),

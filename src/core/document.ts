@@ -27,6 +27,8 @@ export interface MaterialDef {
   metalness?: number;
   /** physically based: pictures (data URLs, saved with the model) laid out like the texture */
   maps?: Partial<Record<MaterialMapKind, string>>;
+  /** kg/m³ – gives solids their mass in Entity Info; missing = unknown */
+  density?: number;
 }
 export type MaterialMapKind = 'normal' | 'roughness' | 'metalness' | 'ao';
 /** an HDR or EXR picture as light, reflections and sky (saved with the model) */

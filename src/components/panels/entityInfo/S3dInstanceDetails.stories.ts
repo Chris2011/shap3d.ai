@@ -19,6 +19,8 @@ const meta = {
       size: '0,45 m × 0,45 m × 0,9 m',
       volume: '0,18 m³',
       area: '2,03 m²',
+      mass: '126,36 kg',
+      centroid: '9,23 m; 1,23 m; 0,45 m',
       material: 'Holz',
       matColor: '#8a5a33',
       hidden: false,

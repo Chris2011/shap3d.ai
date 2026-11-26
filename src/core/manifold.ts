@@ -109,41 +109,12 @@ const fromManifold = (body: Manifold, materials: (string | undefined)[]): Entiti
   );
 };
 
-/**
- * Volume (m³) and outer surface (m²) of the faces and groups as one body: parts that overlap count once. Null when the
- * library is not loaded yet or a part is not closed – the caller then keeps its own sum.
- */
-export const manifoldMeasure = (entities: Entities, matrix = new THREE.Matrix4()): { volume: number; area: number } | null => {
-  if (!wasm) {
-    return null;
-  }
-  const parts: BooleanInput[] = [];
-  const collect = (level: Entities, at: THREE.Matrix4) => {
-    if (level.faces.size) {
-      parts.push({ entities: level, matrix: at, nested: false });
-    }
-    for (const instance of level.instances.values()) {
-      if (!isProcedureInput(instance)) {
-        collect(instance.definition.entities, at.clone().multiply(instance.matrix));
-      }
-    }
-  };
-  collect(entities, matrix);
-  const bodies = parts.map((part) => toManifold(wasm!, part, []));
-  try {
-    if (!bodies.length || bodies.some((body) => !body)) {
-      return null;
-    }
-    const whole = wasm.Manifold.union(bodies as Manifold[]);
-    try {
-      return { volume: Math.abs(whole.volume()), area: whole.surfaceArea() };
-    } finally {
-      whole.delete();
-    }
-  } finally {
-    bodies.forEach((body) => body?.delete());
-  }
-};
+/** the manifold library once it has loaded, else null */
+export const manifoldLibrary = () => wasm;
+
+/** one closed body of faces (see BooleanInput); null without the library or when it is not closed – the caller deletes it */
+export const manifoldBody = (input: BooleanInput, materials: (string | undefined)[] = []) =>
+  wasm ? toManifold(wasm, input, materials) : null;
 
 export type ManifoldOperation = 'union' | 'subtract' | 'intersect';
 

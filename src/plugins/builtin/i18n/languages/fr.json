@@ -752,7 +752,9 @@
       "mapNormal": "Carte de normales",
       "mapAo": "Occlusion ambiante",
       "loadMap": "Charger une image…",
-      "removeMap": "Retirer l’image"
+      "removeMap": "Retirer l’image",
+      "density": "Densité",
+      "densityUnknown": "inconnue"
     },
     "tags": {
       "add": "Ajouter une balise",
@@ -1082,7 +1084,9 @@
       "attributeAdd": "Ajouter un attribut…",
       "attributeRemove": "Supprimer l’attribut",
       "attributeName": "Nom de l’attribut",
-      "surfaceArea": "Surface"
+      "surfaceArea": "Surface",
+      "mass": "Masse",
+      "centroid": "Centre de gravité"
     },
     "shapes": {
       "cylinder": "Cylindre",

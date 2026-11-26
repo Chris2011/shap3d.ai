@@ -19,6 +19,15 @@
       @update:model-value="liveEdit(() => (material.opacity = $event))"
     /><span class="w-10 text-end">{{ Math.round(shown.opacity * 100) }} %</span>
   </S3dFieldRow>
+  <S3dFieldRow :label="t('materials.density')">
+    <S3dTextInput
+      :model-value="shown.density === undefined ? '' : formatNumber(shown.density)"
+      :aria-label="t('materials.density')"
+      :placeholder="t('materials.densityUnknown')"
+      @commit="setDensity"
+      @keydown.stop
+    /><span class="w-10 text-end">kg/m³</span>
+  </S3dFieldRow>
 </template>
 
 <script setup lang="ts">
@@ -30,7 +39,7 @@ import type { MaterialDef } from '../../../core/document';
 import { useModel } from '../../../composables/useModel';
 import { useLiveEdit } from '../../../composables/useLiveEdit';
 import { useMaterialLibrary } from '../../../composables/useMaterialLibrary';
-import { t } from '../../../i18n';
+import { t, formatNumber, normalizeNumberInput } from '../../../i18n';
 
 /** Name, colour and opacity of a material. */
 const props = defineProps<{ material: MaterialDef }>();
@@ -38,6 +47,13 @@ const props = defineProps<{ material: MaterialDef }>();
 const shown = useModel(() => ({ ...props.material }));
 const liveEdit = useLiveEdit();
 const { rename } = useMaterialLibrary();
+/** kg/m³; empty takes it away – solids with this material then show no mass */
+const setDensity = (text: string) => {
+  const value = text.trim() ? parseFloat(normalizeNumberInput(text).replace(',', '.')) : undefined;
+  if (value === undefined || (Number.isFinite(value) && value > 0)) {
+    liveEdit(() => (props.material.density = value));
+  }
+};
 const setColor = (color: string) => {
   if (/^#[0-9a-f]{6}$/i.test(color)) {
     liveEdit(() => (props.material.color = color));

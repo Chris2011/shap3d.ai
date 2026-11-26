@@ -1594,7 +1594,11 @@
       "loadMap": "",
       "loadMap#en": "Load picture…",
       "removeMap": "",
-      "removeMap#en": "Remove picture"
+      "removeMap#en": "Remove picture",
+      "density": "",
+      "density#en": "Density",
+      "densityUnknown": "",
+      "densityUnknown#en": "unknown"
     },
     "tags": {
       "add": "",
@@ -2176,7 +2180,11 @@
       "attributeName": "",
       "attributeName#en": "Name of the attribute",
       "surfaceArea": "",
-      "surfaceArea#en": "Surface"
+      "surfaceArea#en": "Surface",
+      "mass": "",
+      "mass#en": "Mass",
+      "centroid": "",
+      "centroid#en": "Centre of mass"
     },
     "shapes": {
       "cylinder": "",
