@@ -129,7 +129,8 @@
       "toggleSnapping": "الالتقاط",
       "explodeToInputs": "تفكيك إلى أجزائه",
       "newTab": "علامة تبويب جديدة",
-      "toggleAutosave": "الحفظ التلقائي (في المتصفح)"
+      "toggleAutosave": "الحفظ التلقائي (في المتصفح)",
+      "toggleGumball": "مقبض التحويل عند التحديد"
     },
     "names": {
       "model": "نموذج",

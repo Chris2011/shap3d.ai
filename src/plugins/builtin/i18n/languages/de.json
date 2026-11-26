@@ -129,7 +129,8 @@
       "toggleSnapping": "Fangen",
       "explodeToInputs": "In seine Teile zerlegen",
       "newTab": "Neuer Tab",
-      "toggleAutosave": "Automatisch speichern (im Browser)"
+      "toggleAutosave": "Automatisch speichern (im Browser)",
+      "toggleGumball": "Gumball an der Auswahl"
     },
     "names": {
       "model": "Modell",

@@ -426,7 +426,9 @@
       "newTab": "",
       "newTab#en": "New tab",
       "toggleAutosave": "",
-      "toggleAutosave#en": "Autosave (in the browser)"
+      "toggleAutosave#en": "Autosave (in the browser)",
+      "toggleGumball": "",
+      "toggleGumball#en": "Gumball at the selection"
     },
     "names": {
       "model": "",

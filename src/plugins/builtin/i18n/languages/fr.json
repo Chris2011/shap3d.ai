@@ -129,7 +129,8 @@
       "toggleSnapping": "Accrochage",
       "explodeToInputs": "Défaire en ses parties",
       "newTab": "Nouvel onglet",
-      "toggleAutosave": "Enregistrement automatique (dans le navigateur)"
+      "toggleAutosave": "Enregistrement automatique (dans le navigateur)",
+      "toggleGumball": "Gumball sur la sélection"
     },
     "names": {
       "model": "Modèle",

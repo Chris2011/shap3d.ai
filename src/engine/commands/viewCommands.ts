@@ -6,6 +6,7 @@ import { measureView } from '../measureView';
 import { showPanel } from '../../components/panelState';
 import type { CommandDefinition } from './types';
 import { setFaceStyle } from './view';
+import { gumballOn } from '../../tools/modify/gumball';
 
 /** The commands of the View menu – in menu order */
 export const VIEW_COMMANDS: CommandDefinition[] = [
@@ -26,6 +27,15 @@ export const VIEW_COMMANDS: CommandDefinition[] = [
       editor.invalidate();
     },
     checked: (editor) => editor.model.settings.axes,
+  },
+  {
+    id: 'toggleGumball',
+    group: 'view',
+    run: (editor) => {
+      gumballOn.value = !gumballOn.value;
+      editor.invalidate();
+    },
+    checked: () => gumballOn.value,
   },
   {
     id: 'toggleRulers',

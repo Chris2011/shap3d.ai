@@ -129,7 +129,8 @@
       "toggleSnapping": "Ajuste",
       "explodeToInputs": "Separar en sus partes",
       "newTab": "Nueva pestaña",
-      "toggleAutosave": "Guardado automático (en el navegador)"
+      "toggleAutosave": "Guardado automático (en el navegador)",
+      "toggleGumball": "Gumball en la selección"
     },
     "names": {
       "model": "Modelo",

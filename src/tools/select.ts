@@ -4,6 +4,7 @@ import type { Overlay } from '../engine/overlay';
 import type { EdgeRec } from '../engine/viewer';
 import { SMOOTH_MIN_COS, type EntityRef, type Entities } from '../core/model';
 import { t } from '../i18n';
+import { Gumball } from './modify/gumball';
 
 /** soft edges are not drawn, so they cannot be clicked either – unless hidden geometry is shown */
 export const visibleEdge = (editor: Editor) => (record: EdgeRec) =>
@@ -221,6 +222,8 @@ export class SelectTool extends Tool {
   down: { x: number; y: number; shift: boolean; ctrl: boolean } | null = null;
   clickCount = 0;
   lastClick = 0;
+  /** arrows, arcs and squares at the selection, when switched on */
+  gumball = new Gumball();
   status() {
     return t('tools.status.select');
   }
@@ -228,10 +231,20 @@ export class SelectTool extends Tool {
     return modifiers.shift && modifiers.ctrl ? 'remove' : modifiers.shift ? 'toggle' : modifiers.ctrl ? 'add' : 'set';
   }
   onDown(pointer: PEvt) {
+    if (this.gumball.start(this.editor, pointer)) {
+      return;
+    }
     this.down = { x: pointer.x, y: pointer.y, shift: pointer.shift, ctrl: pointer.ctrl };
   }
   onMove(pointer: PEvt) {
     const editor = this.editor;
+    if (this.gumball.drag) {
+      this.gumball.move(editor, pointer);
+      return;
+    }
+    if (!this.down) {
+      this.gumball.update(editor, pointer);
+    }
     if (this.down) {
       if (this.drag || Math.hypot(pointer.x - this.down.x, pointer.y - this.down.y) > 4) {
         this.drag = { startX: this.down.x, startY: this.down.y, endX: pointer.x, endY: pointer.y };
@@ -243,6 +256,10 @@ export class SelectTool extends Tool {
   }
   onUp(pointer: PEvt) {
     const editor = this.editor;
+    if (this.gumball.drag) {
+      this.gumball.finish(editor);
+      return;
+    }
     if (this.drag) {
       const { startX, startY, endX, endY } = this.drag;
       const window = endX >= startX;
@@ -302,13 +319,17 @@ export class SelectTool extends Tool {
     editor.select(withSurface(editor.entities, ref), selectMode);
   }
   busy() {
-    return !!this.drag;
+    return !!this.drag || !!this.gumball.drag;
   }
   cancel() {
     this.drag = null;
     this.down = null;
+    this.gumball.cancel(this.editor);
   }
   draw(overlay: Overlay) {
+    if (!this.drag) {
+      this.gumball.draw(this.editor, overlay);
+    }
     if (this.drag) {
       overlay.rect2D(this.drag.startX, this.drag.startY, this.drag.endX, this.drag.endY, this.drag.endX < this.drag.startX);
     }

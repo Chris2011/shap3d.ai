@@ -129,7 +129,8 @@
       "toggleSnapping": "Snapping",
       "explodeToInputs": "Take apart into its parts",
       "newTab": "New tab",
-      "toggleAutosave": "Autosave (in the browser)"
+      "toggleAutosave": "Autosave (in the browser)",
+      "toggleGumball": "Gumball at the selection"
     },
     "names": {
       "model": "Model",
