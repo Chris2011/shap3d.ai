@@ -1,7 +1,8 @@
 import { shallowReactive, watch } from 'vue';
 import { Editor } from './editor';
 import { workspaceState } from '../plugins/uiExtensions';
-import { SelectTool, LassoTool, EraserTool, PaintTool, SampleTool } from '../tools/select';
+import { SelectTool, LassoTool, PaintTool, SampleTool } from '../tools/select';
+import { EraserTool } from '../tools/eraser';
 import { LineTool, FreehandTool, RectangleTool, RotatedRectangleTool, CircleTool, Arc2Tool, ArcCenterTool, Arc3Tool } from '../tools/draw';
 import { PushPullTool, OffsetTool, MoveTool, RotateTool, ScaleTool, FollowMeTool, nudgeSelection } from '../tools/modify';
 import {

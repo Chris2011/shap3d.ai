@@ -11,10 +11,10 @@ export const drawLabelsOn = useLocalStorage('s3d.drawLabels', true);
 
 const LABEL = { color: '#1d1d1f', background: '#ffffffe6', font: '600 12px "Open Sans", "Segoe UI", sans-serif' };
 
-/** the length of an edge of the preview, a little beside its middle */
-export const edgeLabel = (editor: Editor, overlay: Overlay, start: THREE.Vector3, end: THREE.Vector3, prefix = '') => {
+/** the length of an edge of the preview, a little beside its middle; `always` for measuring tools (Tape Measure) */
+export const edgeLabel = (editor: Editor, overlay: Overlay, start: THREE.Vector3, end: THREE.Vector3, prefix = '', always = false) => {
   const length = start.distanceTo(end);
-  if (!drawLabelsOn.value || length < 1e-6) {
+  if ((!drawLabelsOn.value && !always) || length < 1e-6) {
     return;
   }
   overlay.text(start.clone().lerp(end, 0.5), prefix + editor.fmt(length), { ...LABEL, offsetY: -12 });

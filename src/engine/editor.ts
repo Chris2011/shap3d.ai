@@ -10,6 +10,8 @@ import type { Overlay } from './overlay';
 import { formatLength, formatArea } from '../core/units';
 import { nav, wheelAction } from './navigation';
 import { applyDrawingAxes } from './drawingAxes';
+import { guideAt, drawSelectedGuide } from './guidePick';
+import { valueLabel } from '../tools/drawLabels';
 import { t, localize, normalizeNumberInput } from '../i18n';
 
 /** Tools of SketchUp Web's main toolbar (others appear as recently used tools). */
@@ -32,6 +34,8 @@ export abstract class Tool {
   vcbLabel = '';
   /** how many states the Ctrl key steps through in this tool – to go back when Ctrl was the start of a shortcut */
   ctrlStates = 2;
+  /** its preview shows its sizes at the geometry itself – the measurements value beside the cursor is left out */
+  showsSizes = false;
   constructor(public editor: Editor) {}
   status(): string {
     return '';
@@ -100,7 +104,7 @@ interface HistoryEntry {
 const ANNOTATION_FONT = '12px "Open Sans", "Segoe UI", sans-serif';
 
 export class Editor {
-  /** the text or dimension selected with the Select tool, null = none */
+  /** the text, dimension or guide selected with the Select tool, null = none */
   selectedAnnotation: number | null = null;
   model = new Model();
   viewer!: Viewer;
@@ -293,7 +297,7 @@ export class Editor {
       this.selectionChanged();
     }
   }
-  /** the id of the text or dimension under a screen point: its text box or one of its lines (drawn last, so looked at first) */
+  /** the id of the text, dimension or guide under a screen point: a text box or one of the lines (drawn last, so looked at first) */
   pickAnnotation(x: number, y: number) {
     const pointer = new THREE.Vector3(x, y);
     const nearLine = (start: THREE.Vector3, end: THREE.Vector3) => {
@@ -327,9 +331,10 @@ export class Editor {
         return dimension.id;
       }
     }
-    return null;
+    // the Tape Measure's guide lines and points last: they lie under everything else
+    return this.model.settings.guides ? guideAt(this.viewer, this.model.guides, x, y) : null;
   }
-  /** a text or dimension is not geometry, so it is selected on its own: clicking anything else ends it */
+  /** a text, dimension or guide is not geometry, so it is selected on its own: clicking anything else ends it */
   selectAnnotation(id: number | null) {
     if (id !== null) {
       this.clearSelection();
@@ -341,6 +346,7 @@ export class Editor {
     this.commit('commands.delete', () => {
       this.model.labels = this.model.labels.filter((label) => label.id !== id);
       this.model.dimensions = this.model.dimensions.filter((dimension) => dimension.id !== id);
+      this.model.guides = this.model.guides.filter((guide) => guide.id !== id);
     });
     this.selectedAnnotation = null;
   }
@@ -922,6 +928,7 @@ export class Editor {
           overlay.marker(guide.point, 'guide');
         }
       }
+      drawSelectedGuide(overlay, this.model.guides, this.selectedAnnotation);
     }
     if (this.tool.id === 'move' || this.tool.id === 'snappoint') {
       for (const { position } of this.viewer.snapRecords()) {
@@ -953,6 +960,10 @@ export class Editor {
       }
     }
     this.tool.draw(overlay);
+    // every tool in the middle of something measurable (Push/Pull, Move, Rotate, Scale, Offset, plugins …) shows its value
+    if (this.tool.busy() && !this.tool.showsSizes) {
+      valueLabel(this, overlay);
+    }
   }
 
   drawDimension(overlay: Overlay, start: THREE.Vector3, end: THREE.Vector3, off: THREE.Vector3, selected = false) {

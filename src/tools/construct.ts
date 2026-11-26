@@ -7,6 +7,7 @@ import { newId } from '../core/model';
 import type { Label } from '../core/document';
 import { formatAngle } from '../core/units';
 import { t, formatDecimal } from '../i18n';
+import { edgeLabel } from './drawLabels';
 
 type V3 = THREE.Vector3;
 
@@ -21,6 +22,7 @@ const TAPE_START_STATUS: Record<TapeMode, string> = {
 };
 
 export class TapeTool extends PointTool {
+  showsSizes = true;
   id = 'tape';
   name = 'tools.tape';
   vcbLabel = 'vcb.length';
@@ -175,6 +177,7 @@ export class TapeTool extends PointTool {
       if (this.edgeDir) {
         const off = this.offsetVec();
         overlay.line(this.start, this.start.clone().add(off), '#000', 1, [4, 3]);
+        edgeLabel(this.editor, overlay, this.start, this.start.clone().add(off), '', true);
         overlay.line(
           this.start.clone().add(off).addScaledVector(this.edgeDir, -200),
           this.start.clone().add(off).addScaledVector(this.edgeDir, 200),
@@ -184,6 +187,7 @@ export class TapeTool extends PointTool {
         );
       } else {
         overlay.line(this.start, this.current, '#000', 1, [4, 3]);
+        edgeLabel(this.editor, overlay, this.start, this.current, '', true);
       }
     }
     this.drawInference(overlay);

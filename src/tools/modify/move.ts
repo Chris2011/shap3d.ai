@@ -11,6 +11,7 @@ import { BoxGrips } from './boxGrips';
 import { SeeThrough } from './seeThrough';
 import { GapPicker } from './gaps';
 import { typedOffset } from './typedOffset';
+import { edgeLabel } from '../drawLabels';
 
 type V3 = THREE.Vector3;
 
@@ -19,6 +20,7 @@ export class MoveTool extends PointTool {
   name = 'tools.move';
   vcbLabel = 'vcb.distance';
   cursor = 'move';
+  showsSizes = true;
   start: V3 | null = null;
   live: LiveTransform | null = null;
   copy = false;
@@ -215,6 +217,7 @@ export class MoveTool extends PointTool {
     if (this.start && this.inference) {
       const col = this.inference.axis ? AXIS_COLOR[this.inference.axis] : '#000';
       overlay.line(this.start, this.start.clone().add(this.delta), col, 1.2, [4, 3]);
+      edgeLabel(this.editor, overlay, this.start, this.start.clone().add(this.delta));
     }
     if (this.start) {
       this.gaps.draw(this.editor, overlay);

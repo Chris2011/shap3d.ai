@@ -8,7 +8,7 @@ import { parseLengthList } from '../core/units';
 import { AXES, AXIS_COLOR, MAGENTA, snapping } from '../engine/inference';
 import { type PlaneRef, lineLineClosest } from '../core/geometry';
 import { t, formatDecimal } from '../i18n';
-import { edgeLabel, pointLabel, valueLabel } from './drawLabels';
+import { edgeLabel, pointLabel } from './drawLabels';
 
 type V3 = THREE.Vector3;
 
@@ -26,6 +26,7 @@ const parseCoords = (text: string): { absolute: boolean; vector: V3 } | null => 
 
 // ===================================================================== Line
 export class LineTool extends PointTool {
+  showsSizes = true;
   id = 'line';
   name = 'tools.line';
   vcbLabel = 'vcb.length';
@@ -204,6 +205,7 @@ const isAxisAligned = (direction: V3) => [direction.x, direction.y, direction.z]
 
 // ===================================================================== Rectangle
 export class RectangleTool extends PointTool {
+  showsSizes = true;
   id = 'rectangle';
   name = 'tools.rectangle';
   vcbLabel = 'vcb.dimensions';
@@ -388,6 +390,7 @@ export class RectangleTool extends PointTool {
 
 // ===================================================================== Rotated rectangle (3 points)
 export class RotatedRectangleTool extends PointTool {
+  showsSizes = true;
   id = 'rotrect';
   name = 'tools.rotrect';
   vcbLabel = 'vcb.length';
@@ -481,6 +484,7 @@ export class RotatedRectangleTool extends PointTool {
 
 // ===================================================================== Circle / Polygon
 export class CircleTool extends PointTool {
+  showsSizes = true;
   id = 'circle';
   name = 'tools.circle';
   vcbLabel = 'vcb.segments';
@@ -1066,9 +1070,6 @@ export class Arc2Tool extends PointTool {
     return false;
   }
   draw(overlay: Overlay) {
-    if (this.busy()) {
-      valueLabel(this.editor, overlay);
-    }
     if (this.start && !this.end && this.current) {
       overlay.line(this.start, this.current, '#000', 1);
     }
@@ -1227,9 +1228,6 @@ export class ArcCenterTool extends PointTool {
     return false;
   }
   draw(overlay: Overlay) {
-    if (this.busy()) {
-      valueLabel(this.editor, overlay);
-    }
     if (this.center && !this.startPoint && this.current) {
       const point = onPlane(this.current, this.center, this.normal);
       overlay.line(this.center, point, '#555', 1, [3, 3]);
@@ -1321,9 +1319,6 @@ export class Arc3Tool extends PointTool {
     });
   }
   draw(overlay: Overlay) {
-    if (this.busy()) {
-      valueLabel(this.editor, overlay);
-    }
     if (this.pts.length === 1 && this.current) {
       overlay.line(this.pts[0], this.current, '#000', 1);
     }

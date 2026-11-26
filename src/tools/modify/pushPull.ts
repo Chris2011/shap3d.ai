@@ -6,6 +6,7 @@ import { PointTool } from '../base';
 import { t } from '../../i18n';
 import { pickContextFace } from './picking';
 import { drawPulledFace } from './gumballDraw';
+import { edgeLabel } from '../drawLabels';
 
 type V3 = THREE.Vector3;
 
@@ -14,6 +15,7 @@ export class PushPullTool extends PointTool {
   name = 'tools.pushpull';
   vcbLabel = 'vcb.distance';
   cursor = 'crosshair';
+  showsSizes = true;
   faceId: number | null = null;
   start: V3 | null = null;
   normal = new THREE.Vector3();
@@ -175,7 +177,11 @@ export class PushPullTool extends PointTool {
       if (!editor.entities.faces.has(this.faceId)) {
         return;
       }
-      drawPulledFace(editor, overlay, this.faceId, this.normal.clone().multiplyScalar(this.distance));
+      const offset = this.normal.clone().multiplyScalar(this.distance);
+      drawPulledFace(editor, overlay, this.faceId, offset);
+      // how far, along the pull from where the face was grabbed
+      overlay.line(this.start, this.start.clone().add(offset), '#555', 1, [3, 3]);
+      edgeLabel(editor, overlay, this.start, this.start.clone().add(offset));
       const inference = this.inference;
       if (inference?.target && inference.alignFrom) {
         overlay.line(inference.alignFrom, inference.point, '#000', 1, [2, 3]);
