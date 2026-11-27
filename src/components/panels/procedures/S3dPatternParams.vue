@@ -20,7 +20,7 @@
   </div>
   <div v-if="!circular" class="s3d-row">
     <span class="s3d-label">{{ t('procedures.spacing') }}</span>
-    <input class="s3d-input" :value="editor.fmt(Number(params.spacing))" @change="setLength('spacing', $event)" @keydown.stop />
+    <input class="s3d-input" :value="lengthText('spacing')" @change="setLength('spacing', $event)" @keydown.stop />
   </div>
   <template v-else>
     <div class="s3d-row">
@@ -43,7 +43,7 @@ import { inputValue, useProcedureParams } from '../../../composables/useProcedur
 import { t } from '../../../i18n';
 
 /** A pattern procedure: a row (count, axis, spacing) or a circle (count, axis, angle, centre). */
-const { editor, procedure, setParams, setCount, setLength } = useProcedureParams();
+const { editor, procedure, setParams, setCount, setLength, lengthText } = useProcedureParams();
 const params = computed(() => procedure.value!.params);
 const circular = computed(() => params.value.mode === 'circular');
 const angleText = computed(() => formatAngle(MathUtils.degToRad(Number(params.value.angle))));

@@ -24,6 +24,7 @@
       </option>
     </S3dSelect>
   </S3dFieldRow>
+  <S3dModelVariables />
   <S3dSectionTitle>{{ t('modelInfo.statistics') }}</S3dSectionTitle>
   <S3dFieldRow :label="t('modelInfo.faces')">{{ stats.faces }}</S3dFieldRow>
   <S3dFieldRow :label="t('modelInfo.edges')">{{ stats.edges }}</S3dFieldRow>
@@ -39,6 +40,7 @@ import S3dButton from '../ui/S3dButton.vue';
 import S3dFieldRow from '../ui/S3dFieldRow.vue';
 import S3dSectionTitle from '../ui/S3dSectionTitle.vue';
 import S3dSelect from '../ui/S3dSelect.vue';
+import S3dModelVariables from './S3dModelVariables.vue';
 import { useEditor } from '../keys';
 import type { ModelSettings } from '../../core/document';
 import { useModel } from '../../composables/useModel';

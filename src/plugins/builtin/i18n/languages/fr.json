@@ -1858,6 +1858,20 @@
       "remove": "Retirer de la vue d’ensemble",
       "copyName": "{name} (copie)",
       "confirmRemove": "Retirer « {name} » de la vue d’ensemble ? Les fichiers enregistrés ailleurs restent."
+    },
+    "variables": {
+      "title": "Variables",
+      "hint": "À utiliser comme #nom partout où l’on saisit une longueur, p. ex. #mur * 2 + 10 cm. Les paramètres des groupes modifiables suivent quand une variable change.",
+      "name": "Nom",
+      "value": "Valeur",
+      "add": "Ajouter une variable",
+      "defaultName": "valeur",
+      "invalid": "Expression non valide : {value}",
+      "nameTaken": "Il existe déjà une variable #{name}",
+      "badName": "« {name} » n’est pas un nom valide (lettres, chiffres, _)",
+      "undoAdd": "Ajouter une variable",
+      "undoChange": "Modifier une variable",
+      "undoRemove": "Supprimer une variable"
     }
   }
 }

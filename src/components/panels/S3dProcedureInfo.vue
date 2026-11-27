@@ -20,7 +20,7 @@
       </div>
       <div class="s3d-row">
         <span class="s3d-label">{{ t(procedure.params.treatment === 'round' ? 'procedures.radius' : 'procedures.chamferWidth') }}</span>
-        <input class="s3d-input" :value="editor.fmt(Number(procedure.params.size))" @change="setLength('size', $event)" @keydown.stop />
+        <input class="s3d-input" :value="lengthText('size')" @change="setLength('size', $event)" @keydown.stop />
       </div>
     </template>
 
@@ -38,12 +38,7 @@
       </div>
       <div v-else class="s3d-row">
         <span class="s3d-label">{{ t('procedures.spacing') }}</span>
-        <input
-          class="s3d-input"
-          :value="editor.fmt(Number(procedure.params.spacing))"
-          @change="setLength('spacing', $event)"
-          @keydown.stop
-        />
+        <input class="s3d-input" :value="lengthText('spacing')" @change="setLength('spacing', $event)" @keydown.stop />
       </div>
       <label class="s3d-check">
         <input
@@ -81,7 +76,7 @@ import { runCommand } from '../../engine/commands';
 import { inputValue, useProcedureParams } from '../../composables/useProcedureParams';
 import { t } from '../../i18n';
 
-const { editor, instance, procedure, setParams, setCount, setLength } = useProcedureParams();
+const { editor, instance, procedure, setParams, setCount, setLength, lengthText } = useProcedureParams();
 const inputNames = computed(() =>
   [...(instance.value?.definition.entities.instances.values() ?? [])]
     .filter(isProcedureInput)

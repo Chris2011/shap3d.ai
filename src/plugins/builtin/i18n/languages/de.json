@@ -1858,6 +1858,20 @@
       "remove": "Aus der Übersicht entfernen",
       "copyName": "{name} (Kopie)",
       "confirmRemove": "„{name}“ aus der Übersicht entfernen? Anderswo gespeicherte Dateien bleiben."
+    },
+    "variables": {
+      "title": "Variablen",
+      "hint": "Als #Name überall verwenden, wo eine Länge eingegeben wird, z. B. #wand * 2 + 10 cm. Parameter bearbeitbarer Gruppen folgen, wenn sich eine Variable ändert.",
+      "name": "Name",
+      "value": "Wert",
+      "add": "Variable hinzufügen",
+      "defaultName": "wert",
+      "invalid": "Kein gültiger Ausdruck: {value}",
+      "nameTaken": "Es gibt schon eine Variable #{name}",
+      "badName": "„{name}“ ist kein gültiger Name (Buchstaben, Ziffern, _)",
+      "undoAdd": "Variable hinzufügen",
+      "undoChange": "Variable ändern",
+      "undoRemove": "Variable löschen"
     }
   }
 }

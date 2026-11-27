@@ -1,10 +1,19 @@
 import type { Units } from './document';
 import { formatDecimal, unitSymbol, normalizeNumberInput } from '../i18n';
+import { evaluateExpression, VARIABLE_PATTERN } from './variables';
 
 const FACT: Record<string, number> = { mm: 0.001, cm: 0.01, m: 1, km: 1000, in: 0.0254, '"': 0.0254, ft: 0.3048, "'": 0.3048 };
 
-/** Parse a length like "2.5m", "250cm", "3'6\"", "1200" (model units). Returns meters. */
+/** an expression with the model's variables (`#wand * 2 + 10 cm`), its result a length (m) or a plain number */
+export const parseExpression = (str: string, units: Units = 'm') =>
+  evaluateExpression(normalizeNumberInput(String(str)).trim().replace(/,/g, '.'), FACT, units);
+
+/** Parse a length like "2.5m", "250cm", "3'6\"", "1200" (model units) or with variables "#wand * 2". Returns meters. */
 export const parseLength = (str: string, units: Units = 'm'): number | null => {
+  if (VARIABLE_PATTERN.test(String(str))) {
+    const result = parseExpression(str, units);
+    return result ? (result.length ? result.value : result.value * (FACT[units] ?? 1)) : null;
+  }
   const text = normalizeNumberInput(String(str)).trim().toLowerCase().replace(',', '.');
   if (!text) {
     return null;
@@ -26,7 +35,8 @@ export const parseLength = (str: string, units: Units = 'm'): number | null => {
 /** Splits VCB input "3m;4m" or "3m,4m" or "3m x 4m". */
 export const parseLengthList = (str: string, units: Units = 'm'): (number | null)[] => {
   const text = str.trim();
-  let parts = text.split(/;|\s*[x×]\s*/i);
+  // with variables an "x" may be part of a name (#box): only ";", "×" or an "x" between spaces separate then
+  let parts = text.split(VARIABLE_PATTERN.test(text) ? /;|\s*×\s*|\s+x\s+/i : /;|\s*[x×]\s*/i);
   // "3m,4m" or "3, 4": comma as separator (a comma followed by a space or preceded by a unit)
   if (parts.length === 1 && /(\s|[a-z"'])\s*,|,\s+/i.test(text)) {
     parts = text.split(/\s*,\s*/);

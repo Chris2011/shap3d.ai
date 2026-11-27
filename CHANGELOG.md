@@ -9,6 +9,7 @@ The built-in plugins and the plugin packages ([OpenSCAD](plugins/openscad), [IFC
 
 | Version                     | Date       | In one sentence                                                                          |
 | --------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
+| [0.12.0](#0120--2026-11-27) | 2026-11-27 | Variables: named values as #name in every typed length, followed by editable groups |
 | [0.11.0](#0110--2026-11-26) | 2026-11-26 | Exact solids with manifold-3d, holes, drawing axes, gumball, sections by tag and textures on import |
 | [0.10.0](#0100--2026-11-01) | 2026-11-01 | A bigger plugin API – workspaces, modes, lights, display, data – and scripts in a worker |
 | [0.9.0](#090--2026-10-25)   | 2026-10-25 | Scene tabs, outliner by tags, guide points – and IFC as a plugin package                 |
@@ -31,6 +32,12 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 | [Remote API](src/plugins/builtin/remote/CHANGELOG.md) (`remote`)       | –         | –         | **1.0.0** |
 | [OpenSCAD](plugins/openscad/CHANGELOG.md) (package)                    | **1.2.0** | **1.4.0** | **1.4.1** |
 | [IFC](plugins/ifc/CHANGELOG.md) (package)                              | –         | –         | –         | –         | **1.0.0** | 1.0.0     |
+
+## [0.12.0] – 2026-11-27
+
+### Added
+
+- **Variables**: named values of the model in _Model info › Variables_ (like Onshape's Variable Studio), e.g. `wall` = `240 mm` or `#wall * 2`. Type `#wall`, `#wall * 2 + 10 cm` or `(#wall + 1 m) / 2` wherever a length is typed – the measurements box, Entity Info, procedure parameters. A procedure parameter typed with a variable keeps the expression and is built again when the variable changes; renaming a variable updates its uses. Saved with the model, one undo step each; a small parser of its own, nothing typed is run as code.
 
 ## [0.11.0] – 2026-11-26
 

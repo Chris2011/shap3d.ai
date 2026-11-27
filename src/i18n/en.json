@@ -1840,6 +1840,20 @@
       "remove": "Remove from the overview",
       "copyName": "{name} (copy)",
       "confirmRemove": "Remove „{name}“ from the overview? Files you saved elsewhere stay."
+    },
+    "variables": {
+      "title": "Variables",
+      "hint": "Use them as #name wherever a length is typed, e.g. #wall * 2 + 10 cm. Parameters of editable groups follow when a variable changes.",
+      "name": "Name",
+      "value": "Value",
+      "add": "Add variable",
+      "defaultName": "value",
+      "invalid": "Not a valid expression: {value}",
+      "nameTaken": "There already is a variable #{name}",
+      "badName": "\"{name}\" is no valid name (letters, digits, _)",
+      "undoAdd": "Add variable",
+      "undoChange": "Change variable",
+      "undoRemove": "Delete variable"
     }
   }
 }

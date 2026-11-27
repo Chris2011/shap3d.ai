@@ -12,6 +12,7 @@ import { nav, wheelAction } from './navigation';
 import { applyDrawingAxes } from './drawingAxes';
 import { guideAt, drawSelectedGuide } from './guidePick';
 import { valueLabel } from '../tools/drawLabels';
+import { useVariableSource } from '../core/variables';
 import { t, localize, normalizeNumberInput } from '../i18n';
 
 /** Tools of SketchUp Web's main toolbar (others appear as recently used tools). */
@@ -161,6 +162,8 @@ export class Editor {
   attach(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement) {
     this.viewer = markRaw(new Viewer(canvas, overlay));
     this.viewer.model = this.model;
+    // `#name` in typed lengths reads this model's variables
+    useVariableSource(() => this.model.variables);
     this.infer = markRaw(
       new InferenceEngine(
         this.viewer,

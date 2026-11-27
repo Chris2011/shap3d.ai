@@ -1858,6 +1858,20 @@
       "remove": "Quitar de la vista general",
       "copyName": "{name} (copia)",
       "confirmRemove": "¿Quitar «{name}» de la vista general? Los archivos guardados en otro lugar se conservan."
+    },
+    "variables": {
+      "title": "Variables",
+      "hint": "Úsalas como #nombre donde se escriba una longitud, p. ej. #muro * 2 + 10 cm. Los parámetros de los grupos editables siguen cuando cambia una variable.",
+      "name": "Nombre",
+      "value": "Valor",
+      "add": "Añadir variable",
+      "defaultName": "valor",
+      "invalid": "Expresión no válida: {value}",
+      "nameTaken": "Ya existe una variable #{name}",
+      "badName": "«{name}» no es un nombre válido (letras, cifras, _)",
+      "undoAdd": "Añadir variable",
+      "undoChange": "Cambiar variable",
+      "undoRemove": "Eliminar variable"
     }
   }
 }

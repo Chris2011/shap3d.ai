@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Definition, Entities, ensureIdAbove, newId, type DefinitionRegistry, type Instance } from './model';
 import { t } from '../i18n';
+import { isVariableName, type ModelVariable } from './variables';
 
 export interface MaterialDef {
   name: string;
@@ -226,6 +227,8 @@ export class Model implements DefinitionRegistry {
   labels: Label[] = [];
   environment?: ModelEnvironment;
   sections: SectionPlane[] = [];
+  /** named values usable as `#name` wherever a length is typed */
+  variables: ModelVariable[] = [];
   scenes: Scene[] = [];
   settings: ModelSettings = {
     units: 'mm',
@@ -334,6 +337,7 @@ export class Model implements DefinitionRegistry {
     this.labels = [];
     this.environment = undefined;
     this.sections = [];
+    this.variables = [];
     this.pluginData = undefined;
   }
 
@@ -417,6 +421,7 @@ export class Model implements DefinitionRegistry {
         source: label.source ? { ...label.source, path: [...label.source.path] } : undefined,
         lastValue: label.lastValue,
       })),
+      variables: this.variables.length ? this.variables.map((variable) => ({ ...variable })) : undefined,
       sections: this.sections.map((section) => ({
         id: section.id,
         point: toArray(section.point),
@@ -562,6 +567,9 @@ export class Model implements DefinitionRegistry {
       lastValue: label.lastValue,
       offset: toVector(label.offset),
     }));
+    this.variables = (Array.isArray(json.variables) ? json.variables : [])
+      .filter((variable: any) => isVariableName(String(variable?.name)))
+      .map((variable: any): ModelVariable => ({ name: String(variable.name), value: String(variable.value ?? '') }));
     this.sections = (json.sections ?? []).map((section: any): SectionPlane => ({
       id: seen(section.id),
       point: toVector(section.point),

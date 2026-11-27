@@ -1,6 +1,8 @@
 import { useEditor } from '../components/keys';
 import { rebuildProcedure } from '../core/procedures';
 import { parseLength } from '../core/units';
+import { VARIABLE_PATTERN } from '../core/variables';
+import { expressionKey } from '../core/variableProcedures';
 import { useSelection } from './useModel';
 import { t } from '../i18n';
 
@@ -24,13 +26,21 @@ export const useProcedureParams = () => {
   const sources = () =>
     [...(instance.value?.definition.entities.instances.values() ?? [])].filter((input) => input.procedureRole === 'source');
 
-  const setParams = (change: Record<string, string | number | boolean>) => {
+  /** `undefined` takes a parameter away (e.g. the text of a length typed without variables) */
+  const setParams = (change: Record<string, string | number | boolean | undefined>) => {
     const definition = instance.value?.definition;
     if (!definition?.procedure) {
       return;
     }
     editor.commit('procedures.undoParams', () => {
-      Object.assign(definition.procedure!.params, change);
+      const params = definition.procedure!.params;
+      for (const [key, value] of Object.entries(change)) {
+        if (value === undefined) {
+          delete params[key];
+        } else {
+          params[key] = value;
+        }
+      }
       const error = rebuildProcedure(definition, editor.model);
       if (error) {
         editor.toast(t(error));
@@ -46,14 +56,23 @@ export const useProcedureParams = () => {
       (event.target as HTMLInputElement).value = String(procedure.value?.params.count ?? 1);
     }
   };
-  /** a length typed for a parameter (spacing, radius …); `positive` refuses 0 and less – back to the old value then */
+  /** a length parameter as its field shows it: the text typed with variables (`#wand * 2`), else the length */
+  const lengthText = (key: string, fallback = 1) => {
+    const typed = procedure.value?.params[expressionKey(key)];
+    return typeof typed === 'string' && typed ? typed : editor.fmt(Number(procedure.value?.params[key] ?? fallback));
+  };
+  /**
+   * a length typed for a parameter (spacing, radius …), also with variables – their text is kept, so the parameter
+   * follows when a variable changes; `positive` refuses 0 and less – back to the old value then
+   */
   const setLength = (key: string, event: Event, positive = true) => {
-    const length = parseLength(inputValue(event), editor.model.settings.units);
+    const text = inputValue(event).trim();
+    const length = parseLength(text, editor.model.settings.units);
     if (length != null && (!positive || length > 0)) {
-      setParams({ [key]: length });
+      setParams({ [key]: length, [expressionKey(key)]: VARIABLE_PATTERN.test(text) ? text : undefined });
     } else {
-      (event.target as HTMLInputElement).value = editor.fmt(Number(procedure.value?.params[key] ?? (positive ? 1 : 0)));
+      (event.target as HTMLInputElement).value = lengthText(key, positive ? 1 : 0);
     }
   };
-  return { editor, instance, procedure, sources, setParams, setCount, setLength };
+  return { editor, instance, procedure, sources, setParams, setCount, setLength, lengthText };
 };
