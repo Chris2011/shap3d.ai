@@ -29,6 +29,7 @@ Everything about Shap3D.ai in detail – the [README](../../README.md) only has 
   - Level editor – [overview](plugin-packages.md#the-level-editor-plugin) · [README](../../plugins/level/README.md)
   - Physics – [overview](plugin-packages.md#the-physics-plugin) · [README](../../plugins/physics/README.md)
   - Animation – [overview](plugin-packages.md#the-animation-plugin) · [README](../../plugins/animation/README.md)
+  - Woodshop – [overview](plugin-packages.md#the-woodshop-plugin) · [README](../../plugins/woodshop/README.md)
 
 ## Working on the project
 

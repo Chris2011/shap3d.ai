@@ -1,0 +1,56 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "woodshop": {
+      "plugin": {
+        "name": "Woodshop",
+        "description": "Woodworking: mark groups and components as boards with grain and edge banding; the cut list counts equal boards and saves them as CSV."
+      },
+      "panel": {
+        "selected": "Selected groups",
+        "selectGroups": "Select one or more groups or components.",
+        "mark": "Mark as board",
+        "unmark": "No longer a board"
+      },
+      "fields": {
+        "grain": "Grain",
+        "bandLong": "Banded edges along the grain",
+        "bandShort": "Banded edges across the grain"
+      },
+      "grain": {
+        "length": "Along the length",
+        "width": "Across"
+      },
+      "cutList": {
+        "title": "Cut list",
+        "empty": "No boards in the model yet.",
+        "banding": "Edge banding in total: {length}",
+        "save": "Save CSV",
+        "export": "Cut list (CSV)",
+        "file": "cut-list"
+      },
+      "columns": {
+        "name": "Name",
+        "material": "Material",
+        "count": "Count",
+        "length": "Length (mm)",
+        "width": "Width (mm)",
+        "thickness": "Thickness (mm)",
+        "bandLong": "Banding along",
+        "bandShort": "Banding across",
+        "banding": "Banding total (mm)"
+      },
+      "undo": {
+        "mark": "Mark as board",
+        "unmark": "No longer a board",
+        "change": "Change board"
+      },
+      "script": {
+        "board": "Marks a group or component as a board for the cut list: grain along the longest side (length) or across it (width), edge banding along and across the grain (0–2).",
+        "noGroup": "s3d.board needs a group or component, e.g. from s3d.box()."
+      }
+    }
+  }
+}

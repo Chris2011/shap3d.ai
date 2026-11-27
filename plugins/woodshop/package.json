@@ -1,0 +1,42 @@
+{
+  "name": "s3d-plugin-woodshop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Woodshop for Shap3D.ai: mark groups and components as boards with grain and edge banding; the cut list counts equal boards, adds up the edge banding and goes out as CSV.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "test": "node --test test/*.test.ts"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "woodshop",
+    "name": "Woodshop",
+    "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/woodshop.png"
+  },
+  "screenshots": [
+    {
+      "name": "woodshop",
+      "file": "demo.js",
+      "command": "woodshop.panel.open",
+      "camera": "-1.2,-2.4,1.9",
+      "target": "0.4,0.2,0.75"
+    }
+  ]
+}

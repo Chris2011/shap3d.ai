@@ -1,0 +1,56 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "woodshop": {
+      "plugin": {
+        "name": "Atelier bois",
+        "description": "Menuiserie : marquer des groupes et composants comme planches avec sens du fil et chant ; la liste de débit compte les planches identiques et les enregistre en CSV."
+      },
+      "panel": {
+        "selected": "Groupes sélectionnés",
+        "selectGroups": "Sélectionnez un ou plusieurs groupes ou composants.",
+        "mark": "Marquer comme planche",
+        "unmark": "Plus une planche"
+      },
+      "fields": {
+        "grain": "Fil du bois",
+        "bandLong": "Chants dans le sens du fil",
+        "bandShort": "Chants en travers du fil"
+      },
+      "grain": {
+        "length": "En long",
+        "width": "En travers"
+      },
+      "cutList": {
+        "title": "Liste de débit",
+        "empty": "Aucune planche dans le modèle.",
+        "banding": "Chant au total : {length}",
+        "save": "Enregistrer en CSV",
+        "export": "Liste de débit (CSV)",
+        "file": "liste-de-debit"
+      },
+      "columns": {
+        "name": "Nom",
+        "material": "Matériau",
+        "count": "Quantité",
+        "length": "Longueur (mm)",
+        "width": "Largeur (mm)",
+        "thickness": "Épaisseur (mm)",
+        "bandLong": "Chants en long",
+        "bandShort": "Chants en travers",
+        "banding": "Chant total (mm)"
+      },
+      "undo": {
+        "mark": "Marquer comme planche",
+        "unmark": "Plus une planche",
+        "change": "Modifier la planche"
+      },
+      "script": {
+        "board": "Marque un groupe ou un composant comme planche pour la liste de débit : fil le long du plus grand côté (length) ou en travers (width), chants dans le sens du fil et en travers (0–2).",
+        "noGroup": "s3d.board attend un groupe ou un composant, p. ex. de s3d.box()."
+      }
+    }
+  }
+}

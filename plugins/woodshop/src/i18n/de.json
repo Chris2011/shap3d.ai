@@ -1,0 +1,56 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "woodshop": {
+      "plugin": {
+        "name": "Holzwerkstatt",
+        "description": "Holzbau: Gruppen und Komponenten als Bretter mit Faserrichtung und Kantenumleimer markieren; die Zuschnittliste zählt gleiche Bretter und speichert sie als CSV."
+      },
+      "panel": {
+        "selected": "Gewählte Gruppen",
+        "selectGroups": "Eine oder mehrere Gruppen oder Komponenten wählen.",
+        "mark": "Als Brett markieren",
+        "unmark": "Kein Brett mehr"
+      },
+      "fields": {
+        "grain": "Faser",
+        "bandLong": "Umleimer längs zur Faser",
+        "bandShort": "Umleimer quer zur Faser"
+      },
+      "grain": {
+        "length": "Längs",
+        "width": "Quer"
+      },
+      "cutList": {
+        "title": "Zuschnittliste",
+        "empty": "Noch keine Bretter im Modell.",
+        "banding": "Umleimer gesamt: {length}",
+        "save": "CSV speichern",
+        "export": "Zuschnittliste (CSV)",
+        "file": "Zuschnittliste"
+      },
+      "columns": {
+        "name": "Name",
+        "material": "Material",
+        "count": "Anzahl",
+        "length": "Länge (mm)",
+        "width": "Breite (mm)",
+        "thickness": "Stärke (mm)",
+        "bandLong": "Umleimer längs",
+        "bandShort": "Umleimer quer",
+        "banding": "Umleimer gesamt (mm)"
+      },
+      "undo": {
+        "mark": "Als Brett markieren",
+        "unmark": "Kein Brett mehr",
+        "change": "Brett ändern"
+      },
+      "script": {
+        "board": "Markiert eine Gruppe oder Komponente als Brett für die Zuschnittliste: Faser entlang der längsten Seite (length) oder quer (width), Umleimer längs und quer zur Faser (0–2).",
+        "noGroup": "s3d.board braucht eine Gruppe oder Komponente, z. B. von s3d.box()."
+      }
+    }
+  }
+}

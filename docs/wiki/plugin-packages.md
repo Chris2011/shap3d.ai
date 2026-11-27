@@ -114,6 +114,21 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/roomplanner/dist`.
 
 The pieces are ordinary components of the model, built with the script API (`s3d.box`, `s3d.cylinder` …) – the app's own tools work on them too. Details in [its README](../../plugins/roomplanner/README.md).
 
+## The woodshop plugin
+
+The package in [`plugins/woodshop/`](../../plugins/woodshop) is for woodworking: groups and components become boards with grain and edge banding, and the cut list of the whole model counts equal boards, adds up the edge banding and goes out as CSV. No dependencies of its own; built like the others:
+
+```sh
+cd plugins/woodshop
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/woodshop/dist`.
+
+![Woodshop: a bookcase from oak boards, the left side selected; the panel with its board settings and the cut list](../../plugins/woodshop/docs/woodshop.png)
+
+`s3d.board(group, { grain, bandLong, bandShort })` marks a board from a script. Details in [its README](../../plugins/woodshop/README.md).
+
 ## The shader materials plugin
 
 The package in [`plugins/shaders/`](../../plugins/shaders) draws materials with GLSL shaders instead of pictures – wood, marble, granite, terrazzo, rust and patina, brick walls, checker and exposed concrete. No dependencies of its own; built like the others:

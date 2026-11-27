@@ -1,0 +1,56 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "woodshop": {
+      "plugin": {
+        "name": "Taller de madera",
+        "description": "Carpintería: marcar grupos y componentes como tableros con dirección de la veta y canteado; la lista de corte cuenta los tableros iguales y los guarda como CSV."
+      },
+      "panel": {
+        "selected": "Grupos seleccionados",
+        "selectGroups": "Selecciona uno o varios grupos o componentes.",
+        "mark": "Marcar como tablero",
+        "unmark": "Ya no es un tablero"
+      },
+      "fields": {
+        "grain": "Veta",
+        "bandLong": "Cantos a lo largo de la veta",
+        "bandShort": "Cantos a lo ancho de la veta"
+      },
+      "grain": {
+        "length": "A lo largo",
+        "width": "A lo ancho"
+      },
+      "cutList": {
+        "title": "Lista de corte",
+        "empty": "Aún no hay tableros en el modelo.",
+        "banding": "Canto en total: {length}",
+        "save": "Guardar CSV",
+        "export": "Lista de corte (CSV)",
+        "file": "lista-de-corte"
+      },
+      "columns": {
+        "name": "Nombre",
+        "material": "Material",
+        "count": "Cantidad",
+        "length": "Largo (mm)",
+        "width": "Ancho (mm)",
+        "thickness": "Grosor (mm)",
+        "bandLong": "Cantos a lo largo",
+        "bandShort": "Cantos a lo ancho",
+        "banding": "Canto total (mm)"
+      },
+      "undo": {
+        "mark": "Marcar como tablero",
+        "unmark": "Ya no es un tablero",
+        "change": "Cambiar tablero"
+      },
+      "script": {
+        "board": "Marca un grupo o componente como tablero para la lista de corte: veta a lo largo del lado más largo (length) o a lo ancho (width), cantos a lo largo y a lo ancho de la veta (0–2).",
+        "noGroup": "s3d.board necesita un grupo o componente, p. ej. de s3d.box()."
+      }
+    }
+  }
+}

@@ -84,7 +84,7 @@ src/
   styles.css   Tailwind CSS setup – design tokens for light and dark mode, shared UI classes
 .storybook/    Storybook – config, the shared editor with its demo model, the plugin-package loader
 docs/          logo, README screenshots and this wiki (docs/wiki/)
-plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/, roomplanner/, shaders/, noise/, level/, marketplace/, bricks/ (not part of the app build)
+plugins/       stand-alone plugin packages with their own package.json – openscad/, ifc/, layout/, roomplanner/, shaders/, noise/, level/, marketplace/, bricks/, woodshop/ (not part of the app build)
 packages/      libraries that plugins bundle at build time – procgen/ (procedural generation, with Vitest tests; not part of the app build)
 portal/        the plugin portal – a package of its own (Vite and Vue, built into portal/dist; the start page of the project's GitHub Pages)
 scripts/       plugin-catalog.mjs (the plugin catalog: checks plugins/community.json, builds plugins/index.json), screenshot automation (headless Chrome: screenshots.mjs for the plugin packages, screenshots.ps1 for Windows, screenshots.sh for Linux/macOS, capture-shot.mjs for both), i18n.mjs (translation check and template)
