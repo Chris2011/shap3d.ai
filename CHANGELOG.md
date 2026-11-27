@@ -44,6 +44,7 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 ### Fixed
 
 - <kbd>K</kbd> and the command palette switched _Back edges_ on, but nothing was drawn.
+- **Snapping no longer flickers at the rim**: a point snaps within 10 px as before, but lets go only beyond 15 px – a slightly shaky hand at an endpoint no longer jumps between _Endpoint_ and _On edge_ (measured: 57 changes in 200 cursor positions before, 1 now).
 
 ## [0.11.0] – 2026-11-26
 

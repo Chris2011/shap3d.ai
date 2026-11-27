@@ -82,6 +82,8 @@ const POINT_RADIUS = 10,
   ORIGIN_RADIUS = 8;
 /** A point that is already snapped stays snapped until a rival is clearly closer (no flicker between neighbours). */
 const STICKY_PX = 3;
+/** …and it lets go only this much further out than it snapped (pixels) */
+const RELEASE_RADIUS = POINT_RADIUS + 5;
 /** directions within this angle of a model axis count as that axis (sin of ~0.6°) */
 const AXIS_ALIGNED = 0.01;
 
@@ -201,7 +203,10 @@ export const curveCenter = (entities: Entities, edgeId: number): THREE.Vector3 |
 
 interface PointCandidate {
   inference: Inference;
+  /** screen distance, nudged by kind so ties go the right way */
   dist: number;
+  /** the plain screen distance – what the snap radius is measured with */
+  raw: number;
 }
 
 export class InferenceEngine {
@@ -286,10 +291,11 @@ export class InferenceEngine {
   private pickPoint(x: number, y: number, opt: InferOptions): Inference | null {
     const viewer = this.viewer;
     const candidates: PointCandidate[] = [];
-    const vertexHit = viewer.pickVertex(x, y, POINT_RADIUS, opt.filterVert);
+    const vertexHit = viewer.pickVertex(x, y, RELEASE_RADIUS, opt.filterVert);
     if (vertexHit) {
       candidates.push({
         dist: vertexHit.dist,
+        raw: vertexHit.dist,
         inference: {
           point: vertexHit.rec.position.clone(),
           kind: 'endpoint',
@@ -300,21 +306,23 @@ export class InferenceEngine {
     }
     for (const rec of viewer.snapRecords()) {
       const dist = this.screenDist(rec.position, x, y);
-      if (dist < POINT_RADIUS && (!opt.filterVert || opt.filterVert(rec))) {
+      if (dist < RELEASE_RADIUS && (!opt.filterVert || opt.filterVert(rec))) {
         // ahead of points at the same place: this one was set on purpose
         candidates.push({
           dist: dist - 1,
+          raw: dist,
           inference: { point: rec.position.clone(), kind: 'snap', label: t('inference.snapPoint') + this.where(rec.context), snap: rec },
         });
       }
     }
-    const near = this.edgesNear(x, y, POINT_RADIUS, opt.filterEdge);
+    const near = this.edgesNear(x, y, RELEASE_RADIUS, opt.filterEdge);
     for (const { rec } of near) {
       const mid = rec.start.clone().add(rec.end).multiplyScalar(0.5);
       const dist = this.screenDist(mid, x, y);
-      if (dist < POINT_RADIUS && !viewer.isHidden(mid)) {
+      if (dist < RELEASE_RADIUS && !viewer.isHidden(mid)) {
         candidates.push({
           dist: dist + 0.5,
+          raw: dist,
           inference: { point: mid, kind: 'midpoint', label: t('inference.midpoint') + this.where(rec.context), edge: rec },
         });
       }
@@ -333,9 +341,10 @@ export class InferenceEngine {
           continue;
         }
         const dist = this.screenDist(closest.c1, x, y);
-        if (dist < POINT_RADIUS && !viewer.isHidden(closest.c1)) {
+        if (dist < RELEASE_RADIUS && !viewer.isHidden(closest.c1)) {
           candidates.push({
             dist: dist + 1,
+            raw: dist,
             inference: { point: closest.c1.clone(), kind: 'intersection', label: t('inference.intersection'), edge: first },
           });
         }
@@ -343,8 +352,8 @@ export class InferenceEngine {
     }
     for (const center of this.centers) {
       const dist = this.screenDist(center, x, y);
-      if (dist < POINT_RADIUS) {
-        candidates.push({ dist, inference: { point: center.clone(), kind: 'center', label: t('inference.center') } });
+      if (dist < RELEASE_RADIUS) {
+        candidates.push({ dist, raw: dist, inference: { point: center.clone(), kind: 'center', label: t('inference.center') } });
       }
     }
     if (viewer.model.settings.guides) {
@@ -353,32 +362,39 @@ export class InferenceEngine {
           continue;
         }
         const dist = this.screenDist(guide.point, x, y);
-        if (dist < POINT_RADIUS) {
-          candidates.push({ dist: dist + 0.5, inference: { point: guide.point.clone(), kind: 'guide', label: t('inference.guidePoint') } });
+        if (dist < RELEASE_RADIUS) {
+          candidates.push({
+            dist: dist + 0.5,
+            raw: dist,
+            inference: { point: guide.point.clone(), kind: 'guide', label: t('inference.guidePoint') },
+          });
         }
       }
     }
     if (viewer.model.settings.axes) {
       const dist = this.screenDist(new THREE.Vector3(), x, y);
-      if (dist < ORIGIN_RADIUS) {
-        candidates.push({ dist: dist + 1, inference: { point: new THREE.Vector3(), kind: 'origin', label: t('inference.origin') } });
+      if (dist < RELEASE_RADIUS) {
+        candidates.push({
+          dist: dist + 1,
+          raw: dist,
+          inference: { point: new THREE.Vector3(), kind: 'origin', label: t('inference.origin') },
+        });
       }
     }
-    if (!candidates.length) {
-      return null;
-    }
-    candidates.sort((left, right) => left.dist - right.dist);
-    let best = candidates[0];
-    // hysteresis: keep the point that was snapped before unless another one is clearly closer
+    // hysteresis: the point snapped before stays snapped out to the wider release radius and unless another one is
+    // clearly closer; a new point snaps only within the capture radius (no flicker at the rim)
     const previous =
       this.last &&
       candidates.find(
         (candidate) => candidate.inference.kind === this.last!.kind && candidate.inference.point.distanceTo(this.last!.point) < 1e-9,
       );
-    if (previous && previous.dist < best.dist + STICKY_PX) {
-      best = previous;
+    const capture = (candidate: PointCandidate) => candidate.raw < (candidate.inference.kind === 'origin' ? ORIGIN_RADIUS : POINT_RADIUS);
+    const fresh = candidates.filter(capture).sort((left, right) => left.dist - right.dist);
+    const best = fresh[0];
+    if (previous && (!best || previous.dist < best.dist + STICKY_PX)) {
+      return previous.inference;
     }
-    return best.inference;
+    return best?.inference ?? null;
   }
 
   /** Edges within tol pixels of the cursor, closest first (occluded ones skipped). */
