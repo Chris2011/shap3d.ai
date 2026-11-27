@@ -1,0 +1,49 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "linework": {
+      "plugin": {
+        "name": "Parts from lines",
+        "description": "Walls, straight stairs and spiral stairs from drawn lines: draw a line or chain (or select a face for its outline), choose the part and its sizes – it stays editable while it is selected."
+      },
+      "kinds": {
+        "wall": "Wall",
+        "stairs": "Stairs",
+        "spiral": "Spiral stair"
+      },
+      "fields": {
+        "thickness": "Thickness",
+        "height": "Height",
+        "align": "Position",
+        "width": "Width",
+        "steps": "Steps",
+        "turn": "Turn (°)",
+        "inner": "Spindle radius"
+      },
+      "align": {
+        "left": "Left of the line",
+        "center": "On the line",
+        "right": "Right of the line"
+      },
+      "panel": {
+        "new": "New part",
+        "selected": "Selected part",
+        "create": "Build from selected line",
+        "selectLine": "Select one line, a chain of lines or one face first."
+      },
+      "hint": {
+        "wall": "The wall follows the line – corners meet in a mitre. A closed chain or a face makes a room.",
+        "stairs": "The stair climbs from the line’s start to its end; the line is its middle.",
+        "spiral": "The line’s start is the middle, its length the radius; the stair starts towards its end."
+      },
+      "stairHint": "Riser {riser}, going {going}",
+      "stairHintRiser": "Riser {riser}",
+      "undo": {
+        "create": "Build part from line",
+        "change": "Change part"
+      }
+    }
+  }
+}

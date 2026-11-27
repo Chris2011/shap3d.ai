@@ -1,0 +1,49 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "linework": {
+      "plugin": {
+        "name": "Elementos a partir de líneas",
+        "description": "Muros, escaleras rectas y de caracol a partir de líneas dibujadas: dibuja una línea o una cadena (o elige una cara por su contorno), elige el elemento y sus medidas – sigue siendo editable mientras está seleccionado."
+      },
+      "kinds": {
+        "wall": "Muro",
+        "stairs": "Escalera",
+        "spiral": "Escalera de caracol"
+      },
+      "fields": {
+        "thickness": "Grosor",
+        "height": "Altura",
+        "align": "Posición",
+        "width": "Ancho",
+        "steps": "Peldaños",
+        "turn": "Giro (°)",
+        "inner": "Radio del eje"
+      },
+      "align": {
+        "left": "A la izquierda de la línea",
+        "center": "Sobre la línea",
+        "right": "A la derecha de la línea"
+      },
+      "panel": {
+        "new": "Nuevo elemento",
+        "selected": "Elemento seleccionado",
+        "create": "Construir desde la línea",
+        "selectLine": "Selecciona primero una línea, una cadena de líneas o una cara."
+      },
+      "hint": {
+        "wall": "El muro sigue la línea – las esquinas se unen a inglete. Una cadena cerrada o una cara da una habitación.",
+        "stairs": "La escalera sube del inicio de la línea a su final; la línea es su centro.",
+        "spiral": "El inicio de la línea es el centro, su longitud el radio; la escalera empieza hacia su final."
+      },
+      "stairHint": "Contrahuella {riser}, huella {going}",
+      "stairHintRiser": "Contrahuella {riser}",
+      "undo": {
+        "create": "Construir elemento",
+        "change": "Cambiar elemento"
+      }
+    }
+  }
+}

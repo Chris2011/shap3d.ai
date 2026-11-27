@@ -1,0 +1,49 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "linework": {
+      "plugin": {
+        "name": "Bauteile aus Linien",
+        "description": "Wände, gerade Treppen und Wendeltreppen aus gezeichneten Linien: Linie oder Linienzug zeichnen (oder eine Fläche für ihren Umriss wählen), Bauteil und Maße wählen – es bleibt änderbar, solange es gewählt ist."
+      },
+      "kinds": {
+        "wall": "Wand",
+        "stairs": "Treppe",
+        "spiral": "Wendeltreppe"
+      },
+      "fields": {
+        "thickness": "Dicke",
+        "height": "Höhe",
+        "align": "Lage",
+        "width": "Breite",
+        "steps": "Stufen",
+        "turn": "Drehung (°)",
+        "inner": "Spindelradius"
+      },
+      "align": {
+        "left": "Links der Linie",
+        "center": "Auf der Linie",
+        "right": "Rechts der Linie"
+      },
+      "panel": {
+        "new": "Neues Bauteil",
+        "selected": "Gewähltes Bauteil",
+        "create": "Aus gewählter Linie bauen",
+        "selectLine": "Erst eine Linie, einen Linienzug oder eine Fläche wählen."
+      },
+      "hint": {
+        "wall": "Die Wand folgt der Linie – Ecken treffen sich auf Gehrung. Ein geschlossener Zug oder eine Fläche ergibt einen Raum.",
+        "stairs": "Die Treppe steigt vom Anfang der Linie zu ihrem Ende; die Linie ist ihre Mitte.",
+        "spiral": "Der Anfang der Linie ist die Mitte, ihre Länge der Radius; die Treppe beginnt in Richtung ihres Endes."
+      },
+      "stairHint": "Steigung {riser}, Auftritt {going}",
+      "stairHintRiser": "Steigung {riser}",
+      "undo": {
+        "create": "Bauteil aus Linie bauen",
+        "change": "Bauteil ändern"
+      }
+    }
+  }
+}

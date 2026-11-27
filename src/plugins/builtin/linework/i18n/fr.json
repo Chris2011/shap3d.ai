@@ -1,0 +1,49 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "linework": {
+      "plugin": {
+        "name": "Éléments à partir de lignes",
+        "description": "Murs, escaliers droits et escaliers hélicoïdaux à partir de lignes dessinées : dessiner une ligne ou une suite de lignes (ou choisir une face pour son contour), choisir l’élément et ses dimensions – il reste modifiable tant qu’il est sélectionné."
+      },
+      "kinds": {
+        "wall": "Mur",
+        "stairs": "Escalier",
+        "spiral": "Escalier hélicoïdal"
+      },
+      "fields": {
+        "thickness": "Épaisseur",
+        "height": "Hauteur",
+        "align": "Position",
+        "width": "Largeur",
+        "steps": "Marches",
+        "turn": "Rotation (°)",
+        "inner": "Rayon du noyau"
+      },
+      "align": {
+        "left": "À gauche de la ligne",
+        "center": "Sur la ligne",
+        "right": "À droite de la ligne"
+      },
+      "panel": {
+        "new": "Nouvel élément",
+        "selected": "Élément sélectionné",
+        "create": "Construire depuis la ligne",
+        "selectLine": "Sélectionnez d’abord une ligne, une suite de lignes ou une face."
+      },
+      "hint": {
+        "wall": "Le mur suit la ligne – les angles se rejoignent en onglet. Une suite fermée ou une face donne une pièce.",
+        "stairs": "L’escalier monte du début de la ligne à sa fin ; la ligne est son milieu.",
+        "spiral": "Le début de la ligne est le centre, sa longueur le rayon ; l’escalier part vers sa fin."
+      },
+      "stairHint": "Hauteur de marche {riser}, giron {going}",
+      "stairHintRiser": "Hauteur de marche {riser}",
+      "undo": {
+        "create": "Construire un élément",
+        "change": "Modifier l’élément"
+      }
+    }
+  }
+}
