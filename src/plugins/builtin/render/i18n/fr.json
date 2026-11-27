@@ -1,0 +1,27 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "render": {
+      "plugin": {
+        "name": "Aperçu du rendu",
+        "description": "Un aperçu rapide de la vue actuelle rendue : lancer de chemins avec une vraie lumière, des ombres douces et des reflets à partir des faces, matériaux, environnement et soleil – dans une fenêtre flottante qui s’affine passe après passe. Basé sur three-gpu-pathtracer (MIT)."
+      },
+      "command": {
+        "preview": "Aperçu du rendu"
+      },
+      "window": {
+        "title": "Aperçu du rendu",
+        "close": "Fermer et arrêter le rendu",
+        "again": "Nouvelle image",
+        "againTitle": "Rendre la vue telle qu’elle est maintenant",
+        "save": "Enregistrer en PNG",
+        "passes": "Passes : {count} …",
+        "done": "Terminé – passes : {count}",
+        "failed": "Rendu impossible : {message}",
+        "compiling": "Préparation du moteur de rendu … la première fois, cela peut prendre jusqu’à une minute"
+      }
+    }
+  }
+}

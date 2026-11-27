@@ -1,0 +1,27 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "render": {
+      "plugin": {
+        "name": "Vista previa de render",
+        "description": "Un vistazo rápido a cómo se vería renderizada la vista actual: trazado de rutas con luz real, sombras suaves y reflejos a partir de caras, materiales, entorno y sol – en una ventana flotante que se vuelve más nítida pasada a pasada. Basado en three-gpu-pathtracer (MIT)."
+      },
+      "command": {
+        "preview": "Vista previa de render"
+      },
+      "window": {
+        "title": "Vista previa de render",
+        "close": "Cerrar y detener el render",
+        "again": "Nueva imagen",
+        "againTitle": "Renderizar la vista tal como está ahora",
+        "save": "Guardar PNG",
+        "passes": "Pasadas: {count} …",
+        "done": "Listo – pasadas: {count}",
+        "failed": "No se pudo renderizar: {message}",
+        "compiling": "Preparando el renderizador … la primera vez puede tardar hasta un minuto"
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "render": {
+      "plugin": {
+        "name": "Render preview",
+        "description": "A quick look at how the current view would look rendered: path traced with real light, soft shadows and reflections from the faces, materials, environment and sun – in a floating window that gets sharper pass by pass. Built on three-gpu-pathtracer (MIT)."
+      },
+      "command": {
+        "preview": "Render preview"
+      },
+      "window": {
+        "title": "Render preview",
+        "close": "Close and stop rendering",
+        "again": "New picture",
+        "againTitle": "Render the view as it is now",
+        "save": "Save PNG",
+        "passes": "Passes: {count} …",
+        "done": "Done – passes: {count}",
+        "failed": "Could not render: {message}",
+        "compiling": "Preparing the renderer … the first time this can take up to a minute"
+      }
+    }
+  }
+}

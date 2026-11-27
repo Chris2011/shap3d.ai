@@ -1,0 +1,27 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "render": {
+      "plugin": {
+        "name": "Render-Vorschau",
+        "description": "Ein schneller Blick, wie die aktuelle Ansicht gerendert aussieht: per Path Tracing mit echtem Licht, weichen Schatten und Spiegelungen aus Flächen, Materialien, Umgebung und Sonne – in einem schwebenden Fenster, das Durchgang für Durchgang schärfer wird. Basiert auf three-gpu-pathtracer (MIT)."
+      },
+      "command": {
+        "preview": "Render-Vorschau"
+      },
+      "window": {
+        "title": "Render-Vorschau",
+        "close": "Schließen und Rendern beenden",
+        "again": "Neues Bild",
+        "againTitle": "Die Ansicht rendern, wie sie jetzt ist",
+        "save": "PNG speichern",
+        "passes": "Durchgänge: {count} …",
+        "done": "Fertig – Durchgänge: {count}",
+        "failed": "Rendern nicht möglich: {message}",
+        "compiling": "Renderer wird vorbereitet … beim ersten Mal kann das bis zu einer Minute dauern"
+      }
+    }
+  }
+}
