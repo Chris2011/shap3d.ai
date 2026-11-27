@@ -493,6 +493,7 @@ export class Viewer {
     this.spheres.clear();
     this.builtGroups = [];
     this.lineMats = this.lineMats.filter((material) => !material.userData.owned);
+    this.backEdgeMat = null;
     this.pickMeshes = [];
     this.profiles = [];
     this.profileKey = '';
@@ -749,9 +750,36 @@ export class Viewer {
       const lines = new LineSegments2(parts.lines.geometry, parts.lines.material);
       lines.matrixAutoUpdate = false;
       group.add(lines);
+      // back edges (K): the same edges once more, dashed, only where something lies in front of them
+      if (style.backEdges && !style.xray && style.faceStyle !== 'wireframe' && !faded) {
+        const back = new LineSegments2(parts.lines.geometry, this.backEdgeMaterial());
+        back.computeLineDistances();
+        back.matrixAutoUpdate = false;
+        group.add(back);
+      }
     }
     this.content.add(group);
     return group;
+  }
+
+  /** one dashed material for all back edges of a build – drawn only behind faces (GreaterDepth), never hiding anything */
+  private backEdgeMat: LineMaterial | null = null;
+  private backEdgeMaterial() {
+    if (!this.backEdgeMat) {
+      const style = this.model.settings.style;
+      const color = new THREE.Color(theme.night ? nightEdge(style.edgeColor) : style.edgeColor).getHex();
+      this.backEdgeMat = this.lineMat(color, 1, {
+        dashed: true,
+        dashSize: 0.06,
+        gapSize: 0.05,
+        transparent: true,
+        opacity: 0.7,
+        depthWrite: false,
+        depthFunc: THREE.GreaterDepth,
+      } as Partial<LineMaterial>);
+      this.backEdgeMat.userData.owned = true;
+    }
+    return this.backEdgeMat;
   }
 
   /** A material for faces. */

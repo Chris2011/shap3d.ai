@@ -1,12 +1,21 @@
 <template>
   <div class="s3d-section-title">{{ t('components.inModel') }}</div>
   <div v-if="!defs.length" class="s3d-label">{{ t('components.empty') }}</div>
+  <S3dTextInput
+    v-else
+    v-model="search"
+    class="mb-1.5"
+    type="search"
+    :placeholder="t('components.search')"
+    :aria-label="t('components.search')"
+    @keydown.stop
+  />
   <div class="grid grid-cols-[repeat(3,1fr)] gap-1.5">
     <div
-      v-for="definition in defs"
+      v-for="definition in shown"
       :key="definition.id"
       class="flex cursor-pointer flex-col items-center gap-1 rounded border border-[#e0e4e8] px-1 py-2 text-center text-ink hover:border-[#c5ccd3] hover:bg-hover dark:border-line dark:hover:border-line-2"
-      :title="t('components.clickToPlace', { name: definition.name })"
+      :title="[t('components.clickToPlace', { name: definition.name }), definition.description].filter(Boolean).join('\n')"
       @click="place(definition)"
     >
       <S3dIcon :name="definition.isComponent ? 'component' : 'group'" :size="28" />
@@ -14,6 +23,11 @@
       <div class="text-[0.625rem] text-ink-2">{{ counts.get(definition) ?? 0 }}×</div>
     </div>
   </div>
+  <div v-if="defs.length && !shown.length" class="s3d-label">{{ t('components.noMatch') }}</div>
+  <S3dButton v-if="unused" small class="mt-1.5" :title="t('components.purgeHint')" @click="purge">{{
+    t('components.purge', { count: unused })
+  }}</S3dButton>
+  <S3dComponentDetails :counts="counts" />
   <div class="s3d-section-title">{{ t('components.people') }}</div>
   <div class="grid grid-cols-[repeat(3,1fr)] gap-1.5">
     <div
@@ -43,7 +57,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import S3dIcon from '../S3dIcon.vue';
+import S3dButton from '../ui/S3dButton.vue';
+import S3dTextInput from '../ui/S3dTextInput.vue';
+import S3dComponentDetails from './S3dComponentDetails.vue';
 import { useEditor } from '../keys';
 import type { Definition, Entities } from '../../core/model';
 import type { PlaceTool } from '../../tools/place';
@@ -66,6 +84,20 @@ const counts = useModel(() => {
   walk(editor.model.root);
   return perDefinition;
 });
+const search = ref('');
+/** the components whose name or description contain the search text */
+const shown = computed(() => {
+  const words = search.value.trim().toLowerCase();
+  return words
+    ? defs.value.filter((definition) => `${definition.name} ${definition.description ?? ''}`.toLowerCase().includes(words))
+    : defs.value;
+});
+/** components with no copy left anywhere in the model */
+const unused = useModel(() => editor.model.unusedDefinitions().filter((id) => editor.model.definitions.get(id)?.isComponent).length);
+const purge = () => {
+  editor.commit('undo.purge', () => editor.model.purge());
+  editor.toast(t('modelInfo.purged'));
+};
 const place = (definition: Definition) => {
   (editor.tools.get('place') as PlaceTool).start(definition);
 };

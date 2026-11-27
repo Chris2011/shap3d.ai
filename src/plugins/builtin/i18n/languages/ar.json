@@ -791,7 +791,20 @@
       "people": "أشخاص",
       "placePerson": "وضع {name} (يلتفت دائمًا نحو الكاميرا)",
       "library": "المكتبة",
-      "libraryHint": "تُبنى كائنات المكتبة بسكربت ثم توضع عند المؤشر."
+      "libraryHint": "تُبنى كائنات المكتبة بسكربت ثم توضع عند المؤشر.",
+      "search": "البحث عن مكونات",
+      "noMatch": "لا يوجد مكون مطابق.",
+      "purge": "إزالة غير المستخدم ({count})",
+      "purgeHint": "يزيل المكونات والمجموعات غير المستخدمة في النموذج",
+      "selected": "المكون المحدد",
+      "description": "الوصف",
+      "noDescription": "لا يوجد",
+      "copies": "النسخ",
+      "selectCopies": "تحديد كل النسخ",
+      "replaceWith": "استبدال بـ",
+      "choose": "اختر…",
+      "undoDescription": "وصف المكون",
+      "undoReplace": "استبدال المكون"
     },
     "soften": {
       "hint": "ينعّم الحواف بين أوجه التحديد التي تكون زاويتها أصغر من القيمة المحددة.",
@@ -880,7 +893,8 @@
       "environmentBackground": "كسماء أيضًا",
       "environmentIntensity": "السطوع",
       "environmentTooBig": "الملف أكبر من 32 ميغابايت.",
-      "sectionFill": "ملء المقاطع"
+      "sectionFill": "ملء المقاطع",
+      "backEdges": "الحواف الخلفية متقطعة (K)"
     },
     "instructor": {
       "select": {

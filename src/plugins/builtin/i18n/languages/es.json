@@ -791,7 +791,20 @@
       "people": "Personas",
       "placePerson": "Colocar a {name} (siempre mira a la cámara)",
       "library": "Biblioteca",
-      "libraryHint": "Los objetos de la biblioteca se crean con un script y luego se colocan en el cursor."
+      "libraryHint": "Los objetos de la biblioteca se crean con un script y luego se colocan en el cursor.",
+      "search": "Buscar componentes",
+      "noMatch": "Ningún componente coincide.",
+      "purge": "Eliminar no usados ({count})",
+      "purgeHint": "Elimina componentes y grupos que ya no se usan en el modelo",
+      "selected": "Componente seleccionado",
+      "description": "Descripción",
+      "noDescription": "ninguna",
+      "copies": "Copias",
+      "selectCopies": "Seleccionar todas las copias",
+      "replaceWith": "Reemplazar por",
+      "choose": "Elegir…",
+      "undoDescription": "Descripción del componente",
+      "undoReplace": "Reemplazar componente"
     },
     "soften": {
       "hint": "Suaviza las aristas entre caras de la selección cuyo ángulo sea menor que el valor ajustado.",
@@ -880,7 +893,8 @@
       "environmentBackground": "También como cielo",
       "environmentIntensity": "Brillo",
       "environmentTooBig": "El archivo supera los 32 MB.",
-      "sectionFill": "Rellenar secciones"
+      "sectionFill": "Rellenar secciones",
+      "backEdges": "Aristas posteriores discontinuas (K)"
     },
     "instructor": {
       "select": {

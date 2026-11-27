@@ -276,6 +276,7 @@ export class Model implements DefinitionRegistry {
     definition.faceMe = source.faceMe;
     definition.snaps = source.snaps?.map((point) => [...point]);
     definition.attributes = source.attributes && { ...source.attributes };
+    definition.description = source.description;
     if (source.pluginData) {
       definition.pluginData = JSON.parse(JSON.stringify(source.pluginData));
     }
@@ -393,6 +394,7 @@ export class Model implements DefinitionRegistry {
         isComponent: definition.isComponent,
         faceMe: definition.faceMe || undefined,
         snaps: definition.snaps?.length ? definition.snaps.map((point) => [...point]) : undefined,
+        description: definition.description || undefined,
         attributes: definition.attributes && Object.keys(definition.attributes).length ? { ...definition.attributes } : undefined,
         pluginData: definition.pluginData ? JSON.parse(JSON.stringify(definition.pluginData)) : undefined,
         shape: definition.shape,
@@ -483,6 +485,7 @@ export class Model implements DefinitionRegistry {
       const definition = new Definition(stored.name, !!stored.isComponent);
       definition.faceMe = !!stored.faceMe;
       definition.snaps = stored.snaps?.map((point: number[]) => [Number(point[0]), Number(point[1]), Number(point[2])]);
+      definition.description = typeof stored.description === 'string' && stored.description ? stored.description : undefined;
       definition.attributes =
         stored.attributes && Object.fromEntries(Object.entries(stored.attributes).map(([key, value]) => [key, String(value)]));
       if (stored.pluginData) {

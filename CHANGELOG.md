@@ -38,6 +38,12 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 ### Added
 
 - **Variables**: named values of the model in _Model info › Variables_ (like Onshape's Variable Studio), e.g. `wall` = `240 mm` or `#wall * 2`. Type `#wall`, `#wall * 2 + 10 cm` or `(#wall + 1 m) / 2` wherever a length is typed – the measurements box, Entity Info, procedure parameters. A procedure parameter typed with a variable keeps the expression and is built again when the variable changes; renaming a variable updates its uses. Saved with the model, one undo step each; a small parser of its own, nothing typed is run as code.
+- **Back edges, dashed**: edges hidden behind faces show dashed, so you see where the back wall is (Styles panel › Faces, or <kbd>K</kbd>). The faces stay solid, unlike X-ray. Saved with the style.
+- **Components panel**: search by name or description; for the component of the selection its name, a description, the number of copies, _Select all copies_ and _Replace with_ another component (the selected copies keep their place, tag and material); _Remove unused_ clears components no copy uses any more.
+
+### Fixed
+
+- <kbd>K</kbd> and the command palette switched _Back edges_ on, but nothing was drawn.
 
 ## [0.11.0] – 2026-11-26
 

@@ -1666,7 +1666,33 @@
       "library": "",
       "library#en": "Library",
       "libraryHint": "",
-      "libraryHint#en": "Click one and then click in the 3D view to place it."
+      "libraryHint#en": "Click one and then click in the 3D view to place it.",
+      "search": "",
+      "search#en": "Search components",
+      "noMatch": "",
+      "noMatch#en": "No component matches.",
+      "purge": "",
+      "purge#en": "Remove unused ({count})",
+      "purgeHint": "",
+      "purgeHint#en": "Removes components and groups no longer used anywhere in the model",
+      "selected": "",
+      "selected#en": "Selected component",
+      "description": "",
+      "description#en": "Description",
+      "noDescription": "",
+      "noDescription#en": "none",
+      "copies": "",
+      "copies#en": "Copies",
+      "selectCopies": "",
+      "selectCopies#en": "Select all copies",
+      "replaceWith": "",
+      "replaceWith#en": "Replace with",
+      "choose": "",
+      "choose#en": "Choose…",
+      "undoDescription": "",
+      "undoDescription#en": "Component description",
+      "undoReplace": "",
+      "undoReplace#en": "Replace component"
     },
     "soften": {
       "hint": "",
@@ -1830,7 +1856,9 @@
       "environmentTooBig": "",
       "environmentTooBig#en": "The file is larger than 32 MB.",
       "sectionFill": "",
-      "sectionFill#en": "Fill section cuts"
+      "sectionFill#en": "Fill section cuts",
+      "backEdges": "",
+      "backEdges#en": "Back edges dashed (K)"
     },
     "instructor": {
       "select": {

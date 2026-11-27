@@ -791,7 +791,20 @@
       "people": "People",
       "placePerson": "Place {name} (always turns to the camera)",
       "library": "Library",
-      "libraryHint": "Click one and then click in the 3D view to place it."
+      "libraryHint": "Click one and then click in the 3D view to place it.",
+      "search": "Search components",
+      "noMatch": "No component matches.",
+      "purge": "Remove unused ({count})",
+      "purgeHint": "Removes components and groups no longer used anywhere in the model",
+      "selected": "Selected component",
+      "description": "Description",
+      "noDescription": "none",
+      "copies": "Copies",
+      "selectCopies": "Select all copies",
+      "replaceWith": "Replace with",
+      "choose": "Choose…",
+      "undoDescription": "Component description",
+      "undoReplace": "Replace component"
     },
     "soften": {
       "hint": "Softens edges between faces of the selection whose angle is smaller than the value set.",
@@ -880,7 +893,8 @@
       "environmentBackground": "Also as the sky",
       "environmentIntensity": "Brightness",
       "environmentTooBig": "The file is larger than 32 MB.",
-      "sectionFill": "Fill section cuts"
+      "sectionFill": "Fill section cuts",
+      "backEdges": "Back edges dashed (K)"
     },
     "instructor": {
       "select": {

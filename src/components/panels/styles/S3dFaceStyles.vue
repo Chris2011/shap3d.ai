@@ -2,6 +2,7 @@
   <S3dSectionTitle>{{ t('styles.faces') }}</S3dSectionTitle>
   <S3dSegmentedControl class="mb-1.5" :model-value="style.faceStyle" :options="FACES" @update:model-value="setStyle('faceStyle', $event)" />
   <S3dStyleCheck field="xray">{{ t('styles.xray') }}</S3dStyleCheck>
+  <S3dStyleCheck field="backEdges">{{ t('styles.backEdges') }}</S3dStyleCheck>
   <S3dStyleColor field="frontColor" :label="t('styles.front')" />
   <S3dStyleColor field="backColor" :label="t('styles.back')" />
 </template>

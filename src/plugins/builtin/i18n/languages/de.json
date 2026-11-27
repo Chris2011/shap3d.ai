@@ -791,7 +791,20 @@
       "people": "Personen",
       "placePerson": "{name} platzieren (dreht sich immer zur Kamera)",
       "library": "Bibliothek",
-      "libraryHint": "Klick eines an und dann in die 3D-Ansicht, um es zu platzieren."
+      "libraryHint": "Klick eines an und dann in die 3D-Ansicht, um es zu platzieren.",
+      "search": "Komponenten suchen",
+      "noMatch": "Keine Komponente passt.",
+      "purge": "Unbenutzte entfernen ({count})",
+      "purgeHint": "Entfernt Komponenten und Gruppen, die nirgends im Modell mehr vorkommen",
+      "selected": "Gewählte Komponente",
+      "description": "Beschreibung",
+      "noDescription": "keine",
+      "copies": "Kopien",
+      "selectCopies": "Alle Kopien auswählen",
+      "replaceWith": "Ersetzen durch",
+      "choose": "Wählen…",
+      "undoDescription": "Komponenten-Beschreibung",
+      "undoReplace": "Komponente ersetzen"
     },
     "soften": {
       "hint": "Mildert Kanten zwischen Flächen der Auswahl ab, deren Winkel kleiner als der eingestellte Wert ist.",
@@ -880,7 +893,8 @@
       "environmentBackground": "Auch als Himmel",
       "environmentIntensity": "Helligkeit",
       "environmentTooBig": "Die Datei ist größer als 32 MB.",
-      "sectionFill": "Schnittflächen füllen"
+      "sectionFill": "Schnittflächen füllen",
+      "backEdges": "Rückkanten gestrichelt (K)"
     },
     "instructor": {
       "select": {

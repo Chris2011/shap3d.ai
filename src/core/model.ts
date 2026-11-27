@@ -118,6 +118,8 @@ export class Definition {
   procedure?: ProcedureData;
   /** points that other things dock to when moved, in the definition's coordinates */
   snaps?: [number, number, number][];
+  /** what the component is, as the Components panel shows it */
+  description?: string;
   /** the user's own key/value data, e.g. a part number */
   attributes?: Record<string, string>;
   constructor(
