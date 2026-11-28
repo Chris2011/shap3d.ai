@@ -35,10 +35,16 @@
     <label v-for="key in COUNT_KEYS" :key="key" class="s3d-op-field">
       <span>{{ t(`openings.fields.${key}`) }}</span>
       <select class="s3d-input" :value="String(shown[key])" @change="set({ [key]: Number(valueOf($event)) })">
-        <option v-for="count in key === 'sashes' ? [1, 2, 3] : [0, 1, 2, 3, 4]" :key="count" :value="String(count)">{{ count }}</option>
+        <option
+          v-for="count in key !== 'sashes' ? [0, 1, 2, 3, 4] : shown.kind === 'door' ? [1, 2] : [1, 2, 3]"
+          :key="count"
+          :value="String(count)"
+        >
+          {{ count }}
+        </option>
       </select>
     </label>
-    <label v-if="shown.kind === 'door'" class="s3d-op-field">
+    <label v-if="shown.kind === 'door' && shown.sashes !== 2" class="s3d-op-field">
       <span>{{ t('openings.fields.hinge') }}</span>
       <select class="s3d-input" :value="shown.hinge" @change="set({ hinge: valueOf($event) as OpeningParams['hinge'] })">
         <option value="left">{{ t('openings.hinge.left') }}</option>
@@ -114,7 +120,9 @@ const selected = computed(() => {
 });
 const shown = computed((): OpeningParams => selected.value ?? drafts[chosen.kind]);
 const SIZE_KEYS = computed(() => (shown.value.kind === 'door' ? (['width', 'height'] as const) : (['width', 'height', 'sill'] as const)));
-const COUNT_KEYS = computed(() => (shown.value.kind === 'door' ? [] : (['sashes', 'barsAcross', 'barsUpright'] as const)));
+const COUNT_KEYS = computed(() =>
+  shown.value.kind === 'door' ? (['sashes'] as const) : (['sashes', 'barsAcross', 'barsUpright'] as const),
+);
 const closing = computed(() => {
   void editor.ui.revision;
   return closesHoles(context);

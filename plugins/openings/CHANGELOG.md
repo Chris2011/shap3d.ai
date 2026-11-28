@@ -4,6 +4,12 @@
 
 Nothing yet.
 
+## [1.6.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Added
+
+- **Double doors**: a door with two leaves (_Leaves_ 2) – they meet in the middle, are hinged on both sides and have their handles by the middle; solid or glazed. The schedule counts the leaves; `s3d.opening` takes `sashes: 2` for a door.
+
 ## [1.5.0] – 2026-11-28 · Shap3D.ai 0.12.0
 
 ### Added

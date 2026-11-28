@@ -44,22 +44,34 @@ export const openingPieces = (params: OpeningParams, thickness: number): Piece[]
     add('frame', 'frame', boxMesh([width - jamb, front, 0], [width, back, height]));
     add('frame', 'frame', boxMesh([jamb, front, height - jamb], [width - jamb, back, height]));
     const [leafFront, leafBack] = [middle - 0.02, middle + 0.02];
-    const [x0, x1, z0, z1] = [jamb + 0.003, width - jamb - 0.003, 0.01, height - jamb - 0.003];
-    if (params.glazed) {
-      const rail = Math.min(0.14, (x1 - x0) / 4);
-      add('leaf', 'leaf', frameMesh(x0, z0, x1, z1, rail, leafFront, leafBack));
-      pane(x0 + rail, x1 - rail, z0 + rail, z1 - rail, middle, false);
-    } else {
-      add('leaf', 'leaf', boxMesh([x0, leafFront, z0], [x1, leafBack, z1]));
-    }
-    // the handle on the side away from the hinges, on both faces of the leaf
-    const handleX = params.hinge === 'left' ? width - jamb - 0.08 : jamb + 0.08;
-    for (const [y0, y1] of [
-      [leafFront - 0.06, leafFront],
-      [leafBack, leafBack + 0.06],
-    ]) {
-      add('handle', 'handle', boxMesh([handleX - 0.02, y0, 1.03], [handleX + 0.02, y1, 1.07]));
-    }
+    const [left, right, z0, z1] = [jamb + 0.003, width - jamb - 0.003, 0.01, height - jamb - 0.003];
+    // a double door: two leaves meeting in the middle, hinged on both sides
+    const double = clamp(params.sashes ?? 1, 1, 2) === 2;
+    const gap = 0.004;
+    const leaves = double
+      ? [
+          [left, (left + right - gap) / 2],
+          [(left + right + gap) / 2, right],
+        ]
+      : [[left, right]];
+    leaves.forEach(([x0, x1], index) => {
+      if (params.glazed) {
+        const rail = Math.min(0.14, (x1 - x0) / 4);
+        add('leaf', 'leaf', frameMesh(x0, z0, x1, z1, rail, leafFront, leafBack));
+        pane(x0 + rail, x1 - rail, z0 + rail, z1 - rail, middle, false);
+      } else {
+        add('leaf', 'leaf', boxMesh([x0, leafFront, z0], [x1, leafBack, z1]));
+      }
+      // the handle on the side away from the leaf's hinges (a double door: by the middle), on both faces
+      const handleRight = double ? index === 0 : params.hinge === 'left';
+      const handleX = handleRight ? x1 - 0.08 : x0 + 0.08;
+      for (const [y0, y1] of [
+        [leafFront - 0.06, leafFront],
+        [leafBack, leafBack + 0.06],
+      ]) {
+        add('handle', 'handle', boxMesh([handleX - 0.02, y0, 1.03], [handleX + 0.02, y1, 1.07]));
+      }
+    });
     return pieces;
   }
 

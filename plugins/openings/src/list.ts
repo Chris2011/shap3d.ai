@@ -24,7 +24,7 @@ export const schedule = (context: PluginContext): ScheduleRow[] => {
         walk(instance.definition.entities);
         continue;
       }
-      const sashes = data.kind === 'door' ? 1 : data.sashes;
+      const sashes = data.kind === 'door' ? (data.sashes === 2 ? 2 : 1) : data.sashes;
       const type = data.kind === 'door' ? (data.glazed ? 'glazed' : 'solid') : (data.operation ?? 'casement');
       const key = [data.kind, type, data.width.toFixed(3), data.height.toFixed(3), data.sill.toFixed(3), sashes].join('|');
       const row = rows.get(key) ?? { kind: data.kind, type, width: data.width, height: data.height, sill: data.sill, sashes, count: 0 };

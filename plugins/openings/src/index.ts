@@ -18,7 +18,7 @@ type OpeningCall = Partial<OpeningParams> & { at?: [number, number, number] };
 const openingsPlugin: S3dPlugin = {
   id: 'openings',
   name: 'openings.plugin.name',
-  version: '1.5.0',
+  version: '1.6.0',
   author: 'Shap3D.ai',
   description: 'openings.plugin.description',
   messages: MESSAGES,

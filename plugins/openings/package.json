@@ -1,6 +1,6 @@
 {
   "name": "s3d-plugin-openings",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "private": true,
   "description": "Windows and doors for Shap3D.ai: parametric windows (sashes, glazing bars, sills) and doors (frame, leaf, handle) set into any wall with a click – the opening is cut through the wall; a schedule counts them and goes out as CSV.",
   "license": "Apache-2.0",

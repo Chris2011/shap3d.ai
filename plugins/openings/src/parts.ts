@@ -18,7 +18,7 @@ export interface OpeningParams {
   height: number;
   /** height of the window's bottom above the wall's bottom (doors: 0) */
   sill: number;
-  /** window: side by side sashes (1–3) */
+  /** window: side by side sashes (1–3); door: its leaves (1–2) */
   sashes: number;
   /** window: glazing bars across and upright in each sash (0–4) */
   barsAcross: number;

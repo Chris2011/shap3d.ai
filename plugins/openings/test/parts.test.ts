@@ -94,3 +94,17 @@ test('a glazed door: the leaf is a frame round a glass pane', () => {
   );
   pieces.forEach((piece) => volumeOf(piece.mesh));
 });
+
+test('a double door: two leaves meeting in the middle, a handle by the middle on each', () => {
+  const pieces = openingPieces({ ...DEFAULT_DOOR, width: 1.6, sashes: 2, glazed: true }, 0.3);
+  const of = (name: string) => pieces.filter((piece) => piece.name === name);
+  assert.deepEqual([of('leaf').length, of('glass').length, of('handle').length], [2, 2, 4]);
+  const span = (piece: (typeof pieces)[number]) => {
+    const xs = piece.mesh.vertices.map((point) => point[0]);
+    return [Math.min(...xs), Math.max(...xs)];
+  };
+  const [[, firstRight], [secondLeft]] = of('leaf').map(span);
+  assert.ok(firstRight < 0.8 && secondLeft > 0.8 && secondLeft - firstRight < 0.01, 'they meet in the middle');
+  assert.ok(of('handle').every((handle) => Math.abs((span(handle)[0] + span(handle)[1]) / 2 - 0.8) < 0.15), 'handles by the middle');
+  pieces.forEach((piece) => volumeOf(piece.mesh));
+});
