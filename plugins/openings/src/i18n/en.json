@@ -28,7 +28,7 @@
       "panel": {
         "place": "Set into wall",
         "placeHint": "Then click on a vertical wall face: the outline shows green where it fits. The window sits at the sill height above the bottom of the face, a door on it.",
-        "sizeHint": "Sashes, bars and hinges can be changed here. For another size: undo, or delete it and set a new one (the hole stays)."
+        "sizeHint": "Every setting can be changed here. A new size closes the old hole in the wall and cuts the new one, centred where the old one was."
       },
       "list": {
         "title": "Window and door schedule",

@@ -71,15 +71,15 @@ const thicknessBehind = (entities: Entities, corners: Vector3[], normal: Vector3
 };
 
 /** cuts the rectangle through the wall; returns the wall's thickness (0: it was a single face, now with a hole) */
-const cutHole = (entities: Entities, corners: Vector3[], normal: Vector3) => {
+export const cutHole = (entities: Entities, corners: Vector3[], normal: Vector3) => {
   const thickness = thicknessBehind(entities, corners, normal);
   entities.addLoop(corners);
   const ids = corners.map((corner) => entities.findVertex(corner));
   const area = corners[1].distanceTo(corners[0]) * corners[3].distanceTo(corners[0]);
-  // the face inside the rectangle: all four corners, the rectangle's size, facing the same way
+  // the face inside the rectangle: all four corners (points left on its sides may add more), its size, facing the same way
   const inside = [...entities.faces.values()].find(
     (face) =>
-      face.outer.length === 4 &&
+      !face.holes.length &&
       ids.every((id) => id !== undefined && face.outer.includes(id)) &&
       Math.abs(entities.faceArea(face) - area) < 1e-6 &&
       entities.faceNormal(face).dot(normal) > 0.999,
@@ -96,7 +96,7 @@ const cutHole = (entities: Entities, corners: Vector3[], normal: Vector3) => {
 };
 
 /** builds the pieces into the opening's group (again) */
-const buildPieces = (context: PluginContext, group: Entities, data: OpeningData) => {
+export const buildPieces = (context: PluginContext, group: Entities, data: OpeningData) => {
   const model = context.editor.model;
   for (const id of [...group.instances.keys()]) {
     group.instances.delete(id);
@@ -138,17 +138,4 @@ export const placeOpening = (context: PluginContext, entities: Entities, faceId:
     made = entities.addInstance(definition, matrix);
   });
   return made ? { instance: made as Instance } : { error: 'cutFailed' as const };
-};
-
-/** new settings for an opening that do not change its size (sashes, bars, hinges): its pieces are built again – one undo step */
-export const changeOpening = (context: PluginContext, instance: Instance, patch: Partial<OpeningParams>) => {
-  const data = openingOf(context, instance);
-  if (!data) {
-    return;
-  }
-  const changed: OpeningData = { ...data, ...patch, kind: data.kind, width: data.width, height: data.height, sill: data.sill };
-  context.editor.commit('openings.undo.change', () => {
-    context.data.set(instance.definition, { opening: changed });
-    buildPieces(context, instance.definition.entities, changed);
-  });
 };

@@ -28,7 +28,7 @@
       "panel": {
         "place": "Poser dans le mur",
         "placeHint": "Puis cliquez sur une face de mur verticale : le contour est vert là où il tient. La fenêtre se place à la hauteur d’allège au-dessus du bas de la face, une porte sur celui-ci.",
-        "sizeHint": "Vantaux, petits-bois et paumelles se modifient ici. Pour une autre taille : annuler, ou supprimer et poser à nouveau (le trou reste)."
+        "sizeHint": "Tout se modifie ici. Une nouvelle taille referme l’ancien trou dans le mur et découpe le nouveau, centré au même endroit."
       },
       "list": {
         "title": "Tableau des menuiseries",

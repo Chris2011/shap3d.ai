@@ -28,7 +28,7 @@
       "panel": {
         "place": "In Wand setzen",
         "placeHint": "Dann auf eine senkrechte Wandfläche klicken: der Umriss zeigt grün, wo es passt. Das Fenster sitzt in Brüstungshöhe über der Unterkante der Fläche, eine Tür auf ihr.",
-        "sizeHint": "Flügel, Sprossen und Bänder lassen sich hier ändern. Für eine andere Größe: rückgängig machen oder löschen und neu setzen (das Loch bleibt)."
+        "sizeHint": "Alles lässt sich hier ändern. Eine neue Größe schließt das alte Loch in der Wand und schneidet das neue, mittig an der alten Stelle."
       },
       "list": {
         "title": "Fenster- und Türliste",

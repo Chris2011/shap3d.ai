@@ -4,6 +4,12 @@
 
 Nothing yet.
 
+## [1.1.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Added
+
+- **A placed window or door changes its size**: width, height and sill height of the selected one can be typed like its other settings. The old hole is closed – its sides go, its front and back are filled with the wall’s material and healed into the wall faces – and the new one is cut, centred where the old one was. One undo step; when the new size does not fit on the wall, nothing changes and the app says why.
+
 ## [1.0.0] – 2026-11-28 · Shap3D.ai 0.12.0
 
 ### Added

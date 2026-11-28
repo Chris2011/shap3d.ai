@@ -28,7 +28,7 @@
       "panel": {
         "place": "Colocar en el muro",
         "placeHint": "Luego haz clic en una cara de muro vertical: el contorno se ve verde donde cabe. La ventana queda a la altura del antepecho sobre el borde inferior de la cara, una puerta sobre él.",
-        "sizeHint": "Hojas, junquillos y bisagras se cambian aquí. Para otro tamaño: deshacer, o borrar y colocar de nuevo (el hueco queda)."
+        "sizeHint": "Todo se cambia aquí. Un tamaño nuevo cierra el hueco antiguo del muro y corta el nuevo, centrado en el mismo sitio."
       },
       "list": {
         "title": "Lista de ventanas y puertas",

@@ -1,35 +1,30 @@
 <template>
   <div class="s3d-op">
-    <template v-if="selected">
-      <div class="s3d-op-heading">{{ t(`openings.kinds.${selected.kind}`) }}</div>
-      <p class="s3d-op-sizes">{{ sizes(selected) }}</p>
-    </template>
-    <template v-else>
-      <div class="s3d-op-tabs" role="tablist">
-        <button
-          v-for="kind in KINDS"
-          :key="kind"
-          role="tab"
-          :aria-selected="chosen.kind === kind"
-          :class="{ active: chosen.kind === kind }"
-          @click="chosen.kind = kind"
-        >
-          {{ t(`openings.kinds.${kind}`) }}
-        </button>
-      </div>
-      <label v-for="key in SIZE_KEYS" :key="key" class="s3d-op-field">
-        <span>{{ t(`openings.fields.${key}`) }}</span>
-        <input
-          class="s3d-input"
-          type="number"
-          min="1"
-          step="10"
-          :value="Math.round(shown[key] * 1000)"
-          @change="setSize(key, ($event.target as HTMLInputElement).value)"
-          @keydown.stop
-        />
-      </label>
-    </template>
+    <div v-if="selected" class="s3d-op-heading">{{ t(`openings.kinds.${selected.kind}`) }}</div>
+    <div v-else class="s3d-op-tabs" role="tablist">
+      <button
+        v-for="kind in KINDS"
+        :key="kind"
+        role="tab"
+        :aria-selected="chosen.kind === kind"
+        :class="{ active: chosen.kind === kind }"
+        @click="chosen.kind = kind"
+      >
+        {{ t(`openings.kinds.${kind}`) }}
+      </button>
+    </div>
+    <label v-for="key in SIZE_KEYS" :key="key" class="s3d-op-field">
+      <span>{{ t(`openings.fields.${key}`) }}</span>
+      <input
+        class="s3d-input"
+        type="number"
+        min="1"
+        step="10"
+        :value="Math.round(shown[key] * 1000)"
+        @change="setSize(key, ($event.target as HTMLInputElement).value)"
+        @keydown.stop
+      />
+    </label>
 
     <label v-for="key in COUNT_KEYS" :key="key" class="s3d-op-field">
       <span>{{ t(`openings.fields.${key}`) }}</span>
@@ -74,7 +69,8 @@
 import { computed } from 'vue';
 import { schedule } from './list';
 import type { OpeningParams } from './parts';
-import { changeOpening, openingOf } from './place';
+import { changeOpening } from './change';
+import { openingOf } from './place';
 import { pluginContext, t } from './runtime';
 import { useChosen, useDrafts } from './state';
 import { TOOL_ID } from './tool';
@@ -113,7 +109,7 @@ const sizes = (opening: { width: number; height: number; sill: number; kind: str
 /** a setting: the selected opening is built again, otherwise it is kept for the next one */
 const set = (patch: Partial<OpeningParams>) => {
   if (instance.value && selected.value) {
-    changeOpening(context, instance.value, patch);
+    changeOpening(context, instance.value, patch); // when it fails the app says why and nothing changes
   } else {
     Object.assign(drafts[chosen.kind], patch);
   }

@@ -9,7 +9,7 @@ Parametric windows and doors, set into any wall with a click: the opening is cut
 1. _Plugins › Windows and doors…_: choose _Window_ or _Door_ and its sizes in mm – width, height and (windows) sill height, sashes and glazing bars; for a door the side its hinges are on.
 2. _Set into wall_, then move over a vertical wall face: the outline follows the pointer, green where it fits, red where it would leave the face or overlap another opening. A window sits at its sill height above the bottom of the face, a door on it.
 3. Click: the hole goes through the wall (the wall's thickness is found by itself; a single face just gets the hole) and the window or door is set into the middle of the wall. One undo step. Esc stops.
-4. Select a window or door (inside its wall's group) to change its sashes, glazing bars or hinges – its pieces are built again. Its size stays: for another size, undo, or delete it and set a new one (the hole stays).
+4. Select a window or door (inside its wall's group) to change any of its settings. Sashes, glazing bars and hinges build its pieces again; a new width, height or sill height closes the old hole (healed into the wall faces) and cuts the new one, centred where the old one was – when it does not fit, nothing changes.
 5. The _schedule_ lists all windows and doors in the model, equal ones counted together; _Save CSV_ or _File › Export as window and door schedule (CSV)_ writes it with sizes in mm.
 
 The pieces get the materials _Window frame_, _Window glass_, _Window sill_, _Door leaf_ and _Door handle_ – change their colours in the Materials panel.
@@ -34,5 +34,5 @@ npm test        # the pieces are closed and face out
 ## Limits and plans
 
 - Vertical wall faces only; the opening is a rectangle. Arched and round windows, sliding and tilt-and-turn sashes, door leaves with panels and glass, roller shutters and plan symbols for LayOut are planned.
-- Changing the size of a placed opening (moving its hole along) is planned; today undo or set a new one.
+- Moving a placed opening along the wall is planned; today delete it and set a new one (the hole stays when it is deleted).
 - Rooms of the room planner and walls of "Parts from lines" do not use these windows yet.
