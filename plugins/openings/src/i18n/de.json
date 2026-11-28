@@ -56,7 +56,8 @@
         "notVertical": "Fenster und Türen gehen nur in senkrechte Wandflächen.",
         "tooBig": "Die Öffnung passt nicht auf diese Fläche.",
         "cutFailed": "Das Loch ließ sich hier nicht schneiden.",
-        "noFace": "An dieser Stelle ist keine senkrechte Wandfläche."
+        "noFace": "An dieser Stelle ist keine senkrechte Wandfläche.",
+        "offWall": "Ein Fenster oder eine Tür liegt nicht mehr ganz auf einer Wandfläche – dort hat es kein Loch."
       },
       "materials": {
         "frame": "Fensterrahmen",

@@ -56,7 +56,8 @@
         "notVertical": "Fenêtres et portes ne vont que dans des faces de mur verticales.",
         "tooBig": "L’ouverture ne tient pas sur cette face.",
         "cutFailed": "Le trou n’a pas pu être découpé ici.",
-        "noFace": "Pas de face de mur verticale à cet endroit."
+        "noFace": "Pas de face de mur verticale à cet endroit.",
+        "offWall": "Une fenêtre ou une porte ne repose plus entièrement sur une face de mur – elle n’y a pas de trou."
       },
       "materials": {
         "frame": "Cadre de fenêtre",

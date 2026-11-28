@@ -4,6 +4,7 @@ import type { Vector3 } from 'three';
 import type { Entities, Instance } from '../../../src/core/model';
 import type { PluginContext } from '../../../src/plugins/types';
 import { openingPieces, type OpeningParams, type PieceMaterial } from './parts';
+import { noteOpening } from './known';
 import { THREE, t } from './runtime';
 
 /** what is kept on an opening's group: its settings and the wall's thickness it was made for */
@@ -136,6 +137,7 @@ export const placeOpening = (context: PluginContext, entities: Entities, faceId:
     const inward = place.normal.clone().negate();
     const matrix = new THREE.Matrix4().makeBasis(place.along, inward, new THREE.Vector3(0, 0, 1)).setPosition(place.corners[0]);
     made = entities.addInstance(definition, matrix);
+    noteOpening(entities, made, data);
   });
   return made ? { instance: made as Instance } : { error: 'cutFailed' as const };
 };

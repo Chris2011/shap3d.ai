@@ -56,7 +56,8 @@
         "notVertical": "Windows and doors go into vertical wall faces only.",
         "tooBig": "The opening does not fit on this face.",
         "cutFailed": "The hole could not be cut here.",
-        "noFace": "No vertical wall face at this point."
+        "noFace": "No vertical wall face at this point.",
+        "offWall": "A window or door no longer lies fully on a wall face – it has no hole there."
       },
       "materials": {
         "frame": "Window frame",

@@ -7,6 +7,7 @@ import type { PluginContext } from '../../../src/plugins/types';
 import type { OpeningParams } from './parts';
 import { buildPieces, cutHole, openingOf, openingPlace, type OpeningData } from './place';
 import { fillHole, holeCorners } from './hole';
+import { noteOpening } from './known';
 import { t } from './runtime';
 
 /** the wall face the opening sat in, now whole again: the one facing out at the old hole's middle */
@@ -47,6 +48,7 @@ export const changeOpening = (context: PluginContext, instance: Instance, patch:
       }
       context.data.set(instance.definition, { opening: changed });
       buildPieces(context, instance.definition.entities, changed);
+      noteOpening(entities, instance, changed);
     });
     return true;
   } catch {

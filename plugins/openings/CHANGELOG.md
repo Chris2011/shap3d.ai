@@ -4,6 +4,14 @@
 
 Nothing yet.
 
+## [1.3.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Added
+
+- **The hole moves along**: a window or door moved with the app’s own tools (Move, arrow keys) closes its old hole and cuts a new one where it is now – in the same undo step. Moved onto another wall face, it takes over that wall’s thickness and its new sill height.
+- **Copies get a hole**: a window or door copied (Move with Ctrl) or pasted onto a wall face cuts its own hole.
+- A window or door that no longer lies fully on a wall face (moved off the wall, turned or scaled) gets no hole there, and the app says so.
+
 ## [1.2.0] – 2026-11-28 · Shap3D.ai 0.12.0
 
 ### Added

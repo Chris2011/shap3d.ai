@@ -56,7 +56,8 @@
         "notVertical": "Ventanas y puertas solo van en caras de muro verticales.",
         "tooBig": "El hueco no cabe en esta cara.",
         "cutFailed": "No se pudo cortar el hueco aquí.",
-        "noFace": "No hay una cara de muro vertical en este punto."
+        "noFace": "No hay una cara de muro vertical en este punto.",
+        "offWall": "Una ventana o puerta ya no queda entera sobre una cara de muro – ahí no tiene hueco."
       },
       "materials": {
         "frame": "Marco de ventana",

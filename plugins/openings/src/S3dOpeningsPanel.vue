@@ -78,7 +78,7 @@ import { computed } from 'vue';
 import { schedule } from './list';
 import type { OpeningParams } from './parts';
 import { changeOpening } from './change';
-import { closesHoles, removeOpening, setClosesHoles } from './deleting';
+import { closesHoles, removeOpening, setClosesHoles } from './follow';
 import { openingOf } from './place';
 import { pluginContext, t } from './runtime';
 import { useChosen, useDrafts } from './state';
