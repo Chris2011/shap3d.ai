@@ -19,7 +19,9 @@
         "sashes": "Flügel",
         "barsAcross": "Sprossen waagrecht",
         "barsUpright": "Sprossen senkrecht",
-        "hinge": "Bänder"
+        "hinge": "Bänder",
+        "operation": "Öffnungsart",
+        "glazed": "Mit Glasausschnitt"
       },
       "hinge": {
         "left": "Links (von außen)",
@@ -46,7 +48,8 @@
         "width": "Breite (mm)",
         "height": "Höhe (mm)",
         "sill": "Brüstung (mm)",
-        "sashes": "Flügel"
+        "sashes": "Flügel",
+        "type": "Öffnungsart"
       },
       "tool": {
         "name": "Fenster oder Tür setzen",
@@ -83,6 +86,14 @@
       },
       "script": {
         "opening": "Setzt ein Fenster oder eine Tür in die Wandfläche einer Gruppe (oder des aktuellen Kontexts), auf der der Punkt at liegt – das Loch geht durch die Wand. Maße in Metern; gibt die neue Gruppe zurück."
+      },
+      "types": {
+        "casement": "Dreh",
+        "tiltTurn": "Dreh-Kipp",
+        "sliding": "Schiebe",
+        "fixed": "Festverglasung",
+        "solid": "Vollblatt",
+        "glazed": "Glasausschnitt"
       }
     }
   }

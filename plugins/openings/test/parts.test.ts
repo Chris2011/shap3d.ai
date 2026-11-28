@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { DEFAULT_DOOR, DEFAULT_WINDOW, boxMesh, frameMesh, openingPieces, type Mesh } from '../src/parts.ts';
+import { DEFAULT_DOOR, DEFAULT_WINDOW, boxMesh, frameMesh, type Mesh } from '../src/parts.ts';
+import { openingPieces } from '../src/pieces.ts';
 
 const key = (point: number[]) => point.map((value) => value.toFixed(6)).join(',');
 
@@ -42,6 +43,7 @@ test('a window: frame, one sash with glass per side, bars, two sills – all clo
   assert.equal(count('glass'), 2);
   assert.equal(count('bar'), 2 * 2 * 2); // per sash one across and one upright, on both faces
   assert.equal(count('sill'), 2);
+  assert.equal(count('handle'), 2); // one inside on each sash
   pieces.forEach((piece) => volumeOf(piece.mesh));
   // the frame sits in the middle of the wall
   const ys = pieces.find((piece) => piece.name === 'frame')!.mesh.vertices.map((point) => point[1]);
@@ -61,4 +63,34 @@ test('a door: three-sided frame, leaf and handles; a thin wall gets no inner sil
     openingPieces(DEFAULT_WINDOW, 0.08).filter((piece) => piece.name === 'sill').length,
     1,
   );
+});
+
+test('a fixed window: panes in the frame with mullions, no sashes and no handles', () => {
+  const pieces = openingPieces({ ...DEFAULT_WINDOW, operation: 'fixed', sashes: 3, barsAcross: 1 }, 0.3);
+  const count = (name: string) => pieces.filter((piece) => piece.name === name).length;
+  assert.deepEqual([count('sash'), count('glass'), count('mullion'), count('handle'), count('bar')], [0, 3, 2, 0, 6]);
+  pieces.forEach((piece) => volumeOf(piece.mesh));
+});
+
+test('sliding sashes overlap and run one behind the other', () => {
+  const sashes = openingPieces({ ...DEFAULT_WINDOW, operation: 'sliding', sashes: 2 }, 0.3).filter((piece) => piece.name === 'sash');
+  const span = (piece: (typeof sashes)[number], axis: 0 | 1) => {
+    const values = piece.mesh.vertices.map((point) => point[axis]);
+    return [Math.min(...values), Math.max(...values)];
+  };
+  const [[aLeft, aRight], [bLeft, bRight]] = sashes.map((piece) => span(piece, 0));
+  assert.ok(bLeft < aRight, 'the sashes overlap');
+  assert.ok(Math.abs(aLeft - 0.06) < 1e-9 && Math.abs(bRight - (DEFAULT_WINDOW.width - 0.06)) < 1e-9, 'they fill the frame');
+  const [[aFront, aBack], [bFront, bBack]] = sashes.map((piece) => span(piece, 1));
+  assert.ok(aBack <= bFront + 1e-9 || bBack <= aFront + 1e-9, 'one behind the other');
+  sashes.forEach((piece) => volumeOf(piece.mesh));
+});
+
+test('a glazed door: the leaf is a frame round a glass pane', () => {
+  const pieces = openingPieces({ ...DEFAULT_DOOR, glazed: true }, 0.3);
+  assert.deepEqual(
+    pieces.map((piece) => piece.name),
+    ['frame', 'frame', 'frame', 'leaf', 'glass', 'handle', 'handle'],
+  );
+  pieces.forEach((piece) => volumeOf(piece.mesh));
 });

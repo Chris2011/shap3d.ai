@@ -4,6 +4,19 @@
 
 Nothing yet.
 
+## [1.4.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Added
+
+- **How a window opens**: tilt and turn (new default), casement, sliding – the sashes overlap and run one behind the other – or fixed glazing with panes straight in the frame and mullions between them. Windows with sashes get a handle inside on each sash.
+- **Glazed doors**: the leaf as a frame round a glass pane (_Glass in the leaf_).
+- The schedule and its CSV name the type of opening (a column of its own); equal sizes of different types are counted apart.
+- `s3d.opening` takes `operation` and `glazed`.
+
+### Changed
+
+- Windows set before have no type: they count as casement windows.
+
 ## [1.3.0] – 2026-11-28 · Shap3D.ai 0.12.0
 
 ### Added

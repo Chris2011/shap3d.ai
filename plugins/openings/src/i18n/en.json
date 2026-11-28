@@ -19,7 +19,9 @@
         "sashes": "Sashes",
         "barsAcross": "Glazing bars across",
         "barsUpright": "Glazing bars upright",
-        "hinge": "Hinges"
+        "hinge": "Hinges",
+        "operation": "Opening",
+        "glazed": "Glass in the leaf"
       },
       "hinge": {
         "left": "Left (seen from outside)",
@@ -46,7 +48,8 @@
         "width": "Width (mm)",
         "height": "Height (mm)",
         "sill": "Sill height (mm)",
-        "sashes": "Sashes"
+        "sashes": "Sashes",
+        "type": "Type of opening"
       },
       "tool": {
         "name": "Set window or door",
@@ -83,6 +86,14 @@
       },
       "script": {
         "opening": "Sets a window or door into the wall face of a group (or the current context) that the point at lies on – the hole is cut through the wall. Sizes in metres; returns the new group."
+      },
+      "types": {
+        "casement": "Casement",
+        "tiltTurn": "Tilt and turn",
+        "sliding": "Sliding",
+        "fixed": "Fixed",
+        "solid": "Solid leaf",
+        "glazed": "Glazed leaf"
       }
     }
   }

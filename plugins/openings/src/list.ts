@@ -6,6 +6,8 @@ import { t } from './runtime';
 
 export interface ScheduleRow {
   kind: OpeningData['kind'];
+  /** how a window opens, or whether a door has glass */
+  type: string;
   width: number;
   height: number;
   sill: number;
@@ -23,8 +25,9 @@ export const schedule = (context: PluginContext): ScheduleRow[] => {
         continue;
       }
       const sashes = data.kind === 'door' ? 1 : data.sashes;
-      const key = [data.kind, data.width.toFixed(3), data.height.toFixed(3), data.sill.toFixed(3), sashes].join('|');
-      const row = rows.get(key) ?? { kind: data.kind, width: data.width, height: data.height, sill: data.sill, sashes, count: 0 };
+      const type = data.kind === 'door' ? (data.glazed ? 'glazed' : 'solid') : (data.operation ?? 'casement');
+      const key = [data.kind, type, data.width.toFixed(3), data.height.toFixed(3), data.sill.toFixed(3), sashes].join('|');
+      const row = rows.get(key) ?? { kind: data.kind, type, width: data.width, height: data.height, sill: data.sill, sashes, count: 0 };
       row.count++;
       rows.set(key, row);
     }
@@ -42,9 +45,10 @@ export const scheduleCsv = (context: PluginContext) => {
   if (!rows.length) {
     throw new Error(t('openings.list.empty'));
   }
-  const header = ['kind', 'count', 'width', 'height', 'sill', 'sashes'].map((column) => t(`openings.columns.${column}`));
+  const header = ['kind', 'type', 'count', 'width', 'height', 'sill', 'sashes'].map((column) => t(`openings.columns.${column}`));
   const lines = rows.map((row) => [
     t(`openings.kinds.${row.kind}`),
+    t(`openings.types.${row.type}`),
     row.count,
     millimetres(row.width),
     millimetres(row.height),

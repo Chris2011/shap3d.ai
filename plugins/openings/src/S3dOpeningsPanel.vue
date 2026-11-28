@@ -26,6 +26,12 @@
       />
     </label>
 
+    <label v-if="shown.kind === 'window'" class="s3d-op-field">
+      <span>{{ t('openings.fields.operation') }}</span>
+      <select class="s3d-input" :value="shown.operation ?? 'casement'" @change="set({ operation: valueOf($event) as WindowOperation })">
+        <option v-for="operation in WINDOW_OPERATIONS" :key="operation" :value="operation">{{ t(`openings.types.${operation}`) }}</option>
+      </select>
+    </label>
     <label v-for="key in COUNT_KEYS" :key="key" class="s3d-op-field">
       <span>{{ t(`openings.fields.${key}`) }}</span>
       <select class="s3d-input" :value="String(shown[key])" @change="set({ [key]: Number(valueOf($event)) })">
@@ -38,6 +44,10 @@
         <option value="left">{{ t('openings.hinge.left') }}</option>
         <option value="right">{{ t('openings.hinge.right') }}</option>
       </select>
+    </label>
+    <label v-if="shown.kind === 'door'" class="s3d-check">
+      <input type="checkbox" :checked="!!shown.glazed" @change="set({ glazed: ($event.target as HTMLInputElement).checked })" />
+      {{ t('openings.fields.glazed') }}
     </label>
 
     <template v-if="selected">
@@ -62,7 +72,7 @@
           <tr v-for="(row, index) in rows" :key="index">
             <td class="count">{{ row.count }}×</td>
             <td>
-              {{ t(`openings.kinds.${row.kind}`) }}
+              {{ t(`openings.kinds.${row.kind}`) }} · {{ t(`openings.types.${row.type}`) }}
               <div class="sizes">{{ sizes(row) }}</div>
             </td>
           </tr>
@@ -76,7 +86,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { schedule } from './list';
-import type { OpeningParams } from './parts';
+import { WINDOW_OPERATIONS, type OpeningParams, type WindowOperation } from './parts';
 import { changeOpening } from './change';
 import { closesHoles, removeOpening, setClosesHoles } from './follow';
 import { openingOf } from './place';

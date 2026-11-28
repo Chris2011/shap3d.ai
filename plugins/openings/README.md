@@ -6,7 +6,7 @@ Parametric windows and doors, set into any wall with a click: the opening is cut
 
 ## Use
 
-1. _Plugins › Windows and doors…_: choose _Window_ or _Door_ and its sizes in mm – width, height and (windows) sill height, sashes and glazing bars; for a door the side its hinges are on.
+1. _Plugins › Windows and doors…_: choose _Window_ or _Door_ and its sizes in mm – width, height and (windows) sill height. A window opens tilt and turn, casement or sliding, or is fixed glazing (panes in the frame, mullions between), with one to three sashes and glazing bars; a door has its hinges left or right and a solid or a glazed leaf.
 2. _Set into wall_, then move over a vertical wall face: the outline follows the pointer, green where it fits, red where it would leave the face or overlap another opening. A window sits at its sill height above the bottom of the face, a door on it.
 3. Click: the hole goes through the wall (the wall's thickness is found by itself; a single face just gets the hole) and the window or door is set into the middle of the wall. One undo step. Esc stops.
 4. Select a window or door (inside its wall's group) to change any of its settings. Sashes, glazing bars and hinges build its pieces again; a new width, height or sill height closes the old hole (healed into the wall faces) and cuts the new one, centred where the old one was – when it does not fit, nothing changes.
@@ -20,8 +20,8 @@ The pieces get the materials _Window frame_, _Window glass_, _Window sill_, _Doo
 
 ```js
 const wall = s3d.box([0, 0, 0], 4, 0.3, 2.6);
-s3d.opening(wall, { at: [2, 0, 1], kind: 'window', width: 1.2, height: 1.3, sill: 0.9, sashes: 2, barsAcross: 1 });
-s3d.opening(wall, { at: [0.8, 0, 1], kind: 'door', width: 0.885, height: 2.01, hinge: 'left' });
+s3d.opening(wall, { at: [2, 0, 1], kind: 'window', width: 1.2, height: 1.3, sill: 0.9, sashes: 2, barsAcross: 1, operation: 'tiltTurn' });
+s3d.opening(wall, { at: [0.8, 0, 1], kind: 'door', width: 0.885, height: 2.01, hinge: 'left', glazed: true });
 ```
 
 `at` is a point on the wall face (model coordinates); the opening is centred on it along the wall. Sizes in metres; it returns the new group's id. See `docs/demo.js`.
@@ -35,6 +35,6 @@ npm test        # the pieces are closed and face out
 
 ## Limits and plans
 
-- Vertical wall faces only; the opening is a rectangle. Arched and round windows, sliding and tilt-and-turn sashes, door leaves with panels and glass, roller shutters and plan symbols for LayOut are planned.
+- Vertical wall faces only; the opening is a rectangle. Arched and round windows, door leaves with panels, double doors, roller shutters and plan symbols for LayOut are planned.
 - Turned or scaled windows get no hole; only moves keep it.
 - Rooms of the room planner and walls of "Parts from lines" do not use these windows yet.

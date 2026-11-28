@@ -19,7 +19,9 @@
         "sashes": "Vantaux",
         "barsAcross": "Petits-bois horizontaux",
         "barsUpright": "Petits-bois verticaux",
-        "hinge": "Paumelles"
+        "hinge": "Paumelles",
+        "operation": "Ouverture",
+        "glazed": "Vitrage dans le vantail"
       },
       "hinge": {
         "left": "À gauche (vu de l’extérieur)",
@@ -46,7 +48,8 @@
         "width": "Largeur (mm)",
         "height": "Hauteur (mm)",
         "sill": "Allège (mm)",
-        "sashes": "Vantaux"
+        "sashes": "Vantaux",
+        "type": "Type d’ouverture"
       },
       "tool": {
         "name": "Poser fenêtre ou porte",
@@ -83,6 +86,14 @@
       },
       "script": {
         "opening": "Pose une fenêtre ou une porte dans la face de mur d’un groupe (ou du contexte courant) sur laquelle se trouve le point at – le trou traverse le mur. Tailles en mètres ; renvoie le nouveau groupe."
+      },
+      "types": {
+        "casement": "À la française",
+        "tiltTurn": "Oscillo-battant",
+        "sliding": "Coulissant",
+        "fixed": "Fixe",
+        "solid": "Vantail plein",
+        "glazed": "Vantail vitré"
       }
     }
   }

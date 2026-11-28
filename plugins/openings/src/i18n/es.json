@@ -19,7 +19,9 @@
         "sashes": "Hojas",
         "barsAcross": "Junquillos horizontales",
         "barsUpright": "Junquillos verticales",
-        "hinge": "Bisagras"
+        "hinge": "Bisagras",
+        "operation": "Apertura",
+        "glazed": "Con vidrio en la hoja"
       },
       "hinge": {
         "left": "Izquierda (desde fuera)",
@@ -46,7 +48,8 @@
         "width": "Ancho (mm)",
         "height": "Alto (mm)",
         "sill": "Antepecho (mm)",
-        "sashes": "Hojas"
+        "sashes": "Hojas",
+        "type": "Tipo de apertura"
       },
       "tool": {
         "name": "Colocar ventana o puerta",
@@ -83,6 +86,14 @@
       },
       "script": {
         "opening": "Coloca una ventana o puerta en la cara de muro de un grupo (o del contexto actual) en la que está el punto at – el hueco atraviesa el muro. Medidas en metros; devuelve el nuevo grupo."
+      },
+      "types": {
+        "casement": "Abatible",
+        "tiltTurn": "Oscilobatiente",
+        "sliding": "Corredera",
+        "fixed": "Fija",
+        "solid": "Hoja ciega",
+        "glazed": "Hoja acristalada"
       }
     }
   }

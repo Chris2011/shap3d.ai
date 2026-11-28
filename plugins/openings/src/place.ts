@@ -3,7 +3,8 @@
 import type { Vector3 } from 'three';
 import type { Entities, Instance } from '../../../src/core/model';
 import type { PluginContext } from '../../../src/plugins/types';
-import { openingPieces, type OpeningParams, type PieceMaterial } from './parts';
+import type { OpeningParams, PieceMaterial } from './parts';
+import { openingPieces } from './pieces';
 import { noteOpening } from './known';
 import { THREE, t } from './runtime';
 
