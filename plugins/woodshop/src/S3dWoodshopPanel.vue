@@ -23,8 +23,20 @@
       {{ t('woodshop.panel.mark') }}
     </button>
 
-    <div class="s3d-ws-heading">{{ t('woodshop.cutList.title') }}</div>
+    <div class="s3d-ws-tabs" role="tablist">
+      <button
+        v-for="name in TABS"
+        :key="name"
+        role="tab"
+        :aria-selected="tab === name"
+        :class="{ active: tab === name }"
+        @click="tab = name"
+      >
+        {{ t(`woodshop.tabs.${name}`) }}
+      </button>
+    </div>
     <p v-if="!rows.length" class="s3d-ws-hint">{{ t('woodshop.cutList.empty') }}</p>
+    <S3dWoodshopNesting v-else-if="tab === 'nesting'" :rows="rows" />
     <template v-else>
       <table class="s3d-ws-table">
         <tbody>
@@ -45,7 +57,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import S3dWoodshopNesting from './S3dWoodshopNesting.vue';
 import { DEFAULT_BOARD, boardSides, cutList, type BoardData } from './boards';
 import { boardOf, boardSize, collectBoards, setBoards } from './collect';
 import { pluginContext, t } from './runtime';
@@ -53,6 +66,8 @@ import { pluginContext, t } from './runtime';
 /** Woodshop: mark groups as boards (grain, edge banding) and see the cut list of all boards in the model. */
 const context = pluginContext();
 const editor = context.editor;
+const TABS = ['cutList', 'nesting'] as const;
+const tab = ref<(typeof TABS)[number]>('cutList');
 const BANDS = ['bandLong', 'bandShort'] as const;
 
 // the model is not reactive – the editor bumps ui.revision after every change and ui.selRev after every selection change
@@ -61,8 +76,8 @@ const instances = computed(() => {
   void editor.ui.selRev;
   return editor
     .selected()
-    .filter((ref) => ref.kind === 'instance')
-    .map((ref) => editor.entities.instances.get(ref.id)!)
+    .filter((selected) => selected.kind === 'instance')
+    .map((selected) => editor.entities.instances.get(selected.id)!)
     .filter(Boolean);
 });
 /** the settings shown: those of the first selected board, when all selected groups are boards */

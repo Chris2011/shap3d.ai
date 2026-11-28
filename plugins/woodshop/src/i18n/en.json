@@ -45,11 +45,27 @@
       "undo": {
         "mark": "Mark as board",
         "unmark": "No longer a board",
-        "change": "Change board"
+        "change": "Change board",
+        "sheet": "Change sheet"
       },
       "script": {
         "board": "Marks a group or component as a board for the cut list: grain along the longest side (length) or across it (width), edge banding along and across the grain (0–2).",
         "noGroup": "s3d.board needs a group or component, e.g. from s3d.box()."
+      },
+      "nesting": {
+        "length": "Sheet length (mm)",
+        "width": "Sheet width (mm)",
+        "kerf": "Saw cut (mm)",
+        "trim": "Edge trim (mm)",
+        "grain": "Keep the grain along the sheet",
+        "group": "{material} · {thickness}",
+        "sheets": "{count} sheet(s), {usage}",
+        "sheet": "Sheet {number}, {usage} used",
+        "tooBig": "Too big for the sheet: {names}"
+      },
+      "tabs": {
+        "cutList": "Cut list",
+        "nesting": "Nesting"
       }
     }
   }

@@ -45,11 +45,27 @@
       "undo": {
         "mark": "Marquer comme planche",
         "unmark": "Plus une planche",
-        "change": "Modifier la planche"
+        "change": "Modifier la planche",
+        "sheet": "Modifier le panneau"
       },
       "script": {
         "board": "Marque un groupe ou un composant comme planche pour la liste de débit : fil le long du plus grand côté (length) ou en travers (width), chants dans le sens du fil et en travers (0–2).",
         "noGroup": "s3d.board attend un groupe ou un composant, p. ex. de s3d.box()."
+      },
+      "nesting": {
+        "length": "Longueur du panneau (mm)",
+        "width": "Largeur du panneau (mm)",
+        "kerf": "Trait de scie (mm)",
+        "trim": "Délignage par bord (mm)",
+        "grain": "Garder le fil dans le sens du panneau",
+        "group": "{material} · {thickness}",
+        "sheets": "{count} panneau(x), {usage}",
+        "sheet": "Panneau {number}, {usage} utilisé",
+        "tooBig": "Trop grand pour le panneau : {names}"
+      },
+      "tabs": {
+        "cutList": "Liste de débit",
+        "nesting": "Calepinage"
       }
     }
   }

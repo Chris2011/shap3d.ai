@@ -4,6 +4,14 @@
 
 Nothing yet.
 
+## [1.1.0] – 2026-11-27 · Shap3D.ai 0.12.0
+
+### Added
+
+- **Nesting** below the cut list: the boards of each material and thickness laid out on sheets, in strips across the sheet so every cut goes straight through (as on a panel saw). Each sheet is drawn with its pieces (name in the piece, sizes on hover); per material the number of sheets and how much of them becomes boards.
+- Sheet length and width, saw cut and edge trim in mm, and whether the grain stays along the sheet (off: pieces may turn when that fits better). Saved with the model, one undo step per change. Default: 2800 × 2070 mm, 4 mm cut, 10 mm trim, grain kept.
+- Boards too big for the sheet are named instead of laid out.
+
 ## [1.0.0] – 2026-11-27 · Shap3D.ai 0.12.0
 
 ### Added

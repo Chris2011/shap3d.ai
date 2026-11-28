@@ -1,5 +1,5 @@
 // Woodshop for Shap3D.ai – woodworking: groups and components become boards (grain, edge banding); the cut list counts
-// equal boards and goes out as CSV. s3d.board() marks a group from a script. Joints, nesting and shop drawings follow.
+// equal boards and goes out as CSV, nesting lays them out on sheets. s3d.board() marks a group from a script.
 import type { Instance } from '../../../src/core/model';
 import type { S3dPlugin } from '../../../src/plugins/types';
 import S3dWoodshopPanel from './S3dWoodshopPanel.vue';
@@ -12,7 +12,7 @@ import { injectStyles } from './styles';
 const woodshopPlugin: S3dPlugin = {
   id: 'woodshop',
   name: 'woodshop.plugin.name',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Shap3D.ai',
   description: 'woodshop.plugin.description',
   messages: MESSAGES,

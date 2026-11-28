@@ -116,7 +116,7 @@ The pieces are ordinary components of the model, built with the script API (`s3d
 
 ## The woodshop plugin
 
-The package in [`plugins/woodshop/`](../../plugins/woodshop) is for woodworking: groups and components become boards with grain and edge banding, and the cut list of the whole model counts equal boards, adds up the edge banding and goes out as CSV. No dependencies of its own; built like the others:
+The package in [`plugins/woodshop/`](../../plugins/woodshop) is for woodworking: groups and components become boards with grain and edge banding, and the cut list of the whole model counts equal boards, adds up the edge banding and goes out as CSV; nesting lays the boards out on sheets. No dependencies of its own; built like the others:
 
 ```sh
 cd plugins/woodshop

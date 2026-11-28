@@ -45,11 +45,27 @@
       "undo": {
         "mark": "Als Brett markieren",
         "unmark": "Kein Brett mehr",
-        "change": "Brett ändern"
+        "change": "Brett ändern",
+        "sheet": "Platte ändern"
       },
       "script": {
         "board": "Markiert eine Gruppe oder Komponente als Brett für die Zuschnittliste: Faser entlang der längsten Seite (length) oder quer (width), Umleimer längs und quer zur Faser (0–2).",
         "noGroup": "s3d.board braucht eine Gruppe oder Komponente, z. B. von s3d.box()."
+      },
+      "nesting": {
+        "length": "Plattenlänge (mm)",
+        "width": "Plattenbreite (mm)",
+        "kerf": "Schnittfuge (mm)",
+        "trim": "Besäumen je Kante (mm)",
+        "grain": "Faser entlang der Platte halten",
+        "group": "{material} · {thickness}",
+        "sheets": "{count} Platte(n), {usage}",
+        "sheet": "Platte {number}, {usage} genutzt",
+        "tooBig": "Zu groß für die Platte: {names}"
+      },
+      "tabs": {
+        "cutList": "Zuschnittliste",
+        "nesting": "Plattenaufteilung"
       }
     }
   }

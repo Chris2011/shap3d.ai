@@ -45,11 +45,27 @@
       "undo": {
         "mark": "Marcar como tablero",
         "unmark": "Ya no es un tablero",
-        "change": "Cambiar tablero"
+        "change": "Cambiar tablero",
+        "sheet": "Cambiar tablero"
       },
       "script": {
         "board": "Marca un grupo o componente como tablero para la lista de corte: veta a lo largo del lado más largo (length) o a lo ancho (width), cantos a lo largo y a lo ancho de la veta (0–2).",
         "noGroup": "s3d.board necesita un grupo o componente, p. ej. de s3d.box()."
+      },
+      "nesting": {
+        "length": "Largo del tablero (mm)",
+        "width": "Ancho del tablero (mm)",
+        "kerf": "Corte de sierra (mm)",
+        "trim": "Saneado por borde (mm)",
+        "grain": "Mantener la veta a lo largo del tablero",
+        "group": "{material} · {thickness}",
+        "sheets": "{count} tablero(s), {usage}",
+        "sheet": "Tablero {number}, {usage} usado",
+        "tooBig": "Demasiado grande para el tablero: {names}"
+      },
+      "tabs": {
+        "cutList": "Lista de corte",
+        "nesting": "Despiece"
       }
     }
   }
