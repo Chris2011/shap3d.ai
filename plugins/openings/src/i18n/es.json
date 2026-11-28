@@ -1,0 +1,84 @@
+{
+  "code": "es",
+  "name": "Español",
+  "dir": "ltr",
+  "messages": {
+    "openings": {
+      "plugin": {
+        "name": "Ventanas y puertas",
+        "description": "Ventanas paramétricas (hojas, junquillos, alféizares) y puertas (marco, hoja, manilla) colocadas con un clic en cualquier muro – el hueco atraviesa el muro. Una lista las cuenta y la guarda como CSV."
+      },
+      "kinds": {
+        "window": "Ventana",
+        "door": "Puerta"
+      },
+      "fields": {
+        "width": "Ancho (mm)",
+        "height": "Alto (mm)",
+        "sill": "Altura del antepecho (mm)",
+        "sashes": "Hojas",
+        "barsAcross": "Junquillos horizontales",
+        "barsUpright": "Junquillos verticales",
+        "hinge": "Bisagras"
+      },
+      "hinge": {
+        "left": "Izquierda (desde fuera)",
+        "right": "Derecha (desde fuera)"
+      },
+      "panel": {
+        "place": "Colocar en el muro",
+        "placeHint": "Luego haz clic en una cara de muro vertical: el contorno se ve verde donde cabe. La ventana queda a la altura del antepecho sobre el borde inferior de la cara, una puerta sobre él.",
+        "sizeHint": "Hojas, junquillos y bisagras se cambian aquí. Para otro tamaño: deshacer, o borrar y colocar de nuevo (el hueco queda)."
+      },
+      "list": {
+        "title": "Lista de ventanas y puertas",
+        "empty": "Aún no hay ventanas ni puertas en el modelo.",
+        "save": "Guardar CSV",
+        "export": "Lista de ventanas y puertas (CSV)",
+        "file": "carpinterias",
+        "sill": "antepecho"
+      },
+      "columns": {
+        "kind": "Tipo",
+        "count": "Cantidad",
+        "width": "Ancho (mm)",
+        "height": "Alto (mm)",
+        "sill": "Antepecho (mm)",
+        "sashes": "Hojas"
+      },
+      "tool": {
+        "name": "Colocar ventana o puerta",
+        "status": "Haz clic en una cara de muro vertical para colocar el hueco. Esc termina."
+      },
+      "errors": {
+        "notVertical": "Ventanas y puertas solo van en caras de muro verticales.",
+        "tooBig": "El hueco no cabe en esta cara.",
+        "cutFailed": "No se pudo cortar el hueco aquí.",
+        "noFace": "No hay una cara de muro vertical en este punto."
+      },
+      "materials": {
+        "frame": "Marco de ventana",
+        "glass": "Vidrio de ventana",
+        "sill": "Alféizar",
+        "leaf": "Hoja de puerta",
+        "handle": "Manilla de puerta"
+      },
+      "pieces": {
+        "frame": "Marco",
+        "sash": "Hoja",
+        "glass": "Vidrio",
+        "bar": "Junquillo",
+        "sill": "Alféizar",
+        "leaf": "Hoja de puerta",
+        "handle": "Manilla"
+      },
+      "undo": {
+        "place": "Colocar ventana o puerta",
+        "change": "Cambiar ventana o puerta"
+      },
+      "script": {
+        "opening": "Coloca una ventana o puerta en la cara de muro de un grupo (o del contexto actual) en la que está el punto at – el hueco atraviesa el muro. Medidas en metros; devuelve el nuevo grupo."
+      }
+    }
+  }
+}

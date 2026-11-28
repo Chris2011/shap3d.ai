@@ -1,0 +1,84 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "dir": "ltr",
+  "messages": {
+    "openings": {
+      "plugin": {
+        "name": "Fenêtres et portes",
+        "description": "Fenêtres paramétriques (vantaux, petits-bois, appuis) et portes (huisserie, vantail, poignée) posées d’un clic dans n’importe quel mur – l’ouverture traverse le mur. Un tableau les compte et l’enregistre en CSV."
+      },
+      "kinds": {
+        "window": "Fenêtre",
+        "door": "Porte"
+      },
+      "fields": {
+        "width": "Largeur (mm)",
+        "height": "Hauteur (mm)",
+        "sill": "Hauteur d’allège (mm)",
+        "sashes": "Vantaux",
+        "barsAcross": "Petits-bois horizontaux",
+        "barsUpright": "Petits-bois verticaux",
+        "hinge": "Paumelles"
+      },
+      "hinge": {
+        "left": "À gauche (vu de l’extérieur)",
+        "right": "À droite (vu de l’extérieur)"
+      },
+      "panel": {
+        "place": "Poser dans le mur",
+        "placeHint": "Puis cliquez sur une face de mur verticale : le contour est vert là où il tient. La fenêtre se place à la hauteur d’allège au-dessus du bas de la face, une porte sur celui-ci.",
+        "sizeHint": "Vantaux, petits-bois et paumelles se modifient ici. Pour une autre taille : annuler, ou supprimer et poser à nouveau (le trou reste)."
+      },
+      "list": {
+        "title": "Tableau des menuiseries",
+        "empty": "Aucune fenêtre ni porte dans le modèle.",
+        "save": "Enregistrer en CSV",
+        "export": "Tableau des menuiseries (CSV)",
+        "file": "menuiseries",
+        "sill": "allège"
+      },
+      "columns": {
+        "kind": "Type",
+        "count": "Quantité",
+        "width": "Largeur (mm)",
+        "height": "Hauteur (mm)",
+        "sill": "Allège (mm)",
+        "sashes": "Vantaux"
+      },
+      "tool": {
+        "name": "Poser fenêtre ou porte",
+        "status": "Cliquez sur une face de mur verticale pour poser l’ouverture. Échap arrête."
+      },
+      "errors": {
+        "notVertical": "Fenêtres et portes ne vont que dans des faces de mur verticales.",
+        "tooBig": "L’ouverture ne tient pas sur cette face.",
+        "cutFailed": "Le trou n’a pas pu être découpé ici.",
+        "noFace": "Pas de face de mur verticale à cet endroit."
+      },
+      "materials": {
+        "frame": "Cadre de fenêtre",
+        "glass": "Vitrage",
+        "sill": "Appui de fenêtre",
+        "leaf": "Vantail de porte",
+        "handle": "Poignée de porte"
+      },
+      "pieces": {
+        "frame": "Cadre",
+        "sash": "Vantail",
+        "glass": "Vitrage",
+        "bar": "Petit-bois",
+        "sill": "Appui",
+        "leaf": "Vantail de porte",
+        "handle": "Poignée"
+      },
+      "undo": {
+        "place": "Poser fenêtre ou porte",
+        "change": "Modifier fenêtre ou porte"
+      },
+      "script": {
+        "opening": "Pose une fenêtre ou une porte dans la face de mur d’un groupe (ou du contexte courant) sur laquelle se trouve le point at – le trou traverse le mur. Tailles en mètres ; renvoie le nouveau groupe."
+      }
+    }
+  }
+}

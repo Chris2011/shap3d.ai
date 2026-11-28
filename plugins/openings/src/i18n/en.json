@@ -1,0 +1,84 @@
+{
+  "code": "en",
+  "name": "English",
+  "dir": "ltr",
+  "messages": {
+    "openings": {
+      "plugin": {
+        "name": "Windows and doors",
+        "description": "Parametric windows (sashes, glazing bars, sills) and doors (frame, leaf, handle) set into any wall with a click – the opening is cut through the wall. A schedule counts them and saves it as CSV."
+      },
+      "kinds": {
+        "window": "Window",
+        "door": "Door"
+      },
+      "fields": {
+        "width": "Width (mm)",
+        "height": "Height (mm)",
+        "sill": "Sill height (mm)",
+        "sashes": "Sashes",
+        "barsAcross": "Glazing bars across",
+        "barsUpright": "Glazing bars upright",
+        "hinge": "Hinges"
+      },
+      "hinge": {
+        "left": "Left (seen from outside)",
+        "right": "Right (seen from outside)"
+      },
+      "panel": {
+        "place": "Set into wall",
+        "placeHint": "Then click on a vertical wall face: the outline shows green where it fits. The window sits at the sill height above the bottom of the face, a door on it.",
+        "sizeHint": "Sashes, bars and hinges can be changed here. For another size: undo, or delete it and set a new one (the hole stays)."
+      },
+      "list": {
+        "title": "Window and door schedule",
+        "empty": "No windows or doors in the model yet.",
+        "save": "Save CSV",
+        "export": "Window and door schedule (CSV)",
+        "file": "schedule",
+        "sill": "sill"
+      },
+      "columns": {
+        "kind": "Type",
+        "count": "Count",
+        "width": "Width (mm)",
+        "height": "Height (mm)",
+        "sill": "Sill height (mm)",
+        "sashes": "Sashes"
+      },
+      "tool": {
+        "name": "Set window or door",
+        "status": "Click on a vertical wall face to set the opening. Esc stops."
+      },
+      "errors": {
+        "notVertical": "Windows and doors go into vertical wall faces only.",
+        "tooBig": "The opening does not fit on this face.",
+        "cutFailed": "The hole could not be cut here.",
+        "noFace": "No vertical wall face at this point."
+      },
+      "materials": {
+        "frame": "Window frame",
+        "glass": "Window glass",
+        "sill": "Window sill",
+        "leaf": "Door leaf",
+        "handle": "Door handle"
+      },
+      "pieces": {
+        "frame": "Frame",
+        "sash": "Sash",
+        "glass": "Glass",
+        "bar": "Glazing bar",
+        "sill": "Sill",
+        "leaf": "Door leaf",
+        "handle": "Handle"
+      },
+      "undo": {
+        "place": "Set window or door",
+        "change": "Change window or door"
+      },
+      "script": {
+        "opening": "Sets a window or door into the wall face of a group (or the current context) that the point at lies on – the hole is cut through the wall. Sizes in metres; returns the new group."
+      }
+    }
+  }
+}

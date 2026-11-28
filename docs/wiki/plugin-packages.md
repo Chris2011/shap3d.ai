@@ -114,6 +114,21 @@ Then _Plugins › Load plugin folder…_ and pick `plugins/roomplanner/dist`.
 
 The pieces are ordinary components of the model, built with the script API (`s3d.box`, `s3d.cylinder` …) – the app's own tools work on them too. Details in [its README](../../plugins/roomplanner/README.md).
 
+## The windows and doors plugin
+
+The package in [`plugins/openings/`](../../plugins/openings) sets parametric windows (sashes, glazing bars, sills) and doors (frame, leaf, handle) into any wall with a click – the hole is cut through the wall, as with push/pull onto its back. A schedule counts them and goes out as CSV. No dependencies of its own; built like the others:
+
+```sh
+cd plugins/openings
+npm run build
+```
+
+Then _Plugins › Load plugin folder…_ and pick `plugins/openings/dist`.
+
+![Windows and doors: the walls of a small house with a front door and windows with one, two and three sashes and glazing bars; the panel with the settings and the schedule](../../plugins/openings/docs/openings.png)
+
+`s3d.opening(wall, { at, kind, width, height, sill, sashes, barsAcross, barsUpright, hinge })` sets one from a script. Details in [its README](../../plugins/openings/README.md).
+
 ## The woodshop plugin
 
 The package in [`plugins/woodshop/`](../../plugins/woodshop) is for woodworking: groups and components become boards with grain and edge banding, and the cut list of the whole model counts equal boards, adds up the edge banding and goes out as CSV; nesting lays the boards out on sheets. No dependencies of its own; built like the others:

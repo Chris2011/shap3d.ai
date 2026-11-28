@@ -1,0 +1,42 @@
+{
+  "name": "s3d-plugin-openings",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Windows and doors for Shap3D.ai: parametric windows (sashes, glazing bars, sills) and doors (frame, leaf, handle) set into any wall with a click – the opening is cut through the wall; a schedule counts them and goes out as CSV.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p .",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
+    "i18n": "node ../../scripts/i18n.mjs check --package .",
+    "test": "node --test test/*.test.ts"
+  },
+  "lint-staged": {
+    "src/**/*.{js,mjs,ts,vue}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "src/**/*.{json,css,md}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "shap3d": {
+    "id": "openings",
+    "name": "Windows and doors",
+    "main": "plugin.js"
+  },
+  "portal": {
+    "thumbnail": "docs/openings.png"
+  },
+  "screenshots": [
+    {
+      "name": "openings",
+      "file": "demo.js",
+      "command": "openings.panel.open",
+      "camera": "-3.5,-7.5,4.2",
+      "target": "3,2,1.3"
+    }
+  ]
+}

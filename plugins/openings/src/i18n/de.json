@@ -1,0 +1,84 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "dir": "ltr",
+  "messages": {
+    "openings": {
+      "plugin": {
+        "name": "Fenster und Türen",
+        "description": "Parametrische Fenster (Flügel, Sprossen, Fensterbänke) und Türen (Zarge, Blatt, Griff) per Klick in jede Wand setzen – die Öffnung wird durch die Wand geschnitten. Eine Liste zählt sie und speichert sie als CSV."
+      },
+      "kinds": {
+        "window": "Fenster",
+        "door": "Tür"
+      },
+      "fields": {
+        "width": "Breite (mm)",
+        "height": "Höhe (mm)",
+        "sill": "Brüstungshöhe (mm)",
+        "sashes": "Flügel",
+        "barsAcross": "Sprossen waagrecht",
+        "barsUpright": "Sprossen senkrecht",
+        "hinge": "Bänder"
+      },
+      "hinge": {
+        "left": "Links (von außen)",
+        "right": "Rechts (von außen)"
+      },
+      "panel": {
+        "place": "In Wand setzen",
+        "placeHint": "Dann auf eine senkrechte Wandfläche klicken: der Umriss zeigt grün, wo es passt. Das Fenster sitzt in Brüstungshöhe über der Unterkante der Fläche, eine Tür auf ihr.",
+        "sizeHint": "Flügel, Sprossen und Bänder lassen sich hier ändern. Für eine andere Größe: rückgängig machen oder löschen und neu setzen (das Loch bleibt)."
+      },
+      "list": {
+        "title": "Fenster- und Türliste",
+        "empty": "Noch keine Fenster oder Türen im Modell.",
+        "save": "CSV speichern",
+        "export": "Fenster- und Türliste (CSV)",
+        "file": "Fensterliste",
+        "sill": "Brüstung"
+      },
+      "columns": {
+        "kind": "Art",
+        "count": "Anzahl",
+        "width": "Breite (mm)",
+        "height": "Höhe (mm)",
+        "sill": "Brüstung (mm)",
+        "sashes": "Flügel"
+      },
+      "tool": {
+        "name": "Fenster oder Tür setzen",
+        "status": "Auf eine senkrechte Wandfläche klicken, um die Öffnung zu setzen. Esc beendet."
+      },
+      "errors": {
+        "notVertical": "Fenster und Türen gehen nur in senkrechte Wandflächen.",
+        "tooBig": "Die Öffnung passt nicht auf diese Fläche.",
+        "cutFailed": "Das Loch ließ sich hier nicht schneiden.",
+        "noFace": "An dieser Stelle ist keine senkrechte Wandfläche."
+      },
+      "materials": {
+        "frame": "Fensterrahmen",
+        "glass": "Fensterglas",
+        "sill": "Fensterbank",
+        "leaf": "Türblatt",
+        "handle": "Türgriff"
+      },
+      "pieces": {
+        "frame": "Rahmen",
+        "sash": "Flügel",
+        "glass": "Glas",
+        "bar": "Sprosse",
+        "sill": "Fensterbank",
+        "leaf": "Türblatt",
+        "handle": "Griff"
+      },
+      "undo": {
+        "place": "Fenster oder Tür setzen",
+        "change": "Fenster oder Tür ändern"
+      },
+      "script": {
+        "opening": "Setzt ein Fenster oder eine Tür in die Wandfläche einer Gruppe (oder des aktuellen Kontexts), auf der der Punkt at liegt – das Loch geht durch die Wand. Maße in Metern; gibt die neue Gruppe zurück."
+      }
+    }
+  }
+}
