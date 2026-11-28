@@ -46,6 +46,10 @@ Plugin versions per app version (**bold** = new version, plain = unchanged, – 
 - <kbd>K</kbd> and the command palette switched _Back edges_ on, but nothing was drawn.
 - **Snapping no longer flickers at the rim**: a point snaps within 10 px as before, but lets go only beyond 15 px – a slightly shaky hand at an endpoint no longer jumps between _Endpoint_ and _On edge_ (measured: 57 changes in 200 cursor positions before, 1 now).
 
+### Changed
+
+- **The editor in parts** (for developers): `src/engine/editor.ts` (1 050 lines) is now a chain of classes in `src/engine/editor/`, one job each and none over 200 lines – state and selection, the open group, tools and dialogs, undo history, texts/dimensions/guides, input, drawing over the view. `editor.ts` keeps the `Editor` class and all its exports, so nothing that imports it changes; it behaves as before.
+
 ## [0.11.0] – 2026-11-26
 
 ### Added

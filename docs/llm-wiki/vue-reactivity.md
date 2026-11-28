@@ -1,6 +1,6 @@
 ---
 title: Vue reactivity
-sources: [https://vuejs.org/guide/extras/reactivity-in-depth.html, https://vuejs.org/api/reactivity-advanced.html, src/composables/useModel.ts, src/engine/editor.ts, src/components/panels/materials/S3dMaterialBasics.vue]
+sources: [https://vuejs.org/guide/extras/reactivity-in-depth.html, https://vuejs.org/api/reactivity-advanced.html, src/composables/useModel.ts, src/engine/editor.ts, src/engine/editor/editorBase.ts, src/components/panels/materials/S3dMaterialBasics.vue]
 updated: 2026-11-08
 ---
 
@@ -10,7 +10,7 @@ updated: 2026-11-08
 
 The kernel holds hundreds of thousands of objects. Vue proxies around them would be slow and memory-hungry, so they stay plain:
 
-- `src/engine/editor.ts` wraps the model, viewer and inference engine in `markRaw`.
+- The editor wraps the model (`src/engine/editor/editorBase.ts`), viewer and inference engine (`src/engine/editor.ts`) in `markRaw`.
 - Only `editor.ui` is `reactive`. The editor raises `ui.revision` after each model change and `ui.selRev` after each selection change.
 - Components read model data through `useModel` or `useSelection` from `src/composables/useModel.ts`.
 

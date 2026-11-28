@@ -34,7 +34,7 @@ SOLID comes from class-based design. Apply the idea, not the ceremony: a functio
 | --------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | Single responsibility | One reason to change. A component shows, a composable holds logic           | `src/composables/usePopover.ts` only opens and closes                                               |
 | Open/closed           | Add behaviour by registering, not by editing the core                      | Plugins call `context.panels.register`, `context.tools.register`                                    |
-| Liskov substitution   | A subclass keeps the promises of its base                                  | Every tool in `src/tools/` can stand in for `Tool` from `src/engine/editor.ts`                      |
+| Liskov substitution   | A subclass keeps the promises of its base                                  | Every tool in `src/tools/` can stand in for `Tool` from `src/engine/editor/tool.ts`                    |
 | Interface segregation | Small, focused APIs; nobody depends on what they do not use                | `PluginContext` in `src/plugins/types.ts` groups by area: `meshes`, `files`, `render`               |
 | Dependency inversion  | High-level code depends on an agreed contract, not on details              | Plugin packages use `src/plugins/types.ts`, never the app's modules                                 |
 
