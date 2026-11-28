@@ -21,7 +21,9 @@
         "barsUpright": "Sprossen senkrecht",
         "hinge": "Bänder",
         "operation": "Öffnungsart",
-        "glazed": "Mit Glasausschnitt"
+        "glazed": "Mit Glasausschnitt",
+        "shutter": "Rollladen",
+        "shutterDown": "Rollladen geschlossen"
       },
       "hinge": {
         "left": "Links (von außen)",
@@ -40,7 +42,9 @@
         "save": "CSV speichern",
         "export": "Fenster- und Türliste (CSV)",
         "file": "Fensterliste",
-        "sill": "Brüstung"
+        "sill": "Brüstung",
+        "yes": "ja",
+        "no": "nein"
       },
       "columns": {
         "kind": "Art",
@@ -49,7 +53,8 @@
         "height": "Höhe (mm)",
         "sill": "Brüstung (mm)",
         "sashes": "Flügel",
-        "type": "Öffnungsart"
+        "type": "Öffnungsart",
+        "shutter": "Rollladen"
       },
       "tool": {
         "name": "Fenster oder Tür setzen",
@@ -67,7 +72,8 @@
         "glass": "Fensterglas",
         "sill": "Fensterbank",
         "leaf": "Türblatt",
-        "handle": "Türgriff"
+        "handle": "Türgriff",
+        "shutter": "Rollladen"
       },
       "pieces": {
         "frame": "Rahmen",
@@ -76,7 +82,10 @@
         "bar": "Sprosse",
         "sill": "Fensterbank",
         "leaf": "Türblatt",
-        "handle": "Griff"
+        "handle": "Griff",
+        "shutterBox": "Rollladenkasten",
+        "rail": "Führungsschiene",
+        "curtain": "Rollladenpanzer"
       },
       "undo": {
         "place": "Fenster oder Tür setzen",

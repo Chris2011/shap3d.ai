@@ -19,6 +19,7 @@ const COLOURS: Record<PieceMaterial, { color: string; opacity?: number }> = {
   sill: { color: '#d6d2ca' },
   leaf: { color: '#e8e2d6' },
   handle: { color: '#8a8f96' },
+  shutter: { color: '#9ea3a8' },
 };
 
 export const openingOf = (context: PluginContext, instance: Instance | undefined) =>

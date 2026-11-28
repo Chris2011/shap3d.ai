@@ -12,6 +12,7 @@ export interface ScheduleRow {
   height: number;
   sill: number;
   sashes: number;
+  shutter: boolean;
   count: number;
 }
 
@@ -26,8 +27,18 @@ export const schedule = (context: PluginContext): ScheduleRow[] => {
       }
       const sashes = data.kind === 'door' ? (data.sashes === 2 ? 2 : 1) : data.sashes;
       const type = data.kind === 'door' ? (data.glazed ? 'glazed' : 'solid') : (data.operation ?? 'casement');
-      const key = [data.kind, type, data.width.toFixed(3), data.height.toFixed(3), data.sill.toFixed(3), sashes].join('|');
-      const row = rows.get(key) ?? { kind: data.kind, type, width: data.width, height: data.height, sill: data.sill, sashes, count: 0 };
+      const shutter = data.kind === 'window' && !!data.shutter;
+      const key = [data.kind, type, shutter, data.width.toFixed(3), data.height.toFixed(3), data.sill.toFixed(3), sashes].join('|');
+      const row = rows.get(key) ?? {
+        kind: data.kind,
+        type,
+        width: data.width,
+        height: data.height,
+        sill: data.sill,
+        sashes,
+        shutter,
+        count: 0,
+      };
       row.count++;
       rows.set(key, row);
     }
@@ -45,7 +56,7 @@ export const scheduleCsv = (context: PluginContext) => {
   if (!rows.length) {
     throw new Error(t('openings.list.empty'));
   }
-  const header = ['kind', 'type', 'count', 'width', 'height', 'sill', 'sashes'].map((column) => t(`openings.columns.${column}`));
+  const header = ['kind', 'type', 'count', 'width', 'height', 'sill', 'sashes', 'shutter'].map((column) => t(`openings.columns.${column}`));
   const lines = rows.map((row) => [
     t(`openings.kinds.${row.kind}`),
     t(`openings.types.${row.type}`),
@@ -54,6 +65,7 @@ export const scheduleCsv = (context: PluginContext) => {
     millimetres(row.height),
     millimetres(row.sill),
     row.sashes,
+    t(row.shutter ? 'openings.list.yes' : 'openings.list.no'),
   ]);
   return '﻿' + [header, ...lines].map((line) => line.map(cell).join(';')).join('\r\n');
 };

@@ -4,6 +4,12 @@
 
 Nothing yet.
 
+## [1.7.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Added
+
+- **Roller shutters** for windows (_Roller shutter_): the box above the window and the rails beside it in front of the wall, the curtain let down 0, 25, 50, 75 or 100 % (_Shutter let down_). Material _Roller shutter_. The schedule names them, the CSV has a column for them; `s3d.opening` takes `shutter` and `shutterDown` (0–1).
+
 ## [1.6.0] – 2026-11-28 · Shap3D.ai 0.12.0
 
 ### Added

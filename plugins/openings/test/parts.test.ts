@@ -108,3 +108,15 @@ test('a double door: two leaves meeting in the middle, a handle by the middle on
   assert.ok(of('handle').every((handle) => Math.abs((span(handle)[0] + span(handle)[1]) / 2 - 0.8) < 0.15), 'handles by the middle');
   pieces.forEach((piece) => volumeOf(piece.mesh));
 });
+
+test('a roller shutter: box above the window, rails beside it, the curtain let down as far as asked', () => {
+  const pieces = openingPieces({ ...DEFAULT_WINDOW, shutter: true, shutterDown: 0.5 }, 0.3);
+  const of = (name: string) => pieces.filter((piece) => piece.name === name);
+  assert.deepEqual([of('shutterBox').length, of('rail').length, of('curtain').length], [1, 2, 1]);
+  const zs = of('curtain')[0].mesh.vertices.map((point) => point[2]);
+  assert.ok(Math.abs(Math.max(...zs) - Math.min(...zs) - DEFAULT_WINDOW.height / 2) < 1e-9, 'half down');
+  // all of it in front of the wall
+  assert.ok([...of('shutterBox'), ...of('rail'), ...of('curtain')].every((piece) => piece.mesh.vertices.every((point) => point[1] <= 1e-9)));
+  pieces.forEach((piece) => volumeOf(piece.mesh));
+  assert.equal(openingPieces({ ...DEFAULT_WINDOW, shutter: true, shutterDown: 0 }, 0.3).filter((piece) => piece.name === 'curtain').length, 0);
+});

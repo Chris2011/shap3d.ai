@@ -21,7 +21,9 @@
         "barsUpright": "Junquillos verticales",
         "hinge": "Bisagras",
         "operation": "Apertura",
-        "glazed": "Con vidrio en la hoja"
+        "glazed": "Con vidrio en la hoja",
+        "shutter": "Persiana enrollable",
+        "shutterDown": "Persiana bajada"
       },
       "hinge": {
         "left": "Izquierda (desde fuera)",
@@ -40,7 +42,9 @@
         "save": "Guardar CSV",
         "export": "Lista de ventanas y puertas (CSV)",
         "file": "carpinterias",
-        "sill": "antepecho"
+        "sill": "antepecho",
+        "yes": "sí",
+        "no": "no"
       },
       "columns": {
         "kind": "Tipo",
@@ -49,7 +53,8 @@
         "height": "Alto (mm)",
         "sill": "Antepecho (mm)",
         "sashes": "Hojas",
-        "type": "Tipo de apertura"
+        "type": "Tipo de apertura",
+        "shutter": "Persiana enrollable"
       },
       "tool": {
         "name": "Colocar ventana o puerta",
@@ -67,7 +72,8 @@
         "glass": "Vidrio de ventana",
         "sill": "Alféizar",
         "leaf": "Hoja de puerta",
-        "handle": "Manilla de puerta"
+        "handle": "Manilla de puerta",
+        "shutter": "Persiana"
       },
       "pieces": {
         "frame": "Marco",
@@ -76,7 +82,10 @@
         "bar": "Junquillo",
         "sill": "Alféizar",
         "leaf": "Hoja de puerta",
-        "handle": "Manilla"
+        "handle": "Manilla",
+        "shutterBox": "Cajón de persiana",
+        "rail": "Guía",
+        "curtain": "Lamas"
       },
       "undo": {
         "place": "Colocar ventana o puerta",

@@ -21,7 +21,9 @@
         "barsUpright": "Glazing bars upright",
         "hinge": "Hinges",
         "operation": "Opening",
-        "glazed": "Glass in the leaf"
+        "glazed": "Glass in the leaf",
+        "shutter": "Roller shutter",
+        "shutterDown": "Shutter let down"
       },
       "hinge": {
         "left": "Left (seen from outside)",
@@ -40,7 +42,9 @@
         "save": "Save CSV",
         "export": "Window and door schedule (CSV)",
         "file": "schedule",
-        "sill": "sill"
+        "sill": "sill",
+        "yes": "yes",
+        "no": "no"
       },
       "columns": {
         "kind": "Type",
@@ -49,7 +53,8 @@
         "height": "Height (mm)",
         "sill": "Sill height (mm)",
         "sashes": "Sashes",
-        "type": "Type of opening"
+        "type": "Type of opening",
+        "shutter": "Roller shutter"
       },
       "tool": {
         "name": "Set window or door",
@@ -67,7 +72,8 @@
         "glass": "Window glass",
         "sill": "Window sill",
         "leaf": "Door leaf",
-        "handle": "Door handle"
+        "handle": "Door handle",
+        "shutter": "Roller shutter"
       },
       "pieces": {
         "frame": "Frame",
@@ -76,7 +82,10 @@
         "bar": "Glazing bar",
         "sill": "Sill",
         "leaf": "Door leaf",
-        "handle": "Handle"
+        "handle": "Handle",
+        "shutterBox": "Shutter box",
+        "rail": "Shutter rail",
+        "curtain": "Shutter curtain"
       },
       "undo": {
         "place": "Set window or door",

@@ -108,6 +108,16 @@ export const openingPieces = (params: OpeningParams, thickness: number): Piece[]
       handle(handleX, (z0 + z1) / 2, sashBack, 0.05);
     }
   }
+  // a roller shutter in front of the wall: its box above the opening, rails beside it, the curtain let down between them
+  if (params.shutter) {
+    add('shutterBox', 'shutter', boxMesh([-0.04, -0.2, height], [width + 0.04, 0, height + 0.22]));
+    add('rail', 'shutter', boxMesh([-0.04, -0.06, 0], [0, 0, height]));
+    add('rail', 'shutter', boxMesh([width, -0.06, 0], [width + 0.04, 0, height]));
+    const down = Math.min(1, Math.max(0, params.shutterDown ?? 0)) * height;
+    if (down > 0.001) {
+      add('curtain', 'shutter', boxMesh([0, -0.045, height - down], [width, -0.03, height]));
+    }
+  }
   // sills: outside it reaches out over the wall, inside it lies on the parapet
   add('sill', 'sill', boxMesh([-0.03, -0.05, -0.03], [width + 0.03, front, 0]));
   if (thickness > 0.1) {

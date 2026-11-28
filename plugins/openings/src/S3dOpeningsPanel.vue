@@ -51,6 +51,18 @@
         <option value="right">{{ t('openings.hinge.right') }}</option>
       </select>
     </label>
+    <template v-if="shown.kind === 'window'">
+      <label class="s3d-check">
+        <input type="checkbox" :checked="!!shown.shutter" @change="set({ shutter: ($event.target as HTMLInputElement).checked })" />
+        {{ t('openings.fields.shutter') }}
+      </label>
+      <label v-if="shown.shutter" class="s3d-op-field">
+        <span>{{ t('openings.fields.shutterDown') }}</span>
+        <select class="s3d-input" :value="String(shown.shutterDown ?? 0)" @change="set({ shutterDown: Number(valueOf($event)) })">
+          <option v-for="share in [0, 0.25, 0.5, 0.75, 1]" :key="share" :value="String(share)">{{ Math.round(share * 100) }} %</option>
+        </select>
+      </label>
+    </template>
     <label v-if="shown.kind === 'door'" class="s3d-check">
       <input type="checkbox" :checked="!!shown.glazed" @change="set({ glazed: ($event.target as HTMLInputElement).checked })" />
       {{ t('openings.fields.glazed') }}
@@ -78,7 +90,8 @@
           <tr v-for="(row, index) in rows" :key="index">
             <td class="count">{{ row.count }}×</td>
             <td>
-              {{ t(`openings.kinds.${row.kind}`) }} · {{ t(`openings.types.${row.type}`) }}
+              {{ t(`openings.kinds.${row.kind}`) }} · {{ t(`openings.types.${row.type}`)
+              }}{{ row.shutter ? ` · ${t('openings.fields.shutter')}` : '' }}
               <div class="sizes">{{ sizes(row) }}</div>
             </td>
           </tr>

@@ -18,7 +18,7 @@ type OpeningCall = Partial<OpeningParams> & { at?: [number, number, number] };
 const openingsPlugin: S3dPlugin = {
   id: 'openings',
   name: 'openings.plugin.name',
-  version: '1.6.0',
+  version: '1.7.0',
   author: 'Shap3D.ai',
   description: 'openings.plugin.description',
   messages: MESSAGES,
@@ -60,7 +60,7 @@ const openingsPlugin: S3dPlugin = {
     context.script.extend('opening', scriptOpening, {
       category: 'Plugins',
       signature:
-        "s3d.opening(wall, { at: [x, y, z], kind: 'window' | 'door', width, height, sill, sashes, barsAcross, barsUpright, operation, hinge, glazed })",
+        "s3d.opening(wall, { at: [x, y, z], kind: 'window' | 'door', width, height, sill, sashes, barsAcross, barsUpright, operation, hinge, glazed, shutter, shutterDown })",
       description: 'openings.script.opening',
       example:
         "const wall = s3d.box([0, 0, 0], 4, 0.3, 2.6);\ns3d.opening(wall, { at: [2, 0, 1], kind: 'window', width: 1.2, height: 1.3, sill: 0.9 });",

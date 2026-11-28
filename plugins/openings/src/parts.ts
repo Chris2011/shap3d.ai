@@ -10,7 +10,7 @@ export interface Mesh {
 }
 
 export type OpeningKind = 'window' | 'door';
-export type PieceMaterial = 'frame' | 'glass' | 'sill' | 'leaf' | 'handle';
+export type PieceMaterial = 'frame' | 'glass' | 'sill' | 'leaf' | 'handle' | 'shutter';
 
 export interface OpeningParams {
   kind: OpeningKind;
@@ -29,6 +29,10 @@ export interface OpeningParams {
   operation?: WindowOperation;
   /** door: a glass pane in the leaf */
   glazed?: boolean;
+  /** window: a roller shutter outside – its box above the window, rails beside it */
+  shutter?: boolean;
+  /** how far the shutter is let down, 0 (open) to 1 (closed) */
+  shutterDown?: number;
 }
 
 export type WindowOperation = 'fixed' | 'casement' | 'tiltTurn' | 'sliding';
@@ -45,6 +49,8 @@ export const DEFAULT_WINDOW: OpeningParams = {
   hinge: 'left',
   operation: 'tiltTurn',
   glazed: false,
+  shutter: false,
+  shutterDown: 0,
 };
 export const DEFAULT_DOOR: OpeningParams = { ...DEFAULT_WINDOW, kind: 'door', width: 0.885, height: 2.01, sill: 0, sashes: 1 };
 

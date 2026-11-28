@@ -21,7 +21,9 @@
         "barsUpright": "Petits-bois verticaux",
         "hinge": "Paumelles",
         "operation": "Ouverture",
-        "glazed": "Vitrage dans le vantail"
+        "glazed": "Vitrage dans le vantail",
+        "shutter": "Volet roulant",
+        "shutterDown": "Volet baissé"
       },
       "hinge": {
         "left": "À gauche (vu de l’extérieur)",
@@ -40,7 +42,9 @@
         "save": "Enregistrer en CSV",
         "export": "Tableau des menuiseries (CSV)",
         "file": "menuiseries",
-        "sill": "allège"
+        "sill": "allège",
+        "yes": "oui",
+        "no": "non"
       },
       "columns": {
         "kind": "Type",
@@ -49,7 +53,8 @@
         "height": "Hauteur (mm)",
         "sill": "Allège (mm)",
         "sashes": "Vantaux",
-        "type": "Type d’ouverture"
+        "type": "Type d’ouverture",
+        "shutter": "Volet roulant"
       },
       "tool": {
         "name": "Poser fenêtre ou porte",
@@ -67,7 +72,8 @@
         "glass": "Vitrage",
         "sill": "Appui de fenêtre",
         "leaf": "Vantail de porte",
-        "handle": "Poignée de porte"
+        "handle": "Poignée de porte",
+        "shutter": "Volet roulant"
       },
       "pieces": {
         "frame": "Cadre",
@@ -76,7 +82,10 @@
         "bar": "Petit-bois",
         "sill": "Appui",
         "leaf": "Vantail de porte",
-        "handle": "Poignée"
+        "handle": "Poignée",
+        "shutterBox": "Coffre de volet",
+        "rail": "Coulisse",
+        "curtain": "Tablier"
       },
       "undo": {
         "place": "Poser fenêtre ou porte",
