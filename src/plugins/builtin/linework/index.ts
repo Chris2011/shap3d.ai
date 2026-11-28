@@ -14,7 +14,7 @@ import arabic from './i18n/ar.json';
 const lineworkPlugin: S3dPlugin = {
   id: 'linework',
   name: 'linework.plugin.name',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Shap3D.ai',
   description: 'linework.plugin.description',
   messages: { de: german.messages, en: english.messages, fr: french.messages, es: spanish.messages, ar: arabic.messages },

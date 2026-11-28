@@ -104,7 +104,10 @@ export const createPart = (context: PluginContext, kind: PartKind, params: PartP
   return true;
 };
 
-/** new sizes for a part: its group is built again (all its copies follow) – one undo step */
+/**
+ * new sizes for a part: its group is built again (all its copies follow) – one undo step. Groups put into it (a
+ * window, a lamp) stay; a windows plugin then cuts their holes into the new wall.
+ */
 export const changePart = (context: PluginContext, instance: Instance, params: PartParams) => {
   const part = partOf(context, instance);
   if (!part) {
@@ -113,7 +116,11 @@ export const changePart = (context: PluginContext, instance: Instance, params: P
   const changed: PartData = { ...part, params: { ...params } };
   context.editor.commit('linework.undo.change', () => {
     const definition = instance.definition;
+    const kept = [...definition.entities.instances.values()];
     definition.entities = new Entities();
+    for (const child of kept) {
+      definition.entities.instances.set(child.id, child);
+    }
     context.meshes.build(definition.entities, partMesh(changed));
     context.data.set(definition, { part: changed });
   });

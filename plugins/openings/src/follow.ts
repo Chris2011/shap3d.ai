@@ -5,7 +5,7 @@
 // - copied or pasted: the copy gets a hole of its own
 // All in the same undo step. The "Remove and close hole" button closes it whatever the switch says.
 import { watch } from 'vue';
-import type { Entities, Instance } from '../../../src/core/model';
+import type { Entities, Face, Instance } from '../../../src/core/model';
 import type { PluginContext } from '../../../src/plugins/types';
 import { closeHole, holeCorners } from './hole';
 import { forgetOpening, known, type Known } from './known';
@@ -39,24 +39,44 @@ const collect = (context: PluginContext) => {
   return { found, reachable };
 };
 
+/** how far an opening is pulled onto a wall face in front of or behind it (a wall built again thicker or thinner) */
+const SNAP = 0.5;
+
 /**
- * Cuts the hole of an opening where it sits now: it must lie upright and unscaled on one wall face. A new wall's
- * thickness and the new sill height are taken over (the pieces are built again). False when it is not on a wall.
+ * Cuts the hole of an opening where it sits now: it must lie upright and unscaled on a wall face – or on one up to
+ * SNAP in front of or behind it, onto which it is moved. A new wall's thickness and the new sill height are taken
+ * over (the pieces are built again). False when it is not on a wall.
  */
 const openWhereItIs = (context: PluginContext, { instance, entities, data }: Known & { instance: Instance }) => {
-  const { outer, along, inward } = holeCorners(instance.matrix, data);
+  const corners = holeCorners(instance.matrix, data);
+  const { along, inward } = corners;
   if (Math.abs(along.length() - 1) > 1e-6 || Math.abs(inward.length() - 1) > 1e-6 || Math.abs(inward.z) > 1e-6) {
     return false;
   }
   const normal = inward.clone().negate();
-  const checks = outer.flatMap((corner, index) => [corner, corner.clone().lerp(outer[(index + 1) % 4], 0.5)]);
-  const face = [...entities.faces.values()].find(
-    (candidate) =>
-      entities.faceNormal(candidate).dot(normal) > 0.999 && checks.every((point) => entities.pointInFace(candidate, point, false)),
-  );
+  const checks = corners.outer.flatMap((corner, index) => [corner, corner.clone().lerp(corners.outer[(index + 1) % 4], 0.5)]);
+  // the nearest face facing the same way that the opening lies on once moved straight onto its plane
+  let face: Face | undefined;
+  let shift = Infinity;
+  for (const candidate of entities.faces.values()) {
+    if (entities.faceNormal(candidate).dot(normal) < 0.999) {
+      continue;
+    }
+    const distance = entities.positionOf(candidate.outer[0]).clone().sub(corners.outer[0]).dot(normal);
+    if (
+      Math.abs(distance) <= SNAP &&
+      Math.abs(distance) < Math.abs(shift) &&
+      checks.every((point) => entities.pointInFace(candidate, point.clone().addScaledVector(normal, distance), false))
+    ) {
+      face = candidate;
+      shift = distance;
+    }
+  }
   if (!face) {
     return false;
   }
+  const outer = corners.outer.map((corner) => corner.clone().addScaledVector(normal, shift));
+  instance.matrix.setPosition(outer[0]);
   const bottom = Math.min(...entities.facePoints(face).map((corner) => corner.z));
   const thickness = cutHole(entities, outer, normal);
   if (thickness === null) {

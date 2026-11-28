@@ -11,8 +11,9 @@ Parametric windows and doors, set into any wall with a click: the opening is cut
 3. Click: the hole goes through the wall (the wall's thickness is found by itself; a single face just gets the hole) and the window or door is set into the middle of the wall. One undo step. Esc stops.
 4. Select a window or door (inside its wall's group) to change any of its settings. Sashes, glazing bars and hinges build its pieces again; a new width, height or sill height closes the old hole (healed into the wall faces) and cuts the new one, centred where the old one was – when it does not fit, nothing changes.
 5. Deleting a window or door: while _Close the hole when deleting_ is on (the default, saved with the model), the hole goes with it – whether it is deleted with the Delete key, the eraser or cut – in the same undo step. Switched off, the hole stays (a passage, or room for another opening). _Remove and close the hole_ on a selected one always closes it.
-6. Move a window or door along its wall with the Move tool (or the arrow keys), or copy it with Ctrl: the hole moves along, a copy cuts its own – in the same undo step. One that ends up off the wall face (or turned, or scaled) gets no hole there.
-7. The _schedule_ lists all windows and doors in the model, equal ones counted together; _Save CSV_ or _File › Export as window and door schedule (CSV)_ writes it with sizes in mm.
+6. Walls built again – a wall of _Parts from lines_ given another thickness or side – keep their windows and doors: they move onto the new wall face (up to 50 cm away) and cut their holes with the new thickness.
+7. Move a window or door along its wall with the Move tool (or the arrow keys), or copy it with Ctrl: the hole moves along, a copy cuts its own – in the same undo step. One that ends up off the wall face (or turned, or scaled) gets no hole there.
+8. The _schedule_ lists all windows and doors in the model, equal ones counted together; _Save CSV_ or _File › Export as window and door schedule (CSV)_ writes it with sizes in mm.
 
 The pieces get the materials _Window frame_, _Window glass_, _Window sill_, _Door leaf_ and _Door handle_ – change their colours in the Materials panel.
 
@@ -37,4 +38,4 @@ npm test        # the pieces are closed and face out
 
 - Vertical wall faces only; the opening is a rectangle. Arched and round windows, door leaves with panels, double doors, roller shutters and plan symbols for LayOut are planned.
 - Turned or scaled windows get no hole; only moves keep it.
-- Rooms of the room planner and walls of "Parts from lines" do not use these windows yet.
+- Walls of "Parts from lines" keep their windows when built again; rooms of the room planner have their own doors and windows.

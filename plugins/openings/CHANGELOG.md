@@ -4,6 +4,13 @@
 
 Nothing yet.
 
+## [1.5.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Added
+
+- **Walls built again keep their windows**: when a wall is built again – a wall of _Parts from lines_ made thicker, thinner or moved to the other side of its line – its windows and doors are pulled onto the new wall face (up to 50 cm in front of or behind them) and cut their holes with the new thickness, in the same undo step. One that no longer fits (a lower wall) says so and gets no hole.
+- The same goes for a window moved a little off its wall face.
+
 ## [1.4.0] – 2026-11-28 · Shap3D.ai 0.12.0
 
 ### Added

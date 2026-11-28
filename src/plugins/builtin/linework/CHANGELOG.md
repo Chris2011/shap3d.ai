@@ -4,6 +4,12 @@
 
 Nothing yet.
 
+## [1.1.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Changed
+
+- New sizes for a part keep the groups put into it – a window, a lamp – instead of dropping them. With the _Windows and doors_ plugin the windows and doors of a wall cut their holes into the wall built again.
+
 ## [1.0.0] – 2026-11-27 · Shap3D.ai 0.12.0
 
 ### Added
