@@ -4,6 +4,17 @@
 
 Nothing yet.
 
+## [1.2.0] – 2026-11-28 · Shap3D.ai 0.12.0
+
+### Added
+
+- **Close the hole when deleting** (switch in the panel, saved with the model, on by default): however a window or door is deleted – Delete key, eraser, cut – its hole in the wall is closed and healed into the wall faces in the same undo step. Deleting the whole wall leaves nothing to close.
+- **Remove and close the hole** (button for a selected window or door): closes the hole whatever the switch says.
+
+### Fixed
+
+- Closing a hole (a new size) left the four edges through the wall behind as stray lines.
+
 ## [1.1.0] – 2026-11-28 · Shap3D.ai 0.12.0
 
 ### Added

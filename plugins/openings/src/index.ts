@@ -11,13 +11,14 @@ import { openingPlace, placeOpening } from './place';
 import { MESSAGES, THREE, t, useRuntime } from './runtime';
 import { injectStyles } from './styles';
 import { createPlaceTool } from './tool';
+import { watchDeletedOpenings } from './deleting';
 
 type OpeningCall = Partial<OpeningParams> & { at?: [number, number, number] };
 
 const openingsPlugin: S3dPlugin = {
   id: 'openings',
   name: 'openings.plugin.name',
-  version: '1.1.0',
+  version: '1.2.0',
   author: 'Shap3D.ai',
   description: 'openings.plugin.description',
   messages: MESSAGES,
@@ -25,6 +26,7 @@ const openingsPlugin: S3dPlugin = {
   activate(context) {
     useRuntime(context);
     context.onDispose(injectStyles());
+    context.onDispose(watchDeletedOpenings(context));
     context.tools.register({ id: 'place', name: 'openings.tool.name', icon: 'component', create: createPlaceTool });
     // without a tile: the app adds the command "Windows and doors…" (menu Plugins, command palette)
     context.panels.register({ id: 'panel', label: 'openings.plugin.name', component: S3dOpeningsPanel, icon: 'component' });

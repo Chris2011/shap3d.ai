@@ -28,7 +28,9 @@
       "panel": {
         "place": "Colocar en el muro",
         "placeHint": "Luego haz clic en una cara de muro vertical: el contorno se ve verde donde cabe. La ventana queda a la altura del antepecho sobre el borde inferior de la cara, una puerta sobre él.",
-        "sizeHint": "Todo se cambia aquí. Un tamaño nuevo cierra el hueco antiguo del muro y corta el nuevo, centrado en el mismo sitio."
+        "sizeHint": "Todo se cambia aquí. Un tamaño nuevo cierra el hueco antiguo del muro y corta el nuevo, centrado en el mismo sitio.",
+        "closeOnDelete": "Cerrar el hueco al borrar",
+        "remove": "Quitar y cerrar el hueco"
       },
       "list": {
         "title": "Lista de ventanas y puertas",
@@ -74,7 +76,9 @@
       },
       "undo": {
         "place": "Colocar ventana o puerta",
-        "change": "Cambiar ventana o puerta"
+        "change": "Cambiar ventana o puerta",
+        "setting": "Cerrar huecos al borrar",
+        "remove": "Quitar ventana o puerta"
       },
       "script": {
         "opening": "Coloca una ventana o puerta en la cara de muro de un grupo (o del contexto actual) en la que está el punto at – el hueco atraviesa el muro. Medidas en metros; devuelve el nuevo grupo."

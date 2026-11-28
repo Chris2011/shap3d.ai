@@ -28,7 +28,9 @@
       "panel": {
         "place": "In Wand setzen",
         "placeHint": "Dann auf eine senkrechte Wandfläche klicken: der Umriss zeigt grün, wo es passt. Das Fenster sitzt in Brüstungshöhe über der Unterkante der Fläche, eine Tür auf ihr.",
-        "sizeHint": "Alles lässt sich hier ändern. Eine neue Größe schließt das alte Loch in der Wand und schneidet das neue, mittig an der alten Stelle."
+        "sizeHint": "Alles lässt sich hier ändern. Eine neue Größe schließt das alte Loch in der Wand und schneidet das neue, mittig an der alten Stelle.",
+        "closeOnDelete": "Beim Löschen Loch schließen",
+        "remove": "Entfernen und Loch schließen"
       },
       "list": {
         "title": "Fenster- und Türliste",
@@ -74,7 +76,9 @@
       },
       "undo": {
         "place": "Fenster oder Tür setzen",
-        "change": "Fenster oder Tür ändern"
+        "change": "Fenster oder Tür ändern",
+        "setting": "Loch schließen beim Löschen",
+        "remove": "Fenster oder Tür entfernen"
       },
       "script": {
         "opening": "Setzt ein Fenster oder eine Tür in die Wandfläche einer Gruppe (oder des aktuellen Kontexts), auf der der Punkt at liegt – das Loch geht durch die Wand. Maße in Metern; gibt die neue Gruppe zurück."

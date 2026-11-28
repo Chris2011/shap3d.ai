@@ -28,7 +28,9 @@
       "panel": {
         "place": "Poser dans le mur",
         "placeHint": "Puis cliquez sur une face de mur verticale : le contour est vert là où il tient. La fenêtre se place à la hauteur d’allège au-dessus du bas de la face, une porte sur celui-ci.",
-        "sizeHint": "Tout se modifie ici. Une nouvelle taille referme l’ancien trou dans le mur et découpe le nouveau, centré au même endroit."
+        "sizeHint": "Tout se modifie ici. Une nouvelle taille referme l’ancien trou dans le mur et découpe le nouveau, centré au même endroit.",
+        "closeOnDelete": "Refermer le trou à la suppression",
+        "remove": "Supprimer et refermer le trou"
       },
       "list": {
         "title": "Tableau des menuiseries",
@@ -74,7 +76,9 @@
       },
       "undo": {
         "place": "Poser fenêtre ou porte",
-        "change": "Modifier fenêtre ou porte"
+        "change": "Modifier fenêtre ou porte",
+        "setting": "Refermer les trous à la suppression",
+        "remove": "Supprimer fenêtre ou porte"
       },
       "script": {
         "opening": "Pose une fenêtre ou une porte dans la face de mur d’un groupe (ou du contexte courant) sur laquelle se trouve le point at – le trou traverse le mur. Tailles en mètres ; renvoie le nouveau groupe."

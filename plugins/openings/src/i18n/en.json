@@ -28,7 +28,9 @@
       "panel": {
         "place": "Set into wall",
         "placeHint": "Then click on a vertical wall face: the outline shows green where it fits. The window sits at the sill height above the bottom of the face, a door on it.",
-        "sizeHint": "Every setting can be changed here. A new size closes the old hole in the wall and cuts the new one, centred where the old one was."
+        "sizeHint": "Every setting can be changed here. A new size closes the old hole in the wall and cuts the new one, centred where the old one was.",
+        "closeOnDelete": "Close the hole when deleting",
+        "remove": "Remove and close the hole"
       },
       "list": {
         "title": "Window and door schedule",
@@ -74,7 +76,9 @@
       },
       "undo": {
         "place": "Set window or door",
-        "change": "Change window or door"
+        "change": "Change window or door",
+        "setting": "Close holes when deleting",
+        "remove": "Remove window or door"
       },
       "script": {
         "opening": "Sets a window or door into the wall face of a group (or the current context) that the point at lies on – the hole is cut through the wall. Sizes in metres; returns the new group."

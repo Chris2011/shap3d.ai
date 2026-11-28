@@ -40,11 +40,19 @@
       </select>
     </label>
 
-    <p v-if="selected" class="s3d-op-hint">{{ t('openings.panel.sizeHint') }}</p>
+    <template v-if="selected">
+      <p class="s3d-op-hint">{{ t('openings.panel.sizeHint') }}</p>
+      <button class="s3d-btn" @click="removeOpening(context, instance!)">{{ t('openings.panel.remove') }}</button>
+    </template>
     <template v-else>
       <button class="s3d-btn" @click="editor.setTool(TOOL_ID)">{{ t('openings.panel.place') }}</button>
       <p class="s3d-op-hint">{{ t('openings.panel.placeHint') }}</p>
     </template>
+
+    <label class="s3d-check">
+      <input type="checkbox" :checked="closing" @change="setClosesHoles(context, ($event.target as HTMLInputElement).checked)" />
+      {{ t('openings.panel.closeOnDelete') }}
+    </label>
 
     <div class="s3d-op-heading">{{ t('openings.list.title') }}</div>
     <p v-if="!rows.length" class="s3d-op-hint">{{ t('openings.list.empty') }}</p>
@@ -70,6 +78,7 @@ import { computed } from 'vue';
 import { schedule } from './list';
 import type { OpeningParams } from './parts';
 import { changeOpening } from './change';
+import { closesHoles, removeOpening, setClosesHoles } from './deleting';
 import { openingOf } from './place';
 import { pluginContext, t } from './runtime';
 import { useChosen, useDrafts } from './state';
@@ -96,6 +105,10 @@ const selected = computed(() => {
 const shown = computed((): OpeningParams => selected.value ?? drafts[chosen.kind]);
 const SIZE_KEYS = computed(() => (shown.value.kind === 'door' ? (['width', 'height'] as const) : (['width', 'height', 'sill'] as const)));
 const COUNT_KEYS = computed(() => (shown.value.kind === 'door' ? [] : (['sashes', 'barsAcross', 'barsUpright'] as const)));
+const closing = computed(() => {
+  void editor.ui.revision;
+  return closesHoles(context);
+});
 const rows = computed(() => {
   void editor.ui.revision;
   return schedule(context);
